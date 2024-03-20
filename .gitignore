@@ -1,0 +1,43 @@
+HELP.md
+.gradle
+gradle/
+gradlew
+gradlew.bat
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+.conf
+
+### Maven ###
+target/
+pom.xml
+
+### STS ###
+*.launch
+.springBeans
+
+### Logs and Temporary Files ###
+*.log
+*.tmp
+*.bak
+
+### IntelliJ IDEA ###
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+### Mac OS ###
+.DS_Store
+
+### Windows ###
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+### Local Configurations ###
+application-local.properties
