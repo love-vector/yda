@@ -1,5 +1,5 @@
 rootProject.name = 'assistant'
 
 include 'chatbot'
-include 'embedder'
+include 'embedding'
 include 'shared'
