@@ -1,0 +1,17 @@
+dependencies {
+    implementation project(':shared')
+
+    // Spring Boot
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+    // DB
+    runtimeOnly 'org.postgresql:postgresql'
+
+    // Liquibase (Migrations Tool)
+    implementation 'org.liquibase:liquibase-core:4.25.0'
+}

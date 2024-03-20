@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    implementation platform("org.springframework.ai:spring-ai-bom:0.8.1-SNAPSHOT")
+    api platform("org.springframework.ai:spring-ai-bom:0.8.1-SNAPSHOT")
 
     api 'org.springframework.ai:spring-ai-milvus-store-spring-boot-starter'
     api 'org.springframework.ai:spring-ai-openai-spring-boot-starter'

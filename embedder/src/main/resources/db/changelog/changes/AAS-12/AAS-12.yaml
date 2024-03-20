@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - changeSet:
+      id: "AAS-12"
+      created: "20.03.2024"
+      author: "Nikita"
+      changes:
+        - sqlFile:
+            encoding: "utf8"
+            path: "db/changelog/changes/AAS-12/AAS-12-changes.sql"
+      rollback:
+        - sqlFile:
+           encoding: "utf8"
+           path: "db/changelog/changes/AAS-12/AAS-12-rollback.sql"
