@@ -1,4 +1,4 @@
-package org.vector.assistant.shared.dao;
+package org.vector.assistant.dao;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,8 +22,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import org.vector.assistant.shared.util.constant.MilvusConstant;
-import org.vector.assistant.shared.util.converter.EmbeddingConverter;
+import org.vector.assistant.util.constant.MilvusConstant;
+import org.vector.assistant.util.converter.EmbeddingConverter;
 
 @Slf4j
 @Service

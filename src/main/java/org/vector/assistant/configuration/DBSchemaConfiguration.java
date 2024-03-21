@@ -1,4 +1,4 @@
-package org.vector.assistant.embedding.configuration;
+package org.vector.assistant.configuration;
 
 import java.sql.Connection;
 import java.sql.SQLException;

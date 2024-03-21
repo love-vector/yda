@@ -1,53 +1,65 @@
 plugins {
-    id 'org.springframework.boot' version '3.2.3' apply false
-    id 'io.spring.dependency-management' version '1.1.4' apply false
-    id 'com.diffplug.spotless' version '6.23.3' apply true
+    id 'java'
+    id 'org.springframework.boot' version '3.2.4'
+    id 'io.spring.dependency-management' version '1.1.4'
+    id 'com.diffplug.spotless' version '6.25.0'
 }
 
-allprojects {
-    repositories {
-        mavenCentral()
-        maven { url 'https://repo.spring.io/milestone' }
-        maven { url 'https://repo.spring.io/snapshot' }
+group = 'org.vector'
+version = '0.0.1'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
     }
 }
 
-subprojects {
-    apply plugin: 'java'
-    apply plugin: 'org.springframework.boot'
-    apply plugin: 'io.spring.dependency-management'
-    apply plugin: 'com.diffplug.spotless'
+repositories {
+    mavenCentral()
+    maven { url 'https://repo.spring.io/milestone' }
+    maven { url 'https://repo.spring.io/snapshot' }
+}
 
-    group = 'org.vector'
+dependencies {
+    // Spring Boot
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-docker-compose'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
+    // Spring AI
+    implementation platform("org.springframework.ai:spring-ai-bom:0.8.1-SNAPSHOT")
+    implementation 'org.springframework.ai:spring-ai-milvus-store-spring-boot-starter'
+    implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter'
+
+    // DB
+    runtimeOnly 'org.postgresql:postgresql'
+
+    // Liquibase (Migrations Tool)
+    implementation 'org.liquibase:liquibase-core:4.25.0'
+
+    // Lombok
+    compileOnly 'org.projectlombok:lombok:1.18.30'
+    annotationProcessor 'org.projectlombok:lombok:1.18.30'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+spotless {
     java {
-        sourceCompatibility = JavaVersion.VERSION_21
+        palantirJavaFormat()
+        removeUnusedImports()
+        importOrder('java', 'javax|jakarta', '', 'org.springframework', 'org.vector', '\\#')
     }
-
-    configurations {
-        compileOnly {
-            extendsFrom annotationProcessor
-        }
-    }
-
-    dependencies {
-        // Lombok
-        compileOnly 'org.projectlombok:lombok:1.18.30'
-        annotationProcessor 'org.projectlombok:lombok:1.18.30'
-    }
-
-    tasks.named('test') {
-        useJUnitPlatform()
-    }
-
-    // Code Formatter
-    spotless {
-        java {
-            palantirJavaFormat()
-            removeUnusedImports()
-            importOrder('java', 'javax|jakarta', '', 'org.springframework', 'org.vector', '\\#')
-        }
-    }
-
-    compileJava.dependsOn 'spotlessApply'
 }
+
+compileJava.dependsOn 'spotlessApply'

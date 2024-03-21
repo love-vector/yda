@@ -1,4 +1,4 @@
-package org.vector.assistant.shared.util.constant;
+package org.vector.assistant.util.constant;
 
 public final class MilvusConstant {
 

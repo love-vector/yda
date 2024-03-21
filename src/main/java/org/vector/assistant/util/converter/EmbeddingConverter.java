@@ -1,4 +1,4 @@
-package org.vector.assistant.shared.util.converter;
+package org.vector.assistant.util.converter;
 
 import java.util.ArrayList;
 import java.util.List;

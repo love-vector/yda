@@ -1,12 +1,12 @@
-package org.vector.assistant.embedding;
+package org.vector.assistant;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class EmbeddingApplication {
+public class AssistantApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(EmbeddingApplication.class, args);
+        SpringApplication.run(AssistantApplication.class, args);
     }
 }
