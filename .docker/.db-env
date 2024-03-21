@@ -1,0 +1,13 @@
+# for db container
+POSTGRES_DB=postgres
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+# api prefix
+API_PREFIX=/api
+# database
+PG_HOST=db
+PG_PORT=5432
+PG_DB=${POSTGRES_DB}
+PG_USER=${POSTGRES_USER}
+PG_PASS=${POSTGRES_PASSWORD}
+
