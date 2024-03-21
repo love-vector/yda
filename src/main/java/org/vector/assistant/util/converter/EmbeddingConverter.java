@@ -6,8 +6,8 @@ import java.util.List;
 public final class EmbeddingConverter {
 
     public static List<Float> normalizeVector(final List<Double> vector) {
-        double norm = 0.0;
-        for (double component : vector) {
+        var norm = Double.valueOf(0.0);
+        for (var component : vector) {
             norm += component * component;
         }
         norm = Math.sqrt(norm);

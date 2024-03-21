@@ -28,15 +28,15 @@ import org.vector.assistant.util.converter.EmbeddingConverter;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-class MilvusDao {
+public class MilvusDao {
+
+    @Value("${org.vector.milvus.topK}")
+    private Integer milvusTopK;
+
+    @Value("${org.vector.milvus.chunkFieldDimension}")
+    private Integer chunkFieldDimension;
 
     private final MilvusClient milvusClient;
-
-    @Value("${org.vdma.milvus.topk}")
-    private int milvusTopK;
-
-    @Value("${org.vdma.milvus.chunkFieldDimension}")
-    private int chunkFieldDimension;
 
     public void checkHealth() {
         log.debug("Checking milvus connection: {}", milvusClient.checkHealth());
@@ -47,7 +47,7 @@ class MilvusDao {
     }
 
     public SearchResultData searchVectors(
-            final List<Double> queryVector, final String collectionName, final Integer topk) {
+            final List<Double> queryVector, final Integer topk, final String collectionName) {
         return this.search(milvusClient, queryVector, collectionName, topk);
     }
 
@@ -59,7 +59,7 @@ class MilvusDao {
         return insertedVectorId;
     }
 
-    public long deleteVectorInCollection(final String collectionName, final Long vectorId) {
+    public long deleteVectorInCollection(final Long vectorId, final String collectionName) {
         String deleteExpression = String.format("%s in [%s]", MilvusConstant.RELATION_ID, vectorId);
         milvusClient.delete(DeleteParam.newBuilder()
                 .withCollectionName(collectionName)
