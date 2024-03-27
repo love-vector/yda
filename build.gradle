@@ -44,6 +44,10 @@ dependencies {
     implementation 'org.springframework.ai:spring-ai-milvus-store-spring-boot-starter'
     implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter'
 
+    // Spring Security
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.security:spring-security-crypto'
+
     // DB
     runtimeOnly 'org.postgresql:postgresql'
     runtimeOnly 'org.postgresql:r2dbc-postgresql'
