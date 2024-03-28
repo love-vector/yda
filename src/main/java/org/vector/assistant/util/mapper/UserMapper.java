@@ -7,6 +7,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import org.vector.assistant.dto.CreateUserRequest;
+import org.vector.assistant.dto.UserDto;
 import org.vector.assistant.persistance.entity.UserEntity;
 
 @Mapper(
@@ -19,6 +20,9 @@ public interface UserMapper {
     @Mapping(target = "email", source = "request.email")
     @Mapping(target = "password", source = "request.password", qualifiedByName = "encodePassword")
     UserEntity toEntity(final CreateUserRequest request);
+
+    @Mapping(target = "email", source = "user.email")
+    UserDto toDto(final UserEntity user);
 
     @Component
     @RequiredArgsConstructor

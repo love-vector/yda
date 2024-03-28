@@ -10,6 +10,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import org.vector.assistant.dto.CreateUserRequest;
+import org.vector.assistant.dto.UserDto;
 import org.vector.assistant.service.UserService;
 
 @RestController
@@ -21,8 +22,11 @@ public class UserController {
 
     @PostMapping
     public Mono<ResponseEntity<URI>> createUser(@RequestBody @Validated final CreateUserRequest request) {
-        return userService.createUser(request).map(user -> ResponseEntity.created(
-                        URI.create(user.getId().toString()))
-                .build());
+        return userService.createUser(request).map(ResponseEntity::ok);
+    }
+
+    @GetMapping("/authorized")
+    public Mono<ResponseEntity<UserDto>> getAuthorizedUser() {
+        return userService.getAuthorizedUser().map(ResponseEntity::ok);
     }
 }
