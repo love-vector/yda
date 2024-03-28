@@ -1,4 +1,4 @@
-package org.vector.assistant.configuration;
+package org.vector.assistant.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,19 +12,17 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 
 @Configuration
 @EnableWebFluxSecurity
-public class SecurityConfig {
+public class SecurityConfiguration {
 
     @Bean
-    public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
+    public SecurityWebFilterChain securityWebFilterChain(final ServerHttpSecurity http) {
         http.authorizeExchange(exchanges -> exchanges
                         .pathMatchers(HttpMethod.POST, "/users")
                         .permitAll()
-                        .pathMatchers("/users/**")
-                        .authenticated()
                         .anyExchange()
-                        .permitAll())
+                        .authenticated())
                 .httpBasic(Customizer.withDefaults())
-                .csrf(csrf -> csrf.disable());
+                .csrf(ServerHttpSecurity.CsrfSpec::disable);
         return http.build();
     }
 
