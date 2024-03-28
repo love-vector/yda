@@ -1,4 +1,4 @@
-package org.vector.assistant.dao;
+package org.vector.assistant.persistance.dao;
 
 import java.util.ArrayList;
 import java.util.Arrays;
