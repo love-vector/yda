@@ -7,15 +7,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
-import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import org.vector.assistant.dto.CreateUserRequest;
-import org.vector.assistant.dto.UserDto;
-import org.vector.assistant.exception.UserAlreadyExistsException;
+import org.vector.assistant.exception.conflict.UserAlreadyExistsException;
+import org.vector.assistant.model.dto.UserDto;
+import org.vector.assistant.model.request.CreateUserRequest;
 import org.vector.assistant.persistance.dao.UserDao;
-import org.vector.assistant.persistance.entity.UserEntity;
+import org.vector.assistant.security.UserDetailsService;
 import org.vector.assistant.util.mapper.UserMapper;
 
 @Slf4j
@@ -23,6 +22,8 @@ import org.vector.assistant.util.mapper.UserMapper;
 @Transactional
 @RequiredArgsConstructor
 public class UserService {
+
+    private final UserDetailsService userDetailsService;
 
     private final UserDao userDao;
 
@@ -38,10 +39,7 @@ public class UserService {
         });
     }
 
-    public Mono<UserDto> getAuthorizedUser() {
-        return ReactiveSecurityContextHolder.getContext()
-                .map(securityContext ->
-                        (UserEntity) securityContext.getAuthentication().getPrincipal())
-                .map(userMapper::toDto);
+    public Mono<UserDto> getCurrentUser() {
+        return userDetailsService.getAuthorizedUser().map(userMapper::toDto);
     }
 }

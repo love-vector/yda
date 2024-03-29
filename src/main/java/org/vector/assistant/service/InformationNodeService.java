@@ -7,13 +7,12 @@ import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import org.vector.assistant.dto.InformationNodeDto;
+import org.vector.assistant.model.dto.InformationNodeDto;
 import org.vector.assistant.persistance.dao.InformationNodeDao;
-import org.vector.assistant.persistance.entity.UserEntity;
+import org.vector.assistant.security.UserDetailsService;
 import org.vector.assistant.util.mapper.InformationNodeMapper;
 
 @Slf4j
@@ -21,6 +20,8 @@ import org.vector.assistant.util.mapper.InformationNodeMapper;
 @Transactional
 @RequiredArgsConstructor
 public class InformationNodeService {
+
+    private final UserDetailsService userDetailsService;
 
     private final InformationNodeDao informationNodeDao;
 
@@ -33,12 +34,7 @@ public class InformationNodeService {
      * @return a {@link Mono} emitting the {@link InformationNodeDto}.
      */
     public Mono<InformationNodeDto> getInformationNode(final Long informationNodeId) {
-        return informationNodeDao
-                .getInformationNodeById(informationNodeId)
-                .map(informationNodeMapper::toDto)
-                .doOnSubscribe(subscription -> log.debug("Getting InformationNode with id: {}", informationNodeId))
-                .doOnError(error ->
-                        log.error("Failed during getting InformationNode with id: {}", informationNodeId, error));
+        return informationNodeDao.getInformationNodeById(informationNodeId).map(informationNodeMapper::toDto);
     }
 
     /**
@@ -47,14 +43,10 @@ public class InformationNodeService {
      * @return a {@link Flux} emitting {@link InformationNodeDto} objects.
      */
     public Flux<InformationNodeDto> getUserInformationNodes() {
-        return ReactiveSecurityContextHolder.getContext()
-                .map(securityContext ->
-                        (UserEntity) securityContext.getAuthentication().getPrincipal())
+        return userDetailsService
+                .getAuthorizedUser()
                 .flatMapMany(user -> informationNodeDao.getInformationNodesByUserId(user.getId()))
-                .map(informationNodeMapper::toDto)
-                .doOnSubscribe(subscription -> log.debug("Getting InformationNodes of authenticated user"))
-                .doOnError(
-                        error -> log.error("Failed during getting authenticated user's InformationNode list", error));
+                .map(informationNodeMapper::toDto);
     }
 
     /**
@@ -64,16 +56,13 @@ public class InformationNodeService {
      * @return a {@link Mono} emitting the URI of the newly created information node.
      */
     public Mono<URI> createInformationNode(final InformationNodeDto informationNodeDto) {
-        return ReactiveSecurityContextHolder.getContext()
-                .map(securityContext ->
-                        (UserEntity) securityContext.getAuthentication().getPrincipal())
+        return userDetailsService
+                .getAuthorizedUser()
                 .flatMap(user -> {
                     var informationNode = informationNodeMapper.toEntity(informationNodeDto, user.getId());
                     return informationNodeDao.createInformationNode(informationNode);
                 })
-                .map(informationNode -> URI.create(informationNode.getId().toString()))
-                .doOnSubscribe(subscription -> log.debug("Started creating InformationNode for authenticated user"))
-                .doOnError(error -> log.error("Failed to create InformationNode for authenticated user", error));
+                .map(informationNode -> URI.create(informationNode.getId().toString()));
     }
 
     /**
@@ -88,11 +77,7 @@ public class InformationNodeService {
                 .getInformationNodeById(informationNodeId)
                 .flatMap(informationNode -> informationNodeDao.updateInformationNode(
                         informationNodeMapper.updateEntity(informationNode, informationNodeDto)))
-                .then()
-                .doOnSubscribe(
-                        subscription -> log.debug("Started updating InformationNode with id: {}", informationNodeId))
-                .doOnError(
-                        error -> log.error("Failed to update InformationNode with id: {}", informationNodeId, error));
+                .then();
     }
 
     /**
@@ -104,10 +89,6 @@ public class InformationNodeService {
     public Mono<Void> deleteInformationNode(final Long informationNodeId) {
         return informationNodeDao
                 .getInformationNodeById(informationNodeId)
-                .flatMap(informationNodeDao::deleteInformationNode)
-                .doOnSubscribe(
-                        subscription -> log.debug("Started deleting InformationNode with id: {}", informationNodeId))
-                .doOnError(
-                        error -> log.error("Failed to delete InformationNode with id: {}", informationNodeId, error));
+                .flatMap(informationNodeDao::deleteInformationNode);
     }
 }

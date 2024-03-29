@@ -9,6 +9,9 @@ import io.milvus.param.IndexType;
 import io.milvus.param.MetricType;
 import io.milvus.param.R;
 import io.milvus.param.collection.*;
+import io.milvus.param.collection.CreateCollectionParam;
+import io.milvus.param.collection.FieldType;
+import io.milvus.param.collection.HasCollectionParam;
 import io.milvus.param.index.CreateIndexParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,30 +40,43 @@ public class MilvusDao {
      * @throws MilvusException if the operation fails, encapsulating error details and status.
      */
     public void createCollectionIfNotExist(final String collectionName) {
-        var createCollection = milvusServiceClient.createCollection(CreateCollectionParam.newBuilder()
-                .withCollectionName(collectionName)
-                .withFieldTypes(List.of(
-                        DEFAULT_COLLECTION_FIELDS.ID,
-                        DEFAULT_COLLECTION_FIELDS.CONTENT,
-                        DEFAULT_COLLECTION_FIELDS.METADATA,
-                        DEFAULT_COLLECTION_FIELDS.EMBEDDING))
-                .build());
-        validateResult(createCollection);
+        if (!collectionExists(collectionName)) {
+            var createCollection = milvusServiceClient.createCollection(CreateCollectionParam.newBuilder()
+                    .withCollectionName(collectionName)
+                    .withFieldTypes(List.of(
+                            DEFAULT_COLLECTION_FIELDS.ID,
+                            DEFAULT_COLLECTION_FIELDS.CONTENT,
+                            DEFAULT_COLLECTION_FIELDS.METADATA,
+                            DEFAULT_COLLECTION_FIELDS.EMBEDDING))
+                    .build());
+            validateResult(createCollection);
 
-        createIndex(collectionName);
+            createIndex(collectionName);
+        }
     }
 
     /**
-     * Deletes a specified collection.
+     * Deletes a specified collection if it does exist.
      *
      * @param collectionName the name of the collection to be deleted.
      * @throws MilvusException if the operation fails, encapsulating error details and status.
      */
-    public void deleteCollectionByName(final String collectionName) {
-        var dropCollection = milvusServiceClient.dropCollection(DropCollectionParam.newBuilder()
+    public void deleteCollectionIfExists(final String collectionName) {
+        if (collectionExists(collectionName)) {
+            var dropCollection = milvusServiceClient.dropCollection(DropCollectionParam.newBuilder()
+                    .withCollectionName(collectionName)
+                    .build());
+            validateResult(dropCollection);
+        }
+    }
+
+    private Boolean collectionExists(final String collectionName) {
+        var collectionExists = milvusServiceClient.hasCollection(HasCollectionParam.newBuilder()
+                .withDatabaseName(MilvusVectorStore.DEFAULT_DATABASE_NAME)
                 .withCollectionName(collectionName)
                 .build());
-        validateResult(dropCollection);
+        validateResult(collectionExists);
+        return collectionExists.getData();
     }
 
     private void createIndex(final String collectionName) {
@@ -78,7 +94,7 @@ public class MilvusDao {
 
     private <T> void validateResult(final R<T> result) {
         if (!result.getStatus().equals(R.Status.Success.getCode())) {
-            log.error("Something went wrong during the Milvus query: {}", result.getMessage());
+            log.error("Something went wrong during Milvus query execution: {}", result.getMessage());
             throw new MilvusException(result.getMessage(), result.getStatus());
         }
     }

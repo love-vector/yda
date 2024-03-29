@@ -15,8 +15,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 @Table(name = "users", schema = "chatbot")
-@NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Builder(toBuilder = true)
 public class UserEntity implements UserDetails, Persistable<UUID> {

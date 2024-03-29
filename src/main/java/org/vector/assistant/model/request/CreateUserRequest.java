@@ -1,4 +1,4 @@
-package org.vector.assistant.dto;
+package org.vector.assistant.model.request;
 
 import jakarta.validation.constraints.NotBlank;
 

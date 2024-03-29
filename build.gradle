@@ -40,7 +40,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
 
     // Spring AI
-    implementation platform("org.springframework.ai:spring-ai-bom:0.8.1-SNAPSHOT")
+    implementation platform("org.springframework.ai:spring-ai-bom:0.8.1")
     implementation 'org.springframework.ai:spring-ai-milvus-store-spring-boot-starter'
     implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter'
 
@@ -76,3 +76,9 @@ spotless {
 }
 
 compileJava.dependsOn 'spotlessApply'
+
+bootRun {
+    jvmArgs([
+            "-Dreactor.schedulers.defaultBoundedElasticOnVirtualThreads=true"
+    ])
+}

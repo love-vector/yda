@@ -1,4 +1,4 @@
-package org.vector.assistant.controller;
+package org.vector.assistant.web.controller;
 
 import java.net.URI;
 
@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import org.vector.assistant.dto.InformationNodeDto;
+import org.vector.assistant.model.dto.InformationNodeDto;
 import org.vector.assistant.service.InformationNodeService;
 
 @RestController

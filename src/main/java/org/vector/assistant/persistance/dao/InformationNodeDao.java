@@ -11,7 +11,7 @@ import reactor.core.scheduler.Schedulers;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import org.vector.assistant.exception.information.node.InformationNodeDoesNotExistsException;
+import org.vector.assistant.exception.not.found.InformationNodeDoesNotExistException;
 import org.vector.assistant.persistance.entity.InformationNodeEntity;
 import org.vector.assistant.persistance.repository.InformationNodeRepository;
 
@@ -21,14 +21,14 @@ import org.vector.assistant.persistance.repository.InformationNodeRepository;
 @RequiredArgsConstructor
 public class InformationNodeDao {
 
-    private final MilvusDao milvusDao;
-
     private final InformationNodeRepository informationNodeRepository;
+
+    private final MilvusDao milvusDao;
 
     public Mono<InformationNodeEntity> getInformationNodeById(final Long informationNodeId) {
         return informationNodeRepository
                 .findById(informationNodeId)
-                .switchIfEmpty(Mono.error(InformationNodeDoesNotExistsException::new));
+                .switchIfEmpty(Mono.error(InformationNodeDoesNotExistException::new));
     }
 
     public Flux<InformationNodeEntity> getInformationNodesByUserId(final UUID userId) {
@@ -50,7 +50,7 @@ public class InformationNodeDao {
         return informationNodeRepository
                 .delete(informationNode)
                 .then(Mono.defer(() -> Mono.fromRunnable(
-                                () -> milvusDao.deleteCollectionByName(informationNode.getCollectionName()))
+                                () -> milvusDao.deleteCollectionIfExists(informationNode.getCollectionName()))
                         .subscribeOn(Schedulers.boundedElastic())))
                 .then();
     }

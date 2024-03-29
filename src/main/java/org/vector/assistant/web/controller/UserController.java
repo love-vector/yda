@@ -1,4 +1,4 @@
-package org.vector.assistant.controller;
+package org.vector.assistant.web.controller;
 
 import java.net.URI;
 
@@ -9,8 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import org.vector.assistant.dto.CreateUserRequest;
-import org.vector.assistant.dto.UserDto;
+import org.vector.assistant.model.dto.UserDto;
+import org.vector.assistant.model.request.CreateUserRequest;
 import org.vector.assistant.service.UserService;
 
 @RestController
@@ -27,6 +27,6 @@ public class UserController {
 
     @GetMapping("/authorized")
     public Mono<ResponseEntity<UserDto>> getAuthorizedUser() {
-        return userService.getAuthorizedUser().map(ResponseEntity::ok);
+        return userService.getCurrentUser().map(ResponseEntity::ok);
     }
 }

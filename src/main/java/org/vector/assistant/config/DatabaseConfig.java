@@ -1,4 +1,4 @@
-package org.vector.assistant.configuration;
+package org.vector.assistant.config;
 
 import io.r2dbc.spi.ConnectionFactory;
 
@@ -9,7 +9,7 @@ import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer;
 import org.springframework.r2dbc.connection.init.ResourceDatabasePopulator;
 
 @Configuration
-public class DatabaseConfiguration {
+public class DatabaseConfig {
 
     @Bean
     public ConnectionFactoryInitializer initializer(final ConnectionFactory connectionFactory) {
