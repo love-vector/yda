@@ -69,6 +69,11 @@ public class MilvusDao {
         return vectorId;
     }
 
+    public void createCollection(final String collectionName) {
+
+        createCollectionIfNotExist(milvusClient, collectionName);
+    }
+
     private void createCollectionIfNotExist(final MilvusClient client, final String collectionName) {
         log.debug("Checking if collection {} exists", collectionName);
         var collectionExists = client.hasCollection(HasCollectionParam.newBuilder()
