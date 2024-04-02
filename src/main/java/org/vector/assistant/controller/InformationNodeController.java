@@ -27,4 +27,11 @@ public class InformationNodeController {
                 .createInformationNode(request.name(), request.description(), request.userId())
                 .map(uri -> ResponseEntity.created(uri).build());
     }
+
+    @DeleteMapping()
+    public Mono<ResponseEntity<URI>> delete(@RequestBody @Valid final CreateInformationNodeRequest request) {
+        return informationNodeService
+                .deleteInformationNode(request.name(), request.description(), request.userId())
+                .map(uri -> ResponseEntity.created(uri).build());
+    }
 }

@@ -6,7 +6,6 @@ import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.vector.assistant.persistance.dao.MilvusDao;
 import reactor.core.publisher.Mono;
 
 import org.springframework.stereotype.Service;
@@ -14,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import org.vector.assistant.exception.UserAlreadyExistsException;
 import org.vector.assistant.persistance.dao.InformationNodeDao;
+import org.vector.assistant.persistance.dao.MilvusDao;
 
 @Slf4j
 @Service
@@ -31,14 +31,28 @@ public class InformationNodeService {
                 return Mono.error(new UserAlreadyExistsException());
             }
 
-
             return informationNodeDao
                     .createInformationNode(name, description, userId)
-                    .flatMap(infoNode -> {
-                        Mono.from(()->milvusDao.createCollection(name))
+                    .doOnNext(entity -> {
+                        milvusDao.createCollection(name);
                     })
                     .map(informationNode -> URI.create(
                             Objects.requireNonNull(informationNode.getId()).toString()));
+        });
+    }
+
+    public Mono<URI> deleteInformationNode(String name, String description, UUID userId) {
+        return informationNodeDao.existByNameAndUserId(name, userId).flatMap(exists -> {
+            if (!exists) {
+                return Mono.error(new UserAlreadyExistsException());
+            }
+            return informationNodeDao
+                    .deleteInformationNode(name, description, userId)
+                    .doOnSuccess(entity -> {
+                        milvusDao.deleteCollectionByName(name);
+                    })
+                    .map(informationNode ->
+                            URI.create(Objects.requireNonNull("Deleted").toString()));
         });
     }
 }

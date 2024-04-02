@@ -70,8 +70,26 @@ public class MilvusDao {
     }
 
     public void createCollection(final String collectionName) {
-
         createCollectionIfNotExist(milvusClient, collectionName);
+    }
+
+    public void deleteCollectionByName(final String collectionName) {
+        log.debug("Checking if collection {} exists", collectionName);
+        var collectionExists = milvusClient.hasCollection(HasCollectionParam.newBuilder()
+                .withCollectionName(collectionName)
+                .build());
+
+        if (!collectionExists.getStatus().equals(R.Status.Success.getCode())) {
+            log.error("Milvus connection failed: {}", collectionExists);
+
+            throw new RuntimeException(collectionExists.getException());
+        }
+
+        if (collectionExists.getData()) {
+            milvusClient.dropCollection(DropCollectionParam.newBuilder()
+                    .withCollectionName(collectionName)
+                    .build());
+        }
     }
 
     private void createCollectionIfNotExist(final MilvusClient client, final String collectionName) {

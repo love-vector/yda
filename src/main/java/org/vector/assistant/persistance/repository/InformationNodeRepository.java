@@ -15,4 +15,6 @@ public interface InformationNodeRepository extends R2dbcRepository<InformationNo
     Mono<InformationNodeEntity> findByNameAndUserId(String name, UUID userId);
 
     Mono<Boolean> existsByNameAndUserId(String name, UUID userId);
+
+    Mono<Void> deleteByNameAndUserId(String name, UUID userId);
 }

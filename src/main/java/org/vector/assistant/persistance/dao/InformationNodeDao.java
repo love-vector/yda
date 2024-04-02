@@ -31,6 +31,10 @@ public class InformationNodeDao {
         return informationNodeRepository.save(entityToSave);
     }
 
+    public Mono<Void> deleteInformationNode(String name, String description, UUID userId) {
+        return informationNodeRepository.deleteByNameAndUserId(name, userId);
+    }
+
     public Mono<InformationNodeEntity> getInformationNodeByNameAndUserEmail(String name, UUID userId) {
         return informationNodeRepository.findByNameAndUserId(name, userId);
     }
