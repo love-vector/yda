@@ -5,8 +5,8 @@ import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;
 
-import org.vector.assistant.dto.CreateInformationNodeRequest;
-import org.vector.assistant.dto.InformationNodeDto;
+import org.vector.assistant.dto.information.node.CreateInformationNodeRequest;
+import org.vector.assistant.dto.information.node.InformationNodeDto;
 import org.vector.assistant.persistance.entity.InformationNodeEntity;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING, injectionStrategy = InjectionStrategy.CONSTRUCTOR)

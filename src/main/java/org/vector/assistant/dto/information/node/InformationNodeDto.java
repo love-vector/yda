@@ -1,4 +1,4 @@
-package org.vector.assistant.dto;
+package org.vector.assistant.dto.information.node;
 
 import lombok.Builder;
 

@@ -7,13 +7,17 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import org.vector.assistant.exception.UserAlreadyExistsException;
+import org.vector.assistant.exception.information.node.InformationNodeAlreadyExistsException;
+import org.vector.assistant.exception.information.node.InformationNodeCannotBeFoundException;
 import org.vector.assistant.persistance.dao.InformationNodeDao;
 import org.vector.assistant.persistance.dao.MilvusDao;
+import org.vector.assistant.persistance.entity.InformationNodeEntity;
 
 @Slf4j
 @Service
@@ -28,7 +32,7 @@ public class InformationNodeService {
     public Mono<URI> createInformationNode(String name, String description, UUID userId) {
         return informationNodeDao.existByNameAndUserId(name, userId).flatMap(exists -> {
             if (exists) {
-                return Mono.error(new UserAlreadyExistsException());
+                return Mono.error(new InformationNodeAlreadyExistsException());
             }
 
             return informationNodeDao
@@ -41,18 +45,51 @@ public class InformationNodeService {
         });
     }
 
-    public Mono<URI> deleteInformationNode(String name, String description, UUID userId) {
+    public Mono<ResponseEntity<InformationNodeEntity>> getInformationNode(String name, UUID userId) {
         return informationNodeDao.existByNameAndUserId(name, userId).flatMap(exists -> {
             if (!exists) {
-                return Mono.error(new UserAlreadyExistsException());
+                return Mono.error(new InformationNodeCannotBeFoundException());
             }
             return informationNodeDao
-                    .deleteInformationNode(name, description, userId)
+                    .getInformationNodeByNameAndUserId(name, userId)
+                    .map(ResponseEntity::ok);
+        });
+    }
+
+    public Mono<URI> deleteInformationNode(String name, UUID userId) {
+
+        return informationNodeDao.existByNameAndUserId(name, userId).flatMap(exists -> {
+            if (!exists) {
+                return Mono.error(new InformationNodeCannotBeFoundException());
+            }
+
+            Mono<InformationNodeEntity> informationNodeEntityMono =
+                    informationNodeDao.getInformationNodeByNameAndUserId(name, userId);
+            return informationNodeDao
+                    .deleteInformationNode(name, userId)
+                    .publishOn(Schedulers.boundedElastic())
                     .doOnSuccess(entity -> {
-                        milvusDao.deleteCollectionByName(name);
+                        milvusDao.deleteCollectionByName(informationNodeEntityMono
+                                .map(InformationNodeEntity::getCollectionName)
+                                .block());
                     })
-                    .map(informationNode ->
-                            URI.create(Objects.requireNonNull("Deleted").toString()));
+                    .then(Mono.fromCallable(() -> URI.create("Deleted")));
+        });
+    }
+
+    public Mono<ResponseEntity<URI>> updateInformationNode(
+            String name, UUID userId, String updatedName, String updateDescription) {
+
+        return informationNodeDao.existByNameAndUserId(name, userId).flatMap(exists -> {
+            if (!exists) {
+                return Mono.error(new InformationNodeCannotBeFoundException());
+            }
+
+            return informationNodeDao
+                    .updateNameWhereNameAndUserId(name, userId, updatedName, updateDescription)
+                    .map(informationNode -> URI.create(
+                            Objects.requireNonNull(informationNode.getId()).toString()))
+                    .then(Mono.just(ResponseEntity.ok(URI.create("Updated"))));
         });
     }
 }

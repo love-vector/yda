@@ -24,6 +24,7 @@ public class InformationNodeDao {
 
         InformationNodeEntity entityToSave = InformationNodeEntity.builder()
                 .name(name)
+                .collectionName(name)
                 .description(description)
                 .userId(userId)
                 .isNew(Boolean.TRUE)
@@ -31,15 +32,25 @@ public class InformationNodeDao {
         return informationNodeRepository.save(entityToSave);
     }
 
-    public Mono<Void> deleteInformationNode(String name, String description, UUID userId) {
+    public Mono<Void> deleteInformationNode(String name, UUID userId) {
         return informationNodeRepository.deleteByNameAndUserId(name, userId);
     }
 
-    public Mono<InformationNodeEntity> getInformationNodeByNameAndUserEmail(String name, UUID userId) {
+    public Mono<InformationNodeEntity> getInformationNodeByNameAndUserId(String name, UUID userId) {
         return informationNodeRepository.findByNameAndUserId(name, userId);
     }
 
     public Mono<Boolean> existByNameAndUserId(String name, UUID userId) {
         return informationNodeRepository.existsByNameAndUserId(name, userId);
+    }
+
+    public Mono<InformationNodeEntity> updateNameWhereNameAndUserId(
+            String name, UUID userId, String updatedName, String updatedDescription) {
+        return informationNodeRepository.findByNameAndUserId(name, userId).flatMap(node -> {
+            node.setName(updatedName);
+            node.setDescription(updatedDescription);
+            node.setIsNew(Boolean.FALSE);
+            return informationNodeRepository.save(node);
+        });
     }
 }

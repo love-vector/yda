@@ -2,10 +2,7 @@ package org.vector.assistant.persistance.entity;
 
 import java.util.UUID;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
@@ -17,6 +14,7 @@ import org.springframework.data.relational.core.mapping.Table;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@Setter
 @Builder(toBuilder = true)
 public class InformationNodeEntity implements Persistable<UUID> {
 
@@ -27,6 +25,9 @@ public class InformationNodeEntity implements Persistable<UUID> {
 
     @Column("name")
     private String name;
+
+    @Column("collection_name")
+    private String collectionName;
 
     @Column("description")
     private String description;
