@@ -1,13 +1,13 @@
 databaseChangeLog:
   - changeSet:
-      id: "AAS-14"
-      created: "04.02.2024"
+      id: "AAS-9"
+      created: "08.04.2024"
       author: "Ruslan K"
       changes:
         - sqlFile:
             encoding: "utf8"
-            path: "db/changelog/changes/AAS-14/AAS-14-changes.sql"
+            path: "db/changelog/changes/AAS-9/AAS-9-changes.sql"
       rollback:
         - sqlFile:
             encoding: "utf8"
-            path: "db/changelog/changes/AAS-14/AAS-14-rollback.sql"
+            path: "db/changelog/changes/AAS-9/AAS-9-rollback.sql"

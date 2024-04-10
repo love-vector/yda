@@ -1,7 +1,6 @@
 package org.vector.assistant.service;
 
 import java.net.URI;
-import java.util.Objects;
 import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
@@ -10,14 +9,17 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import org.vector.assistant.exception.information.node.InformationNodeAlreadyExistsException;
-import org.vector.assistant.exception.information.node.InformationNodeCannotBeFoundException;
+import org.vector.assistant.dto.information.node.*;
+import org.vector.assistant.exception.information.node.InformationNodeDoesNotExistsException;
 import org.vector.assistant.persistance.dao.InformationNodeDao;
 import org.vector.assistant.persistance.dao.MilvusDao;
 import org.vector.assistant.persistance.entity.InformationNodeEntity;
+import org.vector.assistant.persistance.entity.UserEntity;
+import org.vector.assistant.util.mapper.InformationNodeMapper;
 
 @Slf4j
 @Service
@@ -29,67 +31,80 @@ public class InformationNodeService {
 
     private final MilvusDao milvusDao;
 
-    public Mono<URI> createInformationNode(String name, String description, UUID userId) {
-        return informationNodeDao.existByNameAndUserId(name, userId).flatMap(exists -> {
-            if (exists) {
-                return Mono.error(new InformationNodeAlreadyExistsException());
-            }
+    private final InformationNodeMapper informationNodeMapper;
 
-            return informationNodeDao
-                    .createInformationNode(name, description, userId)
-                    .doOnNext(entity -> {
-                        milvusDao.createCollection(name);
-                    })
-                    .map(informationNode -> URI.create(
-                            Objects.requireNonNull(informationNode.getId()).toString()));
+    public Mono<URI> createInformationNode(final InformationNodeDto informationNodeDto) {
+        return ReactiveSecurityContextHolder.getContext()
+                .map(securityContext ->
+                        (UserEntity) securityContext.getAuthentication().getPrincipal())
+                .flatMap(user -> {
+                    var informationNode = informationNodeMapper.toEntity(informationNodeDto, user.getId());
+                    return informationNodeDao.createInformationNode(informationNode);
+                })
+                .flatMap(informationNode -> {
+                    milvusDao.createCollection(informationNode.getCollectionName());
+                    return Mono.just(URI.create(informationNode.getId().toString()));
+                });
+    }
+
+    public Mono<ResponseEntity<InformationNodeDto>> getInformationNode(UUID informationNodeId) {
+
+        return informationNodeDao.existsById(informationNodeId).flatMap(exists -> {
+            if (!exists) {
+                return Mono.error(new InformationNodeDoesNotExistsException());
+            }
+            return informationNodeDao.getInformationNodeById(informationNodeId).map(entity -> {
+                InformationNodeDto dto = InformationNodeDto.builder()
+                        .name(entity.getName())
+                        .description(entity.getDescription())
+                        .build();
+                return ResponseEntity.ok(dto);
+            });
         });
     }
 
-    public Mono<ResponseEntity<InformationNodeEntity>> getInformationNode(String name, UUID userId) {
-        return informationNodeDao.existByNameAndUserId(name, userId).flatMap(exists -> {
-            if (!exists) {
-                return Mono.error(new InformationNodeCannotBeFoundException());
-            }
-            return informationNodeDao
-                    .getInformationNodeByNameAndUserId(name, userId)
-                    .map(ResponseEntity::ok);
-        });
-    }
+    public Mono<ResponseEntity<URI>> deleteInformationNode(UUID informationNodeId) {
 
-    public Mono<URI> deleteInformationNode(String name, UUID userId) {
-
-        return informationNodeDao.existByNameAndUserId(name, userId).flatMap(exists -> {
+        return informationNodeDao.existsById(informationNodeId).flatMap(exists -> {
             if (!exists) {
-                return Mono.error(new InformationNodeCannotBeFoundException());
+                return Mono.error(new InformationNodeDoesNotExistsException());
             }
 
             Mono<InformationNodeEntity> informationNodeEntityMono =
-                    informationNodeDao.getInformationNodeByNameAndUserId(name, userId);
+                    informationNodeDao.getInformationNodeById(informationNodeId);
+
             return informationNodeDao
-                    .deleteInformationNode(name, userId)
+                    .deleteInformationNode(informationNodeId)
                     .publishOn(Schedulers.boundedElastic())
                     .doOnSuccess(entity -> {
                         milvusDao.deleteCollectionByName(informationNodeEntityMono
                                 .map(InformationNodeEntity::getCollectionName)
                                 .block());
                     })
-                    .then(Mono.fromCallable(() -> URI.create("Deleted")));
+                    // TODO return 204
+                    .then(Mono.just(ResponseEntity.ok(URI.create("Deleted"))));
         });
     }
 
-    public Mono<ResponseEntity<URI>> updateInformationNode(
-            String name, UUID userId, String updatedName, String updateDescription) {
+    // TODO return resource to entity
+    public Mono<ResponseEntity<URI>> updateInformationNode(InformationNodeDto request) {
 
-        return informationNodeDao.existByNameAndUserId(name, userId).flatMap(exists -> {
-            if (!exists) {
-                return Mono.error(new InformationNodeCannotBeFoundException());
-            }
+        InformationNodeDto updatedInformationNodeDto = InformationNodeDto.builder()
+                .name(request.updatedName())
+                .description(request.updatedDescription())
+                .build();
 
-            return informationNodeDao
-                    .updateNameWhereNameAndUserId(name, userId, updatedName, updateDescription)
-                    .map(informationNode -> URI.create(
-                            Objects.requireNonNull(informationNode.getId()).toString()))
-                    .then(Mono.just(ResponseEntity.ok(URI.create("Updated"))));
-        });
+        return informationNodeDao
+                .getInformationNodeById(request.informationNodeId())
+                .flatMap(informationNodeEntity -> informationNodeDao
+                        .updateInformationNode(informationNodeEntity)
+                        .publishOn(Schedulers.boundedElastic())
+                        .then(Mono.just(ResponseEntity.ok(URI.create("Updated")))))
+                .onErrorResume(
+                        InformationNodeDoesNotExistsException.class,
+                        ex -> Mono.just(ResponseEntity.notFound()
+                                .header("Error-Message", ex.getMessage())
+                                .location(URI.create(""))
+                                .build()));
     }
 }

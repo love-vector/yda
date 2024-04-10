@@ -6,7 +6,4 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record UpdateInformationNodeRequest(
-        @NotBlank String name,
-        @NotNull UUID userId,
-        @NotBlank String updatedName,
-        @NotBlank String updatedDescription) {}
+        @NotNull UUID informationNodeId, @NotBlank String updatedName, @NotBlank String updatedDescription) {}

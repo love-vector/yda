@@ -9,6 +9,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.vector.assistant.exception.information.node.InformationNodeDoesNotExistsException;
 import org.vector.assistant.persistance.entity.InformationNodeEntity;
 import org.vector.assistant.persistance.repository.InformationNodeRepository;
 
@@ -20,37 +21,27 @@ public class InformationNodeDao {
 
     private final InformationNodeRepository informationNodeRepository;
 
-    public Mono<InformationNodeEntity> createInformationNode(String name, String description, UUID userId) {
-
-        InformationNodeEntity entityToSave = InformationNodeEntity.builder()
-                .name(name)
-                .collectionName(name)
-                .description(description)
-                .userId(userId)
-                .isNew(Boolean.TRUE)
-                .build();
-        return informationNodeRepository.save(entityToSave);
+    public Mono<InformationNodeEntity> createInformationNode(final InformationNodeEntity informationNode) {
+        return informationNodeRepository.save(
+                informationNode.toBuilder().isNew(Boolean.TRUE).build());
     }
 
-    public Mono<Void> deleteInformationNode(String name, UUID userId) {
-        return informationNodeRepository.deleteByNameAndUserId(name, userId);
+    public Mono<Void> deleteInformationNode(final UUID informationNodeUUID) {
+        return informationNodeRepository.deleteById(informationNodeUUID);
     }
 
-    public Mono<InformationNodeEntity> getInformationNodeByNameAndUserId(String name, UUID userId) {
-        return informationNodeRepository.findByNameAndUserId(name, userId);
+    public Mono<InformationNodeEntity> getInformationNodeById(final UUID informationNodeId) {
+        return informationNodeRepository
+                .findById(informationNodeId)
+                .switchIfEmpty(Mono.error(InformationNodeDoesNotExistsException::new));
     }
 
-    public Mono<Boolean> existByNameAndUserId(String name, UUID userId) {
-        return informationNodeRepository.existsByNameAndUserId(name, userId);
+    public Mono<Boolean> existsById(final UUID informationNodeId) {
+        return informationNodeRepository.existsById(informationNodeId);
     }
 
-    public Mono<InformationNodeEntity> updateNameWhereNameAndUserId(
-            String name, UUID userId, String updatedName, String updatedDescription) {
-        return informationNodeRepository.findByNameAndUserId(name, userId).flatMap(node -> {
-            node.setName(updatedName);
-            node.setDescription(updatedDescription);
-            node.setIsNew(Boolean.FALSE);
-            return informationNodeRepository.save(node);
-        });
+    public Mono<InformationNodeEntity> updateInformationNode(final InformationNodeEntity informationNode) {
+        return informationNodeRepository.save(
+                informationNode.toBuilder().isNew(Boolean.FALSE).build());
     }
 }
