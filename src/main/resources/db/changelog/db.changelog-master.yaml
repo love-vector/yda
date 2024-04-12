@@ -5,3 +5,5 @@ databaseChangeLog:
       file: db/changelog/changes/AAS-9/AAS-9.yaml
   - include:
       file: db/changelog/changes/AAS-14/AAS-14.yaml
+  - include:
+      file: db/changelog/changes/AAS-17/AAS-17.yaml
