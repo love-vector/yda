@@ -1,1 +1,1 @@
-drop table if exists information_node;
+drop table if exists information_nodes;
