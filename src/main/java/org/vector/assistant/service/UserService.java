@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import org.vector.assistant.dto.CreateUserRequest;
 import org.vector.assistant.dto.UserDto;
-import org.vector.assistant.exception.UserAlreadyExistsException;
+import org.vector.assistant.exception.conflict.UserAlreadyExistsException;
 import org.vector.assistant.persistance.dao.UserDao;
 import org.vector.assistant.persistance.entity.UserEntity;
 import org.vector.assistant.util.mapper.UserMapper;

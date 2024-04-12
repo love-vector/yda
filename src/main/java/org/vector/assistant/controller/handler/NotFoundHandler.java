@@ -11,17 +11,18 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.reactive.result.method.annotation.ResponseEntityExceptionHandler;
 import org.springframework.web.server.ServerWebExchange;
 
-import org.vector.assistant.exception.UserAlreadyExistsException;
+import org.vector.assistant.exception.notfound.AssistantNotFoundException;
 
 @Slf4j
 @RestControllerAdvice
-public class GlobalControllerAdvice extends ResponseEntityExceptionHandler {
+public class NotFoundHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(UserAlreadyExistsException.class)
-    protected Mono<ResponseEntity<Object>> handleInvalidTokenException(
+    private static final HttpStatus code = HttpStatus.NOT_FOUND;
+
+    @ExceptionHandler({AssistantNotFoundException.class})
+    protected Mono<ResponseEntity<Object>> handleNotFoundException(
             final RuntimeException exception, final ServerWebExchange exchange) {
         log.error(exception.getMessage());
-        return handleExceptionInternal(
-                exception, exception.getMessage(), new HttpHeaders(), HttpStatus.CONFLICT, exchange);
+        return handleExceptionInternal(exception, exception.getMessage(), new HttpHeaders(), code, exchange);
     }
 }

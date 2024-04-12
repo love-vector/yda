@@ -1,4 +1,4 @@
-package org.vector.assistant.exception;
+package org.vector.assistant.exception.conflict;
 
 public class UserAlreadyExistsException extends RuntimeException {
 

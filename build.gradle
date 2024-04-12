@@ -61,6 +61,11 @@ dependencies {
     // MapStruct
     implementation 'org.mapstruct:mapstruct:1.5.5.Final'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
+
+    // AssistantApi
+    implementation 'com.theokanning.openai-gpt3-java:api:0.18.2'
+    implementation 'com.theokanning.openai-gpt3-java:client:0.18.2'
+    implementation 'com.theokanning.openai-gpt3-java:service:0.18.2'
 }
 
 tasks.named('test') {
