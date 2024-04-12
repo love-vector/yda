@@ -53,7 +53,6 @@ public class AssistantService {
     public Mono<AssistantDTO> getAssistant(final String assistantId) {
         return authenticationService.getUserId().flatMap(userId -> assistantDao
                 .getAssistant(assistantId, userId)
-                .switchIfEmpty(Mono.error(AssistantNotFoundException::new))
                 .flatMap(assistantEntity -> aiService
                         .getAssistant(assistantId)
                         .onErrorResume(e -> {

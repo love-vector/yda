@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.vector.assistant.exception.notfound.AssistantNotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -39,7 +40,7 @@ public class AssistantDao {
     }
 
     public Mono<AssistantEntity> getAssistant(final String name, final UUID userId) {
-        return assistantRepository.findByIdAndUserId(name, userId);
+        return assistantRepository.findByIdAndUserId(name, userId).switchIfEmpty(Mono.error(AssistantNotFoundException::new));
     }
 
     public Flux<AssistantEntity> getAssistantsForCurrentUser(final UUID userId) {
