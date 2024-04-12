@@ -5,8 +5,6 @@ import java.util.UUID;
 import lombok.*;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.Transient;
-import org.springframework.data.domain.Persistable;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
@@ -16,12 +14,11 @@ import org.springframework.data.relational.core.mapping.Table;
 @Getter
 @Setter
 @Builder(toBuilder = true)
-public class InformationNodeEntity implements Persistable<UUID> {
+public class InformationNodeEntity {
 
     @Id
     @Column("id")
-    @Builder.Default
-    private UUID id = UUID.randomUUID();
+    private Long id;
 
     @Column("name")
     private String name;
@@ -34,13 +31,4 @@ public class InformationNodeEntity implements Persistable<UUID> {
 
     @Column("user_id")
     private UUID userId;
-
-    @Builder.Default
-    @Transient
-    private Boolean isNew = Boolean.FALSE;
-
-    @Override
-    public boolean isNew() {
-        return isNew;
-    }
 }

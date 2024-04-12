@@ -1,7 +1,6 @@
 package org.vector.assistant.controller;
 
 import java.net.URI;
-import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
@@ -21,8 +20,10 @@ public class InformationNodeController {
     private final InformationNodeService informationNodeService;
 
     @GetMapping("/{informationNodeId}")
-    public Mono<ResponseEntity<InformationNodeDto>> getInformationNode(@PathVariable final UUID informationNodeId) {
-        return informationNodeService.getInformationNode(informationNodeId);
+    public Mono<ResponseEntity<InformationNodeDto>> getInformationNode(@PathVariable final Long informationNodeId) {
+        return informationNodeService
+                .getInformationNode(informationNodeId)
+                .map(informationNodeDto -> ResponseEntity.ok(informationNodeDto));
     }
 
     @PostMapping
@@ -31,13 +32,18 @@ public class InformationNodeController {
                 .build());
     }
 
-    @PutMapping
-    public Mono<ResponseEntity<URI>> updateInformationNode(@RequestBody @Validated final InformationNodeDto request) {
-        return informationNodeService.updateInformationNode(request);
+    @PutMapping("/{informationNodeId}")
+    public Mono<ResponseEntity<URI>> updateInformationNode(
+            @RequestBody @Validated final InformationNodeDto request, @PathVariable final Long informationNodeId) {
+        return informationNodeService
+                .updateInformationNode(request, informationNodeId)
+                .map(uri -> ResponseEntity.ok().location(uri).build());
     }
 
     @DeleteMapping("/{informationNodeId}")
-    public Mono<ResponseEntity<URI>> deleteInformationNode(@PathVariable final UUID informationNodeId) {
-        return informationNodeService.deleteInformationNode(informationNodeId);
+    public Mono<ResponseEntity<Void>> deleteInformationNode(@PathVariable final Long informationNodeId) {
+        return informationNodeService
+                .deleteInformationNode(informationNodeId)
+                .then(Mono.just(ResponseEntity.noContent().build()));
     }
 }

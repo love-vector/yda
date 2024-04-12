@@ -24,9 +24,4 @@ public interface InformationNodeMapper {
     @Mapping(target = "name", source = "entity.name")
     @Mapping(target = "description", source = "entity.description")
     InformationNodeDto toDto(final InformationNodeEntity entity);
-
-    @Mapping(target = "name", source = "informationNodeDto.name")
-    @Mapping(target = "description", source = "informationNodeDto.description")
-    InformationNodeEntity updateInformationNode(
-            @MappingTarget final InformationNodeEntity informationNode, final InformationNodeDto informationNodeDto);
 }
