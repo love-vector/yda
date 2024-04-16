@@ -1,12 +1,11 @@
 package org.vector.assistant.service;
 
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,58 +30,58 @@ public class IntentionService {
      * Retrieves a specific {@link IntentionDto} by its ID.
      *
      * @param intentionId the ID of the intention to retrieve.
-     * @return a {@link Mono} emitting the {@link IntentionDto}.
+     * @return the {@link IntentionDto} corresponding to the provided ID.
      */
-    public Mono<IntentionDto> getIntention(final Long intentionId) {
-        return intentionDao.getIntentionById(intentionId).map(intentionMapper::toDto);
+    public IntentionDto getIntention(final Long intentionId) {
+        return intentionMapper.toDto(intentionDao.getIntentionById(intentionId));
     }
 
     /**
      * Retrieves all intentions.
      *
-     * @return a {@link Flux} emitting {@link IntentionDto} objects.
+     * @return a List of {@link IntentionDto} objects.
      */
-    public Flux<IntentionDto> getIntentions() {
-        return intentionDao.getIntentions().map(intentionMapper::toDto);
+    public List<IntentionDto> getIntentions() {
+        return intentionDao.getIntentions().parallelStream()
+                .map(intentionMapper::toDto)
+                .toList();
     }
 
     /**
      * Creates a new intention based on the provided DTO and returns the URI of the newly created intention.
      *
      * @param intentionDto the DTO containing the intention data.
-     * @return a {@link Mono} emitting the URI of the newly created intention.
+     * @return the URI of the newly created intention.
      */
-    public Mono<URI> createIntention(final IntentionDto intentionDto) {
-        return intentionDao
-                .createIntention(intentionMapper.toEntity(intentionDto))
-                .map(entity -> URI.create(entity.getId().toString()));
+    public URI createIntention(final IntentionDto intentionDto) {
+        var intention = intentionDao.createIntention(intentionMapper.toEntity(intentionDto));
+        return URI.create(intention.getId().toString());
     }
 
     /**
      * Deletes an intention identified by its ID.
      *
      * @param intentionId the ID of the intention to delete.
-     * @return a {@link Mono} signaling completion or error if the deletion fails.
      */
-    public Mono<Void> deleteIntention(final Long intentionId) {
-        return intentionDao.getIntentionById(intentionId).flatMap(intentionDao::deleteIntention);
+    public void deleteIntention(final Long intentionId) {
+        intentionDao.deleteIntention(intentionDao.getIntentionById(intentionId));
     }
 
     /**
      * Determines and ranks intentions based on their relevance to the specified message from the {@link DetermineIntentionRequest}.
-     * The search is performed based on the semantic similarity between the stored intentions and the provided message.
-     * Results are ranked by the distance metric indicating closeness to the query message, with a smaller distance representing a higher relevance.
+     * The method returns a list of matched intentions with associated distances indicating semantic closeness to the query message.
      *
      * @param request the request containing the message used for searching relevant intentions.
-     * @return a {@link Flux} emitting {@link DetermineIntentionResponse} objects, each including an {@link IntentionDto}
+     * @return a List of {@link DetermineIntentionResponse} objects, each including an {@link IntentionDto}
      * representing the matched intention and a distance metric indicating how closely the intention matches the request message.
      */
-    public Flux<DetermineIntentionResponse> determineIntention(final DetermineIntentionRequest request) {
-        return intentionDao.search(request).flatMap(document -> intentionDao
-                .getIntentionByVectorId(UUID.fromString(document.getId()))
-                .map(intention -> {
+    public List<DetermineIntentionResponse> determineIntention(final DetermineIntentionRequest request) {
+        return intentionDao.search(request).parallelStream()
+                .map(document -> {
+                    var intention = intentionDao.getIntentionByVectorId(UUID.fromString(document.getId()));
                     var distance = (Float) document.getMetadata().get("distance");
                     return intentionMapper.toDetermineResponse(intention, distance);
-                }));
+                })
+                .toList();
     }
 }

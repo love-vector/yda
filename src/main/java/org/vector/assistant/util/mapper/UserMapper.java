@@ -18,7 +18,6 @@ public interface UserMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "password", source = "request.password", qualifiedByName = "encodePassword")
-    @Mapping(target = "isNew", ignore = true)
     UserEntity toEntity(final CreateUserRequest request);
 
     UserDto toDto(final UserEntity user);

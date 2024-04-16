@@ -2,8 +2,8 @@ package org.vector.assistant.web.controller;
 
 import java.net.URI;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import lombok.RequiredArgsConstructor;
-import reactor.core.publisher.Mono;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -20,13 +20,14 @@ public class UserController {
 
     private final UserService userService;
 
+    @SecurityRequirements
     @PostMapping
-    public Mono<ResponseEntity<URI>> createUser(@RequestBody @Validated final CreateUserRequest request) {
-        return userService.createUser(request).map(ResponseEntity::ok);
+    public ResponseEntity<URI> createUser(@RequestBody @Validated final CreateUserRequest request) {
+        return ResponseEntity.created(userService.createUser(request)).build();
     }
 
     @GetMapping("/authorized")
-    public Mono<ResponseEntity<UserDto>> getAuthorizedUser() {
-        return userService.getCurrentUser().map(ResponseEntity::ok);
+    public ResponseEntity<UserDto> getAuthorizedUser() {
+        return ResponseEntity.ok(userService.getCurrentUser());
     }
 }

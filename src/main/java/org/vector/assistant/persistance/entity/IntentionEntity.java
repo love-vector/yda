@@ -2,30 +2,34 @@ package org.vector.assistant.persistance.entity;
 
 import java.util.UUID;
 
+import jakarta.persistence.*;
+
 import lombok.*;
+import org.hibernate.annotations.DynamicUpdate;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.relational.core.mapping.Column;
-import org.springframework.data.relational.core.mapping.Table;
-
-@Table(name = "intentions", schema = "chatbot")
+@Entity
+@Table(name = "intentions")
+@DynamicUpdate
+@NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Builder(toBuilder = true)
 public class IntentionEntity {
 
     @Id
-    @Column("id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
-    @Column("name")
+    @Column(name = "name")
     private String name;
 
-    @Column("definition")
+    @Column(name = "definition")
     private String definition;
 
-    @Column("description")
+    @Column(name = "description")
     private String description;
 
-    @Column("vector_id")
+    @Column(name = "vector_id")
     private UUID vectorId;
 }
