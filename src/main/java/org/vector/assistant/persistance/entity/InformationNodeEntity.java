@@ -8,7 +8,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
-@Table(name = "information_node", schema = "chatbot")
+@Table(name = "information_nodes", schema = "chatbot")
 @Getter
 @Builder(toBuilder = true)
 public class InformationNodeEntity {
