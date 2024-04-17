@@ -1,22 +1,22 @@
 version: '3.9'
-name: assistant-compose
+name: yda-compose
 
 services:
   db:
     image: postgres:16.2
-    container_name: assistant-db
+    container_name: yda-db
     restart: always
     env_file:
       - .docker/.db-env
     ports:
       - "15432:5432"
     networks:
-      - assistant_postgres
+      - yda_postgres
     volumes:
-      - assistant-db-data:/var/lib/postgresql/data
+      - yda-db-data:/var/lib/postgresql/data
 
   etcd:
-    container_name: assistant-milvus-etcd
+    container_name: yda-milvus-etcd
     image: quay.io/coreos/etcd:v3.5.12
     environment:
       - ETCD_AUTO_COMPACTION_MODE=revision
@@ -24,10 +24,10 @@ services:
       - ETCD_QUOTA_BACKEND_BYTES=4294967296
       - ETCD_SNAPSHOT_COUNT=50000
     volumes:
-      - assistant-milvus:/etcd
+      - yda-milvus:/etcd
     command: etcd -advertise-client-urls=http://127.0.0.1:2379 -listen-client-urls http://0.0.0.0:2379 --data-dir /etcd
     networks:
-      - assistant_milvus
+      - yda_milvus
     healthcheck:
       test: [ "CMD", "etcdctl", "endpoint", "health" ]
       interval: 30s
@@ -35,7 +35,7 @@ services:
       retries: 3
 
   minio:
-    container_name: assistant-milvus-minio
+    container_name: yda-milvus-minio
     image: minio/minio:RELEASE.2023-03-20T20-16-18Z
     environment:
       MINIO_ACCESS_KEY: minioadmin
@@ -44,9 +44,9 @@ services:
       - "9001:9001"
       - "9000:9000"
     networks:
-      - assistant_milvus
+      - yda_milvus
     volumes:
-      - assistant-milvus:/minio_data
+      - yda-milvus:/minio_data
     command: minio server /minio_data --console-address ":9001"
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
@@ -55,7 +55,7 @@ services:
       retries: 3
 
   standalone:
-    container_name: assistant-milvus-standalone
+    container_name: yda-milvus-standalone
     image: milvusdb/milvus:v2.4.0-rc.1
     command: [ "milvus", "run", "standalone" ]
     security_opt:
@@ -64,7 +64,7 @@ services:
       ETCD_ENDPOINTS: etcd:2379
       MINIO_ADDRESS: minio:9000
     volumes:
-      - assistant-milvus:/var/lib/milvus
+      - yda-milvus:/var/lib/milvus
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:9091/healthz" ]
       interval: 30s
@@ -75,25 +75,25 @@ services:
       - "19530:19530"
       - "9091:9091"
     networks:
-      - assistant_milvus
+      - yda_milvus
     depends_on:
       - "etcd"
       - "minio"
 
   attu:
-    container_name: assistant-attu-service
+    container_name: yda-attu-service
     image: zilliz/attu:v2.3.8
     ports:
       - "8000:3000"
     environment:
       MILVUS_URL: standalone:19530
     networks:
-      - assistant_milvus
+      - yda_milvus
 
 networks:
-  assistant_postgres:
-  assistant_milvus:
+  yda_postgres:
+  yda_milvus:
 
 volumes:
-  assistant-db-data:
-  assistant-milvus:
+  yda-db-data:
+  yda-milvus:

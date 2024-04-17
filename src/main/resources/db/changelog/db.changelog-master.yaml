@@ -1,9 +1,9 @@
 databaseChangeLog:
   - include:
-      file: db/changelog/changes/AAS-13/AAS-13.yaml
+      file: db/changelog/changes/YDA-13/YDA-13.yaml
   - include:
-      file: db/changelog/changes/AAS-9/AAS-9.yaml
+      file: db/changelog/changes/YDA-9/YDA-9.yaml
   - include:
-      file: db/changelog/changes/AAS-14/AAS-14.yaml
+      file: db/changelog/changes/YDA-14/YDA-14.yaml
   - include:
-      file: db/changelog/changes/AAS-17/AAS-17.yaml
+      file: db/changelog/changes/YDA-17/YDA-17.yaml

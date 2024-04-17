@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - changeSet:
+      id: "AAS-13"
+      created: "20.03.2024"
+      author: "Alex sl"
+      changes:
+        - sqlFile:
+            encoding: "utf8"
+            path: "db/changelog/changes/YDA-13/YDA-13-changes.sql"
+      rollback:
+        - sqlFile:
+            encoding: "utf8"
+            path: "db/changelog/changes/YDA-13/YDA-13-rollback.sql"
