@@ -29,30 +29,28 @@ repositories {
 
 dependencies {
     // Spring Boot
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-docker-compose'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
-    // Spring Reactive
-    implementation 'org.springframework.boot:spring-boot-starter-webflux'
-    implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
-
     // Spring AI
     implementation platform("org.springframework.ai:spring-ai-bom:0.8.1")
     implementation 'org.springframework.ai:spring-ai-milvus-store-spring-boot-starter'
     implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter'
 
-    // Spring Security
-    implementation 'org.springframework.boot:spring-boot-starter-security'
-
     // DB
     runtimeOnly 'org.postgresql:postgresql'
-    runtimeOnly 'org.postgresql:r2dbc-postgresql'
 
     // Liquibase (Migrations Tool)
     implementation 'org.liquibase:liquibase-core:4.25.0'
+
+    // Open API (SpringDoc)
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
 
     // Lombok
     compileOnly 'org.projectlombok:lombok:1.18.30'
@@ -76,9 +74,3 @@ spotless {
 }
 
 compileJava.dependsOn 'spotlessApply'
-
-bootRun {
-    jvmArgs([
-            "-Dreactor.schedulers.defaultBoundedElasticOnVirtualThreads=true"
-    ])
-}

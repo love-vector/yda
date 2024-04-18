@@ -1,10 +1,9 @@
 package org.vector.assistant.web.controller;
 
 import java.net.URI;
+import java.util.List;
 
 import lombok.RequiredArgsConstructor;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -21,35 +20,33 @@ public class InformationNodeController {
     private final InformationNodeService informationNodeService;
 
     @GetMapping
-    public Flux<InformationNodeDto> getUserInformationNodes() {
-        return informationNodeService.getUserInformationNodes();
+    public ResponseEntity<List<InformationNodeDto>> getUserInformationNodes() {
+        return ResponseEntity.ok(informationNodeService.getUserInformationNodes());
     }
 
     @PostMapping
-    public Mono<ResponseEntity<URI>> createInformationNode(
+    public ResponseEntity<URI> createInformationNode(
             @RequestBody @Validated final InformationNodeDto informationNodeDto) {
-        return informationNodeService.createInformationNode(informationNodeDto).map(uri -> ResponseEntity.created(uri)
-                .build());
+        return ResponseEntity.created(informationNodeService.createInformationNode(informationNodeDto))
+                .build();
     }
 
     @GetMapping("/{informationNodeId}")
-    public Mono<ResponseEntity<InformationNodeDto>> getInformationNode(@PathVariable final Long informationNodeId) {
-        return informationNodeService.getInformationNode(informationNodeId).map(ResponseEntity::ok);
+    public ResponseEntity<InformationNodeDto> getInformationNode(@PathVariable final Long informationNodeId) {
+        return ResponseEntity.ok(informationNodeService.getInformationNode(informationNodeId));
     }
 
     @PutMapping("/{informationNodeId}")
-    public Mono<ResponseEntity<Void>> updateInformationNode(
+    public ResponseEntity<Void> updateInformationNode(
             @PathVariable final Long informationNodeId,
             @RequestBody @Validated final InformationNodeDto informationNodeDto) {
-        return informationNodeService
-                .updateInformationNode(informationNodeId, informationNodeDto)
-                .thenReturn(ResponseEntity.ok().build());
+        informationNodeService.updateInformationNode(informationNodeId, informationNodeDto);
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{informationNodeId}")
-    public Mono<ResponseEntity<Void>> deleteInformationNode(@PathVariable final Long informationNodeId) {
-        return informationNodeService
-                .deleteInformationNode(informationNodeId)
-                .thenReturn(ResponseEntity.noContent().build());
+    public ResponseEntity<Void> deleteInformationNode(@PathVariable final Long informationNodeId) {
+        informationNodeService.deleteInformationNode(informationNodeId);
+        return ResponseEntity.noContent().build();
     }
 }

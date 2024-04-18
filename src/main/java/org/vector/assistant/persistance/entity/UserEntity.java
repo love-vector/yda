@@ -4,44 +4,37 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.UUID;
 
-import lombok.*;
+import jakarta.persistence.*;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.Transient;
-import org.springframework.data.domain.Persistable;
-import org.springframework.data.relational.core.mapping.Column;
-import org.springframework.data.relational.core.mapping.Table;
+import lombok.*;
+import org.hibernate.annotations.DynamicUpdate;
+
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-@Table(name = "users", schema = "chatbot")
+@Entity
+@Table(name = "users")
+@DynamicUpdate
+@NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Builder(toBuilder = true)
-public class UserEntity implements UserDetails, Persistable<UUID> {
+public class UserEntity implements UserDetails {
 
     @Id
-    @Column("id")
-    @Builder.Default
-    private UUID id = UUID.randomUUID();
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id")
+    private UUID id;
 
-    @Column("email")
+    @Column(name = "email")
     private String email;
 
-    @Column("password")
+    @Column(name = "password")
     private String password;
-
-    @Builder.Default
-    @Transient
-    private Boolean isNew = Boolean.FALSE;
 
     @Override
     public String getUsername() {
         return email;
-    }
-
-    @Override
-    public boolean isNew() {
-        return isNew;
     }
 
     @Override

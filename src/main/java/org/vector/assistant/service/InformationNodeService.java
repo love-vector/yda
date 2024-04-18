@@ -1,18 +1,17 @@
 package org.vector.assistant.service;
 
 import java.net.URI;
+import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import org.vector.assistant.model.dto.InformationNodeDto;
 import org.vector.assistant.persistance.dao.InformationNodeDao;
-import org.vector.assistant.security.UserDetailsService;
+import org.vector.assistant.security.CustomUserDetailsService;
 import org.vector.assistant.util.mapper.InformationNodeMapper;
 
 @Slf4j
@@ -21,7 +20,7 @@ import org.vector.assistant.util.mapper.InformationNodeMapper;
 @RequiredArgsConstructor
 public class InformationNodeService {
 
-    private final UserDetailsService userDetailsService;
+    private final CustomUserDetailsService customUserDetailsService;
 
     private final InformationNodeDao informationNodeDao;
 
@@ -31,38 +30,35 @@ public class InformationNodeService {
      * Retrieves a specific {@link InformationNodeDto} by its ID.
      *
      * @param informationNodeId the ID of the information node to retrieve.
-     * @return a {@link Mono} emitting the {@link InformationNodeDto}.
+     * @return the {@link InformationNodeDto} corresponding to the provided ID.
      */
-    public Mono<InformationNodeDto> getInformationNode(final Long informationNodeId) {
-        return informationNodeDao.getInformationNodeById(informationNodeId).map(informationNodeMapper::toDto);
+    public InformationNodeDto getInformationNode(final Long informationNodeId) {
+        return informationNodeMapper.toDto(informationNodeDao.getInformationNodeById(informationNodeId));
     }
 
     /**
      * Retrieves all information nodes related to the currently authenticated user.
      *
-     * @return a {@link Flux} emitting {@link InformationNodeDto} objects.
+     * @return a List of {@link InformationNodeDto} objects.
      */
-    public Flux<InformationNodeDto> getUserInformationNodes() {
-        return userDetailsService
-                .getAuthorizedUser()
-                .flatMapMany(user -> informationNodeDao.getInformationNodesByUserId(user.getId()))
-                .map(informationNodeMapper::toDto);
+    public List<InformationNodeDto> getUserInformationNodes() {
+        var user = customUserDetailsService.getAuthorizedUser();
+        return informationNodeDao.getInformationNodesByUserId(user.getId()).parallelStream()
+                .map(informationNodeMapper::toDto)
+                .toList();
     }
 
     /**
      * Creates a new information node based on the provided DTO and returns the URI of the newly created node.
      *
      * @param informationNodeDto the DTO containing the information node data.
-     * @return a {@link Mono} emitting the URI of the newly created information node.
+     * @return the URI of the newly created information node.
      */
-    public Mono<URI> createInformationNode(final InformationNodeDto informationNodeDto) {
-        return userDetailsService
-                .getAuthorizedUser()
-                .flatMap(user -> {
-                    var informationNode = informationNodeMapper.toEntity(informationNodeDto, user.getId());
-                    return informationNodeDao.createInformationNode(informationNode);
-                })
-                .map(informationNode -> URI.create(informationNode.getId().toString()));
+    public URI createInformationNode(final InformationNodeDto informationNodeDto) {
+        var user = customUserDetailsService.getAuthorizedUser();
+        var informationNode = informationNodeDao.createInformationNode(
+                informationNodeMapper.toEntity(informationNodeDto, user.getId()));
+        return URI.create(informationNode.getId().toString());
     }
 
     /**
@@ -70,25 +66,19 @@ public class InformationNodeService {
      *
      * @param informationNodeId  the ID of the information node to update.
      * @param informationNodeDto the DTO containing updated data for the information node.
-     * @return a {@link Mono} signaling completion.
      */
-    public Mono<Void> updateInformationNode(final Long informationNodeId, final InformationNodeDto informationNodeDto) {
-        return informationNodeDao
-                .getInformationNodeById(informationNodeId)
-                .flatMap(informationNode -> informationNodeDao.updateInformationNode(
-                        informationNodeMapper.updateEntity(informationNode, informationNodeDto)))
-                .then();
+    public void updateInformationNode(final Long informationNodeId, final InformationNodeDto informationNodeDto) {
+        var informationNode = informationNodeDao.getInformationNodeById(informationNodeId);
+        informationNodeDao.updateInformationNode(
+                informationNodeMapper.updateEntity(informationNode, informationNodeDto));
     }
 
     /**
      * Deletes an information node identified by its ID.
      *
      * @param informationNodeId the ID of the information node to delete.
-     * @return a {@link Mono} signaling completion or error if the deletion fails.
      */
-    public Mono<Void> deleteInformationNode(final Long informationNodeId) {
-        return informationNodeDao
-                .getInformationNodeById(informationNodeId)
-                .flatMap(informationNodeDao::deleteInformationNode);
+    public void deleteInformationNode(final Long informationNodeId) {
+        informationNodeDao.deleteInformationNode(informationNodeDao.getInformationNodeById(informationNodeId));
     }
 }

@@ -5,16 +5,14 @@ import java.util.Objects;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import reactor.core.publisher.Mono;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import org.vector.assistant.exception.conflict.UserAlreadyExistsException;
 import org.vector.assistant.model.dto.UserDto;
 import org.vector.assistant.model.request.CreateUserRequest;
 import org.vector.assistant.persistance.dao.UserDao;
-import org.vector.assistant.security.UserDetailsService;
+import org.vector.assistant.security.CustomUserDetailsService;
 import org.vector.assistant.util.mapper.UserMapper;
 
 @Slf4j
@@ -23,23 +21,29 @@ import org.vector.assistant.util.mapper.UserMapper;
 @RequiredArgsConstructor
 public class UserService {
 
-    private final UserDetailsService userDetailsService;
+    private final CustomUserDetailsService customUserDetailsService;
 
     private final UserDao userDao;
 
     private final UserMapper userMapper;
 
-    public Mono<URI> createUser(final CreateUserRequest request) {
-        return userDao.existsByEmail(request.email()).flatMap(exists -> {
-            if (exists) {
-                return Mono.error(new UserAlreadyExistsException());
-            }
-            return userDao.createUser(userMapper.toEntity(request))
-                    .map(user -> URI.create(Objects.requireNonNull(user.getId()).toString()));
-        });
+    /**
+     * Creates a new user based on the provided request data and returns the URI of the newly created user.
+     *
+     * @param request the data used to create a new user.
+     * @return the URI of the newly created user.
+     */
+    public URI createUser(final CreateUserRequest request) {
+        var user = userDao.createUser(userMapper.toEntity(request));
+        return URI.create(Objects.requireNonNull(user.getId()).toString());
     }
 
-    public Mono<UserDto> getCurrentUser() {
-        return userDetailsService.getAuthorizedUser().map(userMapper::toDto);
+    /**
+     * Retrieves the currently authenticated user's details as a DTO.
+     *
+     * @return the DTO representing the currently authenticated user.
+     */
+    public UserDto getCurrentUser() {
+        return userMapper.toDto(customUserDetailsService.getAuthorizedUser());
     }
 }

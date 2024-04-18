@@ -1,17 +1,15 @@
 package org.vector.assistant.persistance.dao;
 
+import java.util.List;
 import java.util.UUID;
 
 import groovy.util.logging.Slf4j;
 import lombok.RequiredArgsConstructor;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import org.vector.assistant.exception.not.found.InformationNodeDoesNotExistException;
+import org.vector.assistant.exception.not.found.InformationNodeNotFoundException;
 import org.vector.assistant.persistance.entity.InformationNodeEntity;
 import org.vector.assistant.persistance.repository.InformationNodeRepository;
 
@@ -25,33 +23,26 @@ public class InformationNodeDao {
 
     private final MilvusDao milvusDao;
 
-    public Mono<InformationNodeEntity> getInformationNodeById(final Long informationNodeId) {
-        return informationNodeRepository
-                .findById(informationNodeId)
-                .switchIfEmpty(Mono.error(InformationNodeDoesNotExistException::new));
+    public InformationNodeEntity getInformationNodeById(final Long informationNodeId) {
+        return informationNodeRepository.findById(informationNodeId).orElseThrow(InformationNodeNotFoundException::new);
     }
 
-    public Flux<InformationNodeEntity> getInformationNodesByUserId(final UUID userId) {
+    public List<InformationNodeEntity> getInformationNodesByUserId(final UUID userId) {
         return informationNodeRepository.findAllByUserId(userId);
     }
 
-    public Mono<InformationNodeEntity> createInformationNode(final InformationNodeEntity informationNode) {
-        return informationNodeRepository.save(informationNode).flatMap(createdNode -> Mono.fromRunnable(
-                        () -> milvusDao.createCollectionIfNotExist(createdNode.getCollectionName()))
-                .subscribeOn(Schedulers.boundedElastic())
-                .thenReturn(createdNode));
+    public InformationNodeEntity createInformationNode(final InformationNodeEntity informationNode) {
+        var createdInformationNode = informationNodeRepository.save(informationNode);
+        milvusDao.createCollectionIfNotExist(createdInformationNode.getCollectionName());
+        return createdInformationNode;
     }
 
-    public Mono<InformationNodeEntity> updateInformationNode(final InformationNodeEntity informationNode) {
+    public InformationNodeEntity updateInformationNode(final InformationNodeEntity informationNode) {
         return informationNodeRepository.save(informationNode);
     }
 
-    public Mono<Void> deleteInformationNode(final InformationNodeEntity informationNode) {
-        return informationNodeRepository
-                .delete(informationNode)
-                .then(Mono.defer(() -> Mono.fromRunnable(
-                                () -> milvusDao.deleteCollectionIfExists(informationNode.getCollectionName()))
-                        .subscribeOn(Schedulers.boundedElastic())))
-                .then();
+    public void deleteInformationNode(final InformationNodeEntity informationNode) {
+        informationNodeRepository.delete(informationNode);
+        milvusDao.deleteCollectionIfExists(informationNode.getCollectionName());
     }
 }

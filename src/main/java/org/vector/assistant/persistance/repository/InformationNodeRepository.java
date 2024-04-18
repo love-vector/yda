@@ -1,16 +1,15 @@
 package org.vector.assistant.persistance.repository;
 
+import java.util.List;
 import java.util.UUID;
 
-import reactor.core.publisher.Flux;
-
-import org.springframework.data.r2dbc.repository.R2dbcRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import org.vector.assistant.persistance.entity.InformationNodeEntity;
 
 @Repository
-public interface InformationNodeRepository extends R2dbcRepository<InformationNodeEntity, Long> {
+public interface InformationNodeRepository extends JpaRepository<InformationNodeEntity, Long> {
 
-    Flux<InformationNodeEntity> findAllByUserId(final UUID userId);
+    List<InformationNodeEntity> findAllByUserId(final UUID userId);
 }

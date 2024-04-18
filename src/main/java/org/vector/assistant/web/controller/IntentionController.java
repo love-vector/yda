@@ -1,10 +1,9 @@
 package org.vector.assistant.web.controller;
 
 import java.net.URI;
+import java.util.List;
 
 import lombok.RequiredArgsConstructor;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -23,31 +22,30 @@ public class IntentionController {
     private final IntentionService intentionService;
 
     @GetMapping
-    public Flux<IntentionDto> getIntentions() {
-        return intentionService.getIntentions();
+    public ResponseEntity<List<IntentionDto>> getIntentions() {
+        return ResponseEntity.ok(intentionService.getIntentions());
     }
 
     @PostMapping
-    public Mono<ResponseEntity<URI>> createIntention(@RequestBody @Validated final IntentionDto intentionDto) {
-        return intentionService.createIntention(intentionDto).map(uri -> ResponseEntity.created(uri)
-                .build());
+    public ResponseEntity<URI> createIntention(@RequestBody @Validated final IntentionDto intentionDto) {
+        return ResponseEntity.created(intentionService.createIntention(intentionDto))
+                .build();
     }
 
     @GetMapping("/{intentionId}")
-    public Mono<ResponseEntity<IntentionDto>> getIntention(@PathVariable final Long intentionId) {
-        return intentionService.getIntention(intentionId).map(ResponseEntity::ok);
+    public ResponseEntity<IntentionDto> getIntention(@PathVariable final Long intentionId) {
+        return ResponseEntity.ok(intentionService.getIntention(intentionId));
     }
 
     @DeleteMapping("/{intentionId}")
-    public Mono<ResponseEntity<Void>> deleteIntention(@PathVariable final Long intentionId) {
-        return intentionService
-                .deleteIntention(intentionId)
-                .thenReturn(ResponseEntity.noContent().build());
+    public ResponseEntity<Void> deleteIntention(@PathVariable final Long intentionId) {
+        intentionService.deleteIntention(intentionId);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/determine")
-    public Flux<DetermineIntentionResponse> determineIntention(
+    public ResponseEntity<List<DetermineIntentionResponse>> determineIntention(
             @RequestBody @Validated final DetermineIntentionRequest request) {
-        return intentionService.determineIntention(request);
+        return ResponseEntity.ok(intentionService.determineIntention(request));
     }
 }
