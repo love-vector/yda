@@ -32,7 +32,7 @@ public class AssistantService {
      * Retrieves an {@link AssistantDto} for a specific assistant based on the given assistant ID.
      *
      * @param assistantId the unique ID of the assistant to retrieve
-     * @return an {@link AssistantDto} representing the assistant, or {@code null} if no assistant is found with the provided ID
+     * @return an {@link AssistantDto} representing the assistant
      * @throws AssistantNotFoundException if no assistant is found with the provided ID
      * */
     public AssistantDto getAssistant(final Long assistantId) {
@@ -54,11 +54,11 @@ public class AssistantService {
     /**
      * Creates a new assistant entry in the database based on the provided {@link AssistantDto} and returns the URI of the created assistant.
      * <p>
-     * This method handles the creation process by first obtaining the currently authorized user and then
-     * creating an assistant in the OpenAI service. It proceeds to map the DTO to an entity and includes the
-     * OpenAI assistant's ID and the authorized user's ID. The assistant is then persisted to the database
-     * through {@link AssistantDao}. The URI for the newly created assistant is constructed using the assistant's database ID.
-     *
+     * The creation process involves the following critical steps,
+     * which must be performed in the specified order to ensure data consistency and prevent any orphaned records:     * <ol>
+     *   <li>Create the assistant in the OpenAI service using the data provided in the {@code assistantDto}.</li>
+     *   <li>Save the new assistant entity to the local database.</li>
+     * </ol>
      * @param assistantDto the {@link AssistantDto} containing the necessary data to create a new assistant
      * @return the {@link URI} of the newly created assistant, constructed from the assistant's ID
      */
@@ -73,10 +73,13 @@ public class AssistantService {
     /**
      * Updates an existing assistant in the database and synchronizes changes with the OpenAI service based on the provided {@link AssistantDto}.
      * <p>
-     * This method updates the details of an assistant identified by {@code assistantId}. It retrieves the existing assistant entity from the database,
-     * updates its fields based on the provided {@link AssistantDto}, and then saves these changes back to the database through {@link AssistantDao}.
-     * After updating the database, it also sends the updated information to the OpenAI service to keep the assistant data synchronized.
-     *
+     * The update process involves the following critical steps,
+     * which must be performed in the specified order to ensure data consistency and prevent any orphaned records:
+     * <ol>
+     *   <li>Persist the updated assistant data back to the database.</li>
+     *   <li>Convert the updated assistant data into a format suitable for the OpenAI service, and send an update request
+     *       to the OpenAI service to synchronize the changes.</li>
+     * </ol>
      * @param assistantId the ID of the assistant to be updated
      * @param assistantDto the {@link AssistantDto} containing updated data for the assistant
      * @throws AssistantNotFoundException if no assistant is found with the provided ID
@@ -90,11 +93,13 @@ public class AssistantService {
     /**
      * Deletes an assistant identified by the given {@code assistantId} from the database and synchronizes the deletion with the OpenAI service.
      * <p>
-     * This method first retrieves the assistant entity from the database using the provided {@code assistantId}.
-     * If the assistant is found, it is deleted from the database and then the corresponding record in the OpenAI service
-     * is also removed to ensure data consistency across platforms. This method handles all steps required to fully remove
-     * an assistant record, including database and service level deletions.
-     *
+     * The deletion process involves the following critical steps,
+     * which must be performed in the specified order to ensure data consistency and prevent any orphaned records:
+     * <ol>
+     *   <li>Delete the assistant entity from the local database.</li>
+     *   <li>Once the local deletion is confirmed, send a request to the OpenAI service to delete the assistant using
+     *       the assistant's OpenAI specific ID.</li>
+     * </ol>
      * @param assistantId the ID of the assistant to be deleted
      * @throws AssistantNotFoundException if no assistant is found with the provided ID
      */
