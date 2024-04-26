@@ -10,7 +10,7 @@ ENV PG_PASS=''
 ENV API_PREFIX=''
 
 #Change name
-COPY ./build/libs/assistant.jar /app.jar
+COPY ./build/libs/yda.jar /app.jar
 
 # Install required packages for downloading and unzipping
 RUN apk --no-cache add curl unzip
