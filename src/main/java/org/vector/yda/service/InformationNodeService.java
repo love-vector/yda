@@ -3,12 +3,14 @@ package org.vector.yda.service;
 import java.net.URI;
 import java.util.List;
 
+import io.milvus.exception.MilvusException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.vector.yda.exception.not.found.InformationNodeNotFoundException;
 import org.vector.yda.model.dto.InformationNodeDto;
 import org.vector.yda.persistance.dao.InformationNodeDao;
 import org.vector.yda.security.UserDetailsService;
@@ -31,6 +33,7 @@ public class InformationNodeService {
      *
      * @param informationNodeId the ID of the information node to retrieve.
      * @return the {@link InformationNodeDto} corresponding to the provided ID.
+     * @throws InformationNodeNotFoundException if no information node is found with the provided ID
      */
     public InformationNodeDto getInformationNode(final Long informationNodeId) {
         return informationNodeMapper.toDto(informationNodeDao.getInformationNodeById(informationNodeId));
@@ -53,6 +56,7 @@ public class InformationNodeService {
      *
      * @param informationNodeDto the DTO containing the information node data.
      * @return the URI of the newly created information node.
+     * @throws MilvusException if the operation fails, encapsulating error details and status.
      */
     public URI createInformationNode(final InformationNodeDto informationNodeDto) {
         var user = userDetailsService.getAuthorizedUser();
@@ -66,6 +70,7 @@ public class InformationNodeService {
      *
      * @param informationNodeId  the ID of the information node to update.
      * @param informationNodeDto the DTO containing updated data for the information node.
+     * @throws MilvusException if the operation fails, encapsulating error details and status.
      */
     public void updateInformationNode(final Long informationNodeId, final InformationNodeDto informationNodeDto) {
         var informationNode = informationNodeDao.getInformationNodeById(informationNodeId);
@@ -77,6 +82,7 @@ public class InformationNodeService {
      * Deletes an information node identified by its ID.
      *
      * @param informationNodeId the ID of the information node to delete.
+     * @throws MilvusException if the operation fails, encapsulating error details and status.
      */
     public void deleteInformationNode(final Long informationNodeId) {
         informationNodeDao.deleteInformationNode(informationNodeDao.getInformationNodeById(informationNodeId));
