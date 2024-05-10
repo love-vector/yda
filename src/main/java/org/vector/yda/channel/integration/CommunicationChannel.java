@@ -1,8 +1,7 @@
-package org.vector.assistant.channel.integration;
+package org.vector.yda.channel.integration;
 
-import org.springframework.http.ResponseEntity;
-import org.vector.assistant.model.request.CommunicationRequest;
-import org.vector.assistant.model.response.CommunicationResponse;
+import org.vector.yda.model.request.CommunicationRequest;
+import org.vector.yda.model.response.CommunicationResponse;
 
 /**
  * The {@code CommunicationChannel} interface provides an abstraction for a communication

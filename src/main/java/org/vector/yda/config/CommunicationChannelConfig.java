@@ -1,4 +1,4 @@
-package org.vector.assistant.config;
+package org.vector.yda.config;
 
 import org.springframework.context.annotation.Configuration;
 
