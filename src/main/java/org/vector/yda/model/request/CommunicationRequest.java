@@ -1,4 +1,4 @@
-package org.vector.assistant.model.request;
+package org.vector.yda.model.request;
 
 import jakarta.validation.constraints.NotBlank;
 
