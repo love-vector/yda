@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - changeSet:
+      id: "YDA-31"
+      created: "22.05.2024"
+      author: "N.Litvinov"
+      changes:
+        - sqlFile:
+            encoding: "utf8"
+            path: "db/changelog/changes/YDA-31/YDA-31-changes.sql"
+      rollback:
+        - sqlFile:
+            encoding: "utf8"
+            path: "db/changelog/changes/YDA-31/YDA-31-rollback.sql"
