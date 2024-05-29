@@ -28,19 +28,19 @@ public class AssistantController {
     }
 
     @GetMapping("/{assistantId}")
-    public ResponseEntity<AssistantDto> getAssistant(@PathVariable final Long assistantId) {
+    public ResponseEntity<AssistantDto> getAssistant(@PathVariable final String assistantId) {
         return ResponseEntity.ok(assistantService.getAssistant(assistantId));
     }
 
     @PutMapping("/{assistantId}")
     public ResponseEntity<Void> updateAssistant(
-            @PathVariable final Long assistantId, @RequestBody @Validated final AssistantDto assistantDto) {
+            @PathVariable final String assistantId, @RequestBody @Validated final AssistantDto assistantDto) {
         assistantService.updateAssistant(assistantId, assistantDto);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{assistantId}")
-    public ResponseEntity<Void> deleteAssistant(@PathVariable final Long assistantId) {
+    public ResponseEntity<Void> deleteAssistant(@PathVariable final String assistantId) {
         assistantService.deleteAssistant(assistantId);
         return ResponseEntity.noContent().build();
     }

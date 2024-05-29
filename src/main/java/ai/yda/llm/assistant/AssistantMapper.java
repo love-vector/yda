@@ -1,31 +1,37 @@
 package ai.yda.llm.assistant;
 
+import java.time.Instant;
+import java.time.ZoneOffset;
+
+import com.theokanning.openai.assistants.Assistant;
+import com.theokanning.openai.assistants.AssistantRequest;
 import com.theokanning.openai.assistants.ModifyAssistantRequest;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+@Mapper(
+        componentModel = MappingConstants.ComponentModel.SPRING,
+        imports = {Instant.class, ZoneOffset.class})
 public interface AssistantMapper {
 
-    AssistantDto toDto(final AssistantEntity assistant);
+    @Mapping(
+            target = "createdAt",
+            expression =
+                    "java(OffsetDateTime.ofInstant(Instant.ofEpochSecond(assistant.getCreatedAt()), ZoneOffset.UTC))")
+    AssistantDto toDto(final Assistant assistant);
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "assistantId", source = "openAiAssistantId")
-    AssistantEntity createEntity(final AssistantDto assistantDto, final String openAiAssistantId);
-
-    default AssistantEntity updateEntity(final AssistantEntity assistant, final AssistantDto assistantDto) {
-        return assistant.toBuilder()
-                .name(assistantDto.name())
-                .instructions(assistantDto.instructions())
-                .build();
-    }
+    @Mapping(target = "model", constant = "gpt-4-1106-preview")
+    @Mapping(target = "description", ignore = true)
+    @Mapping(target = "tools", ignore = true)
+    @Mapping(target = "fileIds", ignore = true)
+    @Mapping(target = "metadata", ignore = true)
+    AssistantRequest toCreateRequest(final AssistantDto assistantDto);
 
     @Mapping(target = "model", ignore = true)
     @Mapping(target = "description", ignore = true)
     @Mapping(target = "tools", ignore = true)
     @Mapping(target = "fileIds", ignore = true)
     @Mapping(target = "metadata", ignore = true)
-    ModifyAssistantRequest toModifyAssistantRequest(final AssistantEntity assistant);
+    ModifyAssistantRequest toModifyRequest(final AssistantDto assistantDto);
 }
