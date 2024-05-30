@@ -1,0 +1,90 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.2.5'
+    id 'io.spring.dependency-management' version '1.1.4'
+    id 'com.diffplug.spotless' version '6.25.0'
+}
+
+group = 'org.vector'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+}
+
+jar {
+    enabled = false
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven { url 'https://repo.spring.io/milestone' }
+    maven { url 'https://repo.spring.io/snapshot' }
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.modulith:spring-modulith-bom:1.1.4"
+    }
+}
+
+dependencies {
+    // Spring Boot
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-docker-compose'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+    // Spring AI
+    implementation platform("org.springframework.ai:spring-ai-bom:0.8.1")
+    implementation 'org.springframework.ai:spring-ai-milvus-store-spring-boot-starter'
+    implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter'
+
+    // Spring Modulith
+    implementation 'org.springframework.modulith:spring-modulith-starter-insight'
+    implementation 'org.springframework.modulith:spring-modulith-starter-test'
+
+    // DB
+    runtimeOnly 'org.postgresql:postgresql'
+
+    // Liquibase (Migrations Tool)
+    implementation 'org.liquibase:liquibase-core:4.25.0'
+
+    // OpenAI Assistant API
+    implementation 'com.theokanning.openai-gpt3-java:api:0.18.2'
+    implementation 'com.theokanning.openai-gpt3-java:client:0.18.2'
+    implementation 'com.theokanning.openai-gpt3-java:service:0.18.2'
+
+    // Open API (SpringDoc)
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
+
+    // Lombok
+    compileOnly 'org.projectlombok:lombok:1.18.30'
+    annotationProcessor 'org.projectlombok:lombok:1.18.30'
+
+    // MapStruct
+    implementation 'org.mapstruct:mapstruct:1.5.5.Final'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+spotless {
+    java {
+        palantirJavaFormat()
+        removeUnusedImports()
+        importOrder('java', 'javax|jakarta', '', 'org.springframework', 'ai.yda', '\\#')
+    }
+}
+
+compileJava.dependsOn 'spotlessApply'
