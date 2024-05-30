@@ -1,6 +1,5 @@
 package ai.yda.framework.llm.chat;
 
-import ai.yda.framework.llm.thread.ThreadService;
 import com.theokanning.openai.OpenAiHttpException;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
@@ -9,7 +8,7 @@ import retrofit2.HttpException;
 
 import org.springframework.stereotype.Component;
 
-import ai.yda.framework.llm.openai.OpenAiService;
+import ai.yda.framework.llm.thread.ThreadService;
 
 @Component
 @RequiredArgsConstructor

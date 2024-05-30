@@ -1,5 +1,7 @@
 package ai.yda.framework.llm.assistant;
 
+import java.util.List;
+
 import com.theokanning.openai.OpenAiHttpException;
 import com.theokanning.openai.assistants.Assistant;
 import com.theokanning.openai.assistants.AssistantRequest;
@@ -8,11 +10,10 @@ import com.theokanning.openai.messages.Message;
 import com.theokanning.openai.messages.MessageRequest;
 import com.theokanning.openai.threads.Thread;
 import com.theokanning.openai.threads.ThreadRequest;
-import org.springframework.ai.openai.api.common.OpenAiApiException;
 import reactor.core.publisher.Flux;
 import retrofit2.HttpException;
 
-import java.util.List;
+import org.springframework.ai.openai.api.common.OpenAiApiException;
 
 public interface LlmProviderService {
 
