@@ -1,11 +1,18 @@
 package ai.yda.framework.intent;
 
-import java.util.UUID;
-
 /**
  * Data structure that contains an identifier, name, definition, description, and vector ID.
+ *
+ * @param <ID> the type of the unique identifier
  */
-public interface Intent {
+public interface Intent<ID> {
+
+    /**
+     * Retrieves the unique identifier of the intent.
+     *
+     * @return the unique identifier of the intent
+     */
+    ID getId();
 
     /**
      * Retrieves the name of the intent.
@@ -33,10 +40,12 @@ public interface Intent {
      *
      * @return the UUID of the vector associated with the intent
      */
-    UUID getVectorId();
+    String getVectorId();
 
     /**
      * Sets the UUID of the vector associated with the intent.
+     *
+     * @param vectorId the UUID of the vector to be associated with the intent
      */
-    void setVectorId(UUID vectorId);
+    void setVectorId(String vectorId);
 }

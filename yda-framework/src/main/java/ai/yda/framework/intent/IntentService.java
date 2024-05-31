@@ -2,36 +2,38 @@ package ai.yda.framework.intent;
 
 import java.util.*;
 
+import ai.yda.framework.shared.store.vector.Document;
 import lombok.RequiredArgsConstructor;
 
+import ai.yda.framework.shared.store.relational.RelationalStore;
+import ai.yda.framework.shared.store.vector.VectorStore;
+
 @RequiredArgsConstructor
-public class IntentService {
+public class IntentService<ID> {
 
-    private final IntentRelationalStorage intentRelationalStorage;
-    private final IntentVectorStorage intentVectorStorage;
+    private final RelationalStore<Intent<ID>, ID> intentRelationalStore;
+    private final VectorStore<Intent<ID>> intentVectorStore;
 
-    public Set<Intent> getIntents() {
-        return intentRelationalStorage.getIntents();
+    public Intent<ID> getIntentById(ID intentId) {
+        return intentRelationalStore.getById(intentId);
     }
 
-    public Intent craeteIntent(final Intent intent) {
-        var document = intentVectorStorage.createIntent(intent);
-        intent.setVectorId(UUID.fromString(document.getId()));
-        return intentRelationalStorage.createIntent(intent);
+    public Set<Intent<ID>> getIntents() {
+        return intentRelationalStore.getAll();
     }
 
-    public void deleteIntent(final Intent intent) {
-        intentRelationalStorage.deleteIntent(intent);
-        intentVectorStorage.deleteIntent(intent);
+    public Intent<ID> craeteIntent(final Intent<ID> intent) {
+        var document = intentVectorStore.createIntent(intent);
+        intent.setVectorId(document.getId());
+        return intentRelationalStore.save(intent);
     }
 
-    public List<IntentApproximation> similaritySearch(final String message) {
-        return intentVectorStorage.search(message).stream()
-                .map(document -> {
-                    var intent = intentRelationalStorage.getIntentByVectorId(UUID.fromString(document.getId()));
-                    var distance = (Float) document.getMetadata().get("distance");
-                    return IntentMapper.INSTANCE.toApproximation(intent, distance);
-                })
-                .toList();
+    public void deleteIntent(final Intent<ID> intent) {
+        intentRelationalStore.delete(intent);
+        intentVectorStore.deleteIntent(intent);
+    }
+
+    public List<Document> search(final String message) {
+        return intentVectorStore.search(message);
     }
 }

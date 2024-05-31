@@ -22,16 +22,6 @@ repositories {
 }
 
 dependencies {
-    // Spring AI
-    implementation platform("org.springframework.ai:spring-ai-bom:1.0.0-SNAPSHOT")
-    implementation 'org.springframework.ai:spring-ai-milvus-store'
-    implementation 'org.springframework.ai:spring-ai-openai'
-
-    // OpenAI Assistant API
-    implementation 'com.theokanning.openai-gpt3-java:api:0.18.2'
-    implementation 'com.theokanning.openai-gpt3-java:client:0.18.2'
-    implementation 'com.theokanning.openai-gpt3-java:service:0.18.2'
-
     // Lombok
     compileOnly 'org.projectlombok:lombok:1.18.30'
     annotationProcessor 'org.projectlombok:lombok:1.18.30'
@@ -39,6 +29,10 @@ dependencies {
     // MapStruct
     implementation 'org.mapstruct:mapstruct:1.5.5.Final'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
+
+    implementation 'org.apache.commons:commons-lang3:3.14.0'
+
+    implementation 'org.reactivestreams:reactive-streams:1.0.4'
 }
 
 spotless {
