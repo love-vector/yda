@@ -2,10 +2,10 @@ package ai.yda.framework.intent;
 
 import java.util.*;
 
-import ai.yda.framework.shared.store.vector.Document;
 import lombok.RequiredArgsConstructor;
 
 import ai.yda.framework.shared.store.relational.RelationalStore;
+import ai.yda.framework.shared.store.vector.Document;
 import ai.yda.framework.shared.store.vector.VectorStore;
 
 @RequiredArgsConstructor

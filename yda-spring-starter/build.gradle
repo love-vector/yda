@@ -1,14 +1,6 @@
 plugins {
-    id 'java'
     id 'org.springframework.boot' version '3.2.5'
     id 'io.spring.dependency-management' version '1.1.4'
-    id 'com.diffplug.spotless' version '6.25.0'
-}
-
-group = 'org.vector'
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_21
 }
 
 jar {
@@ -22,7 +14,6 @@ configurations {
 }
 
 repositories {
-    mavenCentral()
     maven { url 'https://repo.spring.io/milestone' }
     maven { url 'https://repo.spring.io/snapshot' }
 }
@@ -78,13 +69,3 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
-
-spotless {
-    java {
-        palantirJavaFormat()
-        removeUnusedImports()
-        importOrder('java', 'javax|jakarta', '', 'org.springframework', 'ai.yda', '\\#')
-    }
-}
-
-compileJava.dependsOn 'spotlessApply'

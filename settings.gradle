@@ -2,3 +2,5 @@ rootProject.name = 'yda'
 
 include 'yda-framework'
 include 'yda-spring-starter'
+
+include 'yda-azure-provider'

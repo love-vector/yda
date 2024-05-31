@@ -1,10 +1,11 @@
 package ai.yda.framework.knowledge;
 
-import ai.yda.framework.shared.store.relational.RelationalStore;
-import ai.yda.framework.shared.store.vector.VectorStore;
+import java.util.Set;
+
 import lombok.RequiredArgsConstructor;
 
-import java.util.Set;
+import ai.yda.framework.shared.store.relational.RelationalStore;
+import ai.yda.framework.shared.store.vector.VectorStore;
 
 @RequiredArgsConstructor
 public class KnowledgeService<ID> {
