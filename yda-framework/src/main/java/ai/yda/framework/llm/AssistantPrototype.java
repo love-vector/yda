@@ -2,7 +2,7 @@ package ai.yda.framework.llm;
 
 import java.time.OffsetDateTime;
 
-public interface Assistant {
+public interface AssistantPrototype {
 
     String getId();
 

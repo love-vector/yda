@@ -4,21 +4,15 @@ configurations {
     }
 }
 
-repositories {
-    maven { url 'https://repo.spring.io/milestone' }
-    maven { url 'https://repo.spring.io/snapshot' }
-}
-
 dependencies {
+    implementation project(":yda-framework")
+
+    implementation 'com.azure:azure-ai-openai-assistants:1.0.0-beta.2'
+
+    // Gson
+    implementation 'com.google.code.gson:gson:2.11.0'
+
     // Lombok
     compileOnly 'org.projectlombok:lombok:1.18.30'
     annotationProcessor 'org.projectlombok:lombok:1.18.30'
-
-    // MapStruct
-    implementation 'org.mapstruct:mapstruct:1.5.5.Final'
-    annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
-
-    implementation 'org.apache.commons:commons-lang3:3.14.0'
-
-    implementation 'org.reactivestreams:reactive-streams:1.0.4'
 }

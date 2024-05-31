@@ -4,3 +4,4 @@ include 'yda-framework'
 include 'yda-spring-starter'
 
 include 'yda-azure-provider'
+project(':yda-azure-provider').projectDir = file('llm-providers/yda-azure-provider')
