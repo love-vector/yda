@@ -5,7 +5,7 @@ plugins {
 dependencies {
     api project(":yda-framework")
 
-    api 'com.azure:azure-ai-openai-assistants:1.0.0-beta.2'
+    api 'com.theokanning.openai-gpt3-java:service:0.18.2'
 
     // Gson
     implementation 'com.google.code.gson:gson:2.11.0'

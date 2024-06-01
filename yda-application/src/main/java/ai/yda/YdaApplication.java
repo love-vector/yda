@@ -12,8 +12,6 @@ import ai.yda.framework.llm.LlmProvider;
 @RequiredArgsConstructor
 public class YdaApplication {
 
-    private final ApplicationContext applicationContext;
-
     public static void main(String[] args) {
         ApplicationContext context = SpringApplication.run(YdaApplication.class, args);
         LlmProvider llmProvider = context.getBean(LlmProvider.class);

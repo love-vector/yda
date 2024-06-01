@@ -8,12 +8,13 @@ import java.util.List;
 import java.util.concurrent.Flow;
 import java.util.concurrent.SubmissionPublisher;
 
-import com.azure.ai.openai.assistants.AssistantsClient;
-import com.azure.ai.openai.assistants.models.AssistantCreationOptions;
-import com.azure.ai.openai.assistants.models.AssistantThreadCreationOptions;
-import com.azure.ai.openai.assistants.models.MessageRole;
-import com.azure.ai.openai.assistants.models.UpdateAssistantOptions;
 import com.google.gson.Gson;
+import com.theokanning.openai.ListSearchParameters;
+import com.theokanning.openai.assistants.AssistantRequest;
+import com.theokanning.openai.assistants.ModifyAssistantRequest;
+import com.theokanning.openai.messages.MessageRequest;
+import com.theokanning.openai.service.OpenAiService;
+import com.theokanning.openai.threads.ThreadRequest;
 import lombok.RequiredArgsConstructor;
 
 import ai.yda.framework.llm.Assistant;
@@ -21,58 +22,62 @@ import ai.yda.framework.llm.LlmProvider;
 import ai.yda.framework.llm.Message;
 import ai.yda.framework.llm.Thread;
 
-/**/
-
 @RequiredArgsConstructor
-public class AzureProvider implements LlmProvider {
+public class TheokanningProvider implements LlmProvider {
 
     private final String model;
 
-    private final AssistantsClient assistantsClient;
+    private final OpenAiService openAiService;
 
     private final HttpClient httpClient = HttpClient.newHttpClient();
 
     @Override
     public Assistant getAssistant(final String assistantId) {
-        return AzureMapper.INSTANCE.toAssistant(assistantsClient.getAssistant(assistantId));
+        return TheokanningMapper.INSTANCE.toAssistant(openAiService.retrieveAssistant(assistantId));
     }
 
     @Override
     public List<Assistant> getAssistants() {
-        return assistantsClient.listAssistants().getData().stream()
-                .map(AzureMapper.INSTANCE::toAssistant)
+        return openAiService.listAssistants(ListSearchParameters.builder().build()).getData().stream()
+                .map(TheokanningMapper.INSTANCE::toAssistant)
                 .toList();
     }
 
     @Override
     public Assistant createAssistant(final Assistant assistant) {
-        return AzureMapper.INSTANCE.toAssistant(assistantsClient.createAssistant(new AssistantCreationOptions(model)
-                .setName(assistant.getName())
-                .setInstructions(assistant.getInstructions())));
+        return TheokanningMapper.INSTANCE.toAssistant(openAiService.createAssistant(AssistantRequest.builder()
+                .model(model)
+                .name(assistant.getName())
+                .instructions(assistant.getInstructions())
+                .build()));
     }
 
     @Override
     public void updateAssistant(final String assistantId, final Assistant assistant) {
-        assistantsClient.updateAssistant(
+        openAiService.modifyAssistant(
                 assistantId,
-                new UpdateAssistantOptions()
-                        .setName(assistant.getName())
-                        .setInstructions(assistant.getInstructions()));
+                ModifyAssistantRequest.builder()
+                        .model(model)
+                        .name(assistant.getName())
+                        .instructions(assistant.getInstructions())
+                        .build());
     }
 
     @Override
     public void deleteAssistant(final String assistantId) {
-        assistantsClient.deleteAssistant(assistantId);
+        openAiService.deleteAssistant(assistantId);
     }
 
     @Override
     public Thread createThread(final Thread thread) {
-        return AzureMapper.INSTANCE.toThread(assistantsClient.createThread(new AssistantThreadCreationOptions()));
+        return TheokanningMapper.INSTANCE.toThread(
+                openAiService.createThread(ThreadRequest.builder().build()));
     }
 
     @Override
     public Message createMessage(final String threadId, final Message message) {
-        return AzureMapper.INSTANCE.toMessage(assistantsClient.createMessage(threadId, MessageRole.USER, message.getContent()));
+        return TheokanningMapper.INSTANCE.toMessage(openAiService.createMessage(
+                threadId, MessageRequest.builder().content(message.getContent()).build()));
     }
 
     @Override

@@ -5,19 +5,19 @@ import java.util.concurrent.Flow;
 
 public interface LlmProvider {
 
-    AssistantPrototype getAssistant(final String assistantId);
+    Assistant getAssistant(final String assistantId);
 
-    List<AssistantPrototype> getAssistants();
+    List<Assistant> getAssistants();
 
-    AssistantPrototype createAssistant(final AssistantPrototype assistantPrototype);
+    Assistant createAssistant(final Assistant assistant);
 
-    void updateAssistant(final String assistantId, final AssistantPrototype assistantPrototype);
+    void updateAssistant(final String assistantId, final Assistant assistant);
 
     void deleteAssistant(final String assistantId);
 
-    ThreadPrototype createThread(final ThreadPrototype threadPrototype);
+    Thread createThread(final Thread thread);
 
-    MessagePrototype createMessage(final String threadId, final MessagePrototype messagePrototype);
+    Message createMessage(final String threadId, final Message message);
 
     Flow.Publisher<String> streamRun(final String assistantId, final String threadId);
 }
