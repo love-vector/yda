@@ -14,12 +14,12 @@ import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 
 import ai.yda.framework.llm.AssistantPrototype;
-import ai.yda.framework.llm.LlmProviderService;
+import ai.yda.framework.llm.LlmProvider;
 import ai.yda.framework.llm.MessagePrototype;
 import ai.yda.framework.llm.ThreadPrototype;
 
 @RequiredArgsConstructor
-public class AzureProviderService implements LlmProviderService {
+public class AzureProvider implements LlmProvider {
 
     private final String model;
 

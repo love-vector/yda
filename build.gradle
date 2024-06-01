@@ -18,6 +18,18 @@ subprojects {
         sourceCompatibility = JavaVersion.VERSION_21
     }
 
+    configurations {
+        compileOnly {
+            extendsFrom annotationProcessor
+        }
+    }
+
+    dependencies {
+        // Lombok
+        compileOnly 'org.projectlombok:lombok:1.18.30'
+        annotationProcessor 'org.projectlombok:lombok:1.18.30'
+    }
+
     spotless {
         java {
             palantirJavaFormat()

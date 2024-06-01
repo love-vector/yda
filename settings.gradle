@@ -1,7 +1,10 @@
 rootProject.name = 'yda'
 
 include 'yda-framework'
-include 'yda-spring-starter'
+include 'yda-application'
 
 include 'yda-azure-provider'
 project(':yda-azure-provider').projectDir = file('llm-providers/yda-azure-provider')
+
+include 'yda-azure-provider-autoconfigure'
+project(':yda-azure-provider-autoconfigure').projectDir = file('spring-boot-autoconfigure/yda-azure-provider-autoconfigure')

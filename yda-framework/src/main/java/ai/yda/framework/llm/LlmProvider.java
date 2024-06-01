@@ -3,7 +3,7 @@ package ai.yda.framework.llm;
 import java.util.List;
 import java.util.concurrent.Flow;
 
-public interface LlmProviderService {
+public interface LlmProvider {
 
     AssistantPrototype getAssistant(final String assistantId);
 
