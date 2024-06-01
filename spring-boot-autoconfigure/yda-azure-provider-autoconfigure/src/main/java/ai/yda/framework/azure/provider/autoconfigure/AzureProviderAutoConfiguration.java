@@ -15,26 +15,28 @@
  */
 package ai.yda.framework.azure.provider.autoconfigure;
 
-import ai.yda.framework.azure.provider.AzureProvider;
 import com.azure.ai.openai.assistants.AssistantsClientBuilder;
 import com.azure.core.credential.KeyCredential;
+
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
+import ai.yda.framework.azure.provider.AzureProvider;
+
 @AutoConfiguration
 @ConditionalOnClass({AzureProvider.class})
-@EnableConfigurationProperties({ AzureProviderProperties.class })
+@EnableConfigurationProperties({AzureProviderProperties.class})
 public class AzureProviderAutoConfiguration {
 
-	@Bean
-	@ConditionalOnMissingBean
-	public AzureProvider azureProvider(AzureProviderProperties properties) {
-		var assistantClient = new AssistantsClientBuilder()
-				.credential(new KeyCredential(properties.getApiKey()))
-				.buildClient();
-		return new AzureProvider(properties.getModel(), assistantClient);
-	}
+    @Bean
+    @ConditionalOnMissingBean
+    public AzureProvider azureProvider(AzureProviderProperties properties) {
+        var assistantClient = new AssistantsClientBuilder()
+                .credential(new KeyCredential(properties.getApiKey()))
+                .buildClient();
+        return new AzureProvider(properties.getModel(), assistantClient);
+    }
 }

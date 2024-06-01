@@ -1,8 +1,5 @@
 dependencies {
-    // Apache
-    implementation 'org.apache.commons:commons-lang3:3.14.0'
+    implementation project(":yda-azure-provider-autoconfigure")
 
-    // Lombok
-    compileOnly 'org.projectlombok:lombok:1.18.30'
-    annotationProcessor 'org.projectlombok:lombok:1.18.30'
+    implementation 'org.springframework.boot:spring-boot-starter:3.3.0'
 }
