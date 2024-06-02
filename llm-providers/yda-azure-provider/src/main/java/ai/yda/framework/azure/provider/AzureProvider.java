@@ -55,9 +55,7 @@ public class AzureProvider implements LlmProvider {
     public void updateAssistant(final String assistantId, final Assistant assistant) {
         assistantsClient.updateAssistant(
                 assistantId,
-                new UpdateAssistantOptions()
-                        .setName(assistant.getName())
-                        .setInstructions(assistant.getInstructions()));
+                new UpdateAssistantOptions().setName(assistant.getName()).setInstructions(assistant.getInstructions()));
     }
 
     @Override
@@ -72,7 +70,8 @@ public class AzureProvider implements LlmProvider {
 
     @Override
     public Message createMessage(final String threadId, final Message message) {
-        return AzureMapper.INSTANCE.toMessage(assistantsClient.createMessage(threadId, MessageRole.USER, message.getContent()));
+        return AzureMapper.INSTANCE.toMessage(
+                assistantsClient.createMessage(threadId, MessageRole.USER, message.getContent()));
     }
 
     @Override

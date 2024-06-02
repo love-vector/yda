@@ -15,24 +15,20 @@
  */
 package ai.yda.framework.azure.provider.autoconfigure;
 
-import com.azure.ai.openai.assistants.AssistantsClientBuilder;
-import com.azure.core.credential.KeyCredential;
+import com.theokanning.openai.service.OpenAiService;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
-import ai.yda.framework.azure.provider.AzureProvider;
+import ai.yda.framework.azure.provider.TheokanningProvider;
 
 @AutoConfiguration
-@EnableConfigurationProperties({AzureProviderProperties.class})
-public class AzureProviderAutoConfiguration {
+@EnableConfigurationProperties({TheokanningProviderProperties.class})
+public class TheokanningProviderAutoConfiguration {
 
     @Bean
-    public AzureProvider azureProvider(AzureProviderProperties properties) {
-        var assistantClient = new AssistantsClientBuilder()
-                .credential(new KeyCredential(properties.getApiKey()))
-                .buildClient();
-        return new AzureProvider(properties.getModel(), assistantClient);
+    public TheokanningProvider azureProvider(TheokanningProviderProperties properties) {
+        return new TheokanningProvider(properties.getModel(), new OpenAiService(properties.getApiKey()));
     }
 }

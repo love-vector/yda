@@ -4,9 +4,11 @@ include 'yda-framework'
 include 'yda-application'
 
 include 'yda-azure-provider'
-project(':yda-azure-provider').projectDir = file('llm-providers/yda-azure-provider')
 include 'yda-theokanning-provider'
+project(':yda-azure-provider').projectDir = file('llm-providers/yda-azure-provider')
 project(':yda-theokanning-provider').projectDir = file('llm-providers/yda-theokanning-provider')
 
 include 'yda-azure-provider-autoconfigure'
+include 'yda-theokanning-provider-autoconfigure'
 project(':yda-azure-provider-autoconfigure').projectDir = file('spring-boot-autoconfigure/yda-azure-provider-autoconfigure')
+project(':yda-theokanning-provider-autoconfigure').projectDir = file('spring-boot-autoconfigure/yda-theokanning-provider-autoconfigure')
