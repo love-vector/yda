@@ -10,24 +10,24 @@ import ai.yda.framework.shared.store.vector.VectorStore;
 @RequiredArgsConstructor
 public class KnowledgeService<ID> {
 
-    private final RelationalStore<Knowledge<ID>, ID> knowledgeRelationalStore;
-    private final VectorStore<Knowledge<ID>> knowledgeVectorStore;
+    private final RelationalStore<Knowledge<ID>, ID> relationalStore;
+    private final VectorStore vectorStore;
 
     public Knowledge<ID> getKnowledgeById(final ID knowledgeId) {
-        return knowledgeRelationalStore.getById(knowledgeId);
+        return relationalStore.getById(knowledgeId);
     }
 
     public Set<Knowledge<ID>> getKnowledge() {
-        return knowledgeRelationalStore.getAll();
+        return relationalStore.getAll();
     }
 
     public Knowledge<ID> createKnowledge(final Knowledge<ID> knowledge) {
-        knowledgeVectorStore.createCollection(knowledge.getName());
-        return knowledgeRelationalStore.save(knowledge);
+        vectorStore.createCollection(knowledge.getName());
+        return relationalStore.save(knowledge);
     }
 
     public void deleteKnowledge(final Knowledge<ID> knowledge) {
-        knowledgeVectorStore.deleteCollection(knowledge.getName());
-        knowledgeRelationalStore.delete(knowledge);
+        vectorStore.deleteCollection(knowledge.getName());
+        relationalStore.delete(knowledge);
     }
 }

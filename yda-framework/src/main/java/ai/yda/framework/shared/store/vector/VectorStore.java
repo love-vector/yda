@@ -1,16 +1,8 @@
 package ai.yda.framework.shared.store.vector;
 
-import java.util.List;
+public interface VectorStore extends org.springframework.ai.vectorstore.VectorStore {
 
-public interface VectorStore<T> {
+    void createCollection(String collectionName) throws CollectionDoesNotExistException;
 
-    Document createIntent(T intent);
-
-    void deleteIntent(T intent);
-
-    List<Document> search(String message);
-
-    void createCollection(String name) throws CollectionDoesNotExistException;
-
-    void deleteCollection(String name) throws CollectionDoesNotExistException;
+    void deleteCollection(String collectionName) throws CollectionDoesNotExistException;
 }
