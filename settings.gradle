@@ -3,15 +3,20 @@ rootProject.name = 'yda'
 include 'yda-framework'
 include 'yda-application'
 
-include 'yda-azure-provider'
 include 'yda-theokanning-provider'
-project(':yda-azure-provider').projectDir = file('llm-providers/yda-azure-provider')
 project(':yda-theokanning-provider').projectDir = file('llm-providers/yda-theokanning-provider')
 
 include 'yda-azure-provider-autoconfigure'
-include 'yda-theokanning-provider-autoconfigure'
 project(':yda-azure-provider-autoconfigure').projectDir = file('spring-boot-autoconfigure/yda-azure-provider-autoconfigure')
+
+include 'yda-azure-provider'
+project(':yda-azure-provider').projectDir = file('llm-providers/yda-azure-provider')
+
+include 'yda-theokanning-provider-autoconfigure'
 project(':yda-theokanning-provider-autoconfigure').projectDir = file('spring-boot-autoconfigure/yda-theokanning-provider-autoconfigure')
+
+include 'yda-retriever-intent-based'
+project(':yda-retriever-intent-based').projectDir = file('retrievers/yda-retriever-intent-based')
 
 include 'yda-vector-store-milvus'
 project(':yda-vector-store-milvus').projectDir = file('stores/vector-stores/yda-vector-store-milvus')

@@ -1,4 +1,4 @@
-package ai.yda.framework.knowledge;
+package ai.yda.framework.retriever.knowledge;
 
 /**
  * Data structure that contains a name and a description.

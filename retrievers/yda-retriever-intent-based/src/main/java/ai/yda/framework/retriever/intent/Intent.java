@@ -1,4 +1,4 @@
-package ai.yda.framework.intent;
+package ai.yda.framework.retriever.intent;
 
 /**
  * Data structure that contains an identifier, name, definition, description, and vector ID.
