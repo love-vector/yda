@@ -1,5 +1,8 @@
 package ai.yda.framework.channels;
 
+import ai.yda.framework.shared.model.CommunicationRequest;
+import ai.yda.framework.shared.model.CommunicationResponse;
+
 /**
  * <p> The {@code CommunicationChannel} interface provides an abstraction for a communication
  * channel that accepts requests from various external sources. </p>

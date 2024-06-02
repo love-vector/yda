@@ -1,7 +1,8 @@
-package ai.yda.framework.intent;
+package ai.yda.framework.retriever.intent;
 
 import java.util.*;
 
+import ai.yda.framework.retriever.intent.Intent;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.ai.document.Document;

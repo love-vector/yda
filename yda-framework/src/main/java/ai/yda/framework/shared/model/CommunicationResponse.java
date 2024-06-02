@@ -1,4 +1,4 @@
-package ai.yda.framework.channels;
+package ai.yda.framework.shared.model;
 
 import lombok.NonNull;
 

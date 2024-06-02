@@ -1,4 +1,4 @@
-package ai.yda.framework.knowledge;
+package ai.yda.framework.retriever.knowledge;
 
 import java.util.Set;
 
