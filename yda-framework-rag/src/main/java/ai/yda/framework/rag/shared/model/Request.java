@@ -2,4 +2,4 @@ package ai.yda.framework.rag.shared.model;
 
 import lombok.NonNull;
 
-public record CommunicationRequest(@NonNull String message) {}
+public record Request(@NonNull String message) {}

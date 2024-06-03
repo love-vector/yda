@@ -1,6 +1,5 @@
 package ai.yda.framework.rag.retriever;
 
-public interface Retriever<T, M> {
-    T retrieve(M request);
-
+public interface Retriever<REQUEST, RAW_CONTEXT> {
+    RAW_CONTEXT retrieve(REQUEST request);
 }

@@ -1,18 +1,18 @@
 package ai.yda.framework.rag.channels;
 
-import ai.yda.framework.rag.shared.model.CommunicationRequest;
-import ai.yda.framework.rag.shared.model.CommunicationResponse;
+import ai.yda.framework.rag.shared.model.Request;
+import ai.yda.framework.rag.shared.model.Response;
 import lombok.RequiredArgsConstructor;
 
-import ai.yda.framework.rag.core.CoreService;
+import ai.yda.framework.rag.core.RagApplication;
 
 @RequiredArgsConstructor
 public class DefaultCommunicationChannel implements CommunicationChannel {
 
-    private final CoreService coreService;
+    private final RagApplication coreService;
 
     @Override
-    public CommunicationResponse sendRequest(final CommunicationRequest request) {
-        return new CommunicationResponse(request.message());
+    public Response sendRequest(final Request request) {
+        return new Response(request.message());
     }
 }

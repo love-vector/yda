@@ -1,7 +1,7 @@
 package ai.yda.framework.rag.channels;
 
-import ai.yda.framework.rag.shared.model.CommunicationRequest;
-import ai.yda.framework.rag.shared.model.CommunicationResponse;
+import ai.yda.framework.rag.shared.model.Request;
+import ai.yda.framework.rag.shared.model.Response;
 
 /**
  * <p> The {@code CommunicationChannel} interface provides an abstraction for a communication
@@ -18,9 +18,9 @@ public interface CommunicationChannel {
      *
      * @param request The communication request containing the necessary information
      *                to be processed, such as message content and sender details.
-     * @return a {@link CommunicationResponse} object containing the response
+     * @return a {@link Response} object containing the response
      *         from the core processing system. The response includes the outcome of
      *         the processing.
      */
-    CommunicationResponse sendRequest(CommunicationRequest request);
+    Response sendRequest(Request request);
 }
