@@ -16,10 +16,10 @@ import com.azure.ai.openai.assistants.models.UpdateAssistantOptions;
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 
-import ai.yda.framework.rag.generator.Assistant;
-import ai.yda.framework.rag.generator.LlmProvider;
-import ai.yda.framework.rag.generator.Message;
-import ai.yda.framework.rag.generator.Thread;
+import ai.yda.framework.rag.generator.llm.Assistant;
+import ai.yda.framework.rag.generator.llm.LlmProvider;
+import ai.yda.framework.rag.generator.llm.Message;
+import ai.yda.framework.rag.generator.llm.Thread;
 
 /**/
 

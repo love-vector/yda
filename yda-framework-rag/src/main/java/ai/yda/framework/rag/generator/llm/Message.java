@@ -1,4 +1,4 @@
-package ai.yda.framework.rag.generator;
+package ai.yda.framework.rag.generator.llm;
 
 import java.time.OffsetDateTime;
 

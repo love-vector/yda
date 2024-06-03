@@ -9,9 +9,9 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
-import ai.yda.framework.rag.generator.Assistant;
-import ai.yda.framework.rag.generator.Message;
-import ai.yda.framework.rag.generator.Thread;
+import ai.yda.framework.rag.generator.llm.Assistant;
+import ai.yda.framework.rag.generator.llm.Message;
+import ai.yda.framework.rag.generator.llm.Thread;
 
 @Mapper(imports = {MessageTextContent.class, Collectors.class})
 public interface AzureMapper {
