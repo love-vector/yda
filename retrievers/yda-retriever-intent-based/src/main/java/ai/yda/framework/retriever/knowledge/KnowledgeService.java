@@ -4,8 +4,8 @@ import java.util.Set;
 
 import lombok.RequiredArgsConstructor;
 
-import ai.yda.framework.shared.store.relational.RelationalStore;
-import ai.yda.framework.shared.store.vector.VectorStore;
+import ai.yda.framework.rag.shared.store.relational.RelationalStore;
+import ai.yda.framework.rag.shared.store.vector.VectorStore;
 
 @RequiredArgsConstructor
 public class KnowledgeService<ID> {

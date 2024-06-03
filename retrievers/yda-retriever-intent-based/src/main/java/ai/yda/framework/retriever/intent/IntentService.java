@@ -2,13 +2,12 @@ package ai.yda.framework.retriever.intent;
 
 import java.util.*;
 
-import ai.yda.framework.retriever.intent.Intent;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.ai.document.Document;
 
-import ai.yda.framework.shared.store.relational.RelationalStore;
-import ai.yda.framework.shared.store.vector.VectorStore;
+import ai.yda.framework.rag.shared.store.relational.RelationalStore;
+import ai.yda.framework.rag.shared.store.vector.VectorStore;
 
 @RequiredArgsConstructor
 public class IntentService<ID> {

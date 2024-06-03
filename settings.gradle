@@ -1,6 +1,6 @@
 rootProject.name = 'yda'
 
-include 'yda-framework'
+include 'yda-framework-rag'
 include 'yda-application'
 
 include 'yda-theokanning-provider'

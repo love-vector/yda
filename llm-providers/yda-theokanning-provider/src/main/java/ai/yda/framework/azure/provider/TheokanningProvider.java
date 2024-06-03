@@ -17,10 +17,10 @@ import com.theokanning.openai.service.OpenAiService;
 import com.theokanning.openai.threads.ThreadRequest;
 import lombok.RequiredArgsConstructor;
 
-import ai.yda.framework.generator.Assistant;
-import ai.yda.framework.generator.LlmProvider;
-import ai.yda.framework.generator.Message;
-import ai.yda.framework.generator.Thread;
+import ai.yda.framework.rag.generator.Assistant;
+import ai.yda.framework.rag.generator.LlmProvider;
+import ai.yda.framework.rag.generator.Message;
+import ai.yda.framework.rag.generator.Thread;
 
 @RequiredArgsConstructor
 public class TheokanningProvider implements LlmProvider {

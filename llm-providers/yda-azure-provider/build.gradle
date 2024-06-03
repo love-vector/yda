@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    api project(":yda-framework")
+    api project(":yda-framework-rag")
 
     api 'com.azure:azure-ai-openai-assistants:1.0.0-beta.2'
 

@@ -15,8 +15,8 @@ import io.milvus.param.index.DropIndexParam;
 
 import org.springframework.ai.embedding.EmbeddingModel;
 
-import ai.yda.framework.shared.store.vector.CollectionDoesNotExistException;
-import ai.yda.framework.shared.store.vector.VectorStore;
+import ai.yda.framework.rag.shared.store.vector.CollectionDoesNotExistException;
+import ai.yda.framework.rag.shared.store.vector.VectorStore;
 
 public class MilvusVectorStore extends org.springframework.ai.vectorstore.MilvusVectorStore implements VectorStore {
 
