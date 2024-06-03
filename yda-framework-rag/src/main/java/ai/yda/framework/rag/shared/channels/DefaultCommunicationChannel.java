@@ -1,4 +1,4 @@
-package ai.yda.framework.rag.channels;
+package ai.yda.framework.rag.shared.channels;
 
 import ai.yda.framework.rag.shared.model.Request;
 import ai.yda.framework.rag.shared.model.Response;
