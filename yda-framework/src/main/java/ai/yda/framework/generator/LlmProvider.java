@@ -1,4 +1,4 @@
-package ai.yda.framework.llm;
+package ai.yda.framework.generator;
 
 import java.util.List;
 import java.util.concurrent.Flow;

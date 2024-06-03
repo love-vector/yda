@@ -1,4 +1,4 @@
-package ai.yda.framework.llm;
+package ai.yda.framework.generator;
 
 import java.time.OffsetDateTime;
 
@@ -7,7 +7,9 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class Thread {
+public class Assistant {
     private String id;
+    private String name;
+    private String instructions;
     private OffsetDateTime createdAt;
 }

@@ -10,9 +10,9 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
-import ai.yda.framework.llm.Assistant;
-import ai.yda.framework.llm.Message;
-import ai.yda.framework.llm.Thread;
+import ai.yda.framework.generator.Assistant;
+import ai.yda.framework.generator.Message;
+import ai.yda.framework.generator.Thread;
 
 @Mapper(imports = {Instant.class, ZoneOffset.class, Collectors.class, OffsetDateTime.class, MessageContent.class})
 public interface TheokanningMapper {
