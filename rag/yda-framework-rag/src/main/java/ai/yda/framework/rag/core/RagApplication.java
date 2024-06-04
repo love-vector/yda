@@ -17,6 +17,5 @@ public interface RagApplication<REQUEST, RAW_CONTEXT, CONTEXT, RESPONSE> {
         var rawContext = getRetriever().retrieve(request);
         var context = getAugmenter().augmentContext(request, rawContext);
         return getGenerator().generate(request, context);
-
     }
 }

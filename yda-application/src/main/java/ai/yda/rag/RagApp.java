@@ -5,10 +5,10 @@ import ai.yda.framework.generator.CommonGenerator;
 import ai.yda.framework.rag.augmenter.Augmenter;
 import ai.yda.framework.rag.core.BaseRagApplication;
 import ai.yda.framework.rag.dto.RagContext;
-import ai.yda.framework.rag.generator.Generator;
 import ai.yda.framework.rag.dto.RagRawContext;
 import ai.yda.framework.rag.dto.RagRequest;
 import ai.yda.framework.rag.dto.RagResponse;
+import ai.yda.framework.rag.generator.Generator;
 import ai.yda.framework.rag.retriever.Retriever;
 import ai.yda.framework.retriever.CommonRetriever;
 

@@ -1,4 +1,3 @@
 package ai.yda.framework.rag.dto;
 
-public interface RagRequest {
-}
+public interface RagRequest {}
