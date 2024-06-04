@@ -12,7 +12,7 @@ import ai.yda.framework.rag.core.retriever.Retriever;
 @RequiredArgsConstructor
 public class BaseRetriever implements Retriever<RagRequest, RagContext> {
 
-    private VectorStore vectorStore;
+    private final VectorStore vectorStore;
 
     @Override
     public RagContext retrieve(RagRequest request) {
