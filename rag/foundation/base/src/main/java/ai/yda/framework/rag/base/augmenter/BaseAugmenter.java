@@ -9,6 +9,5 @@ public class BaseAugmenter implements Augmenter<BaseRagRequest, BaseRagContext> 
     @Override
     public BaseRagContext augment(BaseRagRequest request, BaseRagContext context) {
         return context;
-
     }
 }
