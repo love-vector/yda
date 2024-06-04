@@ -6,7 +6,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 
-import ai.yda.framework.rag.dto.RagRequest;
+import ai.yda.framework.rag.model.RagRequest;
 import ai.yda.rag.RagApp;
 
 @SpringBootApplication
