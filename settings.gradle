@@ -1,28 +1,31 @@
 rootProject.name = 'yda'
 
 include 'yda-framework-rag'
+project(':yda-framework-rag').projectDir = file('rag/yda-framework-rag')
+
 include 'yda-application'
+project(':yda-application').projectDir = file('rag/yda-application')
 
 include 'yda-theokanning-provider'
-project(':yda-theokanning-provider').projectDir = file('llm-providers/yda-theokanning-provider')
+project(':yda-theokanning-provider').projectDir = file('rag/llm-providers/yda-theokanning-provider')
 
 include 'yda-azure-provider-autoconfigure'
-project(':yda-azure-provider-autoconfigure').projectDir = file('spring-boot-autoconfigure/yda-azure-provider-autoconfigure')
+project(':yda-azure-provider-autoconfigure').projectDir = file('rag/spring-boot-autoconfigure/yda-azure-provider-autoconfigure')
 
 include 'yda-azure-provider'
-project(':yda-azure-provider').projectDir = file('llm-providers/yda-azure-provider')
+project(':yda-azure-provider').projectDir = file('rag/llm-providers/yda-azure-provider')
 
 include 'yda-theokanning-provider-autoconfigure'
-project(':yda-theokanning-provider-autoconfigure').projectDir = file('spring-boot-autoconfigure/yda-theokanning-provider-autoconfigure')
+project(':yda-theokanning-provider-autoconfigure').projectDir = file('rag/spring-boot-autoconfigure/yda-theokanning-provider-autoconfigure')
 
 include 'yda-retriever-common'
-project(':yda-retriever-common').projectDir = file('retrievers/yda-retriever-common')
+project(':yda-retriever-common').projectDir = file('rag/retrievers/yda-retriever-common')
 
 include 'yda-augmenter-common'
-project(':yda-augmenter-common').projectDir = file('augmenters/yda-augmenter-common')
+project(':yda-augmenter-common').projectDir = file('rag/augmenters/yda-augmenter-common')
 
 include 'yda-generator-common'
-project(':yda-generator-common').projectDir = file('generators/yda-generator-common')
+project(':yda-generator-common').projectDir = file('rag/generators/yda-generator-common')
 
 include 'yda-vector-store-milvus'
-project(':yda-vector-store-milvus').projectDir = file('stores/vector-stores/yda-vector-store-milvus')
+project(':yda-vector-store-milvus').projectDir = file('rag/stores/vector-stores/yda-vector-store-milvus')
