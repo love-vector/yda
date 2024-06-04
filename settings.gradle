@@ -15,8 +15,14 @@ project(':yda-azure-provider').projectDir = file('llm-providers/yda-azure-provid
 include 'yda-theokanning-provider-autoconfigure'
 project(':yda-theokanning-provider-autoconfigure').projectDir = file('spring-boot-autoconfigure/yda-theokanning-provider-autoconfigure')
 
-include 'yda-retriever-intent-based'
-project(':yda-retriever-intent-based').projectDir = file('retrievers/yda-retriever-intent-based')
+include 'yda-retriever-common'
+project(':yda-retriever-common').projectDir = file('retrievers/yda-retriever-common')
+
+include 'yda-augmenter-common'
+project(':yda-augmenter-common').projectDir = file('augmenters/yda-augmenter-common')
+
+include 'yda-generator-common'
+project(':yda-generator-common').projectDir = file('generators/yda-generator-common')
 
 include 'yda-vector-store-milvus'
 project(':yda-vector-store-milvus').projectDir = file('stores/vector-stores/yda-vector-store-milvus')

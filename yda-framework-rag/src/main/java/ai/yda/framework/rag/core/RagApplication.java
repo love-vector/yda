@@ -12,7 +12,6 @@ public interface RagApplication<REQUEST, RAW_CONTEXT, CONTEXT, RESPONSE> {
 
     Generator<REQUEST, CONTEXT, RESPONSE> getGenerator();
 
-
     default RESPONSE run(REQUEST request) {
 
         var rawContext = getRetriever().retrieve(request);
