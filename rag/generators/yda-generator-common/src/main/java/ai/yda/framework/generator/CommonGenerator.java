@@ -3,9 +3,9 @@ package ai.yda.framework.generator;
 import ai.yda.framework.rag.model.RagContext;
 import ai.yda.framework.rag.model.RagRequest;
 import ai.yda.framework.rag.model.RagResponse;
-import ai.yda.framework.rag.generator.BaseGenerator;
+import ai.yda.framework.rag.generator.Generator;
 
-public class CommonGenerator extends BaseGenerator {
+public class CommonGenerator extends Generator {
 
     @Override
     public RagResponse generate(RagRequest ragRequest, RagContext ragContext) {

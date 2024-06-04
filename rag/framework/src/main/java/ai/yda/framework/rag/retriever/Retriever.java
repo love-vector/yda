@@ -1,5 +1,9 @@
 package ai.yda.framework.rag.retriever;
 
-public interface Retriever<REQUEST, RAW_CONTEXT> {
-    RAW_CONTEXT retrieve(REQUEST request);
+import ai.yda.framework.rag.model.RagContext;
+import ai.yda.framework.rag.model.RagRequest;
+
+public interface Retriever<REQUEST extends RagRequest, CONTEXT extends RagContext> {
+
+    CONTEXT retrieve(REQUEST request);
 }
