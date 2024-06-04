@@ -7,11 +7,11 @@ import ai.yda.framework.rag.generator.Generator;
 import ai.yda.framework.rag.retriever.Retriever;
 
 @RequiredArgsConstructor
-public abstract class AbstractRagApplication<REQUEST, RAW_CONTEXT, CONTEXT, RESPONSE> {
+public abstract class AbstractRagApplication<REQUEST, CONTEXT, RESPONSE> {
 
-    private final Retriever<REQUEST, RAW_CONTEXT> retriever;
+    private final Retriever<REQUEST, CONTEXT> retriever;
 
-    private final Augmenter<REQUEST, RAW_CONTEXT, CONTEXT> augmenter;
+    private final Augmenter<REQUEST, CONTEXT> augmenter;
 
     private final Generator<REQUEST, CONTEXT, RESPONSE> generator;
 
