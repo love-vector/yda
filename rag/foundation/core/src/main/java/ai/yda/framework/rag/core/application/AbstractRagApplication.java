@@ -1,9 +1,9 @@
 package ai.yda.framework.rag.core.application;
 
-import ai.yda.framework.rag.core.generator.Generator;
 import lombok.RequiredArgsConstructor;
 
 import ai.yda.framework.rag.core.augmenter.Augmenter;
+import ai.yda.framework.rag.core.generator.Generator;
 import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.model.RagResponse;

@@ -1,4 +1,3 @@
 package ai.yda.application.beans;
 
-public class HelloRagBean {
-}
+public class HelloRagBean {}

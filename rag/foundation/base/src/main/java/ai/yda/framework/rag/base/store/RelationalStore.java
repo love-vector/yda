@@ -1,4 +1,4 @@
-package ai.yda.framework.rag.base.store.rdbs;
+package ai.yda.framework.rag.base.store;
 
 import java.util.*;
 

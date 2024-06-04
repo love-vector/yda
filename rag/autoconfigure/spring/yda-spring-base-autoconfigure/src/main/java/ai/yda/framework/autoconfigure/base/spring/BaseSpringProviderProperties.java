@@ -11,5 +11,4 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class BaseSpringProviderProperties {
 
     public static final String CONFIG_PREFIX = "ai.yda.framework.base.spring.provider";
-
 }

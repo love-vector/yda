@@ -20,6 +20,4 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 
 @AutoConfiguration
 @EnableConfigurationProperties({BaseSpringProviderProperties.class})
-public class BaseSpringProviderAutoConfiguration {
-
-}
+public class BaseSpringProviderAutoConfiguration {}
