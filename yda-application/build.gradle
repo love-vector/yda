@@ -1,10 +1,3 @@
 dependencies {
-    implementation project(":yda-framework-rag")
-    implementation project(":yda-azure-provider-autoconfigure")
-
-    implementation project(":yda-augmenter-common")
-    implementation project(":yda-retriever-common")
-    implementation project(":yda-generator-common")
-
     implementation 'org.springframework.boot:spring-boot-starter:3.3.0'
 }

@@ -9,8 +9,6 @@ repositories {
 }
 
 dependencies {
-    api project(":yda-framework-rag")
-
     implementation platform("org.springframework.ai:spring-ai-bom:1.0.0-SNAPSHOT")
     implementation 'org.springframework.ai:spring-ai-milvus-store'
 }

@@ -19,8 +19,6 @@ configurations {
 }
 
 dependencies {
-    implementation project(":yda-framework-rag")
-
     implementation platform("org.springframework.ai:spring-ai-bom:0.8.1")
     implementation 'org.springframework.ai:spring-ai-milvus-store-spring-boot-starter'
 
