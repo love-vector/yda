@@ -1,10 +1,10 @@
-rootProject.name = 'yda'
+rootProject.name = 'yda-framework'
 
 include 'yda-framework-core'
-project(':yda-framework-core').projectDir = file('rag/framework/core')
+project(':yda-framework-core').projectDir = file('rag/foundation/core')
 
 include 'yda-framework-base'
-project(':yda-framework-base').projectDir = file('rag/framework/base')
+project(':yda-framework-base').projectDir = file('rag/foundation/base')
 
 include 'yda-azure-provider-autoconfigure'
 project(':yda-azure-provider-autoconfigure').projectDir = file('rag/autoconfigure/spring/yda-azure-provider-autoconfigure')
