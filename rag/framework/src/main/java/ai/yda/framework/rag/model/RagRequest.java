@@ -1,3 +1,5 @@
 package ai.yda.framework.rag.model;
 
-public interface RagRequest {}
+public interface RagRequest {
+    String getMessage();
+}
