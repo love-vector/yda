@@ -1,13 +1,13 @@
 rootProject.name = 'yda'
 
 include 'yda-framework-rag'
-project(':yda-framework-rag').projectDir = file('rag/yda-framework-rag')
+project(':yda-framework-rag').projectDir = file('rag/framework')
 
 include 'yda-azure-provider-autoconfigure'
-project(':yda-azure-provider-autoconfigure').projectDir = file('rag/framework-autoconfigure/spring/yda-azure-provider-autoconfigure')
+project(':yda-azure-provider-autoconfigure').projectDir = file('rag/autoconfigure/spring/yda-azure-provider-autoconfigure')
 
 include 'yda-theokanning-provider-autoconfigure'
-project(':yda-theokanning-provider-autoconfigure').projectDir = file('rag/framework-autoconfigure/spring/yda-theokanning-provider-autoconfigure')
+project(':yda-theokanning-provider-autoconfigure').projectDir = file('rag/autoconfigure/spring/yda-theokanning-provider-autoconfigure')
 
 include 'yda-retriever-common'
 project(':yda-retriever-common').projectDir = file('rag/retrievers/yda-retriever-common')
