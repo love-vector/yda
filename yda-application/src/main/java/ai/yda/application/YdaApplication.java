@@ -1,5 +1,6 @@
-package ai.yda;
+package ai.yda.application;
 
+import ai.yda.framework.rag.base.application.HelloRagApplication;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.boot.SpringApplication;
@@ -12,5 +13,8 @@ public class YdaApplication {
 
     public static void main(String[] args) {
         ApplicationContext context = SpringApplication.run(YdaApplication.class, args);
+
+
+        new HelloRagApplication();
     }
 }

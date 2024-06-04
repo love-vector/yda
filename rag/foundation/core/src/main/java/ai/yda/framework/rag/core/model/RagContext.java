@@ -7,5 +7,5 @@ public interface RagContext {
 
     List<String> getChunks();
 
-    Map<String, Object> metadata();
+    Map<String, Object> getMetadata();
 }
