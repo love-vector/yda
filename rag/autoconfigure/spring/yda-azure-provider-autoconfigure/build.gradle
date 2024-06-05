@@ -1,0 +1,9 @@
+plugins {
+    id 'java-library'
+}
+
+dependencies {
+    api project("::yda-azure-provider")
+
+    api 'org.springframework.boot:spring-boot-starter:3.3.0'
+}

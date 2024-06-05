@@ -1,5 +1,0 @@
-databaseChangeLog:
-  - include:
-      file: db/changelog/changes/YDA-19/YDA-19.yaml
-  - include:
-      file: db/changelog/changes/YDA-31/YDA-31.yaml

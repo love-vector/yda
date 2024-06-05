@@ -1,1 +1,38 @@
-rootProject.name = 'yda'
+rootProject.name = 'yda-framework'
+
+include 'yda-framework-core'
+project(':yda-framework-core').projectDir = file('rag/foundation/core')
+
+include 'yda-framework-base'
+project(':yda-framework-base').projectDir = file('rag/foundation/base')
+
+include 'yda-spring-base-autoconfigure'
+project(':yda-spring-base-autoconfigure').projectDir = file('rag/autoconfigure/spring/yda-spring-base-autoconfigure')
+
+//include 'yda-azure-provider-autoconfigure'
+//project(':yda-azure-provider-autoconfigure').projectDir = file('rag/autoconfigure/spring/yda-azure-provider-autoconfigure')
+//
+//include 'yda-theokanning-provider-autoconfigure'
+//project(':yda-theokanning-provider-autoconfigure').projectDir = file('rag/autoconfigure/spring/yda-theokanning-provider-autoconfigure')
+
+include 'yda-retriever-common'
+project(':yda-retriever-common').projectDir = file('rag/retrievers/yda-retriever-common')
+
+include 'yda-vector-store-milvus'
+project(':yda-vector-store-milvus').projectDir = file('rag/retrievers/stores/vector-stores/yda-vector-store-milvus')
+
+include 'yda-augmenter-common'
+project(':yda-augmenter-common').projectDir = file('rag/augmenters/yda-augmenter-common')
+
+include 'yda-azure-provider'
+project(':yda-azure-provider').projectDir = file('rag/generators/llm-providers/yda-azure-provider')
+
+include 'yda-theokanning-provider'
+project(':yda-theokanning-provider').projectDir = file('rag/generators/llm-providers/yda-theokanning-provider')
+
+include 'yda-generator-common'
+project(':yda-generator-common').projectDir = file('rag/generators/yda-generator-common')
+
+
+//test
+include 'yda-application'
