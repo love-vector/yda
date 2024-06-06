@@ -6,12 +6,14 @@ project(':yda-framework-core').projectDir = file('rag/foundation/core')
 include 'yda-framework-base'
 project(':yda-framework-base').projectDir = file('rag/foundation/base')
 
-include 'yda-spring-base-autoconfigure'
-project(':yda-spring-base-autoconfigure').projectDir = file('rag/autoconfigure/spring/yda-spring-base-autoconfigure')
+include 'yda-openai-assistant-generator'
+project(':yda-openai-assistant-generator').projectDir = file('rag/generators/assistant-generators/openai-assistant-generator')
 
-//include 'yda-azure-provider-autoconfigure'
-//project(':yda-azure-provider-autoconfigure').projectDir = file('rag/autoconfigure/spring/yda-azure-provider-autoconfigure')
-//
+include 'yda-spring-base-autoconfigure'
+include 'yda-openai-assistant-generator-autoconfigure'
+project(':yda-spring-base-autoconfigure').projectDir = file('rag/autoconfigure/spring/yda-spring-base-autoconfigure')
+project(':yda-openai-assistant-generator-autoconfigure').projectDir = file('rag/autoconfigure/spring/openai-assistant-generator-autoconfigure')
+
 //include 'yda-theokanning-provider-autoconfigure'
 //project(':yda-theokanning-provider-autoconfigure').projectDir = file('rag/autoconfigure/spring/yda-theokanning-provider-autoconfigure')
 

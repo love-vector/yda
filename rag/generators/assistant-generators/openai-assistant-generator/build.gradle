@@ -1,0 +1,10 @@
+plugins {
+    id 'java-library'
+}
+
+dependencies {
+    api project(':yda-framework-base')
+
+    api 'org.springframework.ai:spring-ai-core:1.0.0-M1'
+    api 'com.azure:azure-ai-openai-assistants:1.0.0-beta.2'
+}
