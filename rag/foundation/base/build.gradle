@@ -3,7 +3,8 @@ plugins {
 }
 
 dependencies {
-    api project(":yda-framework-core")
+    api project(":yda-common-shared")
+    api project(":yda-rag-core")
 
     implementation platform("org.springframework.ai:spring-ai-bom:1.0.0-SNAPSHOT")
     implementation 'org.springframework.ai:spring-ai-milvus-store'

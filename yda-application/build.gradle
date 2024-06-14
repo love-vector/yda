@@ -4,7 +4,12 @@ plugins {
 }
 
 dependencies {
-    implementation project(":yda-framework-base")
+    implementation project(":yda-rag-base")
+    implementation project(":yda-framework-core")
+
+    //dev
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
 
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 

@@ -8,10 +8,12 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 
+import ai.yda.application.channel.RestChannel;
+import ai.yda.common.shared.model.impl.BaseAssistantRequest;
+import ai.yda.framework.core.assistant.RagAssistant;
 import ai.yda.framework.rag.base.application.BaseRagApplication;
 import ai.yda.framework.rag.base.augmenter.BaseAugmenter;
 import ai.yda.framework.rag.base.generator.BaseGenerator;
-import ai.yda.framework.rag.base.model.BaseRagRequest;
 import ai.yda.framework.rag.base.retriever.BaseRetriever;
 
 @SpringBootApplication
@@ -29,10 +31,14 @@ public class YdaApplication {
         var chatModel = context.getBean(OpenAiChatModel.class);
         var generator = new BaseGenerator(chatModel);
 
-        var application = new BaseRagApplication(retriever, augmenter, generator);
+        var rag = new BaseRagApplication(retriever, augmenter, generator);
 
-        System.out.println(application
-                .doRag(BaseRagRequest.builder().content("Test Message").build())
-                .getContent());
+        var channel = context.getBean(RestChannel.class);
+
+        var assistant = new RagAssistant(rag, channel);
+
+        System.out.println(
+                rag.doRag(BaseAssistantRequest.builder().content("Test Message").build())
+                        .getContent());
     }
 }

@@ -1,10 +1,11 @@
 package ai.yda.framework.rag.core.generator;
 
+import ai.yda.common.shared.model.AssistantRequest;
+import ai.yda.common.shared.model.AssistantResponse;
 import ai.yda.framework.rag.core.model.RagContext;
-import ai.yda.framework.rag.core.model.RagRequest;
-import ai.yda.framework.rag.core.model.RagResponse;
 
-public interface Generator<REQUEST extends RagRequest, CONTEXT extends RagContext, RESPONSE extends RagResponse> {
+public interface Generator<
+        REQUEST extends AssistantRequest, CONTEXT extends RagContext, RESPONSE extends AssistantResponse> {
 
     RESPONSE generate(REQUEST request, CONTEXT context);
 }
