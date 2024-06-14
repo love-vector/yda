@@ -8,9 +8,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 
-import ai.yda.application.channel.RestChannel;
 import ai.yda.common.shared.model.impl.BaseAssistantRequest;
+import ai.yda.common.shared.model.impl.BaseAssistantResponse;
 import ai.yda.framework.core.assistant.RagAssistant;
+import ai.yda.framework.core.channel.factory.netty.HttpNettyChannelFactory;
 import ai.yda.framework.rag.base.application.BaseRagApplication;
 import ai.yda.framework.rag.base.augmenter.BaseAugmenter;
 import ai.yda.framework.rag.base.generator.BaseGenerator;
@@ -33,7 +34,11 @@ public class YdaApplication {
 
         var rag = new BaseRagApplication(retriever, augmenter, generator);
 
-        var channel = context.getBean(RestChannel.class);
+        // Create HttpNettyChannel using factory
+        var factory = new HttpNettyChannelFactory();
+        var configuration = factory.buildConfiguration(
+                "POST", "/channels", BaseAssistantRequest.class, BaseAssistantResponse.class);
+        var channel = factory.createChannel(configuration);
 
         var assistant = new RagAssistant(rag, channel);
 
