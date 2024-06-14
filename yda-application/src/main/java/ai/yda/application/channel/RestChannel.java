@@ -6,11 +6,11 @@ import ai.yda.common.shared.model.impl.BaseAssistantRequest;
 import ai.yda.common.shared.model.impl.BaseAssistantResponse;
 import ai.yda.framework.core.channel.AbstractChannel;
 
-@RestController
-@RequestMapping("/channels")
+// @RestController
+// @RequestMapping("/channels")
 public class RestChannel extends AbstractChannel {
 
-    @PostMapping
+    //    @PostMapping
     public BaseAssistantResponse handleRequest(@RequestBody BaseAssistantRequest request) {
         return processRequest(request);
     }
