@@ -7,7 +7,7 @@ include 'yda-framework-base'
 project(':yda-framework-base').projectDir = file('rag/foundation/base')
 
 include 'yda-openai-assistant-generator'
-project(':yda-openai-assistant-generator').projectDir = file('rag/generators/assistant-generators/openai-assistant-generator')
+project(':yda-openai-assistant-generator').projectDir = file('rag/generators/openai-assistant-generator')
 
 include 'yda-spring-base-autoconfigure'
 include 'yda-openai-assistant-generator-autoconfigure'

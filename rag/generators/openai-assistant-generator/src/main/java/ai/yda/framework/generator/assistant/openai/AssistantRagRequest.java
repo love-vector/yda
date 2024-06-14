@@ -1,8 +1,9 @@
-package ai.yda.framework.rag.base.generator.assistant;
+package ai.yda.framework.generator.assistant.openai;
 
-import ai.yda.framework.rag.core.model.RagRequest;
 import lombok.Builder;
 import lombok.Getter;
+
+import ai.yda.framework.rag.core.model.RagRequest;
 
 @Getter
 @Builder(toBuilder = true)

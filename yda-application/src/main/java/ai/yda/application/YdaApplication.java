@@ -1,7 +1,12 @@
 package ai.yda.application;
 
+import java.util.List;
+import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.ai.document.Document;
+import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -20,8 +25,21 @@ public class YdaApplication {
     public static void main(String[] args) {
         ApplicationContext context = SpringApplication.run(YdaApplication.class, args);
 
-        var milvusVectorStore = context.getBean(VectorStore.class);
-        var retriever = new BaseRetriever(milvusVectorStore);
+        //        var milvusVectorStore = context.getBean(VectorStore.class);
+        var retriever = new BaseRetriever(new VectorStore() {
+            @Override
+            public void add(List<Document> documents) {}
+
+            @Override
+            public Optional<Boolean> delete(List<String> idList) {
+                return Optional.empty();
+            }
+
+            @Override
+            public List<Document> similaritySearch(SearchRequest request) {
+                return List.of();
+            }
+        });
 
         var augmenter = new BaseAugmenter();
 

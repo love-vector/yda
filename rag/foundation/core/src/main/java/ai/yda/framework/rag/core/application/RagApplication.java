@@ -10,18 +10,17 @@ import ai.yda.framework.rag.core.model.RagResponse;
 import ai.yda.framework.rag.core.retriever.Retriever;
 
 @RequiredArgsConstructor
-public abstract class AbstractRagApplication<
-        REQUEST extends RagRequest, CONTEXT extends RagContext, RESPONSE extends RagResponse> {
+public class RagApplication<REQUEST extends RagRequest, CONTEXT extends RagContext, RESPONSE extends RagResponse> {
 
     private final Retriever<REQUEST, CONTEXT> retriever;
 
     private final Augmenter<REQUEST, CONTEXT> augmenter;
 
-    private final Generator<REQUEST, CONTEXT, RESPONSE> generator;
+    private final Generator<REQUEST, RESPONSE> generator;
 
     public RESPONSE doRag(REQUEST request) {
         var rawContext = retriever.retrieve(request);
         var context = augmenter.augment(request, rawContext);
-        return generator.generate(request, context);
+        return generator.generate(request);
     }
 }
