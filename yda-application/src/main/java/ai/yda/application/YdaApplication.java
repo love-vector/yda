@@ -42,8 +42,5 @@ public class YdaApplication {
 
         var assistant = new RagAssistant(rag, channel);
 
-        System.out.println(
-                rag.doRag(BaseAssistantRequest.builder().content("Test Message").build())
-                        .getContent());
     }
 }
