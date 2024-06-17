@@ -1,26 +1,20 @@
 package ai.yda.framework.rag.core.application;
 
-import lombok.RequiredArgsConstructor;
-
+import ai.yda.common.shared.model.AssistantRequest;
+import ai.yda.common.shared.model.AssistantResponse;
 import ai.yda.framework.rag.core.augmenter.Augmenter;
 import ai.yda.framework.rag.core.generator.Generator;
 import ai.yda.framework.rag.core.model.RagContext;
-import ai.yda.framework.rag.core.model.RagRequest;
-import ai.yda.framework.rag.core.model.RagResponse;
 import ai.yda.framework.rag.core.retriever.Retriever;
 
-@RequiredArgsConstructor
-public class RagApplication<REQUEST extends RagRequest, CONTEXT extends RagContext, RESPONSE extends RagResponse> {
+public interface RagApplication<
+        REQUEST extends AssistantRequest, CONTEXT extends RagContext, RESPONSE extends AssistantResponse> {
 
-    private final Retriever<REQUEST, CONTEXT> retriever;
+    Retriever<REQUEST, CONTEXT> getRetriever();
 
-    private final Augmenter<REQUEST, CONTEXT> augmenter;
+    Augmenter<REQUEST, CONTEXT> getAugmenter();
 
-    private final Generator<REQUEST, RESPONSE> generator;
+    Generator<REQUEST, CONTEXT, RESPONSE> getGenerator();
 
-    public RESPONSE doRag(REQUEST request) {
-        var rawContext = retriever.retrieve(request);
-        var context = augmenter.augment(request, rawContext);
-        return generator.generate(request);
-    }
+    RESPONSE doRag(REQUEST request);
 }

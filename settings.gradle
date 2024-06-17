@@ -1,10 +1,13 @@
 rootProject.name = 'yda-framework'
 
-include 'yda-framework-core'
-project(':yda-framework-core').projectDir = file('rag/foundation/core')
+include 'yda-common-shared'
+project(':yda-common-shared').projectDir = file('common/shared')
 
-include 'yda-framework-base'
-project(':yda-framework-base').projectDir = file('rag/foundation/base')
+include 'yda-rag-core'
+project(':yda-rag-core').projectDir = file('rag/foundation/core')
+
+include 'yda-rag-base'
+project(':yda-rag-base').projectDir = file('rag/foundation/base')
 
 include 'yda-openai-assistant-generator'
 project(':yda-openai-assistant-generator').projectDir = file('rag/generators/openai-assistant-generator')
@@ -34,6 +37,9 @@ project(':yda-theokanning-provider').projectDir = file('rag/generators/llm-provi
 
 include 'yda-generator-common'
 project(':yda-generator-common').projectDir = file('rag/generators/yda-generator-common')
+
+include 'yda-framework-core'
+project(':yda-framework-core').projectDir = file('framework/core')
 
 
 //test
