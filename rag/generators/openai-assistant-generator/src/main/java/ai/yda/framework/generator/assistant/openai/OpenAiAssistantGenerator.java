@@ -9,18 +9,26 @@ import com.azure.ai.openai.assistants.AssistantsClient;
 import com.azure.ai.openai.assistants.models.*;
 import lombok.RequiredArgsConstructor;
 
+import ai.yda.common.shared.model.impl.BaseAssistantRequest;
+import ai.yda.common.shared.model.impl.BaseAssistantResponse;
 import ai.yda.framework.rag.core.generator.Generator;
+import ai.yda.framework.rag.core.model.RagContext;
+import ai.yda.framework.rag.core.session.SessionProvider;
 
 @RequiredArgsConstructor
-public class OpenAiAssistantGenerator implements Generator<AssistantRagRequest, AssistantRagResponse> {
+public class OpenAiAssistantGenerator implements Generator<BaseAssistantRequest, RagContext, BaseAssistantResponse> {
 
     private final String assistantId;
 
     private final AssistantsClient assistantsClient;
 
+    private SessionProvider sessionProvider;
+
     @Override
-    public AssistantRagResponse generate(AssistantRagRequest request) {
-        var threadRun = addMessageAndRun(request.getContent(), request.getThreadId());
+    public BaseAssistantResponse generate(BaseAssistantRequest request, RagContext context) {
+        //        var threadRun = addMessageAndRun(request.getContent(),
+        // getSessionProvider().getSession().getThreadId();
+        var threadRun = addMessageAndRun(request.getContent(), null);
         var runResult = waitForResult(threadRun);
         return processResponse(runResult);
     }
@@ -65,11 +73,16 @@ public class OpenAiAssistantGenerator implements Generator<AssistantRagRequest, 
                 .getValue();
     }
 
-    private AssistantRagResponse processResponse(ThreadRun threadRun) {
+    private BaseAssistantResponse processResponse(ThreadRun threadRun) {
         if (threadRun.getStatus().equals(RunStatus.FAILED)) {
             throw new RuntimeException(threadRun.getLastError().getMessage());
         }
         var result = getRunResult(threadRun);
-        return AssistantRagResponse.builder().content(result).build();
+        return BaseAssistantResponse.builder().content(result).build();
+    }
+
+    @Override
+    public SessionProvider getSessionProvider() {
+        return sessionProvider;
     }
 }

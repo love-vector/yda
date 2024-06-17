@@ -6,7 +6,6 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.ai.document.Document;
-import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.boot.SpringApplication;
@@ -19,7 +18,6 @@ import ai.yda.framework.core.assistant.RagAssistant;
 import ai.yda.framework.core.channel.factory.netty.HttpNettyChannelFactory;
 import ai.yda.framework.rag.base.application.BaseRagApplication;
 import ai.yda.framework.rag.base.augmenter.BaseAugmenter;
-import ai.yda.framework.rag.base.generator.BaseGenerator;
 import ai.yda.framework.rag.base.retriever.BaseRetriever;
 import ai.yda.framework.rag.core.generator.Generator;
 
@@ -55,5 +53,7 @@ public class YdaApplication {
         var configuration = factory.buildConfiguration(
                 "POST", "/channels", BaseAssistantRequest.class, BaseAssistantResponse.class);
         var channel = factory.createChannel(configuration);
+
+        var assistant = new RagAssistant(rag, channel);
     }
 }

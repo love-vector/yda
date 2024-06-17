@@ -11,10 +11,6 @@ import ai.yda.framework.rag.core.retriever.Retriever;
 public class BaseRagApplication
         extends AbstractRagApplication<BaseAssistantRequest, BaseRagContext, BaseAssistantResponse> {
 
-    private Retriever<BaseAssistantRequest, BaseRagContext> retriever;
-    private Augmenter<BaseAssistantRequest, BaseRagContext> augmenter;
-    private Generator<BaseAssistantRequest, BaseRagContext, BaseAssistantResponse> generator;
-
     public BaseRagApplication(
             Retriever<BaseAssistantRequest, BaseRagContext> retriever,
             Augmenter<BaseAssistantRequest, BaseRagContext> augmenter,
