@@ -1,13 +1,7 @@
 package ai.yda.application;
 
-import java.util.List;
-import java.util.Optional;
-
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.ai.document.Document;
-import org.springframework.ai.vectorstore.SearchRequest;
-import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
@@ -19,8 +13,8 @@ import ai.yda.framework.core.channel.factory.netty.HttpNettyChannelFactory;
 import ai.yda.framework.rag.base.application.BaseRagApplication;
 import ai.yda.framework.rag.base.augmenter.BaseAugmenter;
 import ai.yda.framework.rag.base.augmenter.BaseChainAugmenter;
-import ai.yda.framework.rag.base.retriever.BaseRetriever;
 import ai.yda.framework.rag.core.generator.Generator;
+import ai.yda.framework.rag.core.retriever.Retriever;
 
 @SpringBootApplication
 @RequiredArgsConstructor
@@ -29,26 +23,12 @@ public class YdaApplication {
     public static void main(String[] args) {
         ApplicationContext context = SpringApplication.run(YdaApplication.class, args);
 
-        var retriever = new BaseRetriever(new VectorStore() {
-            @Override
-            public void add(List<Document> documents) {}
-
-            @Override
-            public Optional<Boolean> delete(List<String> idList) {
-                return Optional.empty();
-            }
-
-            @Override
-            public List<Document> similaritySearch(SearchRequest request) {
-                return List.of();
-            }
-        });
-
         var chainAugmenter = new BaseChainAugmenter();
         chainAugmenter.addAugmenter(new BaseAugmenter());
-        chainAugmenter.addAugmenter(new BaseAugmenter());
 
+        var retriever = context.getBean(Retriever.class);
         var generator = context.getBean(Generator.class);
+
         var rag = new BaseRagApplication(retriever, chainAugmenter, generator);
 
         // Create HttpNettyChannel using factory

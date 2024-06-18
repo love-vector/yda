@@ -25,7 +25,8 @@ public class OpenAiAssistantGenerator implements Generator<BaseAssistantRequest,
 
         var createAndRunThreadOptions = new CreateAndRunThreadOptions(assistantId)
                 .setThread(new AssistantThreadCreationOptions()
-                        .setMessages(List.of(new ThreadMessageOptions(MessageRole.USER, request.getContent()))));
+                        .setMessages(List.of(new ThreadMessageOptions(
+                                MessageRole.USER, request.getContent() + request.getContext()))));
         var run = assistantsClient.createThreadAndRun(createAndRunThreadOptions);
 
         do {

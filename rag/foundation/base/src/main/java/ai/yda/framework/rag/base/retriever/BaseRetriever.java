@@ -6,7 +6,7 @@ import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.VectorStore;
 
 import ai.yda.common.shared.model.impl.BaseAssistantRequest;
-import ai.yda.framework.rag.base.model.BaseRagContext;
+import ai.yda.framework.rag.core.model.impl.BaseRagContext;
 import ai.yda.framework.rag.core.retriever.Retriever;
 
 @RequiredArgsConstructor
