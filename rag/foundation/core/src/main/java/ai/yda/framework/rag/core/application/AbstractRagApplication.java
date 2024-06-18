@@ -11,7 +11,7 @@ import ai.yda.framework.rag.core.retriever.Retriever;
 
 @AllArgsConstructor
 public abstract class AbstractRagApplication<
-                REQUEST extends AssistantRequest, CONTEXT extends RagContext, RESPONSE extends AssistantResponse>
+                REQUEST extends AssistantRequest, CONTEXT extends RagContext<?>, RESPONSE extends AssistantResponse>
         implements RagApplication<REQUEST, CONTEXT, RESPONSE> {
 
     private Retriever<REQUEST, CONTEXT> retriever;

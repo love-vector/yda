@@ -18,6 +18,6 @@ public class BaseRetriever implements Retriever<BaseAssistantRequest, BaseRagCon
     public BaseRagContext retrieve(BaseAssistantRequest request) {
         var documents = vectorStore.similaritySearch(request.getContent());
         var chunks = documents.stream().map(Document::getContent).toList();
-        return BaseRagContext.builder().chunks(chunks).build();
+        return BaseRagContext.builder().knowledge(chunks).build();
     }
 }

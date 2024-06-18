@@ -3,10 +3,10 @@ package ai.yda.framework.rag.core.augmenter.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import ai.yda.framework.rag.core.augmenter.Augmenter;
 import lombok.NoArgsConstructor;
 
 import ai.yda.common.shared.model.AssistantRequest;
+import ai.yda.framework.rag.core.augmenter.Augmenter;
 import ai.yda.framework.rag.core.model.RagContext;
 
 /**
@@ -20,7 +20,7 @@ import ai.yda.framework.rag.core.model.RagContext;
  * @param <CONTEXT> the type of the context object
  */
 @NoArgsConstructor
-public class ChainAugmenter<REQUEST extends AssistantRequest, CONTEXT extends RagContext>
+public class ChainAugmenter<REQUEST extends AssistantRequest, CONTEXT extends RagContext<?>>
         implements Augmenter<REQUEST, CONTEXT> {
 
     private final List<Augmenter<REQUEST, CONTEXT>> augmenters = new ArrayList<>();
