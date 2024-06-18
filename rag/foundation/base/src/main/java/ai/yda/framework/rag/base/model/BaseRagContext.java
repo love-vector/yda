@@ -10,9 +10,9 @@ import ai.yda.framework.rag.core.model.RagContext;
 
 @Getter
 @Builder(toBuilder = true)
-public class BaseRagContext implements RagContext {
+public class BaseRagContext implements RagContext<String> {
 
-    private List<String> chunks;
+    private List<String> knowledge;
 
     private Map<String, Object> metadata;
 }

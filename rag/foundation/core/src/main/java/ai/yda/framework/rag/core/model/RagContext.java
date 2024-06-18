@@ -3,9 +3,9 @@ package ai.yda.framework.rag.core.model;
 import java.util.List;
 import java.util.Map;
 
-public interface RagContext {
+public interface RagContext<KNOWLEDGE> {
 
-    List<String> getChunks();
+    List<KNOWLEDGE> getKnowledge();
 
     Map<String, Object> getMetadata();
 }
