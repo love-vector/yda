@@ -1,6 +1,6 @@
 package ai.yda.framework.rag.core.application;
 
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 
 import ai.yda.common.shared.model.AssistantRequest;
 import ai.yda.common.shared.model.AssistantResponse;
@@ -9,14 +9,14 @@ import ai.yda.framework.rag.core.generator.Generator;
 import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.retriever.Retriever;
 
-@RequiredArgsConstructor
+@AllArgsConstructor
 public abstract class AbstractRagApplication<
                 REQUEST extends AssistantRequest, CONTEXT extends RagContext, RESPONSE extends AssistantResponse>
         implements RagApplication<REQUEST, CONTEXT, RESPONSE> {
 
-    private final Retriever<REQUEST, CONTEXT> retriever;
-    private final Augmenter<REQUEST, CONTEXT> augmenter;
-    private final Generator<REQUEST, CONTEXT, RESPONSE> generator;
+    private Retriever<REQUEST, CONTEXT> retriever;
+    private Augmenter<REQUEST, CONTEXT> augmenter;
+    private Generator<REQUEST, CONTEXT, RESPONSE> generator;
 
     @Override
     public Retriever<REQUEST, CONTEXT> getRetriever() {
