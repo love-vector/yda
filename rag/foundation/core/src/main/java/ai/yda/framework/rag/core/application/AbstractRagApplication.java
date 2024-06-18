@@ -16,7 +16,7 @@ public abstract class AbstractRagApplication<
 
     private Retriever<REQUEST, CONTEXT> retriever;
     private Augmenter<REQUEST, CONTEXT> augmenter;
-    private Generator<REQUEST, CONTEXT, RESPONSE> generator;
+    private Generator<REQUEST, RESPONSE> generator;
 
     @Override
     public Retriever<REQUEST, CONTEXT> getRetriever() {
@@ -29,7 +29,7 @@ public abstract class AbstractRagApplication<
     }
 
     @Override
-    public Generator<REQUEST, CONTEXT, RESPONSE> getGenerator() {
+    public Generator<REQUEST, RESPONSE> getGenerator() {
         return generator;
     }
 
@@ -37,6 +37,6 @@ public abstract class AbstractRagApplication<
     public RESPONSE doRag(REQUEST request) {
         var rawContext = retriever.retrieve(request);
         var context = augmenter.augment(request, rawContext);
-        return generator.generate(request, context);
+        return generator.generate(request);
     }
 }

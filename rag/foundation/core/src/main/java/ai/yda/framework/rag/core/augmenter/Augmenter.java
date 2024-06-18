@@ -5,5 +5,5 @@ import ai.yda.framework.rag.core.model.RagContext;
 
 public interface Augmenter<REQUEST extends AssistantRequest, CONTEXT extends RagContext> {
 
-    CONTEXT augment(REQUEST request, CONTEXT context);
+    REQUEST augment(REQUEST request, CONTEXT context);
 }

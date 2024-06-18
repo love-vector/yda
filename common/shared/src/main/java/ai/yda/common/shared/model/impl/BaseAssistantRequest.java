@@ -12,4 +12,6 @@ import ai.yda.common.shared.model.AssistantRequest;
 public class BaseAssistantRequest implements AssistantRequest {
 
     private String content;
+
+    private String context;
 }

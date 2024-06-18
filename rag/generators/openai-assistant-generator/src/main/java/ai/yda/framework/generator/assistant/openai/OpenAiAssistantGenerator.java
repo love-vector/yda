@@ -9,11 +9,10 @@ import lombok.RequiredArgsConstructor;
 import ai.yda.common.shared.model.impl.BaseAssistantRequest;
 import ai.yda.common.shared.model.impl.BaseAssistantResponse;
 import ai.yda.framework.rag.core.generator.Generator;
-import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.session.SessionProvider;
 
 @RequiredArgsConstructor
-public class OpenAiAssistantGenerator implements Generator<BaseAssistantRequest, RagContext, BaseAssistantResponse> {
+public class OpenAiAssistantGenerator implements Generator<BaseAssistantRequest, BaseAssistantResponse> {
 
     private final String assistantId;
 
@@ -22,7 +21,7 @@ public class OpenAiAssistantGenerator implements Generator<BaseAssistantRequest,
     private SessionProvider sessionProvider;
 
     @Override
-    public BaseAssistantResponse generate(BaseAssistantRequest request, RagContext context) {
+    public BaseAssistantResponse generate(BaseAssistantRequest request) {
 
         var createAndRunThreadOptions = new CreateAndRunThreadOptions(assistantId)
                 .setThread(new AssistantThreadCreationOptions()
