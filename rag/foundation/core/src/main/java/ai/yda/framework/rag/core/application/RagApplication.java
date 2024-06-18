@@ -14,7 +14,7 @@ public interface RagApplication<
 
     Augmenter<REQUEST, CONTEXT> getAugmenter();
 
-    Generator<REQUEST, CONTEXT, RESPONSE> getGenerator();
+    Generator<REQUEST, RESPONSE> getGenerator();
 
     RESPONSE doRag(REQUEST request);
 }

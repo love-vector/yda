@@ -14,7 +14,7 @@ public class BaseRagApplication
     public BaseRagApplication(
             Retriever<BaseAssistantRequest, BaseRagContext> retriever,
             Augmenter<BaseAssistantRequest, BaseRagContext> augmenter,
-            Generator<BaseAssistantRequest, BaseRagContext, BaseAssistantResponse> generator) {
+            Generator<BaseAssistantRequest, BaseAssistantResponse> generator) {
         super(retriever, augmenter, generator);
     }
 }

@@ -18,6 +18,7 @@ import ai.yda.framework.core.assistant.RagAssistant;
 import ai.yda.framework.core.channel.factory.netty.HttpNettyChannelFactory;
 import ai.yda.framework.rag.base.application.BaseRagApplication;
 import ai.yda.framework.rag.base.augmenter.BaseAugmenter;
+import ai.yda.framework.rag.base.augmenter.BaseChainAugmenter;
 import ai.yda.framework.rag.base.retriever.BaseRetriever;
 import ai.yda.framework.rag.core.generator.Generator;
 
@@ -43,10 +44,12 @@ public class YdaApplication {
             }
         });
 
-        var augmenter = new BaseAugmenter();
+        var chainAugmenter = new BaseChainAugmenter();
+        chainAugmenter.addAugmenter(new BaseAugmenter());
+        chainAugmenter.addAugmenter(new BaseAugmenter());
 
         var generator = context.getBean(Generator.class);
-        var rag = new BaseRagApplication(retriever, augmenter, generator);
+        var rag = new BaseRagApplication(retriever, chainAugmenter, generator);
 
         // Create HttpNettyChannel using factory
         var factory = new HttpNettyChannelFactory();

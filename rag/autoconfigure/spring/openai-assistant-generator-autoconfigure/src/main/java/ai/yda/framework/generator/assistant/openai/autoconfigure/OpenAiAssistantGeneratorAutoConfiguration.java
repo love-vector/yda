@@ -26,14 +26,13 @@ import ai.yda.common.shared.model.impl.BaseAssistantRequest;
 import ai.yda.common.shared.model.impl.BaseAssistantResponse;
 import ai.yda.framework.generator.assistant.openai.OpenAiAssistantGenerator;
 import ai.yda.framework.rag.core.generator.Generator;
-import ai.yda.framework.rag.core.model.RagContext;
 
 @AutoConfiguration
 @EnableConfigurationProperties({OpenAiAssistantGeneratorProperties.class})
 public class OpenAiAssistantGeneratorAutoConfiguration {
 
     @Bean
-    public Generator<BaseAssistantRequest, RagContext, BaseAssistantResponse> azureProvider(
+    public Generator<BaseAssistantRequest, BaseAssistantResponse> azureProvider(
             OpenAiAssistantGeneratorProperties properties) {
         var assistantClient = new AssistantsClientBuilder()
                 .credential(new KeyCredential(properties.getApiKey()))
