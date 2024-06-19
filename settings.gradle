@@ -33,6 +33,15 @@ project(':yda-retriever-filesystem-autoconfigure').projectDir = file('rag/autoco
 include'yda-retriever-website-autoconfigure'
 project(':yda-retriever-website-autoconfigure').projectDir = file('rag/autoconfigure/spring/retrievers/yda-retriever-website-autoconfigure')
 
+include'yda-retriever-website-autoconfigure'
+project(':yda-retriever-website-autoconfigure').projectDir = file('rag/autoconfigure/spring/retrievers/yda-retriever-website-autoconfigure')
+
+include 'yda-azure-provider'
+project(':yda-azure-provider').projectDir = file('rag/generators/llm-providers/yda-azure-provider')
+
+include 'yda-theokanning-provider'
+project(':yda-theokanning-provider').projectDir = file('rag/generators/llm-providers/yda-theokanning-provider')
+
 include 'yda-framework-core'
 project(':yda-framework-core').projectDir = file('framework/core')
 
