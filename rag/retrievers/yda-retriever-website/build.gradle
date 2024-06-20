@@ -1,0 +1,10 @@
+plugins {
+    id 'java-library'
+}
+
+dependencies {
+    api project(":yda-common-shared")
+    api project(":yda-rag-core")
+    implementation 'org.jsoup:jsoup:1.15.3'
+    api 'org.springframework.ai:spring-ai-milvus-store:1.0.0-M1'
+}
