@@ -10,5 +10,7 @@ dependencies {
 
     implementation 'org.jsoup:jsoup:1.15.3'
 
+    implementation 'org.jsoup:jsoup:1.15.3'
+
     api 'org.springframework.ai:spring-ai-core'
 }
