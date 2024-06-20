@@ -1,4 +1,4 @@
-rootProject.name = 'yda-framework'
+rootProject.name = 'project-yda'
 
 include 'yda-common-shared'
 project(':yda-common-shared').projectDir = file('common/shared')
@@ -12,31 +12,23 @@ project(':yda-rag-base').projectDir = file('rag/foundation/base')
 include 'yda-openai-assistant-generator'
 project(':yda-openai-assistant-generator').projectDir = file('rag/generators/openai-assistant-generator')
 
-include 'yda-spring-base-autoconfigure'
 include 'yda-openai-assistant-generator-autoconfigure'
+project(':yda-openai-assistant-generator-autoconfigure').projectDir = file('rag/autoconfigure/spring/generators/openai-assistant-generator-autoconfigure')
+
+include 'yda-spring-base-autoconfigure'
 project(':yda-spring-base-autoconfigure').projectDir = file('rag/autoconfigure/spring/yda-spring-base-autoconfigure')
-project(':yda-openai-assistant-generator-autoconfigure').projectDir = file('rag/autoconfigure/spring/openai-assistant-generator-autoconfigure')
 
-//include 'yda-theokanning-provider-autoconfigure'
-//project(':yda-theokanning-provider-autoconfigure').projectDir = file('rag/autoconfigure/spring/yda-theokanning-provider-autoconfigure')
+include 'yda-retriever-filesystem'
+project(':yda-retriever-filesystem').projectDir = file('rag/retrievers/yda-retriever-filesystem')
 
-include 'yda-retriever-common'
-project(':yda-retriever-common').projectDir = file('rag/retrievers/yda-retriever-common')
-
-include 'yda-vector-store-milvus'
-project(':yda-vector-store-milvus').projectDir = file('rag/retrievers/stores/vector-stores/yda-vector-store-milvus')
-
-include 'yda-augmenter-common'
-project(':yda-augmenter-common').projectDir = file('rag/augmenters/yda-augmenter-common')
+include 'yda-retriever-filesystem-autoconfigure'
+project(':yda-retriever-filesystem-autoconfigure').projectDir = file('rag/autoconfigure/spring/retrievers/yda-retriever-filesystem-autoconfigure')
 
 include 'yda-azure-provider'
 project(':yda-azure-provider').projectDir = file('rag/generators/llm-providers/yda-azure-provider')
 
 include 'yda-theokanning-provider'
 project(':yda-theokanning-provider').projectDir = file('rag/generators/llm-providers/yda-theokanning-provider')
-
-include 'yda-generator-common'
-project(':yda-generator-common').projectDir = file('rag/generators/yda-generator-common')
 
 include 'yda-framework-core'
 project(':yda-framework-core').projectDir = file('framework/core')

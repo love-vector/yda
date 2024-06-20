@@ -1,0 +1,10 @@
+plugins {
+    id 'java-library'
+}
+
+dependencies {
+    api project(':yda-retriever-filesystem')
+
+    api 'org.springframework.boot:spring-boot-starter:3.3.0'
+
+}

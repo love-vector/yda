@@ -36,7 +36,7 @@ public abstract class AbstractRagApplication<
     @Override
     public RESPONSE doRag(REQUEST request) {
         var rawContext = retriever.retrieve(request);
-        var context = augmenter.augment(request, rawContext);
+        augmenter.augment(request, rawContext);
         return generator.generate(request);
     }
 }

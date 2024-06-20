@@ -1,7 +1,6 @@
 package ai.yda.framework.rag.base.generator;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.NotImplementedException;
 
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.Prompt;
@@ -26,6 +25,6 @@ public class BaseGenerator implements Generator<BaseAssistantRequest, BaseAssist
 
     @Override
     public SessionProvider getSessionProvider() {
-        throw new NotImplementedException("Session is not available for this Generator");
+        throw new RuntimeException("Session is not available for this Generator");
     }
 }
