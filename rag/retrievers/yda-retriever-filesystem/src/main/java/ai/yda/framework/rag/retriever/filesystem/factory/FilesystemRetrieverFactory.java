@@ -6,10 +6,10 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.ai.vectorstore.VectorStore;
 
+import ai.yda.common.shared.factory.FactoryConfig;
 import ai.yda.common.shared.model.impl.BaseAssistantRequest;
 import ai.yda.framework.rag.core.model.impl.BaseRagContext;
 import ai.yda.framework.rag.core.retriever.Retriever;
-import ai.yda.framework.rag.core.retriever.factory.RetrieverConfig;
 import ai.yda.framework.rag.core.retriever.factory.RetrieverFactory;
 import ai.yda.framework.rag.retriever.filesystem.FilesystemRetriever;
 
@@ -22,7 +22,7 @@ public class FilesystemRetrieverFactory implements RetrieverFactory<BaseAssistan
 
     @Override
     public Retriever<BaseAssistantRequest, BaseRagContext> createRetriever(
-            Map<? extends RetrieverConfig, String> config) {
+            Map<? extends FactoryConfig, String> config) {
         return new FilesystemRetriever(config.get(LOCAL_DIRECTORY_PATH), vectorStore);
     }
 }

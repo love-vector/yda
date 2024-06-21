@@ -1,4 +1,4 @@
-package ai.yda.framework.core.channel.factory.netty;
+package ai.yda.framework.channel.http.factory;
 
 import java.io.IOException;
 import java.util.concurrent.Executors;
@@ -14,6 +14,7 @@ import io.netty.handler.codec.http.*;
 
 import ai.yda.common.shared.model.impl.BaseAssistantRequest;
 import ai.yda.common.shared.model.impl.BaseAssistantResponse;
+import ai.yda.framework.channel.http.config.HttpChannelConfig;
 import ai.yda.framework.core.channel.AbstractChannel;
 import ai.yda.framework.core.channel.Channel;
 import ai.yda.framework.core.channel.factory.AbstractChannelFactory;
@@ -53,7 +54,8 @@ public class HttpNettyChannelFactory extends AbstractChannelFactory<BaseAssistan
                                     protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest req)
                                             throws IOException {
                                         if (!configuration
-                                                .getMethod()
+                                                .getConfigs()
+                                                .get(HttpChannelConfig.METHOD)
                                                 .equalsIgnoreCase(req.method().name())) {
                                             sendError(ctx, HttpResponseStatus.METHOD_NOT_ALLOWED);
                                             return;
@@ -81,7 +83,7 @@ public class HttpNettyChannelFactory extends AbstractChannelFactory<BaseAssistan
                                                 HttpVersion.HTTP_1_1,
                                                 status,
                                                 Unpooled.copiedBuffer(
-                                                        "Failure: " + status.toString() + "\r\n",
+                                                        "Failure: " + status + "\r\n",
                                                         io.netty.util.CharsetUtil.UTF_8));
                                         response.headers()
                                                 .set(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
@@ -91,7 +93,9 @@ public class HttpNettyChannelFactory extends AbstractChannelFactory<BaseAssistan
                             }
                         });
 
-                ChannelFuture f = b.bind(8081).sync();
+                ChannelFuture f = b.bind(
+                                Integer.parseInt(configuration.getConfigs().get(HttpChannelConfig.PORT)))
+                        .sync();
                 f.channel().closeFuture().sync();
             } catch (InterruptedException e) {
                 e.printStackTrace();

@@ -1,5 +1,7 @@
 package ai.yda.framework.core.assistant;
 
+import java.util.List;
+
 import ai.yda.common.shared.model.impl.BaseAssistantRequest;
 import ai.yda.common.shared.model.impl.BaseAssistantResponse;
 import ai.yda.framework.core.channel.Channel;
@@ -11,8 +13,8 @@ public abstract class AbstractAssistant implements Assistant<BaseAssistantReques
 
     public AbstractAssistant(
             RagApplication<BaseAssistantRequest, ?, BaseAssistantResponse> ragApplication,
-            Channel<BaseAssistantRequest, BaseAssistantResponse> channel) {
+            List<Channel<BaseAssistantRequest, BaseAssistantResponse>> channels) {
         this.ragApplication = ragApplication;
-        channel.setAssistant(this);
+        channels.forEach(channel -> channel.setAssistant(this));
     }
 }

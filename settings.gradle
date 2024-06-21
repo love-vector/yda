@@ -36,6 +36,12 @@ project(':yda-theokanning-provider').projectDir = file('rag/generators/llm-provi
 include 'yda-framework-core'
 project(':yda-framework-core').projectDir = file('framework/core')
 
+include 'yda-channel-http'
+project(':yda-channel-http').projectDir = file('channels/yda-channel-http')
+
+include 'yda-channel-http-spring-autoconfigure'
+project(':yda-channel-http-spring-autoconfigure').projectDir = file('channels/autoconfigure/spring/yda-channel-http-spring-autoconfigure')
+
 
 //test
 include 'yda-application'
