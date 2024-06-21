@@ -60,19 +60,6 @@ public class WebSiteRetriever implements Retriever<BaseAssistantRequest, BaseRag
      * this content to the vector store in parallel.
      */
     private void processWebPages() {
-        try (Stream<Path> paths = Files.list(localDirectoryPath)) {
-            var fileList = paths.filter(Files::isRegularFile).toList();
 
-            if (fileList.isEmpty()) {
-                log.info("No files to process in directory: {}", localDirectoryPath);
-                return;
-            }
-
-            fileList.parallelStream()
-                    .map(Path::toString)
-                    .map(chunkList ->
-                            chunkList.map(Document::new).collect(Collectors.toList()))
-                    .forEach(vectorStore::add);
-        }
     }
 }

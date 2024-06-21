@@ -2,6 +2,7 @@ package ai.yda.framework.rag.retriever.filesystem.service;
 
 import ai.yda.framework.rag.retriever.filesystem.constants.Constants;
 import ai.yda.framework.rag.retriever.filesystem.exception.WebsiteReadException;
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -11,11 +12,13 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class WebsiteService {
     private Set<String> links;
 
@@ -37,7 +40,7 @@ public class WebsiteService {
                         try {
                             getPageLinks(absHref, depth);
                         } catch (WebsiteReadException e) {
-                            System.err.println("Skipping url due to error: " + absHref);
+                            log.error("Skipping url due to error: " + absHref);
                         }
                     }
                 }
@@ -57,11 +60,27 @@ public class WebsiteService {
         try {
             return Jsoup.connect(url).get();
         } catch (HttpStatusException e) {
-            System.err.println("HTTP error fetching URL. Status=" + e.getStatusCode() + ", URL=" + url);
+            log.error("HTTP error fetching URL. Status=" + e.getStatusCode() + ", URL=" + url);
             return null;
         } catch (IOException e) {
             throw new WebsiteReadException(e);
         }
+    }
+
+    public List<String> DocumentFilterData(List<Document> documents) {
+        List<String> result = new ArrayList<>();
+
+        for (Document doc : documents) {
+            if (doc != null) {
+                StringBuilder documentContent = new StringBuilder();
+                doc.select("h1, h2, h3, h4, h5, h6").forEach(heading -> documentContent.append("Heading: ").append(heading.text()).append("\n"));
+                doc.select("a[href]").forEach(link -> documentContent.append("Link: ").append(link.attr("abs:href")).append(" Text: ").append(link.text()).append("\n"));
+                doc.select("p").forEach(paragraph -> documentContent.append("Paragraph: ").append(paragraph.text()).append("\n"));
+                result.add(documentContent.toString());
+            }
+        }
+
+        return result;
     }
 
     private boolean isValidURL(String url) {
