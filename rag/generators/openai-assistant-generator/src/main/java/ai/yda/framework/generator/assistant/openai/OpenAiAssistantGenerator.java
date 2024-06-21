@@ -1,10 +1,13 @@
 package ai.yda.framework.generator.assistant.openai;
 
-import java.util.List;
+import java.util.Map;
 
-import com.azure.ai.openai.assistants.AssistantsClient;
-import com.azure.ai.openai.assistants.models.*;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.openai.OpenAiChatModel;
 
 import ai.yda.common.shared.model.impl.BaseAssistantRequest;
 import ai.yda.common.shared.model.impl.BaseAssistantResponse;
@@ -14,49 +17,18 @@ import ai.yda.framework.rag.core.session.SessionProvider;
 @RequiredArgsConstructor
 public class OpenAiAssistantGenerator implements Generator<BaseAssistantRequest, BaseAssistantResponse> {
 
-    private final String assistantId;
-
-    private final AssistantsClient assistantsClient;
+    private final OpenAiChatModel chatModel;
 
     private SessionProvider sessionProvider;
 
     @Override
     public BaseAssistantResponse generate(BaseAssistantRequest request) {
 
-        var createAndRunThreadOptions = new CreateAndRunThreadOptions(assistantId)
-                .setThread(new AssistantThreadCreationOptions()
-                        .setMessages(List.of(new ThreadMessageOptions(
-                                MessageRole.USER, request.getContent() + request.getContext()))));
-        var run = assistantsClient.createThreadAndRun(createAndRunThreadOptions);
-
-        do {
-            run = assistantsClient.getRun(run.getThreadId(), run.getId());
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        } while (run.getStatus() == RunStatus.QUEUED || run.getStatus() == RunStatus.IN_PROGRESS);
-
-        PageableList<ThreadMessage> messages = assistantsClient.listMessages(run.getThreadId());
-        List<ThreadMessage> data = messages.getData();
-        BaseAssistantResponse response = null;
-
-        for (int i = 0; i < data.size(); i++) {
-            ThreadMessage dataMessage = data.get(i);
-            MessageRole role = dataMessage.getRole();
-            if (role.equals(MessageRole.ASSISTANT)) {
-                for (MessageContent messageContent : dataMessage.getContent()) {
-                    MessageTextContent messageTextContent = (MessageTextContent) messageContent;
-                    System.out.println(i + ": Role = " + role + ", content = "
-                            + messageTextContent.getText().getValue());
-                    response = BaseAssistantResponse.builder()
-                            .content(messageTextContent.getText().getValue())
-                            .build();
-                }
-            }
-        }
-        return response;
+        Prompt prompt = new Prompt(new UserMessage(request.getContent()));
+        ChatResponse call = chatModel.call(prompt);
+        return BaseAssistantResponse.builder()
+                .content(Map.of("generation", call).toString())
+                .build();
     }
 
     @Override
