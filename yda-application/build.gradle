@@ -11,6 +11,8 @@ dependencies {
     implementation project(':yda-retriever-filesystem-autoconfigure')
     implementation project(':yda-channel-http-spring-autoconfigure')
 
+    implementation 'org.springframework.ai:spring-ai-milvus-store:1.0.0-SNAPSHOT'
+
     //dev
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 

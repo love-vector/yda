@@ -1,0 +1,18 @@
+plugins {
+    id 'java-library'
+}
+
+repositories {
+    mavenLocal()
+}
+
+
+dependencies {
+    api project(':yda-openai-assistant-generator')
+
+    api 'org.springframework.boot:spring-boot-starter:3.3.0'
+    api 'org.springframework.boot:spring-boot-starter-web:3.3.0'
+    api 'org.springframework.ai:spring-ai-spring-boot-autoconfigure:1.0.0-SNAPSHOT'
+
+    implementation 'org.springframework.boot:spring-boot-starter-webflux:3.3.0'
+}

@@ -13,11 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ai.yda.framework.autoconfigure.base.spring;
+package ai.yda.framework.generator.theokanning.autoconfigure;
 
+import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
+
+import ai.yda.common.shared.model.impl.BaseAssistantRequest;
+import ai.yda.common.shared.model.impl.BaseAssistantResponse;
+import ai.yda.framework.generator.assistant.openai.OpenAiAssistantGenerator;
+import ai.yda.framework.rag.core.generator.Generator;
 
 @AutoConfiguration
-@EnableConfigurationProperties({BaseSpringProviderProperties.class})
-public class BaseSpringProviderAutoConfiguration {}
+@EnableConfigurationProperties({TheoKanningGeneratorProperties.class})
+public class TheoKanningGeneratorAutoConfiguration {
+
+    @Bean
+    public Generator<BaseAssistantRequest, BaseAssistantResponse> openAiGenerator(OpenAiChatModel chatModel) {
+        return new OpenAiAssistantGenerator(chatModel);
+    }
+}
