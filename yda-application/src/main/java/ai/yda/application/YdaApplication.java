@@ -1,5 +1,7 @@
 package ai.yda.application;
 
+import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.boot.SpringApplication;
@@ -31,6 +33,6 @@ public class YdaApplication {
 
         var channel = context.getBean(Channel.class);
 
-        var assistant = new RagAssistant(rag, channel);
+        var assistant = new RagAssistant(rag, List.of(channel));
     }
 }
