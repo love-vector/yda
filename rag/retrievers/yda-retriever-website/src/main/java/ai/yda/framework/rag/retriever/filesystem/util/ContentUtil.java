@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class ContentUtil {
-
     public static List<String> preprocessContent(String content) {
         return List.of(content.trim());
     }

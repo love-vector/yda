@@ -16,7 +16,7 @@ import ai.yda.framework.rag.core.retriever.factory.RetrieverFactory;
 import static ai.yda.framework.rag.retriever.filesystem.config.WebsiteRetrieverConfig.LOCAL_DIRECTORY_PATH;
 
 @RequiredArgsConstructor
-public class FilesystemRetrieverFactory implements RetrieverFactory<BaseAssistantRequest, BaseRagContext> {
+public class WebSiteRetrieverFactory implements RetrieverFactory<BaseAssistantRequest, BaseRagContext> {
 
     private final VectorStore vectorStore;
 

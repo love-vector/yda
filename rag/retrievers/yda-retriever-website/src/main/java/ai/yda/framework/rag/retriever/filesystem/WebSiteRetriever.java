@@ -4,14 +4,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import ai.yda.framework.rag.core.retriever.util.ContentUtil;
-import ai.yda.framework.rag.retriever.filesystem.service.WebsiteCrawlerService;
+import ai.yda.framework.rag.retriever.filesystem.service.WebsiteService;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.ai.document.Document;
@@ -27,7 +23,7 @@ public class WebSiteRetriever implements Retriever<BaseAssistantRequest, BaseRag
 
     private final Path localDirectoryPath;
     private final VectorStore vectorStore;
-    private final WebsiteCrawlerService websiteCrawlerService = new WebsiteCrawlerService();
+    private final WebsiteService websiteCrawlerService = new WebsiteService();
 
     public WebSiteRetriever(String localDirectoryPath, VectorStore vectorStore) {
         this.localDirectoryPath = Paths.get(localDirectoryPath);
@@ -64,20 +60,6 @@ public class WebSiteRetriever implements Retriever<BaseAssistantRequest, BaseRag
      * this content to the vector store in parallel.
      */
     private void processWebPages() {
-       /* Set<String> urlsToCrawl = Set.of("https://example.com"); // Замените на реальные URLs
-        Set<String> allLinks = new HashSet<>();
 
-        for (String url : urlsToCrawl) {
-            allLinks.addAll(websiteCrawlerService.getPageLinks(url, 0));
-        }
-
-        allLinks.parallelStream().forEach(url -> {
-            Document document = websiteCrawlerService.getDataFromPage(url);
-            String content = websiteCrawlerService.extractContent(document);
-            var documentChunks = ContentUtil.splitContent(content, 1000);
-            var documents = documentChunks.parallelStream().map(Document::new).collect(Collectors.toList());
-            vectorStore.add(documents);
-        });
-        return; */
     }
 }
