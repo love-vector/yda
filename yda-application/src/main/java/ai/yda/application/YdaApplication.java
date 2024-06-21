@@ -1,15 +1,15 @@
 package ai.yda.application;
 
+import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 
-import ai.yda.common.shared.model.impl.BaseAssistantRequest;
-import ai.yda.common.shared.model.impl.BaseAssistantResponse;
 import ai.yda.framework.core.assistant.RagAssistant;
-import ai.yda.framework.core.channel.factory.netty.HttpNettyChannelFactory;
+import ai.yda.framework.core.channel.Channel;
 import ai.yda.framework.rag.base.application.BaseRagApplication;
 import ai.yda.framework.rag.base.augmenter.BaseAugmenter;
 import ai.yda.framework.rag.base.augmenter.BaseChainAugmenter;
@@ -31,12 +31,8 @@ public class YdaApplication {
 
         var rag = new BaseRagApplication(retriever, chainAugmenter, generator);
 
-        // Create HttpNettyChannel using factory
-        var factory = new HttpNettyChannelFactory();
-        var configuration = factory.buildConfiguration(
-                "POST", "/channels", BaseAssistantRequest.class, BaseAssistantResponse.class);
-        var channel = factory.createChannel(configuration);
+        var channel = context.getBean(Channel.class);
 
-        var assistant = new RagAssistant(rag, channel);
+        var assistant = new RagAssistant(rag, List.of(channel));
     }
 }

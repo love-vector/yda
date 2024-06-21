@@ -1,5 +1,7 @@
 package ai.yda.framework.core.assistant;
 
+import java.util.List;
+
 import ai.yda.common.shared.model.impl.BaseAssistantRequest;
 import ai.yda.common.shared.model.impl.BaseAssistantResponse;
 import ai.yda.framework.core.channel.Channel;
@@ -9,8 +11,8 @@ public class RagAssistant extends AbstractAssistant {
 
     public RagAssistant(
             RagApplication<BaseAssistantRequest, ?, BaseAssistantResponse> ragApplication,
-            Channel<BaseAssistantRequest, BaseAssistantResponse> channel) {
-        super(ragApplication, channel);
+            List<Channel<BaseAssistantRequest, BaseAssistantResponse>> channels) {
+        super(ragApplication, channels);
     }
 
     @Override

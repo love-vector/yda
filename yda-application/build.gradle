@@ -6,10 +6,10 @@ plugins {
 dependencies {
     implementation project(":yda-rag-base")
     implementation project(":yda-framework-core")
-    implementation project(":yda-retriever-filesystem")
 
     implementation project(':yda-openai-assistant-generator-autoconfigure')
     implementation project(':yda-retriever-filesystem-autoconfigure')
+    implementation project(':yda-channel-http-spring-autoconfigure')
 
     //dev
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
