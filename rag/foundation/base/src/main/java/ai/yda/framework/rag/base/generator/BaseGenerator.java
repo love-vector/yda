@@ -19,7 +19,7 @@ public class BaseGenerator implements Generator<BaseAssistantRequest, BaseAssist
     public BaseAssistantResponse generate(BaseAssistantRequest request) {
         var response = chat.call(new Prompt(request.getContent()));
         return BaseAssistantResponse.builder()
-                .content(response.getResult().getOutput().getContent())
+                .responseMessage(response.getResult().getOutput().getContent())
                 .build();
     }
 

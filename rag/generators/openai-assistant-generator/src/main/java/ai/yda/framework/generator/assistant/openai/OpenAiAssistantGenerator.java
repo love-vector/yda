@@ -27,7 +27,7 @@ public class OpenAiAssistantGenerator implements Generator<BaseAssistantRequest,
         Prompt prompt = new Prompt(new UserMessage(request.getContent()));
         ChatResponse call = chatModel.call(prompt);
         return BaseAssistantResponse.builder()
-                .content(Map.of("generation", call).toString())
+                .responseMessage(Map.of("generation", call).toString())
                 .build();
     }
 
