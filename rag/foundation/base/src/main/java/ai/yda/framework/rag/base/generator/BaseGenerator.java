@@ -8,7 +8,6 @@ import org.springframework.ai.chat.prompt.Prompt;
 import ai.yda.common.shared.model.impl.BaseAssistantRequest;
 import ai.yda.common.shared.model.impl.BaseAssistantResponse;
 import ai.yda.framework.rag.core.generator.Generator;
-import ai.yda.framework.rag.core.session.SessionProvider;
 
 @RequiredArgsConstructor
 public class BaseGenerator implements Generator<BaseAssistantRequest, BaseAssistantResponse> {
@@ -21,10 +20,5 @@ public class BaseGenerator implements Generator<BaseAssistantRequest, BaseAssist
         return BaseAssistantResponse.builder()
                 .responseMessage(response.getResult().getOutput().getContent())
                 .build();
-    }
-
-    @Override
-    public SessionProvider getSessionProvider() {
-        throw new RuntimeException("Session is not available for this Generator");
     }
 }

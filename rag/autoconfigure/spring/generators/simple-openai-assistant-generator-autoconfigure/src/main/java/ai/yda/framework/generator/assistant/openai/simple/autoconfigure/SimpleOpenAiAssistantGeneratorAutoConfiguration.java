@@ -29,7 +29,8 @@ import ai.yda.framework.rag.core.generator.Generator;
 public class SimpleOpenAiAssistantGeneratorAutoConfiguration {
 
     @Bean
-    public Generator<BaseAssistantRequest, BaseAssistantResponse> openAiGenerator() {
-        return new SimpleOpenAiAssistantGenerator();
+    public Generator<BaseAssistantRequest, BaseAssistantResponse> openAiGenerator(
+            SimpleOpenAiAssistantGeneratorProperties properties) {
+        return new SimpleOpenAiAssistantGenerator(properties.getApiKey(), properties.getAssistantId());
     }
 }

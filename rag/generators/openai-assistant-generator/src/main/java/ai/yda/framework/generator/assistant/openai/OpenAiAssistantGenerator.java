@@ -12,14 +12,11 @@ import org.springframework.ai.openai.OpenAiChatModel;
 import ai.yda.common.shared.model.impl.BaseAssistantRequest;
 import ai.yda.common.shared.model.impl.BaseAssistantResponse;
 import ai.yda.framework.rag.core.generator.Generator;
-import ai.yda.framework.rag.core.session.SessionProvider;
 
 @RequiredArgsConstructor
 public class OpenAiAssistantGenerator implements Generator<BaseAssistantRequest, BaseAssistantResponse> {
 
     private final OpenAiChatModel chatModel;
-
-    private SessionProvider sessionProvider;
 
     @Override
     public BaseAssistantResponse generate(BaseAssistantRequest request) {
@@ -29,10 +26,5 @@ public class OpenAiAssistantGenerator implements Generator<BaseAssistantRequest,
         return BaseAssistantResponse.builder()
                 .responseMessage(Map.of("generation", call).toString())
                 .build();
-    }
-
-    @Override
-    public SessionProvider getSessionProvider() {
-        return sessionProvider;
     }
 }

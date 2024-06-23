@@ -8,5 +8,7 @@ public interface Generator<REQUEST extends AssistantRequest, RESPONSE extends As
 
     RESPONSE generate(REQUEST request);
 
-    SessionProvider getSessionProvider();
+    default SessionProvider getSessionProvider() {
+        throw new RuntimeException("Session is not available for this Generator");
+    }
 }

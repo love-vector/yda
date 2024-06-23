@@ -13,4 +13,6 @@ public class SimpleOpenAiAssistantGeneratorProperties {
     public static final String CONFIG_PREFIX = "ai.yda.framework.generator.assistant.openai.simple.autoconfigure";
 
     private String apiKey;
+
+    private String assistantId;
 }
