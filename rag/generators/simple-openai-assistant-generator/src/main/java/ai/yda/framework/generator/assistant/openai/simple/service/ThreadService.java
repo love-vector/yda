@@ -107,7 +107,6 @@ public class ThreadService {
         return getThread(threadId).get("id").asText();
     }
 
-
     private JsonNode getThread(String threadId) {
         try {
             var response = webClient
@@ -129,9 +128,11 @@ public class ThreadService {
     }
 
     private JsonNode createThread(String sessionId) {
-        var body = new HashMap<>(){{
-            put("metadata", Map.of("session_id", sessionId));
-        }};
+        var body = new HashMap<>() {
+            {
+                put("metadata", Map.of("session_id", sessionId));
+            }
+        };
 
         var objectMapper = new ObjectMapper();
         try {

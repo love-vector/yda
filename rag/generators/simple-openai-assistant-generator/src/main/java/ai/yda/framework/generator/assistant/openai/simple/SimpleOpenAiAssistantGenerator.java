@@ -25,8 +25,7 @@ public class SimpleOpenAiAssistantGenerator implements Generator<BaseAssistantRe
 
         var threadId = threadService.getThreadIdForUser(null);
 
-        threadService.addMessageToThread(
-                String.valueOf(threadId), request.getContent() + request.getContext());
+        threadService.addMessageToThread(String.valueOf(threadId), request.getContent() + request.getContext());
 
         var response = threadService.createRunStream(threadId, assistantId);
 

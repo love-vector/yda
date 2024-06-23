@@ -36,11 +36,11 @@ project(':yda-theokanning-provider').projectDir = file('rag/generators/llm-provi
 include 'yda-framework-core'
 project(':yda-framework-core').projectDir = file('framework/core')
 
-include 'yda-channel-http'
-project(':yda-channel-http').projectDir = file('channels/yda-channel-http')
+include 'channel-http'
+project(':channel-http').projectDir = file('channels/channel-http')
 
-include 'yda-channel-http-spring-autoconfigure'
-project(':yda-channel-http-spring-autoconfigure').projectDir = file('channels/autoconfigure/spring/yda-channel-http-spring-autoconfigure')
+include 'channel-http-autoconfigure'
+project(':channel-http-autoconfigure').projectDir = file('channels/autoconfigure/spring/channel-http-autoconfigure')
 
 
 //test
