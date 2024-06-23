@@ -42,6 +42,12 @@ project(':channel-http').projectDir = file('channels/channel-http')
 include 'channel-http-autoconfigure'
 project(':channel-http-autoconfigure').projectDir = file('channels/autoconfigure/spring/channel-http-autoconfigure')
 
+include 'channel-http-streaming'
+project(':channel-http-streaming').projectDir = file('channels/channel-http-streaming')
+
+include 'channel-http-streaming-autoconfigure'
+project(':channel-http-streaming-autoconfigure').projectDir = file('channels/autoconfigure/spring/channel-http-streaming-autoconfigure')
+
 
 //test
 include 'yda-application'

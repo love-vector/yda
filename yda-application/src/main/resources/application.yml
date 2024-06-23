@@ -5,11 +5,17 @@ ai:
         retriever:
           filesystem:
             localDirectoryPath: /Users/dmmrch/work/IdeaProjects/yda/.data/documents
+#      channel:
+#        http:
+#          method: POST
+#          port: 8081
+#          uri: /channels
       channel:
         http:
-          method: POST
-          port: 8081
-          uri: /channels
+          streaming:
+            method: POST
+            port: 8081
+            uri: /channels
       generator:
         assistant:
           openai:
