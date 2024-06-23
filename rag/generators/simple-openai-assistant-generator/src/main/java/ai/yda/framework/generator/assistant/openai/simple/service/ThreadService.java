@@ -1,10 +1,12 @@
-package ai.yda.framework.generator.assistant.openai.simple;
+package ai.yda.framework.generator.assistant.openai.simple.service;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 
@@ -16,7 +18,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import ai.yda.framework.generator.assistant.openai.simple.util.CustomHttpHeaders;
 
 @RequiredArgsConstructor
-public class SimpleOpenAiClient {
+public class ThreadService {
 
     private final String apiKey;
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -88,6 +90,76 @@ public class SimpleOpenAiClient {
 
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Error during Request serialization: ", e);
+        }
+    }
+
+    private static String generateSessionId() {
+        return UUID.randomUUID().toString();
+    }
+
+    public JsonNode getThreadOrCreateIfNotExist(String sessionId) {
+        String threadId = retrieveThreadId(sessionId);
+
+        if (threadId == null) {
+            return createThread(generateSessionId());
+        }
+
+        return getThread(threadId);
+    }
+
+    private String retrieveThreadId(String sessionId) {
+        try {
+            // Simulate retrieval of thread ID using session ID
+            // Replace with actual logic if you have an endpoint or method to get the thread ID by session ID
+            String threadId = null;
+            // If thread ID is retrieved successfully, return it
+            return threadId;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private JsonNode getThread(String threadId) {
+        try {
+            String response = webClient
+                    .get()
+                    .uri("/threads/{thread_id}", threadId)
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey)
+                    .header("OpenAI-Beta", "assistants=v2")
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
+
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readTree(response);
+        } catch (WebClientResponseException.NotFound ex) {
+            return null;
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Error processing JSON response", e);
+        }
+    }
+
+    private JsonNode createThread(String sessionId) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("metadata", Map.of("session_id", sessionId));
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            String requestBody = objectMapper.writeValueAsString(body);
+
+            String response = webClient
+                    .post()
+                    .uri("/threads")
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey)
+                    .header("OpenAI-Beta", "assistants=v2")
+                    .bodyValue(requestBody)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
+
+            return objectMapper.readTree(response);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Error during request serialization: ", e);
         }
     }
 }

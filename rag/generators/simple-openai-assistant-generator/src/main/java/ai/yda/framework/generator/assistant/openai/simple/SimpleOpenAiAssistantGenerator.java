@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 
 import ai.yda.common.shared.model.impl.BaseAssistantRequest;
 import ai.yda.common.shared.model.impl.BaseAssistantResponse;
+import ai.yda.framework.generator.assistant.openai.simple.service.ThreadService;
 import ai.yda.framework.rag.core.generator.Generator;
 
 @RequiredArgsConstructor
@@ -20,12 +21,14 @@ public class SimpleOpenAiAssistantGenerator implements Generator<BaseAssistantRe
     @Override
     public BaseAssistantResponse generate(BaseAssistantRequest request) {
 
-        var simpleOpenAiClient = new SimpleOpenAiClient(apiKey);
+        var threadService = new ThreadService(apiKey);
 
-        simpleOpenAiClient.addMessageToThread(
-                "thread_fIXyqifnwBEMMyrxlPfl8YqW", request.getContent() + request.getContext());
+        JsonNode thread = threadService.getThreadOrCreateIfNotExist(null);
 
-        var xx = simpleOpenAiClient.createRunStream("thread_fIXyqifnwBEMMyrxlPfl8YqW", assistantId);
+        threadService.addMessageToThread(
+                String.valueOf(thread.get("id").asText()), request.getContent() + request.getContext());
+
+        var xx = threadService.createRunStream("thread_fIXyqifnwBEMMyrxlPfl8YqW", assistantId);
 
         // Extract the assistant's message content
         String assistantMessage = extractAssistantMessage(xx);
