@@ -23,16 +23,15 @@ public class SimpleOpenAiAssistantGenerator implements Generator<BaseAssistantRe
 
         var threadService = new ThreadService(apiKey);
 
-        JsonNode thread = threadService.getThreadOrCreateIfNotExist(null);
+        var threadId = threadService.getThreadIdForUser(null);
 
         threadService.addMessageToThread(
-                String.valueOf(thread.get("id").asText()), request.getContent() + request.getContext());
+                String.valueOf(threadId), request.getContent() + request.getContext());
 
-        var xx = threadService.createRunStream("thread_fIXyqifnwBEMMyrxlPfl8YqW", assistantId);
+        var response = threadService.createRunStream(threadId, assistantId);
 
         // Extract the assistant's message content
-        String assistantMessage = extractAssistantMessage(xx);
-        System.out.println("Assistant Message: " + assistantMessage);
+        var assistantMessage = extractAssistantMessage(response);
 
         return BaseAssistantResponse.builder().responseMessage(assistantMessage).build();
     }

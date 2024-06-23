@@ -38,7 +38,7 @@ public class ThreadService {
         };
 
         try {
-            String messageJson = objectMapper.writeValueAsString(message);
+            var messageJson = objectMapper.writeValueAsString(message);
             webClient
                     .post()
                     .uri("/threads/{thread_id}/messages", threadId)
@@ -69,7 +69,7 @@ public class ThreadService {
         };
 
         try {
-            String messageJson = objectMapper.writeValueAsString(body);
+            var messageJson = objectMapper.writeValueAsString(body);
 
             return webClient
                     .post()
@@ -97,31 +97,20 @@ public class ThreadService {
         return UUID.randomUUID().toString();
     }
 
-    public JsonNode getThreadOrCreateIfNotExist(String sessionId) {
-        String threadId = retrieveThreadId(sessionId);
+    public String getThreadIdForUser(String sessionId) {
+        String threadId = null;
 
         if (threadId == null) {
-            return createThread(generateSessionId());
+            return createThread(generateSessionId()).get("id").asText();
         }
 
-        return getThread(threadId);
+        return getThread(threadId).get("id").asText();
     }
 
-    private String retrieveThreadId(String sessionId) {
-        try {
-            // Simulate retrieval of thread ID using session ID
-            // Replace with actual logic if you have an endpoint or method to get the thread ID by session ID
-            String threadId = null;
-            // If thread ID is retrieved successfully, return it
-            return threadId;
-        } catch (Exception e) {
-            return null;
-        }
-    }
 
     private JsonNode getThread(String threadId) {
         try {
-            String response = webClient
+            var response = webClient
                     .get()
                     .uri("/threads/{thread_id}", threadId)
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey)
@@ -130,7 +119,7 @@ public class ThreadService {
                     .bodyToMono(String.class)
                     .block();
 
-            ObjectMapper mapper = new ObjectMapper();
+            var mapper = new ObjectMapper();
             return mapper.readTree(response);
         } catch (WebClientResponseException.NotFound ex) {
             return null;
@@ -140,14 +129,15 @@ public class ThreadService {
     }
 
     private JsonNode createThread(String sessionId) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("metadata", Map.of("session_id", sessionId));
+        var body = new HashMap<>(){{
+            put("metadata", Map.of("session_id", sessionId));
+        }};
 
-        ObjectMapper objectMapper = new ObjectMapper();
+        var objectMapper = new ObjectMapper();
         try {
-            String requestBody = objectMapper.writeValueAsString(body);
+            var requestBody = objectMapper.writeValueAsString(body);
 
-            String response = webClient
+            var response = webClient
                     .post()
                     .uri("/threads")
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey)
