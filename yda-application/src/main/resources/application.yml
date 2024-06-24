@@ -5,21 +5,40 @@ ai:
         retriever:
           filesystem:
             localDirectoryPath: /Users/dmmrch/work/IdeaProjects/yda/.data/documents
-            databaseName: default
-            collectionName: documents
-            embeddingDimension: 1536
-            username:
-            password:
-            host: http://localhost:19530
-            openAiKey: sk-proj-eTAeDDwK4dEQY09ZQktbT3BlbkFJeaKh8oDF3sZT00LtAVnf
-            openAiModel: text-embedding-3-small
-        generator:
-          assistant:
-            openai:
-              api-key: sk-proj-eTAeDDwK4dEQY09ZQktbT3BlbkFJeaKh8oDF3sZT00LtAVnf
-              assistant-id: asst_9S7lP9N2n99EPept42iUjLeL
       channel:
         http:
           method: POST
           port: 8081
           uri: /channels
+#          streaming:
+#            method: POST
+#            port: 8081
+#            uri: /channels
+      generator:
+        assistant:
+          openai:
+            simple:
+              autoconfigure:
+                api-key: sk-proj-eTAeDDwK4dEQY09ZQktbT3BlbkFJeaKh8oDF3sZT00LtAVnf
+                assistant-id: asst_9S7lP9N2n99EPept42iUjLeL
+
+spring:
+  ai:
+    vectorstore:
+      milvus:
+        client:
+          host: "localhost"
+          port: 19530
+          username: ""
+          password: ""
+        databaseName: "default"
+        collectionName: "documents"
+        embeddingDimension: 1536
+        indexType: IVF_FLAT
+        metricType: COSINE
+    openai:
+      api-key: sk-proj-eTAeDDwK4dEQY09ZQktbT3BlbkFJeaKh8oDF3sZT00LtAVnf
+      chat:
+        options:
+          model: gpt-3.5-turbo
+          temperature: 0.7

@@ -9,5 +9,5 @@ import ai.yda.common.shared.model.AssistantResponse;
 @Builder(toBuilder = true)
 public class BaseAssistantResponse implements AssistantResponse {
 
-    private String content;
+    private String responseMessage;
 }

@@ -15,9 +15,7 @@
  */
 package ai.yda.framework.generator.assistant.openai.autoconfigure;
 
-import com.azure.ai.openai.assistants.AssistantsClientBuilder;
-import com.azure.core.credential.KeyCredential;
-
+import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -32,11 +30,7 @@ import ai.yda.framework.rag.core.generator.Generator;
 public class OpenAiAssistantGeneratorAutoConfiguration {
 
     @Bean
-    public Generator<BaseAssistantRequest, BaseAssistantResponse> azureProvider(
-            OpenAiAssistantGeneratorProperties properties) {
-        var assistantClient = new AssistantsClientBuilder()
-                .credential(new KeyCredential(properties.getApiKey()))
-                .buildClient();
-        return new OpenAiAssistantGenerator(properties.getAssistantId(), assistantClient);
+    public Generator<BaseAssistantRequest, BaseAssistantResponse> openAiGenerator(OpenAiChatModel chatModel) {
+        return new OpenAiAssistantGenerator(chatModel);
     }
 }
