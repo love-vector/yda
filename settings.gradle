@@ -15,8 +15,11 @@ project(':yda-openai-assistant-generator').projectDir = file('rag/generators/ope
 include 'yda-openai-assistant-generator-autoconfigure'
 project(':yda-openai-assistant-generator-autoconfigure').projectDir = file('rag/autoconfigure/spring/generators/openai-assistant-generator-autoconfigure')
 
-include 'yda-spring-base-autoconfigure'
-project(':yda-spring-base-autoconfigure').projectDir = file('rag/autoconfigure/spring/yda-spring-base-autoconfigure')
+include 'yda-simple-openai-assistant-generator'
+project(':yda-simple-openai-assistant-generator').projectDir = file('rag/generators/simple-openai-assistant-generator')
+
+include 'yda-simple-openai-assistant-generator-autoconfigure'
+project(':yda-simple-openai-assistant-generator-autoconfigure').projectDir = file('rag/autoconfigure/spring/generators/simple-openai-assistant-generator-autoconfigure')
 
 include 'yda-retriever-filesystem'
 project(':yda-retriever-filesystem').projectDir = file('rag/retrievers/yda-retriever-filesystem')
@@ -33,11 +36,17 @@ project(':yda-theokanning-provider').projectDir = file('rag/generators/llm-provi
 include 'yda-framework-core'
 project(':yda-framework-core').projectDir = file('framework/core')
 
-include 'yda-channel-http'
-project(':yda-channel-http').projectDir = file('channels/yda-channel-http')
+include 'channel-http'
+project(':channel-http').projectDir = file('channels/channel-http')
 
-include 'yda-channel-http-spring-autoconfigure'
-project(':yda-channel-http-spring-autoconfigure').projectDir = file('channels/autoconfigure/spring/yda-channel-http-spring-autoconfigure')
+include 'channel-http-autoconfigure'
+project(':channel-http-autoconfigure').projectDir = file('channels/autoconfigure/spring/channel-http-autoconfigure')
+
+include 'channel-http-streaming'
+project(':channel-http-streaming').projectDir = file('channels/channel-http-streaming')
+
+include 'channel-http-streaming-autoconfigure'
+project(':channel-http-streaming-autoconfigure').projectDir = file('channels/autoconfigure/spring/channel-http-streaming-autoconfigure')
 
 
 //test
