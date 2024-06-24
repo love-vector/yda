@@ -7,11 +7,19 @@ dependencies {
     implementation project(":yda-rag-base")
     implementation project(":yda-framework-core")
 
+//  non-Streaming
+    implementation project(':channel-http-autoconfigure')
     implementation project(':yda-openai-assistant-generator-autoconfigure')
+
+//  Streaming
+//    implementation project(':channel-http-streaming-autoconfigure')
+//    implementation project(':yda-simple-openai-assistant-generator-autoconfigure')
+
+//  Retrievers
     implementation project(':yda-retriever-filesystem-autoconfigure')
-    implementation project(':yda-channel-http-spring-autoconfigure')
 
-    //dev
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
+//    3rd-party
+    implementation 'org.springframework.boot:spring-boot-starter-actuator' // dev
+    implementation 'org.springframework.ai:spring-ai-milvus-store:1.0.0-SNAPSHOT'
 }
