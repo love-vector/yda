@@ -1,13 +1,8 @@
-package ai.yda.framework.rag.retriever.filesystem;
+package ai.yda.framework.rag.retriever.website;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import ai.yda.framework.rag.retriever.filesystem.service.WebsiteService;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.ai.document.Document;
@@ -17,17 +12,18 @@ import org.springframework.ai.vectorstore.VectorStore;
 import ai.yda.common.shared.model.impl.BaseAssistantRequest;
 import ai.yda.framework.rag.core.model.impl.BaseRagContext;
 import ai.yda.framework.rag.core.retriever.Retriever;
+import ai.yda.framework.rag.retriever.website.constants.Constants;
+import ai.yda.framework.rag.retriever.website.service.WebsiteService;
 
 @Slf4j
-public class WebSiteRetriever implements Retriever<BaseAssistantRequest, BaseRagContext> {
-
-    private final Path localDirectoryPath;
+public class WebsiteRetriever implements Retriever<BaseAssistantRequest, BaseRagContext> {
     private final VectorStore vectorStore;
-    private final WebsiteService websiteCrawlerService = new WebsiteService();
+    private final WebsiteService websiteService = new WebsiteService();
+    private final String url;
 
-    public WebSiteRetriever(String localDirectoryPath, VectorStore vectorStore) {
-        this.localDirectoryPath = Paths.get(localDirectoryPath);
+    public WebsiteRetriever(VectorStore vectorStore, String url) {
         this.vectorStore = vectorStore;
+        this.url = url;
 
         try {
             init();
@@ -50,16 +46,16 @@ public class WebSiteRetriever implements Retriever<BaseAssistantRequest, BaseRag
     }
 
     public void init() throws IOException {
-        processWebPages();
+        processWebsite();
     }
 
-    /**
-     * Processes web pages by crawling, extracting content and adding it to the vector store.
-     *
-     * This method initiates web crawling, extracts the content from each page, and then adds
-     * this content to the vector store in parallel.
-     */
-    private void processWebPages() {
-
+    private void processWebsite() {
+        var documents = websiteService.getPageDocuments(url, Constants.DEFAULT_DEPTH);
+        var listOfDocuments = websiteService.documentFilterData(documents);
+        listOfDocuments.values().parallelStream()
+                .map(documentChunks ->
+                        documentChunks.parallelStream().map(Document::new).collect(Collectors.toList()))
+                .toList()
+                .forEach(vectorStore::add);
     }
 }

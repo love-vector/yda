@@ -3,17 +3,30 @@ ai:
     framework:
       rag:
         retriever:
-          filesystem:
-            localDirectoryPath: /Users/dmmrch/work/IdeaProjects/yda/.data/documents
+          website:
+            databaseName: default
+            collectionName: websites
+            embeddingDimension: 1536
+            username:
+            password:
+            host: http://localhost:19530
+            openAiKey: sk-proj-eTAeDDwK4dEQY09ZQktbT3BlbkFJeaKh8oDF3sZT00LtAVnf
+            openAiModel: text-embedding-3-small
+            url: https://dog.ceo/dog-api/
+        generator:
+          assistant:
+            openai:
+              api-key: sk-proj-eTAeDDwK4dEQY09ZQktbT3BlbkFJeaKh8oDF3sZT00LtAVnf
+              assistant-id: asst_9S7lP9N2n99EPept42iUjLeL
       channel:
         http:
           method: POST
           port: 8081
           uri: /channels
-#          streaming:
-#            method: POST
-#            port: 8081
-#            uri: /channels
+      #          streaming:
+      #            method: POST
+      #            port: 8081
+      #            uri: /channels
       generator:
         assistant:
           openai:
@@ -21,7 +34,6 @@ ai:
               autoconfigure:
                 api-key: sk-proj-eTAeDDwK4dEQY09ZQktbT3BlbkFJeaKh8oDF3sZT00LtAVnf
                 assistant-id: asst_9S7lP9N2n99EPept42iUjLeL
-
 spring:
   ai:
     vectorstore:
