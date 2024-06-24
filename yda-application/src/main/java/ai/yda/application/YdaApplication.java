@@ -34,5 +34,6 @@ public class YdaApplication {
         var channel = context.getBean(Channel.class);
 
         var assistant = new RagAssistant(rag, List.of(channel));
+        //        var assistant = new RagAssistantReactive(rag, List.of(channel));
     }
 }

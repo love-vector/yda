@@ -1,6 +1,8 @@
 package ai.yda.framework.rag.core.application;
 
 import lombok.AllArgsConstructor;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import ai.yda.common.shared.model.AssistantRequest;
 import ai.yda.common.shared.model.AssistantResponse;
@@ -38,5 +40,12 @@ public abstract class AbstractRagApplication<
         var rawContext = retriever.retrieve(request);
         augmenter.augment(request, rawContext);
         return generator.generate(request);
+    }
+
+    @Override
+    public Flux<RESPONSE> doRagReactive(REQUEST request) {
+        return Mono.fromCallable(() -> getRetriever().retrieve(request)).flatMapMany(rawContext -> Mono.fromCallable(
+                        () -> getAugmenter().augment(request, rawContext))
+                .flatMapMany(augmentedRequest -> getGenerator().generateReactive(augmentedRequest)));
     }
 }
