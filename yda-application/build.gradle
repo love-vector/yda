@@ -7,13 +7,13 @@ dependencies {
     implementation project(":yda-rag-base")
     implementation project(":yda-framework-core")
 
-//  Channels
-//    implementation project(':channel-http-autoconfigure')
-    implementation project(':channel-http-streaming-autoconfigure')
+//  non-Streaming
+    implementation project(':channel-http-autoconfigure')
+    implementation project(':yda-openai-assistant-generator-autoconfigure')
 
-//  Generators
-//    implementation project(':yda-openai-assistant-generator-autoconfigure')
-    implementation project(':yda-simple-openai-assistant-generator-autoconfigure')
+//  Streaming
+//    implementation project(':channel-http-streaming-autoconfigure')
+//    implementation project(':yda-simple-openai-assistant-generator-autoconfigure')
 
 //  Retrievers
     implementation project(':yda-retriever-filesystem-autoconfigure')

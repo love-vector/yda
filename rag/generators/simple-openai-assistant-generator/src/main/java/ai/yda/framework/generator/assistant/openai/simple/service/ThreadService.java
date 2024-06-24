@@ -9,6 +9,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -28,8 +30,7 @@ public class ThreadService {
             .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
             .build();
 
-    public void addMessageToThread(String threadId, String content) {
-
+    public Mono<Void> addMessageToThread(String threadId, String content) {
         var message = new HashMap<>() {
             {
                 put("role", "user");
@@ -39,7 +40,7 @@ public class ThreadService {
 
         try {
             var messageJson = objectMapper.writeValueAsString(message);
-            webClient
+            return webClient
                     .post()
                     .uri("/threads/{thread_id}/messages", threadId)
                     .header(HttpHeaders.CONTENT_TYPE, "application/json")
@@ -52,14 +53,13 @@ public class ThreadService {
                         System.err.println("Error status code: " + ex.getRawStatusCode());
                         System.err.println("Response body: " + ex.getResponseBodyAsString());
                     })
-                    .block();
+                    .then();
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Error during Request serialization: ", e);
+            return Mono.error(new RuntimeException("Error during Request serialization: ", e));
         }
     }
 
-    public List<String> createRunStream(final String threadId, String assistantId) {
-
+    public Flux<String> createRunStream(String threadId, String assistantId) {
         var body = new HashMap<>() {
             {
                 put("assistant_id", assistantId);
@@ -81,64 +81,53 @@ public class ThreadService {
                     .bodyValue(messageJson)
                     .retrieve()
                     .bodyToFlux(String.class)
-                    .collectList()
                     .doOnError(WebClientResponseException.class, ex -> {
                         System.err.println("Error status code: " + ex.getRawStatusCode());
                         System.err.println("Response body: " + ex.getResponseBodyAsString());
-                    })
-                    .block();
-
+                    });
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Error during Request serialization: ", e);
+            return Flux.error(new RuntimeException("Error during Request serialization: ", e));
         }
     }
 
-    private static String generateSessionId() {
-        return UUID.randomUUID().toString();
-    }
-
-    public String getThreadIdForUser(String sessionId) {
-        String threadId = null;
+    public Mono<String> getThreadIdForUser(String sessionId) {
+        String threadId = null; // Replace with your logic to get threadId
 
         if (threadId == null) {
-            return createThread(generateSessionId()).get("id").asText();
+            return createThread(generateSessionId()).map(node -> node.get("id").asText());
         }
 
-        return getThread(threadId).get("id").asText();
+        return getThread(threadId).map(node -> node.get("id").asText());
     }
 
-    private JsonNode getThread(String threadId) {
-        try {
-            var response = webClient
-                    .get()
-                    .uri("/threads/{thread_id}", threadId)
-                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey)
-                    .header("OpenAI-Beta", "assistants=v2")
-                    .retrieve()
-                    .bodyToMono(String.class)
-                    .block();
-
-            var mapper = new ObjectMapper();
-            return mapper.readTree(response);
-        } catch (WebClientResponseException.NotFound ex) {
-            return null;
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Error processing JSON response", e);
-        }
+    private Mono<JsonNode> getThread(String threadId) {
+        return webClient
+                .get()
+                .uri("/threads/{thread_id}", threadId)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey)
+                .header("OpenAI-Beta", "assistants=v2")
+                .retrieve()
+                .bodyToMono(String.class)
+                .map(response -> {
+                    try {
+                        return objectMapper.readTree(response);
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException("Error processing JSON response", e);
+                    }
+                })
+                .onErrorResume(WebClientResponseException.NotFound.class, ex -> Mono.empty());
     }
 
-    private JsonNode createThread(String sessionId) {
+    private Mono<JsonNode> createThread(String sessionId) {
         var body = new HashMap<>() {
             {
                 put("metadata", Map.of("session_id", sessionId));
             }
         };
 
-        var objectMapper = new ObjectMapper();
         try {
             var requestBody = objectMapper.writeValueAsString(body);
-
-            var response = webClient
+            return webClient
                     .post()
                     .uri("/threads")
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey)
@@ -146,11 +135,19 @@ public class ThreadService {
                     .bodyValue(requestBody)
                     .retrieve()
                     .bodyToMono(String.class)
-                    .block();
-
-            return objectMapper.readTree(response);
+                    .map(response -> {
+                        try {
+                            return objectMapper.readTree(response);
+                        } catch (JsonProcessingException e) {
+                            throw new RuntimeException("Error during request serialization: ", e);
+                        }
+                    });
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Error during request serialization: ", e);
+            return Mono.error(new RuntimeException("Error during request serialization: ", e));
         }
+    }
+
+    private static String generateSessionId() {
+        return UUID.randomUUID().toString();
     }
 }

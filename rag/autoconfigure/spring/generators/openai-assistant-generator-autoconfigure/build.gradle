@@ -13,5 +13,4 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter:3.3.0'
     implementation 'org.springframework.boot:spring-boot-starter-web:3.3.0'
     implementation 'org.springframework.ai:spring-ai-spring-boot-autoconfigure:1.0.0-SNAPSHOT'
-    implementation 'org.springframework:spring-webflux:6.1.10'
 }

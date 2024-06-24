@@ -1,5 +1,7 @@
 package ai.yda.framework.rag.core.application;
 
+import reactor.core.publisher.Flux;
+
 import ai.yda.common.shared.model.AssistantRequest;
 import ai.yda.common.shared.model.AssistantResponse;
 import ai.yda.framework.rag.core.augmenter.Augmenter;
@@ -17,4 +19,8 @@ public interface RagApplication<
     Generator<REQUEST, RESPONSE> getGenerator();
 
     RESPONSE doRag(REQUEST request);
+
+    default Flux<RESPONSE> doRagReactive(REQUEST request) {
+        throw new RuntimeException("Reactive processing is not available for this RAG Application");
+    }
 }
