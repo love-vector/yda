@@ -15,13 +15,13 @@
  */
 package ai.yda.framework.generator.assistant.openai.autoconfigure;
 
+import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
 import ai.yda.common.shared.model.impl.BaseAssistantRequest;
-import ai.yda.common.shared.model.impl.BaseAssistantResponse;
 import ai.yda.framework.generator.assistant.openai.OpenAiAssistantGenerator;
 import ai.yda.framework.rag.core.generator.Generator;
 
@@ -30,7 +30,7 @@ import ai.yda.framework.rag.core.generator.Generator;
 public class OpenAiAssistantGeneratorAutoConfiguration {
 
     @Bean
-    public Generator<BaseAssistantRequest, BaseAssistantResponse> openAiGenerator(OpenAiChatModel chatModel) {
+    public Generator<BaseAssistantRequest, AssistantMessage> openAiGenerator(OpenAiChatModel chatModel) {
         return new OpenAiAssistantGenerator(chatModel);
     }
 }

@@ -17,12 +17,12 @@ package ai.yda.framework.channel.http.spring.autoconfigure;
 
 import java.util.HashMap;
 
+import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
 import ai.yda.common.shared.model.impl.BaseAssistantRequest;
-import ai.yda.common.shared.model.impl.BaseAssistantResponse;
 import ai.yda.framework.channel.http.factory.HttpNettyChannelFactory;
 import ai.yda.framework.core.channel.Channel;
 
@@ -33,7 +33,7 @@ import static ai.yda.framework.channel.http.config.HttpChannelConfig.*;
 public class ChannelHttpAutoConfiguration {
 
     @Bean
-    public Channel<BaseAssistantRequest, BaseAssistantResponse> channelFactory(ChannelHttpProperties properties) {
+    public Channel<BaseAssistantRequest, AssistantMessage> channelFactory(ChannelHttpProperties properties) {
         var channelFactory = new HttpNettyChannelFactory();
 
         var configuration = channelFactory.buildConfiguration(
@@ -45,7 +45,7 @@ public class ChannelHttpAutoConfiguration {
                     }
                 },
                 BaseAssistantRequest.class,
-                BaseAssistantResponse.class);
+                AssistantMessage.class);
 
         return channelFactory.createChannel(configuration);
     }

@@ -3,13 +3,11 @@ plugins {
 }
 
 dependencies {
-    api project(":yda-common-shared")
     api project(":yda-rag-core")
 
     api 'org.springframework.ai:spring-ai-core:1.0.0-SNAPSHOT'
     implementation 'org.springframework.ai:spring-ai-openai:1.0.0-SNAPSHOT'
 
     implementation 'org.apache.pdfbox:pdfbox:3.0.2'
-
 
 }

@@ -3,10 +3,9 @@ plugins {
 }
 
 dependencies {
-    api project(":yda-common-shared")
     api project(":yda-rag-core")
 
-    implementation platform("org.springframework.ai:spring-ai-bom:1.0.0-SNAPSHOT")
+    api platform("org.springframework.ai:spring-ai-bom:1.0.0-SNAPSHOT")
 
     api 'org.springframework.ai:spring-ai-core'
 }
