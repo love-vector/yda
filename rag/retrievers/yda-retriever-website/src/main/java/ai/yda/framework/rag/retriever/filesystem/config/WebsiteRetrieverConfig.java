@@ -2,11 +2,11 @@ package ai.yda.framework.rag.retriever.filesystem.config;
 
 import lombok.Getter;
 
-import ai.yda.framework.rag.core.retriever.factory.RetrieverConfig;
+import ai.yda.common.shared.factory.FactoryConfig;
 
 @Getter
-public enum WebsiteRetrieverConfig implements RetrieverConfig {
-    LOCAL_DIRECTORY_PATH("localDirectoryPath");
+public enum WebsiteRetrieverConfig implements FactoryConfig {
+    ;
 
     private final String key;
 

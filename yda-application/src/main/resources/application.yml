@@ -5,6 +5,8 @@ ai:
         retriever:
           filesystem:
             localDirectoryPath: /Users/dmmrch/work/IdeaProjects/yda/.data/documents
+          website:
+            local-directory-path:
       channel:
         http:
           method: POST
@@ -32,7 +34,7 @@ spring:
           username: ""
           password: ""
         databaseName: "default"
-        collectionName: "documents"
+        collectionName: "websites"
         embeddingDimension: 1536
         indexType: IVF_FLAT
         metricType: COSINE
