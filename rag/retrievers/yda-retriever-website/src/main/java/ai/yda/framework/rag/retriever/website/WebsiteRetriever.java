@@ -1,4 +1,4 @@
-package ai.yda.framework.rag.retriever.website;
+package ai.yda.framework.rag.retriever.filesystem;
 
 import java.io.IOException;
 import java.util.stream.Collectors;
@@ -12,18 +12,16 @@ import org.springframework.ai.vectorstore.VectorStore;
 import ai.yda.common.shared.model.impl.BaseAssistantRequest;
 import ai.yda.framework.rag.core.model.impl.BaseRagContext;
 import ai.yda.framework.rag.core.retriever.Retriever;
-import ai.yda.framework.rag.retriever.website.constants.Constants;
-import ai.yda.framework.rag.retriever.website.service.WebsiteService;
+import ai.yda.framework.rag.retriever.filesystem.constants.Constants;
+import ai.yda.framework.rag.retriever.filesystem.service.WebsiteService;
 
 @Slf4j
 public class WebsiteRetriever implements Retriever<BaseAssistantRequest, BaseRagContext> {
     private final VectorStore vectorStore;
     private final WebsiteService websiteService = new WebsiteService();
-    private final String url;
 
-    public WebsiteRetriever(VectorStore vectorStore, String url) {
+    public WebsiteRetriever(VectorStore vectorStore) {
         this.vectorStore = vectorStore;
-        this.url = url;
 
         try {
             init();
@@ -50,7 +48,7 @@ public class WebsiteRetriever implements Retriever<BaseAssistantRequest, BaseRag
     }
 
     private void processWebsite() {
-        var documents = websiteService.getPageDocuments(url, Constants.DEFAULT_DEPTH);
+        var documents = websiteService.getPageDocuments(Constants.LINK_FOR_TEST, Constants.DEFAULT_DEPTH);
         var listOfDocuments = websiteService.documentFilterData(documents);
         listOfDocuments.values().parallelStream()
                 .map(documentChunks ->
