@@ -1,4 +1,4 @@
-package ai.yda.framework.rag.retriever.filesystem.constants;
+package ai.yda.framework.rag.retriever.website.constants;
 
 public class Constants {
     public static final String LINK_FOR_TEST = "https://dog.ceo/dog-api/";

@@ -1,4 +1,4 @@
-package ai.yda.framework.rag.retriever.filesystem.service;
+package ai.yda.framework.rag.retriever.website.service;
 
 import java.io.IOException;
 import java.net.URI;
@@ -12,9 +12,9 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
-import ai.yda.framework.rag.retriever.filesystem.constants.Constants;
-import ai.yda.framework.rag.retriever.filesystem.exception.WebsiteReadException;
-import ai.yda.framework.rag.retriever.filesystem.util.ContentUtil;
+import ai.yda.framework.rag.retriever.website.constants.Constants;
+import ai.yda.framework.rag.retriever.website.exception.WebsiteReadException;
+import ai.yda.framework.rag.retriever.website.util.ContentUtil;
 
 @Slf4j
 public class WebsiteService {

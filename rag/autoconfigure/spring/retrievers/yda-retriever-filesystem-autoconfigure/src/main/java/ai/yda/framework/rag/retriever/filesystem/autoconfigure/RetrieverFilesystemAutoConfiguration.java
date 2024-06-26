@@ -27,6 +27,7 @@ import ai.yda.framework.rag.core.model.impl.BaseRagContext;
 import ai.yda.framework.rag.core.retriever.Retriever;
 import ai.yda.framework.rag.core.retriever.factory.RetrieverFactory;
 import ai.yda.framework.rag.retriever.filesystem.factory.FilesystemRetrieverFactory;
+
 import static ai.yda.framework.rag.retriever.filesystem.config.FilesystemRetrieverConfig.LOCAL_DIRECTORY_PATH;
 
 @AutoConfiguration

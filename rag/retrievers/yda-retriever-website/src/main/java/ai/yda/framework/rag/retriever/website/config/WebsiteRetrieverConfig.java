@@ -1,4 +1,4 @@
-package ai.yda.framework.rag.retriever.filesystem.config;
+package ai.yda.framework.rag.retriever.website.config;
 
 import lombok.Getter;
 

@@ -1,14 +1,12 @@
 package ai.yda.framework.rag.retriever.website.autoconfigure;
 
-import ai.yda.common.shared.model.impl.BaseAssistantRequest;
-import ai.yda.framework.rag.core.model.impl.BaseRagContext;
-import ai.yda.framework.rag.core.retriever.Retriever;
-import ai.yda.framework.rag.core.retriever.factory.RetrieverFactory;
-import ai.yda.framework.rag.retriever.filesystem.factory.WebsiteRetrieverFactory;
+import java.util.HashMap;
+
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.param.ConnectParam;
 import io.milvus.param.IndexType;
 import io.milvus.param.MetricType;
+
 import org.springframework.ai.document.MetadataMode;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.openai.OpenAiEmbeddingModel;
@@ -20,7 +18,11 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
-import java.util.HashMap;
+import ai.yda.common.shared.model.impl.BaseAssistantRequest;
+import ai.yda.framework.rag.core.model.impl.BaseRagContext;
+import ai.yda.framework.rag.core.retriever.Retriever;
+import ai.yda.framework.rag.core.retriever.factory.RetrieverFactory;
+import ai.yda.framework.rag.retriever.filesystem.factory.WebsiteRetrieverFactory;
 
 import static org.springframework.ai.retry.RetryUtils.DEFAULT_RETRY_TEMPLATE;
 

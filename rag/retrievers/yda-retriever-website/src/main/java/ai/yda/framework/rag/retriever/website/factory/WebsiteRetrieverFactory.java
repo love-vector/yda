@@ -1,4 +1,4 @@
-package ai.yda.framework.rag.retriever.filesystem.factory;
+package ai.yda.framework.rag.retriever.website.factory;
 
 import java.util.Map;
 
@@ -11,7 +11,7 @@ import ai.yda.common.shared.model.impl.BaseAssistantRequest;
 import ai.yda.framework.rag.core.model.impl.BaseRagContext;
 import ai.yda.framework.rag.core.retriever.Retriever;
 import ai.yda.framework.rag.core.retriever.factory.RetrieverFactory;
-import ai.yda.framework.rag.retriever.filesystem.WebsiteRetriever;
+import ai.yda.framework.rag.retriever.website.WebsiteRetriever;
 
 @RequiredArgsConstructor
 public class WebsiteRetrieverFactory implements RetrieverFactory<BaseAssistantRequest, BaseRagContext> {
