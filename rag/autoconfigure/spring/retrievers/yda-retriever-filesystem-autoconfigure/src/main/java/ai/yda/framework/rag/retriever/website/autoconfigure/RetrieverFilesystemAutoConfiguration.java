@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ai.yda.framework.rag.retriever.filesystem.autoconfigure;
+package ai.yda.framework.rag.retriever.website.autoconfigure;
 
 import java.util.HashMap;
 
