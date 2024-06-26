@@ -1,4 +1,4 @@
-package ai.yda.framework.rag.retriever.website.autoconfigure;
+package ai.yda.framework.rag.retriever.filesystem.autoconfigure;
 
 import lombok.Getter;
 import lombok.Setter;
