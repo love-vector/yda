@@ -2,6 +2,7 @@ package ai.yda.framework.rag.retriever.website.autoconfigure;
 
 import java.util.HashMap;
 
+import ai.yda.framework.rag.retriever.website.factory.WebsiteRetrieverFactory;
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.param.ConnectParam;
 import io.milvus.param.IndexType;
@@ -30,7 +31,7 @@ import static org.springframework.ai.retry.RetryUtils.DEFAULT_RETRY_TEMPLATE;
 @EnableConfigurationProperties({RetrieverWebsiteProperties.class})
 public class RetrieverWebsiteAutoConfiguration {
     @Bean
-    public Retriever<BaseAssistantRequest, BaseRagContext> filesystemRetriever(
+    public Retriever<BaseAssistantRequest, BaseRagContext> websiteRetriever(
             RetrieverFactory<BaseAssistantRequest, BaseRagContext> retrieverFactory,
             RetrieverWebsiteProperties properties) {
 
