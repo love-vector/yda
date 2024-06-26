@@ -24,6 +24,7 @@ import org.springframework.context.annotation.Bean;
 
 import ai.yda.framework.rag.retriever.filesystem.FilesystemRetriever;
 import ai.yda.framework.rag.retriever.filesystem.factory.FilesystemRetrieverFactory;
+
 import static ai.yda.framework.rag.retriever.filesystem.config.FilesystemRetrieverConfig.LOCAL_DIRECTORY_PATH;
 
 @AutoConfiguration
