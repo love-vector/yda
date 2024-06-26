@@ -6,16 +6,16 @@ ai:
           filesystem:
             localDirectoryPath: /Users/dmmrch/work/IdeaProjects/yda/.data/documents
           website:
-            local-directory-path:
+            local-directory-path: D:\assistant\.data\links
       channel:
         http:
           method: POST
           port: 8081
           uri: /channels
-#          streaming:
-#            method: POST
-#            port: 8081
-#            uri: /channels
+      #          streaming:
+      #            method: POST
+      #            port: 8081
+      #            uri: /channels
       generator:
         assistant:
           openai:
@@ -34,7 +34,7 @@ spring:
           username: ""
           password: ""
         databaseName: "default"
-        collectionName: "websites"
+        collectionName: "documents"
         embeddingDimension: 1536
         indexType: IVF_FLAT
         metricType: COSINE

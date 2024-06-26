@@ -1,2 +1,1 @@
-ai.yda.framework.rag.retriever.filesystem.autoconfigure.RetrieverFilesystemAutoConfiguration
-ai.yda.framework.rag.retriever.filesystem.autoconfigure.RetrieverWebsiteAutoConfiguration
+ai.yda.framework.rag.retriever.website.autoconfigure.RetrieverFilesystemAutoConfiguration
