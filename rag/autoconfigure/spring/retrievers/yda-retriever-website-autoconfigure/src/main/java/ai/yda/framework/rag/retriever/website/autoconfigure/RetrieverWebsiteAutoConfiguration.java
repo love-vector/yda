@@ -2,7 +2,6 @@ package ai.yda.framework.rag.retriever.website.autoconfigure;
 
 import java.util.HashMap;
 
-import ai.yda.framework.rag.retriever.website.factory.WebsiteRetrieverFactory;
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.param.ConnectParam;
 import io.milvus.param.IndexType;
@@ -18,12 +17,13 @@ import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 
 import ai.yda.common.shared.model.impl.BaseAssistantRequest;
 import ai.yda.framework.rag.core.model.impl.BaseRagContext;
 import ai.yda.framework.rag.core.retriever.Retriever;
 import ai.yda.framework.rag.core.retriever.factory.RetrieverFactory;
-import ai.yda.framework.rag.retriever.filesystem.factory.WebsiteRetrieverFactory;
+import ai.yda.framework.rag.retriever.website.factory.WebsiteRetrieverFactory;
 
 import static org.springframework.ai.retry.RetryUtils.DEFAULT_RETRY_TEMPLATE;
 
@@ -46,7 +46,8 @@ public class RetrieverWebsiteAutoConfiguration {
         return new WebsiteRetrieverFactory(vectorStore);
     }
 
-    @Bean
+    @Bean(name = "websiteVectorStore")
+    @Primary
     public VectorStore vectorStore(
             MilvusServiceClient milvusClient, EmbeddingModel embeddingModel, RetrieverWebsiteProperties properties) {
         MilvusVectorStore.MilvusVectorStoreConfig config = MilvusVectorStore.MilvusVectorStoreConfig.builder()
@@ -60,6 +61,7 @@ public class RetrieverWebsiteAutoConfiguration {
     }
 
     @Bean
+    @Primary
     public EmbeddingModel embeddingModel(RetrieverWebsiteProperties properties) {
         var openAiApi = new OpenAiApi(properties.getOpenAiKey());
         return new OpenAiEmbeddingModel(
@@ -73,6 +75,7 @@ public class RetrieverWebsiteAutoConfiguration {
     }
 
     @Bean
+    @Primary
     public MilvusServiceClient milvusClient(RetrieverWebsiteProperties properties) {
         return new MilvusServiceClient(ConnectParam.newBuilder()
                 .withAuthorization(properties.getUsername(), properties.getPassword())

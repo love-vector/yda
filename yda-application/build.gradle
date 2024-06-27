@@ -16,7 +16,7 @@ dependencies {
 //    implementation project(':yda-simple-openai-assistant-generator-autoconfigure')
 
 //  Retrievers
-    implementation project(':yda-retriever-filesystem-autoconfigure')
+/*    implementation project(':yda-retriever-filesystem-autoconfigure')*/
     implementation project(':yda-retriever-website-autoconfigure')
 
 

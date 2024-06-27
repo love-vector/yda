@@ -7,4 +7,6 @@ dependencies {
     api project(":yda-rag-core")
     implementation 'org.jsoup:jsoup:1.15.3'
     api 'org.springframework.ai:spring-ai-milvus-store:1.0.0-M1'
+    api 'org.springframework.ai:spring-ai-core:1.0.0-M1'
+    api 'org.springframework.ai:spring-ai-openai:1.0.0-M1'
 }

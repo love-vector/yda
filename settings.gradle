@@ -27,8 +27,8 @@ project(':yda-retriever-filesystem').projectDir = file('rag/retrievers/yda-retri
 include 'yda-retriever-website'
 project(':yda-retriever-website').projectDir = file('rag/retrievers/yda-retriever-website')
 
-include 'yda-retriever-filesystem-autoconfigure'
-project(':yda-retriever-filesystem-autoconfigure').projectDir = file('rag/autoconfigure/spring/retrievers/yda-retriever-filesystem-autoconfigure')
+/*include 'yda-retriever-filesystem-autoconfigure'
+project(':yda-retriever-filesystem-autoconfigure').projectDir = file('rag/autoconfigure/spring/retrievers/yda-retriever-filesystem-autoconfigure')*/
 
 include'yda-retriever-website-autoconfigure'
 project(':yda-retriever-website-autoconfigure').projectDir = file('rag/autoconfigure/spring/retrievers/yda-retriever-website-autoconfigure')
