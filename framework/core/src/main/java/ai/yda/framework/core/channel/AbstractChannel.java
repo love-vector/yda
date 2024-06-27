@@ -1,20 +1,19 @@
 package ai.yda.framework.core.channel;
 
 import ai.yda.common.shared.model.impl.BaseAssistantRequest;
-import ai.yda.common.shared.model.impl.BaseAssistantResponse;
 import ai.yda.framework.core.assistant.Assistant;
 
-public abstract class AbstractChannel implements Channel<BaseAssistantRequest, BaseAssistantResponse> {
+public abstract class AbstractChannel<RESPONSE> implements Channel<BaseAssistantRequest, RESPONSE> {
 
-    private Assistant<BaseAssistantRequest, BaseAssistantResponse> assistant;
+    private Assistant<BaseAssistantRequest, RESPONSE> assistant;
 
     @Override
-    public BaseAssistantResponse processRequest(BaseAssistantRequest request) {
+    public RESPONSE processRequest(BaseAssistantRequest request) {
         return assistant.processRequest(request);
     }
 
     @Override
-    public void setAssistant(Assistant<BaseAssistantRequest, BaseAssistantResponse> assistant) {
+    public void setAssistant(Assistant<BaseAssistantRequest, RESPONSE> assistant) {
         this.assistant = assistant;
     }
 }
