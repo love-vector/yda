@@ -20,9 +20,11 @@ public class WebsiteRetriever implements Retriever<BaseAssistantRequest, BaseRag
     private final VectorStore vectorStore;
     private final WebsiteService websiteService = new WebsiteService();
 
-    public WebsiteRetriever(VectorStore vectorStore) {
-        this.vectorStore = vectorStore;
+    private final String url;
 
+    public WebsiteRetriever(VectorStore vectorStore, String url) {
+        this.vectorStore = vectorStore;
+        this.url = url;
         try {
             init();
         } catch (IOException e) {
@@ -48,7 +50,7 @@ public class WebsiteRetriever implements Retriever<BaseAssistantRequest, BaseRag
     }
 
     private void processWebsite() {
-        var documents = websiteService.getPageDocuments(Constants.LINK_FOR_TEST, Constants.DEFAULT_DEPTH);
+        var documents = websiteService.getPageDocuments(url, Constants.DEFAULT_DEPTH);
         var listOfDocuments = websiteService.documentFilterData(documents);
         listOfDocuments.values().parallelStream()
                 .map(documentChunks ->
