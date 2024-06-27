@@ -12,26 +12,27 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.*;
 
+import org.springframework.ai.chat.messages.AssistantMessage;
+
 import ai.yda.common.shared.model.impl.BaseAssistantRequest;
-import ai.yda.common.shared.model.impl.BaseAssistantResponse;
 import ai.yda.framework.channel.http.config.HttpChannelConfig;
 import ai.yda.framework.core.channel.AbstractChannel;
 import ai.yda.framework.core.channel.Channel;
 import ai.yda.framework.core.channel.factory.AbstractChannelFactory;
 import ai.yda.framework.core.channel.factory.ChannelConfiguration;
 
-public class HttpNettyChannelFactory extends AbstractChannelFactory<BaseAssistantRequest, BaseAssistantResponse> {
+public class HttpNettyChannelFactory extends AbstractChannelFactory<BaseAssistantRequest, AssistantMessage> {
 
     @Override
-    public Channel<BaseAssistantRequest, BaseAssistantResponse> createChannel(
-            ChannelConfiguration<BaseAssistantRequest, BaseAssistantResponse> configuration) {
+    public Channel<BaseAssistantRequest, AssistantMessage> createChannel(
+            ChannelConfiguration<BaseAssistantRequest, AssistantMessage> configuration) {
         return new HttpNettyChannel(configuration);
     }
 
-    private static class HttpNettyChannel extends AbstractChannel {
-        private final ChannelConfiguration<BaseAssistantRequest, BaseAssistantResponse> configuration;
+    private static class HttpNettyChannel extends AbstractChannel<AssistantMessage> {
+        private final ChannelConfiguration<BaseAssistantRequest, AssistantMessage> configuration;
 
-        public HttpNettyChannel(ChannelConfiguration<BaseAssistantRequest, BaseAssistantResponse> configuration) {
+        public HttpNettyChannel(ChannelConfiguration<BaseAssistantRequest, AssistantMessage> configuration) {
             this.configuration = configuration;
             Executors.newSingleThreadExecutor().execute(this::setupHttpServer);
         }
@@ -65,7 +66,7 @@ public class HttpNettyChannelFactory extends AbstractChannelFactory<BaseAssistan
                                                 .readValue(
                                                         req.content().toString(io.netty.util.CharsetUtil.UTF_8),
                                                         configuration.getRequestClass());
-                                        BaseAssistantResponse response = processRequest(request);
+                                        var response = processRequest(request);
 
                                         FullHttpResponse httpResponse = new DefaultFullHttpResponse(
                                                 HttpVersion.HTTP_1_1,

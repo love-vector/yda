@@ -4,10 +4,9 @@ import java.util.Map;
 
 import ai.yda.common.shared.factory.FactoryConfig;
 import ai.yda.common.shared.model.AssistantRequest;
-import ai.yda.common.shared.model.AssistantResponse;
 import ai.yda.framework.core.channel.Channel;
 
-public abstract class AbstractChannelFactory<REQUEST extends AssistantRequest, RESPONSE extends AssistantResponse>
+public abstract class AbstractChannelFactory<REQUEST extends AssistantRequest, RESPONSE>
         implements ChannelFactory<REQUEST, RESPONSE> {
 
     @Override

@@ -7,6 +7,5 @@ dependencies {
     implementation 'edu.stanford.nlp:stanford-corenlp:4.5.7'
     implementation 'edu.stanford.nlp:stanford-corenlp:4.5.7:models'
     implementation 'org.jsoup:jsoup:1.17.2'
-    api 'io.projectreactor:reactor-core:3.6.6'
 
 }

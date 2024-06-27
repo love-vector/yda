@@ -22,10 +22,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
-import ai.yda.common.shared.model.impl.BaseAssistantRequest;
-import ai.yda.framework.rag.core.model.impl.BaseRagContext;
-import ai.yda.framework.rag.core.retriever.Retriever;
-import ai.yda.framework.rag.core.retriever.factory.RetrieverFactory;
+import ai.yda.framework.rag.retriever.filesystem.FilesystemRetriever;
 import ai.yda.framework.rag.retriever.filesystem.factory.FilesystemRetrieverFactory;
 
 import static ai.yda.framework.rag.retriever.filesystem.config.FilesystemRetrieverConfig.LOCAL_DIRECTORY_PATH;
@@ -35,11 +32,10 @@ import static ai.yda.framework.rag.retriever.filesystem.config.FilesystemRetriev
 public class RetrieverFilesystemAutoConfiguration {
 
     @Bean
-    public Retriever<BaseAssistantRequest, BaseRagContext> filesystemRetriever(
-            RetrieverFactory<BaseAssistantRequest, BaseRagContext> retrieverFactory,
-            RetrieverFilesystemProperties properties) {
+    public FilesystemRetriever filesystemRetriever(
+            FilesystemRetrieverFactory filesystemRetrieverFactory, RetrieverFilesystemProperties properties) {
 
-        return retrieverFactory.createRetriever(new HashMap<>() {
+        return filesystemRetrieverFactory.createRetriever(new HashMap<>() {
             {
                 put(LOCAL_DIRECTORY_PATH, properties.getLocalDirectoryPath());
             }
@@ -47,7 +43,7 @@ public class RetrieverFilesystemAutoConfiguration {
     }
 
     @Bean
-    public RetrieverFactory<BaseAssistantRequest, BaseRagContext> retrieverFactory(VectorStore vectorStore) {
+    public FilesystemRetrieverFactory retrieverFactory(VectorStore vectorStore) {
         return new FilesystemRetrieverFactory(vectorStore);
     }
 }

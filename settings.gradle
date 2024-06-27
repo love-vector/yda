@@ -33,12 +33,6 @@ project(':yda-retriever-filesystem-autoconfigure').projectDir = file('rag/autoco
 include'yda-retriever-website-autoconfigure'
 project(':yda-retriever-website-autoconfigure').projectDir = file('rag/autoconfigure/spring/retrievers/yda-retriever-website-autoconfigure')
 
-include 'yda-azure-provider'
-project(':yda-azure-provider').projectDir = file('rag/generators/llm-providers/yda-azure-provider')
-
-include 'yda-theokanning-provider'
-project(':yda-theokanning-provider').projectDir = file('rag/generators/llm-providers/yda-theokanning-provider')
-
 include 'yda-framework-core'
 project(':yda-framework-core').projectDir = file('framework/core')
 
@@ -47,13 +41,6 @@ project(':channel-http').projectDir = file('channels/channel-http')
 
 include 'channel-http-autoconfigure'
 project(':channel-http-autoconfigure').projectDir = file('channels/autoconfigure/spring/channel-http-autoconfigure')
-
-include 'channel-http-streaming'
-project(':channel-http-streaming').projectDir = file('channels/channel-http-streaming')
-
-include 'channel-http-streaming-autoconfigure'
-project(':channel-http-streaming-autoconfigure').projectDir = file('channels/autoconfigure/spring/channel-http-streaming-autoconfigure')
-
 
 //test
 include 'yda-application'
