@@ -6,7 +6,7 @@ import ai.yda.common.shared.factory.FactoryConfig;
 
 @Getter
 public enum WebsiteRetrieverConfig implements FactoryConfig {
-    ;
+    WEBSITE_URL("url");
 
     private final String key;
 

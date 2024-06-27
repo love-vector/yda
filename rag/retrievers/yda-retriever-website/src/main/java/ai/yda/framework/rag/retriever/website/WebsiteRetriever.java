@@ -19,9 +19,11 @@ import ai.yda.framework.rag.retriever.website.service.WebsiteService;
 public class WebsiteRetriever implements Retriever<BaseAssistantRequest, BaseRagContext> {
     private final VectorStore vectorStore;
     private final WebsiteService websiteService = new WebsiteService();
+    private final String url;
 
-    public WebsiteRetriever(VectorStore vectorStore) {
+    public WebsiteRetriever(VectorStore vectorStore, String url) {
         this.vectorStore = vectorStore;
+        this.url = url;
 
         try {
             init();
@@ -48,7 +50,7 @@ public class WebsiteRetriever implements Retriever<BaseAssistantRequest, BaseRag
     }
 
     private void processWebsite() {
-        var documents = websiteService.getPageDocuments(Constants.LINK_FOR_TEST, Constants.DEFAULT_DEPTH);
+        var documents = websiteService.getPageDocuments(url, Constants.DEFAULT_DEPTH);
         var listOfDocuments = websiteService.documentFilterData(documents);
         listOfDocuments.values().parallelStream()
                 .map(documentChunks ->

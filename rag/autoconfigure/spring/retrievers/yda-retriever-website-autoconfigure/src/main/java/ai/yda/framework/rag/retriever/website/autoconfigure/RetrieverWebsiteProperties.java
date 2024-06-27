@@ -1,10 +1,12 @@
 package ai.yda.framework.rag.retriever.website.autoconfigure;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@Data
+@Getter
+@Setter
 @ConfigurationProperties(RetrieverWebsiteProperties.CONFIG_PREFIX)
 public class RetrieverWebsiteProperties {
     public static final String CONFIG_PREFIX = "ai.yda.framework.rag.retriever.website";
@@ -26,4 +28,6 @@ public class RetrieverWebsiteProperties {
     private String password;
 
     private String host;
+
+    private String url;
 }

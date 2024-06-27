@@ -25,6 +25,7 @@ import ai.yda.framework.rag.core.retriever.Retriever;
 import ai.yda.framework.rag.core.retriever.factory.RetrieverFactory;
 import ai.yda.framework.rag.retriever.website.factory.WebsiteRetrieverFactory;
 
+import static ai.yda.framework.rag.retriever.website.config.WebsiteRetrieverConfig.WEBSITE_URL;
 import static org.springframework.ai.retry.RetryUtils.DEFAULT_RETRY_TEMPLATE;
 
 @AutoConfiguration
@@ -34,9 +35,9 @@ public class RetrieverWebsiteAutoConfiguration {
     public Retriever<BaseAssistantRequest, BaseRagContext> websiteRetriever(
             RetrieverFactory<BaseAssistantRequest, BaseRagContext> retrieverFactory,
             RetrieverWebsiteProperties properties) {
-
         return retrieverFactory.createRetriever(new HashMap<>() {
             {
+                put(WEBSITE_URL, properties.getUrl());
             }
         });
     }
