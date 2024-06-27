@@ -19,18 +19,14 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
-import ai.yda.common.shared.model.impl.BaseAssistantRequest;
-import ai.yda.common.shared.model.impl.BaseAssistantResponse;
 import ai.yda.framework.generator.assistant.openai.simple.SimpleOpenAiAssistantGenerator;
-import ai.yda.framework.rag.core.generator.Generator;
 
 @AutoConfiguration
 @EnableConfigurationProperties({SimpleOpenAiAssistantGeneratorProperties.class})
 public class SimpleOpenAiAssistantGeneratorAutoConfiguration {
 
     @Bean
-    public Generator<BaseAssistantRequest, BaseAssistantResponse> openAiGenerator(
-            SimpleOpenAiAssistantGeneratorProperties properties) {
+    public SimpleOpenAiAssistantGenerator openAiGenerator(SimpleOpenAiAssistantGeneratorProperties properties) {
         return new SimpleOpenAiAssistantGenerator(properties.getApiKey(), properties.getAssistantId());
     }
 }

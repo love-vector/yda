@@ -10,7 +10,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(SimpleOpenAiAssistantGeneratorProperties.CONFIG_PREFIX)
 public class SimpleOpenAiAssistantGeneratorProperties {
 
-    public static final String CONFIG_PREFIX = "ai.yda.framework.generator.assistant.openai.simple.autoconfigure";
+    public static final String CONFIG_PREFIX = "ai.yda.framework.rag.generator.assistant.openai.simple.autoconfigure";
 
     private String apiKey;
 

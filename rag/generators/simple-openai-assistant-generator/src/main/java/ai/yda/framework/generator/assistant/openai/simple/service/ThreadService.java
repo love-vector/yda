@@ -1,5 +1,9 @@
 package ai.yda.framework.generator.assistant.openai.simple.service;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,29 +13,25 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.http.*;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import ai.yda.framework.generator.assistant.openai.simple.util.CustomHttpHeaders;
 
+@Service
 @RequiredArgsConstructor
 public class ThreadService {
 
     private final String apiKey;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final RestTemplate restTemplate = new RestTemplate();
 
-    private final WebClient webClient = WebClient.builder()
-            .baseUrl("https://api.openai.com/v1")
-            .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-            .build();
-
-    public Mono<Void> addMessageToThread(String threadId, String content) {
-        var message = new HashMap<>() {
+    public void addMessageToThread(String threadId, String content) {
+        var message = new HashMap<String, Object>() {
             {
                 put("role", "user");
                 put("content", List.of(Map.of("type", "text", "text", content)));
@@ -40,86 +40,104 @@ public class ThreadService {
 
         try {
             var messageJson = objectMapper.writeValueAsString(message);
-            return webClient
-                    .post()
-                    .uri("/threads/{thread_id}/messages", threadId)
-                    .header(HttpHeaders.CONTENT_TYPE, "application/json")
-                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey)
-                    .header(CustomHttpHeaders.OPEN_AI_BETA, "assistants=v2")
-                    .bodyValue(messageJson)
-                    .retrieve()
-                    .bodyToMono(String.class)
-                    .doOnError(WebClientResponseException.class, ex -> {
-                        System.err.println("Error status code: " + ex.getRawStatusCode());
-                        System.err.println("Response body: " + ex.getResponseBodyAsString());
-                    })
-                    .then();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(apiKey);
+            headers.add(CustomHttpHeaders.OPEN_AI_BETA, "assistants=v2");
+
+            HttpEntity<String> entity = new HttpEntity<>(messageJson, headers);
+            restTemplate.exchange(
+                    "https://api.openai.com/v1/threads/{thread_id}/messages",
+                    HttpMethod.POST,
+                    entity,
+                    String.class,
+                    threadId);
         } catch (JsonProcessingException e) {
-            return Mono.error(new RuntimeException("Error during Request serialization: ", e));
+            throw new RuntimeException("Error during Request serialization: ", e);
+        } catch (HttpClientErrorException ex) {
+            System.err.println("Error status code: " + ex.getStatusCode());
+            System.err.println("Response body: " + ex.getResponseBodyAsString());
         }
     }
 
-    public Flux<String> createRunStream(String threadId, String assistantId) {
-        var body = new HashMap<>() {
-            {
-                put("assistant_id", assistantId);
-                put("stream", true);
-                put("tool_choice", null);
-            }
-        };
+    public SseEmitter createRunStream(final String threadId, String assistantId) {
+        SseEmitter emitter = new SseEmitter();
 
-        try {
-            var messageJson = objectMapper.writeValueAsString(body);
-
-            return webClient
-                    .post()
-                    .uri("/threads/{thread_id}/runs", threadId)
-                    .header(HttpHeaders.ACCEPT, "text/event-stream")
-                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey)
-                    .header(CustomHttpHeaders.OPEN_AI_BETA, "assistants=v1")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(messageJson)
-                    .retrieve()
-                    .bodyToFlux(String.class)
-                    .doOnError(WebClientResponseException.class, ex -> {
-                        System.err.println("Error status code: " + ex.getRawStatusCode());
-                        System.err.println("Response body: " + ex.getResponseBodyAsString());
-                    });
-        } catch (JsonProcessingException e) {
-            return Flux.error(new RuntimeException("Error during Request serialization: ", e));
-        }
-    }
-
-    public Mono<String> getThreadIdForUser(String sessionId) {
-        String threadId = null; // Replace with your logic to get threadId
-
-        if (threadId == null) {
-            return createThread(generateSessionId()).map(node -> node.get("id").asText());
-        }
-
-        return getThread(threadId).map(node -> node.get("id").asText());
-    }
-
-    private Mono<JsonNode> getThread(String threadId) {
-        return webClient
-                .get()
-                .uri("/threads/{thread_id}", threadId)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey)
-                .header("OpenAI-Beta", "assistants=v2")
-                .retrieve()
-                .bodyToMono(String.class)
-                .map(response -> {
+        new Thread(() -> {
                     try {
-                        return objectMapper.readTree(response);
-                    } catch (JsonProcessingException e) {
-                        throw new RuntimeException("Error processing JSON response", e);
+                        var body = new HashMap<String, Object>() {
+                            {
+                                put("assistant_id", assistantId);
+                                put("stream", true);
+                                put("tool_choice", null);
+                            }
+                        };
+
+                        var bodyJson = objectMapper.writeValueAsString(body);
+                        URL url = new URL("https://api.openai.com/v1/threads/" + threadId + "/runs");
+                        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                        connection.setRequestMethod("POST");
+                        connection.setRequestProperty(HttpHeaders.ACCEPT, "text/event-stream");
+                        connection.setRequestProperty(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey);
+                        connection.setRequestProperty(CustomHttpHeaders.OPEN_AI_BETA, "assistants=v1");
+                        connection.setRequestProperty(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+                        connection.setDoOutput(true);
+                        connection.getOutputStream().write(bodyJson.getBytes());
+
+                        try (BufferedReader reader =
+                                new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+                            String line;
+                            while ((line = reader.readLine()) != null) {
+                                emitter.send(SseEmitter.event().data(line));
+                            }
+                        } catch (Exception e) {
+                            emitter.completeWithError(e);
+                        } finally {
+                            emitter.complete();
+                        }
+                    } catch (Exception e) {
+                        emitter.completeWithError(e);
                     }
                 })
-                .onErrorResume(WebClientResponseException.NotFound.class, ex -> Mono.empty());
+                .start();
+
+        return emitter;
     }
 
-    private Mono<JsonNode> createThread(String sessionId) {
-        var body = new HashMap<>() {
+    private static String generateSessionId() {
+        return UUID.randomUUID().toString();
+    }
+
+    public String getThreadIdForUser(String sessionId) {
+        String threadId = null;
+
+        if (threadId == null) {
+            return createThread(generateSessionId()).get("id").asText();
+        }
+
+        return getThread(threadId).get("id").asText();
+    }
+
+    private JsonNode getThread(String threadId) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(apiKey);
+            headers.add(CustomHttpHeaders.OPEN_AI_BETA, "assistants=v2");
+
+            HttpEntity<Void> entity = new HttpEntity<>(headers);
+            ResponseEntity<String> response = restTemplate.exchange(
+                    "https://api.openai.com/v1/threads/{thread_id}", HttpMethod.GET, entity, String.class, threadId);
+
+            return objectMapper.readTree(response.getBody());
+        } catch (HttpClientErrorException.NotFound ex) {
+            return null;
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Error processing JSON response", e);
+        }
+    }
+
+    private JsonNode createThread(String sessionId) {
+        var body = new HashMap<String, Object>() {
             {
                 put("metadata", Map.of("session_id", sessionId));
             }
@@ -127,27 +145,19 @@ public class ThreadService {
 
         try {
             var requestBody = objectMapper.writeValueAsString(body);
-            return webClient
-                    .post()
-                    .uri("/threads")
-                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey)
-                    .header("OpenAI-Beta", "assistants=v2")
-                    .bodyValue(requestBody)
-                    .retrieve()
-                    .bodyToMono(String.class)
-                    .map(response -> {
-                        try {
-                            return objectMapper.readTree(response);
-                        } catch (JsonProcessingException e) {
-                            throw new RuntimeException("Error during request serialization: ", e);
-                        }
-                    });
-        } catch (JsonProcessingException e) {
-            return Mono.error(new RuntimeException("Error during request serialization: ", e));
-        }
-    }
 
-    private static String generateSessionId() {
-        return UUID.randomUUID().toString();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(apiKey);
+            headers.add(CustomHttpHeaders.OPEN_AI_BETA, "assistants=v2");
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
+            ResponseEntity<String> response =
+                    restTemplate.exchange("https://api.openai.com/v1/threads", HttpMethod.POST, entity, String.class);
+
+            return objectMapper.readTree(response.getBody());
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Error during request serialization: ", e);
+        }
     }
 }
