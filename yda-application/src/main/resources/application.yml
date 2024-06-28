@@ -3,8 +3,18 @@ ai:
     framework:
       rag:
         retriever:
-          filesystem:
-            localDirectoryPath: /Users/dmmrch/work/IdeaProjects/yda/.data/documents
+#          filesystem:
+#            localDirectoryPath: /Users/dmmrch/work/IdeaProjects/yda/.data/documents
+          website:
+            databaseName: default
+            collectionName: websites
+            embeddingDimension: 1536
+            username:
+            password:
+            host: http://localhost:19530
+            openAiKey: sk-proj-eTAeDDwK4dEQY09ZQktbT3BlbkFJeaKh8oDF3sZT00LtAVnf
+            openAiModel: text-embedding-3-small
+            url: https://www.tqg.de/sitemap.xml
         generator:
           assistant:
             openai:
