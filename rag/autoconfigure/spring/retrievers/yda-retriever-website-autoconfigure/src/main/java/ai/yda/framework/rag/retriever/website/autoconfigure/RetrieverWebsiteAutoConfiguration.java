@@ -19,10 +19,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 
-import ai.yda.common.shared.model.impl.BaseAssistantRequest;
-import ai.yda.framework.rag.core.model.impl.BaseRagContext;
-import ai.yda.framework.rag.core.retriever.Retriever;
-import ai.yda.framework.rag.core.retriever.factory.RetrieverFactory;
+import ai.yda.framework.rag.retriever.website.WebsiteRetriever;
 import ai.yda.framework.rag.retriever.website.factory.WebsiteRetrieverFactory;
 
 import static ai.yda.framework.rag.retriever.website.config.WebsiteRetrieverConfig.WEBSITE_URL;
@@ -32,9 +29,8 @@ import static org.springframework.ai.retry.RetryUtils.DEFAULT_RETRY_TEMPLATE;
 @EnableConfigurationProperties({RetrieverWebsiteProperties.class})
 public class RetrieverWebsiteAutoConfiguration {
     @Bean
-    public Retriever<BaseAssistantRequest, BaseRagContext> websiteRetriever(
-            RetrieverFactory<BaseAssistantRequest, BaseRagContext> retrieverFactory,
-            RetrieverWebsiteProperties properties) {
+    public WebsiteRetriever websiteRetriever(
+            WebsiteRetrieverFactory retrieverFactory, RetrieverWebsiteProperties properties) {
         return retrieverFactory.createRetriever(new HashMap<>() {
             {
                 put(WEBSITE_URL, properties.getUrl());
@@ -43,7 +39,7 @@ public class RetrieverWebsiteAutoConfiguration {
     }
 
     @Bean
-    public RetrieverFactory<BaseAssistantRequest, BaseRagContext> retrieverFactory(VectorStore vectorStore) {
+    public WebsiteRetrieverFactory websiteRetrieverFactory(VectorStore vectorStore) {
         return new WebsiteRetrieverFactory(vectorStore);
     }
 

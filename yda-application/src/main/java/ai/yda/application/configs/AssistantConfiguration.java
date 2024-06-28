@@ -13,19 +13,20 @@ import ai.yda.framework.core.assistant.RagAssistant;
 import ai.yda.framework.generator.assistant.openai.simple.SimpleOpenAiAssistantGenerator;
 import ai.yda.framework.rag.base.application.BaseRagApplication;
 import ai.yda.framework.rag.base.augmenter.BaseChainAugmenter;
-import ai.yda.framework.rag.retriever.filesystem.FilesystemRetriever;
+import ai.yda.framework.rag.retriever.website.WebsiteRetriever;
 
 @Configuration
 @RequiredArgsConstructor
 public class AssistantConfiguration {
 
-    private final FilesystemRetriever filesystemRetriever;
+    private final WebsiteRetriever websiteRetriever;
     private final SimpleOpenAiAssistantGenerator openAiAssistantGenerator;
     private final AsyncChannel asyncController;
 
     @PostConstruct
     public void init() {
-        var ragApplication = new BaseRagApplication<>(filesystemRetriever, new BaseChainAugmenter(), openAiAssistantGenerator);
+        var ragApplication =
+                new BaseRagApplication<>(websiteRetriever, new BaseChainAugmenter(), openAiAssistantGenerator);
         new RagAssistant<>(ragApplication, List.of(asyncController));
     }
 }
