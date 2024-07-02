@@ -7,7 +7,7 @@ import ai.yda.common.shared.factory.FactoryConfig;
 @Getter
 public enum WebsiteRetrieverConfig implements FactoryConfig {
     WEBSITE_URL("url"),
-    IS_ENABLED("enableSiteParsing");
+    IS_CRAWLING_ENABLE("autoStartSiteParsing");
 
     private final String key;
 

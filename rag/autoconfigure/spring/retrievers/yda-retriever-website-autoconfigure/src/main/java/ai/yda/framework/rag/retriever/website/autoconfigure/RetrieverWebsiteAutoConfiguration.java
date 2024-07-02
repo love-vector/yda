@@ -22,8 +22,7 @@ import org.springframework.context.annotation.Primary;
 import ai.yda.framework.rag.retriever.website.WebsiteRetriever;
 import ai.yda.framework.rag.retriever.website.factory.WebsiteRetrieverFactory;
 
-import static ai.yda.framework.rag.retriever.website.config.WebsiteRetrieverConfig.IS_ENABLED;
-import static ai.yda.framework.rag.retriever.website.config.WebsiteRetrieverConfig.WEBSITE_URL;
+import static ai.yda.framework.rag.retriever.website.config.WebsiteRetrieverConfig.*;
 import static org.springframework.ai.retry.RetryUtils.DEFAULT_RETRY_TEMPLATE;
 
 @AutoConfiguration
@@ -35,7 +34,7 @@ public class RetrieverWebsiteAutoConfiguration {
         return retrieverFactory.createRetriever(new HashMap<>() {
             {
                 put(WEBSITE_URL, properties.getUrl());
-                put(IS_ENABLED, String.valueOf(properties.isEnableSiteParsing()));
+                put(IS_CRAWLING_ENABLE, String.valueOf(properties.isAutoStartSiteParsing()));
             }
         });
     }

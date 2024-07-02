@@ -21,11 +21,11 @@ public class WebsiteRetriever implements Retriever<BaseAssistantRequest, BaseRag
 
     private final String url;
 
-    public WebsiteRetriever(VectorStore vectorStore, String url, boolean isEnabled) {
+    public WebsiteRetriever(VectorStore vectorStore, String url, boolean isCrawlingEnabled) {
         this.vectorStore = vectorStore;
         this.url = url;
         try {
-            if (isEnabled) {
+            if (isCrawlingEnabled) {
                 init();
             }
         } catch (IOException e) {

@@ -29,5 +29,5 @@ public class RetrieverWebsiteProperties {
 
     private String url;
 
-    private boolean enableSiteParsing;
+    private boolean autoStartSiteParsing;
 }
