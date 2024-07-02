@@ -1,6 +1,5 @@
 package ai.yda.framework.rag.retriever.website;
 
-import java.io.IOException;
 import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
@@ -24,13 +23,8 @@ public class WebsiteRetriever implements Retriever<BaseAssistantRequest, BaseRag
     public WebsiteRetriever(VectorStore vectorStore, String url, boolean isCrawlingEnabled) {
         this.vectorStore = vectorStore;
         this.url = url;
-        try {
-            if (isCrawlingEnabled) {
-                init();
-            }
-        } catch (IOException e) {
-            log.error("Failed initialize Retriever: {}", e.getClass());
-            throw new RuntimeException(e);
+        if (isCrawlingEnabled) {
+            processWebsite();
         }
     }
 
@@ -44,10 +38,6 @@ public class WebsiteRetriever implements Retriever<BaseAssistantRequest, BaseRag
                         .map(Document::getContent)
                         .collect(Collectors.toList()))
                 .build();
-    }
-
-    public void init() throws IOException {
-        processWebsite();
     }
 
     private void processWebsite() {

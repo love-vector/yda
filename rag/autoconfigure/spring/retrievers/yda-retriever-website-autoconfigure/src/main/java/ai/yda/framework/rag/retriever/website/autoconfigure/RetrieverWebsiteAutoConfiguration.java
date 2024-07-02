@@ -34,7 +34,7 @@ public class RetrieverWebsiteAutoConfiguration {
         return retrieverFactory.createRetriever(new HashMap<>() {
             {
                 put(WEBSITE_URL, properties.getUrl());
-                put(IS_CRAWLING_ENABLE, String.valueOf(properties.isAutoStartSiteParsing()));
+                put(IS_CRAWLING_ENABLED, String.valueOf(properties.isCrawlingEnabled()));
             }
         });
     }

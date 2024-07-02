@@ -22,6 +22,6 @@ public class WebsiteRetrieverFactory implements RetrieverFactory<BaseAssistantRe
     @Override
     public WebsiteRetriever createRetriever(Map<? extends FactoryConfig, String> config) {
         return new WebsiteRetriever(
-                vectorStore, config.get(WEBSITE_URL), Boolean.parseBoolean(config.get(IS_CRAWLING_ENABLE)));
+                vectorStore, config.get(WEBSITE_URL), Boolean.parseBoolean(config.get(IS_CRAWLING_ENABLED)));
     }
 }
