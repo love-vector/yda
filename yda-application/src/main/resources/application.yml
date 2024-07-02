@@ -14,7 +14,7 @@ ai:
             host: http://localhost:19530
             openAiKey: sk-proj-eTAeDDwK4dEQY09ZQktbT3BlbkFJeaKh8oDF3sZT00LtAVnf
             openAiModel: text-embedding-3-small
-            url: https://www.tqg.de/sitemap.xml false
+            url: https://www.tqg.de/sitemap.xml
             crawling-enabled: false
         generator:
           assistant:
