@@ -24,8 +24,14 @@ project(':yda-simple-openai-assistant-generator-autoconfigure').projectDir = fil
 include 'yda-retriever-filesystem'
 project(':yda-retriever-filesystem').projectDir = file('rag/retrievers/yda-retriever-filesystem')
 
-include 'yda-retriever-filesystem-autoconfigure'
-project(':yda-retriever-filesystem-autoconfigure').projectDir = file('rag/autoconfigure/spring/retrievers/yda-retriever-filesystem-autoconfigure')
+include 'yda-retriever-website'
+project(':yda-retriever-website').projectDir = file('rag/retrievers/yda-retriever-website')
+
+/*include 'yda-retriever-filesystem-autoconfigure'
+project(':yda-retriever-filesystem-autoconfigure').projectDir = file('rag/autoconfigure/spring/retrievers/yda-retriever-filesystem-autoconfigure')*/
+
+include'yda-retriever-website-autoconfigure'
+project(':yda-retriever-website-autoconfigure').projectDir = file('rag/autoconfigure/spring/retrievers/yda-retriever-website-autoconfigure')
 
 include 'yda-framework-core'
 project(':yda-framework-core').projectDir = file('framework/core')
