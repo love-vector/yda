@@ -7,7 +7,6 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -27,10 +26,19 @@ import ai.yda.framework.generator.assistant.openai.simple.util.CustomHttpHeaders
 public class ThreadService {
 
     private final String apiKey;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final RestTemplate restTemplate = new RestTemplate();
 
-    public void addMessageToThread(String threadId, String content) {
+    public JsonNode getOrCreateThread(final String threadId) {
+
+        if (threadId == null) {
+            return createThread();
+        }
+        return getThread(threadId);
+    }
+
+    public void addMessageToThread(final String threadId, final String content) {
         var message = new HashMap<String, Object>() {
             {
                 put("role", "user");
@@ -60,7 +68,7 @@ public class ThreadService {
         }
     }
 
-    public SseEmitter createRunStream(final String threadId, String assistantId) {
+    public SseEmitter createRunStream(final String threadId, final String assistantId) {
         SseEmitter emitter = new SseEmitter();
 
         new Thread(() -> {
@@ -104,21 +112,7 @@ public class ThreadService {
         return emitter;
     }
 
-    private static String generateSessionId() {
-        return UUID.randomUUID().toString();
-    }
-
-    public String getThreadIdForUser(String sessionId) {
-        String threadId = null;
-
-        if (threadId == null) {
-            return createThread(generateSessionId()).get("id").asText();
-        }
-
-        return getThread(threadId).get("id").asText();
-    }
-
-    private JsonNode getThread(String threadId) {
+    private JsonNode getThread(final String threadId) {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setBearerAuth(apiKey);
@@ -136,22 +130,14 @@ public class ThreadService {
         }
     }
 
-    private JsonNode createThread(String sessionId) {
-        var body = new HashMap<String, Object>() {
-            {
-                put("metadata", Map.of("session_id", sessionId));
-            }
-        };
-
+    private JsonNode createThread() {
         try {
-            var requestBody = objectMapper.writeValueAsString(body);
-
             HttpHeaders headers = new HttpHeaders();
             headers.setBearerAuth(apiKey);
             headers.add(CustomHttpHeaders.OPEN_AI_BETA, "assistants=v2");
             headers.setContentType(MediaType.APPLICATION_JSON);
 
-            HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
+            HttpEntity<String> entity = new HttpEntity<>(headers);
             ResponseEntity<String> response =
                     restTemplate.exchange("https://api.openai.com/v1/threads", HttpMethod.POST, entity, String.class);
 

@@ -8,7 +8,12 @@ import ai.yda.framework.rag.core.application.RagApplication;
 
 public abstract class AbstractAssistant<RESPONSE> implements Assistant<BaseAssistantRequest, RESPONSE> {
 
-    protected RagApplication<BaseAssistantRequest, ?, RESPONSE> ragApplication;
+    private final RagApplication<BaseAssistantRequest, ?, RESPONSE> ragApplication;
+
+    @Override
+    public RESPONSE processRequest(BaseAssistantRequest request) {
+        return ragApplication.doRag(request);
+    }
 
     public AbstractAssistant(
             RagApplication<BaseAssistantRequest, ?, RESPONSE> ragApplication,
