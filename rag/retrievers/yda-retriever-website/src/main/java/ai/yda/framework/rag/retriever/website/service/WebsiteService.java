@@ -1,16 +1,17 @@
 package ai.yda.framework.rag.retriever.website.service;
 
-import ai.yda.framework.rag.core.retriever.util.ContentUtil;
-import ai.yda.framework.rag.retriever.website.constants.Constants;
-import ai.yda.framework.rag.retriever.website.exception.WebsiteReadException;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
+
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
-import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
+import ai.yda.framework.rag.core.retriever.util.ContentUtil;
+import ai.yda.framework.rag.retriever.website.constants.Constants;
+import ai.yda.framework.rag.retriever.website.exception.WebsiteReadException;
 
 @Slf4j
 public class WebsiteService {
@@ -24,7 +25,8 @@ public class WebsiteService {
      * @return a map where the key is the document location (URL) and the value is a list of processed content chunks
      */
     public Map<String, List<String>> getPageDocuments(final String url) {
-        return documentFilterData(extractLinks(url).stream().map(this::safeConnect).collect(Collectors.toList()));
+        return documentFilterData(
+                extractLinks(url).stream().map(this::safeConnect).collect(Collectors.toList()));
     }
 
     /**
@@ -70,7 +72,7 @@ public class WebsiteService {
             return links;
 
         } catch (IOException e) {
-            log.info("Failed to retrieve sitemap: {}", url);
+            log.error("Failed to retrieve sitemap: {}", url);
         }
         return links;
     }
@@ -88,9 +90,8 @@ public class WebsiteService {
         try {
             return Jsoup.connect(url).get();
         } catch (IOException e) {
-            log.info("HTTP error fetching URL: {}", e.getMessage());
+            log.error("HTTP error fetching URL: {}", e.getMessage());
             throw new WebsiteReadException(e);
         }
     }
 }
-
