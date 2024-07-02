@@ -21,11 +21,13 @@ public class WebsiteRetriever implements Retriever<BaseAssistantRequest, BaseRag
 
     private final String url;
 
-    public WebsiteRetriever(VectorStore vectorStore, String url) {
+    public WebsiteRetriever(VectorStore vectorStore, String url, boolean isEnabled) {
         this.vectorStore = vectorStore;
         this.url = url;
         try {
-            init();
+            if (isEnabled) {
+                init();
+            }
         } catch (IOException e) {
             log.error("Failed initialize Retriever: {}", e.getClass());
             throw new RuntimeException(e);

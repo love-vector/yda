@@ -28,4 +28,6 @@ public class RetrieverWebsiteProperties {
     private String host;
 
     private String url;
+
+    private boolean enableSiteParsing;
 }
