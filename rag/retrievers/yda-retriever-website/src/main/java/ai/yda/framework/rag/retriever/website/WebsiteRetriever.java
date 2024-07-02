@@ -49,9 +49,7 @@ public class WebsiteRetriever implements Retriever<BaseAssistantRequest, BaseRag
     }
 
     private void processWebsite() {
-        var documents = websiteService.getPageDocuments(url);
-        var listOfDocuments = websiteService.documentFilterData(documents);
-        listOfDocuments.values().parallelStream()
+        websiteService.getPageDocuments(url).values().parallelStream()
                 .map(documentChunks ->
                         documentChunks.parallelStream().map(Document::new).collect(Collectors.toList()))
                 .toList()

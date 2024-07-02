@@ -1,41 +1,41 @@
 package ai.yda.framework.rag.retriever.website.service;
 
-import java.io.IOException;
-import java.util.*;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-
-import org.jsoup.HttpStatusException;
+import ai.yda.framework.rag.core.retriever.util.ContentUtil;
+import ai.yda.framework.rag.retriever.website.constants.Constants;
+import ai.yda.framework.rag.retriever.website.exception.WebsiteReadException;
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
-import ai.yda.framework.rag.core.retriever.util.ContentUtil;
-import ai.yda.framework.rag.retriever.website.constants.Constants;
-import ai.yda.framework.rag.retriever.website.exception.WebsiteReadException;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
 
+@Slf4j
 public class WebsiteService {
-    private static final Logger logger = Logger.getLogger(WebsiteService.class.getName());
 
     /**
-     * Retrieves a list of Documents from the specified URL up to a given depth.
+     * Retrieves a map of document locations and their respective content chunks from the specified URL up to a certain depth.
      *
-     * @param url the URL to start crawling from
-     * @return a list of Documents found within the specified depth
+     * This method starts crawling from the provided URL, extracts links, connects to them safely, and processes the documents found.
+     *
+     * @param url the starting URL for crawling
+     * @return a map where the key is the document location (URL) and the value is a list of processed content chunks
      */
-    public List<Document> getPageDocuments(final String url) {
-        return extractLinks(url).stream().map(this::safeConnect).collect(Collectors.toList());
+    public Map<String, List<String>> getPageDocuments(final String url) {
+        return documentFilterData(extractLinks(url).stream().map(this::safeConnect).collect(Collectors.toList()));
     }
 
     /**
-     * Filters and processes the content of the given documents.
+     * Filters and processes the content of the given documents, splitting them into chunks.
      *
      * @param documents the list of documents to process
-     * @return a map containing the document location and its processed content chunks
+     * @return a map where the key is the document location (URL) and the value is a list of processed content chunks
      */
-    public Map<String, List<String>> documentFilterData(final List<Document> documents) {
-        Map<String, List<String>> result = new HashMap<>();
-        for (Document document : documents) {
+    private Map<String, List<String>> documentFilterData(final List<Document> documents) {
+        var result = new HashMap<String, List<String>>();
+        for (var document : documents) {
             if (document != null) {
                 var documentContent = document.text();
                 var preprocessedContent = ContentUtil.preprocessContent(documentContent);
@@ -47,18 +47,20 @@ public class WebsiteService {
     }
 
     /**
-     * Extracts links from a sitemap.
+     * Extracts all links from the given sitemap URL.
+     *
+     * This method recursively processes sitemap index files to gather all individual URLs.
      *
      * @param url the URL of the sitemap
-     * @return a links of extracted links
+     * @return a set of URLs extracted from the sitemap
      */
     private Set<String> extractLinks(final String url) {
-        Set<String> links = new HashSet<>();
+        var links = new HashSet<String>();
         try {
             var document = Jsoup.connect(url).get();
             var sitemapIndexElements = document.select("loc");
 
-            for (Element element : sitemapIndexElements) {
+            for (var element : sitemapIndexElements) {
                 if (element.text().contains("sitemap")) {
                     links.addAll(extractLinks(element.text()));
                 } else {
@@ -68,26 +70,27 @@ public class WebsiteService {
             return links;
 
         } catch (IOException e) {
-            logger.info("Failed to retrieve sitemap from " + url);
+            log.info("Failed to retrieve sitemap: {}", url);
         }
-         return links;
+        return links;
     }
 
     /**
-     * Safely connects to a URL and retrieves its Document.
+     * Safely connects to the given URL and retrieves its HTML Document.
+     *
+     * This method handles IOExceptions by logging the error and throwing a custom WebsiteReadException.
      *
      * @param url the URL to connect to
-     * @return the Document from the URL, or null if an error occurs
+     * @return the Document object retrieved from the URL, or null if an error occurs
+     * @throws WebsiteReadException if an IOException occurs during the connection attempt
      */
     private Document safeConnect(final String url) {
         try {
             return Jsoup.connect(url).get();
-        } catch (HttpStatusException e) {
-            logger.info("HTTP error fetching URL. Status=" + e.getStatusCode() + ", URL=" + url);
-            throw new WebsiteReadException(e);
         } catch (IOException e) {
-            logger.info("Error connecting to: " + url);
+            log.info("HTTP error fetching URL: {}", e.getMessage());
             throw new WebsiteReadException(e);
         }
     }
 }
+
