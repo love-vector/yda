@@ -25,7 +25,7 @@ public class AsyncChannel extends AbstractChannel<SseEmitter> {
 
         return processRequest(new BaseAssistantRequest() {
             {
-                setContent("hello");
+                setQuery("hello");
             }
         });
     }
