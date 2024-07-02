@@ -72,9 +72,8 @@ public class WebsiteService {
             return links;
 
         } catch (IOException e) {
-            log.error("Failed to retrieve sitemap: {}", url);
+            throw new WebsiteReadException(e);
         }
-        return links;
     }
 
     /**
