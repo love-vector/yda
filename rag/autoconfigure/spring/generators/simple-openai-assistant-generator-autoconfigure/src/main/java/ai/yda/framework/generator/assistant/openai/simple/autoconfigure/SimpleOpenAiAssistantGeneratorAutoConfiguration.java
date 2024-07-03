@@ -19,6 +19,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
+import ai.yda.common.shared.service.impl.ThreadLocalSessionProvider;
 import ai.yda.framework.generator.assistant.openai.simple.SimpleOpenAiAssistantGenerator;
 
 @AutoConfiguration
@@ -26,7 +27,10 @@ import ai.yda.framework.generator.assistant.openai.simple.SimpleOpenAiAssistantG
 public class SimpleOpenAiAssistantGeneratorAutoConfiguration {
 
     @Bean
-    public SimpleOpenAiAssistantGenerator openAiGenerator(SimpleOpenAiAssistantGeneratorProperties properties) {
-        return new SimpleOpenAiAssistantGenerator(properties.getApiKey(), properties.getAssistantId());
+    public SimpleOpenAiAssistantGenerator openAiGenerator(
+            SimpleOpenAiAssistantGeneratorProperties properties,
+            ThreadLocalSessionProvider threadLocalSessionProvider) {
+        return new SimpleOpenAiAssistantGenerator(
+                properties.getApiKey(), properties.getAssistantId(), threadLocalSessionProvider);
     }
 }

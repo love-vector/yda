@@ -44,7 +44,7 @@ public class FilesystemRetriever implements Retriever<BaseAssistantRequest, Base
         return BaseRagContext.builder()
                 .knowledge(vectorStore
                         .similaritySearch(
-                                SearchRequest.query(request.getContent()).withTopK(5))
+                                SearchRequest.query(request.getQuery()).withTopK(5))
                         .stream()
                         .map(Document::getContent)
                         .collect(Collectors.toList()))

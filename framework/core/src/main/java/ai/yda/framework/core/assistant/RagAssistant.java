@@ -13,9 +13,4 @@ public class RagAssistant<RESPONSE> extends AbstractAssistant<RESPONSE> {
             List<Channel<BaseAssistantRequest, RESPONSE>> channels) {
         super(ragApplication, channels);
     }
-
-    @Override
-    public RESPONSE processRequest(BaseAssistantRequest request) {
-        return ragApplication.doRag(request);
-    }
 }
