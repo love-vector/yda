@@ -18,27 +18,22 @@ package ai.yda.framework.rag.retriever.filesystem.autoconfigure;
 import java.util.HashMap;
 
 import io.milvus.client.MilvusServiceClient;
-import io.milvus.param.ConnectParam;
 import io.milvus.param.IndexType;
 import io.milvus.param.MetricType;
 
-import org.springframework.ai.document.MetadataMode;
 import org.springframework.ai.embedding.EmbeddingModel;
-import org.springframework.ai.openai.OpenAiEmbeddingModel;
-import org.springframework.ai.openai.OpenAiEmbeddingOptions;
-import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.ai.vectorstore.MilvusVectorStore;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 
 import ai.yda.framework.rag.retriever.filesystem.FilesystemRetriever;
 import ai.yda.framework.rag.retriever.filesystem.factory.FilesystemRetrieverFactory;
 
 import static ai.yda.framework.rag.retriever.filesystem.config.FilesystemRetrieverConfig.LOCAL_DIRECTORY_PATH;
-import static org.springframework.ai.retry.RetryUtils.DEFAULT_RETRY_TEMPLATE;
 
 @AutoConfiguration
 @EnableConfigurationProperties({RetrieverFilesystemProperties.class})
@@ -60,10 +55,9 @@ public class RetrieverFilesystemAutoConfiguration {
     }
 
     @Bean("filesystemVectorStore")
+    @Primary
     public VectorStore vectorStore(
-            @Qualifier("filesystemMilvusClient") MilvusServiceClient milvusClient,
-            @Qualifier("filesystemEmbeddingModel") EmbeddingModel embeddingModel,
-            RetrieverFilesystemProperties properties) {
+            MilvusServiceClient milvusClient, EmbeddingModel embeddingModel, RetrieverFilesystemProperties properties) {
         MilvusVectorStore.MilvusVectorStoreConfig config = MilvusVectorStore.MilvusVectorStoreConfig.builder()
                 .withCollectionName(properties.getCollectionName())
                 .withDatabaseName(properties.getDatabaseName())
@@ -72,26 +66,5 @@ public class RetrieverFilesystemAutoConfiguration {
                 .withEmbeddingDimension(properties.getEmbeddingDimension())
                 .build();
         return new MilvusVectorStore(milvusClient, embeddingModel, config, Boolean.TRUE);
-    }
-
-    @Bean("filesystemEmbeddingModel")
-    public EmbeddingModel embeddingModel(RetrieverFilesystemProperties properties) {
-        var openAiApi = new OpenAiApi(properties.getOpenAiKey());
-        return new OpenAiEmbeddingModel(
-                openAiApi,
-                MetadataMode.EMBED,
-                OpenAiEmbeddingOptions.builder()
-                        .withModel(properties.getOpenAiModel())
-                        .withUser("user")
-                        .build(),
-                DEFAULT_RETRY_TEMPLATE);
-    }
-
-    @Bean("filesystemMilvusClient")
-    public MilvusServiceClient milvusClient(RetrieverFilesystemProperties properties) {
-        return new MilvusServiceClient(ConnectParam.newBuilder()
-                .withAuthorization(properties.getUsername(), properties.getPassword())
-                .withUri(properties.getHost())
-                .build());
     }
 }
