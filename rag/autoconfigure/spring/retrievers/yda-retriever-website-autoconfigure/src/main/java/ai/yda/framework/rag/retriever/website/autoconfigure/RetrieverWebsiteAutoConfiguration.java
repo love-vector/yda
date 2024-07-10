@@ -14,15 +14,16 @@ import org.springframework.ai.openai.OpenAiEmbeddingOptions;
 import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.ai.vectorstore.MilvusVectorStore;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
 
 import ai.yda.framework.rag.retriever.website.WebsiteRetriever;
 import ai.yda.framework.rag.retriever.website.factory.WebsiteRetrieverFactory;
 
-import static ai.yda.framework.rag.retriever.website.config.WebsiteRetrieverConfig.*;
+import static ai.yda.framework.rag.retriever.website.config.WebsiteRetrieverConfig.IS_CRAWLING_ENABLED;
+import static ai.yda.framework.rag.retriever.website.config.WebsiteRetrieverConfig.WEBSITE_URL;
 import static org.springframework.ai.retry.RetryUtils.DEFAULT_RETRY_TEMPLATE;
 
 @AutoConfiguration
@@ -40,14 +41,15 @@ public class RetrieverWebsiteAutoConfiguration {
     }
 
     @Bean
-    public WebsiteRetrieverFactory websiteRetrieverFactory(VectorStore vectorStore) {
+    public WebsiteRetrieverFactory websiteRetrieverFactory(@Qualifier("websiteVectorStore") VectorStore vectorStore) {
         return new WebsiteRetrieverFactory(vectorStore);
     }
 
-    @Bean
-    @Primary
-    public VectorStore websiteVectorStore(
-            MilvusServiceClient milvusClient, EmbeddingModel embeddingModel, RetrieverWebsiteProperties properties) {
+    @Bean("websiteVectorStore")
+    public VectorStore vectorStore(
+            @Qualifier("websiteMilvusClient") MilvusServiceClient milvusClient,
+            @Qualifier("websiteEmbeddingModel") EmbeddingModel embeddingModel,
+            RetrieverWebsiteProperties properties) {
         MilvusVectorStore.MilvusVectorStoreConfig config = MilvusVectorStore.MilvusVectorStoreConfig.builder()
                 .withCollectionName(properties.getCollectionName())
                 .withDatabaseName(properties.getDatabaseName())
@@ -58,8 +60,7 @@ public class RetrieverWebsiteAutoConfiguration {
         return new MilvusVectorStore(milvusClient, embeddingModel, config, Boolean.TRUE);
     }
 
-    @Bean
-    @Primary
+    @Bean("websiteEmbeddingModel")
     public EmbeddingModel embeddingModel(RetrieverWebsiteProperties properties) {
         var openAiApi = new OpenAiApi(properties.getOpenAiKey());
         return new OpenAiEmbeddingModel(
@@ -72,8 +73,7 @@ public class RetrieverWebsiteAutoConfiguration {
                 DEFAULT_RETRY_TEMPLATE);
     }
 
-    @Bean
-    @Primary
+    @Bean("websiteMilvusClient")
     public MilvusServiceClient milvusClient(RetrieverWebsiteProperties properties) {
         return new MilvusServiceClient(ConnectParam.newBuilder()
                 .withAuthorization(properties.getUsername(), properties.getPassword())
