@@ -1,12 +1,11 @@
 package ai.yda.framework.rag.retriever.website.autoconfigure;
 
-import java.util.HashMap;
-
+import ai.yda.framework.rag.retriever.website.WebsiteRetriever;
+import ai.yda.framework.rag.retriever.website.factory.WebsiteRetrieverFactory;
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.param.ConnectParam;
 import io.milvus.param.IndexType;
 import io.milvus.param.MetricType;
-
 import org.springframework.ai.document.MetadataMode;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.openai.OpenAiEmbeddingModel;
@@ -19,8 +18,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
-import ai.yda.framework.rag.retriever.website.WebsiteRetriever;
-import ai.yda.framework.rag.retriever.website.factory.WebsiteRetrieverFactory;
+import java.util.HashMap;
 
 import static ai.yda.framework.rag.retriever.website.config.WebsiteRetrieverConfig.IS_CRAWLING_ENABLED;
 import static ai.yda.framework.rag.retriever.website.config.WebsiteRetrieverConfig.WEBSITE_URL;
