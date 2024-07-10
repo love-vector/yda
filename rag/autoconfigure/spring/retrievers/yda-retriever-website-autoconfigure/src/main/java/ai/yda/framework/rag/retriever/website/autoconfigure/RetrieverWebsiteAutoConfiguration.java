@@ -1,6 +1,6 @@
 package ai.yda.framework.rag.retriever.website.autoconfigure;
 
-import java.util.HashMap;
+import java.util.Map;
 
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.param.ConnectParam;
@@ -12,6 +12,7 @@ import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.openai.OpenAiEmbeddingModel;
 import org.springframework.ai.openai.OpenAiEmbeddingOptions;
 import org.springframework.ai.openai.api.OpenAiApi;
+import org.springframework.ai.retry.RetryUtils;
 import org.springframework.ai.vectorstore.MilvusVectorStore;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -21,11 +22,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 
 import ai.yda.framework.rag.retriever.website.WebsiteRetriever;
+import ai.yda.framework.rag.retriever.website.config.WebsiteRetrieverConfig;
 import ai.yda.framework.rag.retriever.website.factory.WebsiteRetrieverFactory;
-
-import static ai.yda.framework.rag.retriever.website.config.WebsiteRetrieverConfig.IS_CRAWLING_ENABLED;
-import static ai.yda.framework.rag.retriever.website.config.WebsiteRetrieverConfig.WEBSITE_URL;
-import static org.springframework.ai.retry.RetryUtils.DEFAULT_RETRY_TEMPLATE;
 
 @AutoConfiguration
 @EnableConfigurationProperties({RetrieverWebsiteProperties.class})
@@ -33,12 +31,12 @@ public class RetrieverWebsiteAutoConfiguration {
     @Bean
     public WebsiteRetriever websiteRetriever(
             WebsiteRetrieverFactory retrieverFactory, RetrieverWebsiteProperties properties) {
-        return retrieverFactory.createRetriever(new HashMap<>() {
-            {
-                put(WEBSITE_URL, properties.getUrl());
-                put(IS_CRAWLING_ENABLED, String.valueOf(properties.isCrawlingEnabled()));
-            }
-        });
+        return retrieverFactory.createRetriever(
+                Map.of(
+                        WebsiteRetrieverConfig.WEBSITE_URL, properties.getUrl(),
+                        WebsiteRetrieverConfig.IS_CRAWLING_ENABLED, String.valueOf(properties.isCrawlingEnabled())
+                )
+        );
     }
 
     @Bean
@@ -71,7 +69,7 @@ public class RetrieverWebsiteAutoConfiguration {
                         .withModel(properties.getOpenAiModel())
                         .withUser("user")
                         .build(),
-                DEFAULT_RETRY_TEMPLATE);
+                RetryUtils.DEFAULT_RETRY_TEMPLATE);
     }
 
     @Bean

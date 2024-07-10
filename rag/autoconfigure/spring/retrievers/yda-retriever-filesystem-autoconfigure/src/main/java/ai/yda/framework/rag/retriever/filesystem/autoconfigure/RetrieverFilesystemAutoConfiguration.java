@@ -15,7 +15,7 @@
  */
 package ai.yda.framework.rag.retriever.filesystem.autoconfigure;
 
-import java.util.HashMap;
+import java.util.Map;
 
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.param.IndexType;
@@ -31,9 +31,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 
 import ai.yda.framework.rag.retriever.filesystem.FilesystemRetriever;
+import ai.yda.framework.rag.retriever.filesystem.config.FilesystemRetrieverConfig;
 import ai.yda.framework.rag.retriever.filesystem.factory.FilesystemRetrieverFactory;
-
-import static ai.yda.framework.rag.retriever.filesystem.config.FilesystemRetrieverConfig.LOCAL_DIRECTORY_PATH;
 
 @AutoConfiguration
 @EnableConfigurationProperties({RetrieverFilesystemProperties.class})
@@ -42,11 +41,11 @@ public class RetrieverFilesystemAutoConfiguration {
     @Bean
     public FilesystemRetriever filesystemRetriever(
             FilesystemRetrieverFactory filesystemRetrieverFactory, RetrieverFilesystemProperties properties) {
-        return filesystemRetrieverFactory.createRetriever(new HashMap<>() {
-            {
-                put(LOCAL_DIRECTORY_PATH, properties.getLocalDirectoryPath());
-            }
-        });
+        return filesystemRetrieverFactory.createRetriever(
+                Map.of(
+                        FilesystemRetrieverConfig.LOCAL_DIRECTORY_PATH, properties.getLocalDirectoryPath()
+                )
+        );
     }
 
     @Bean
