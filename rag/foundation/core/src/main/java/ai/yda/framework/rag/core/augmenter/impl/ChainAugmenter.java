@@ -26,9 +26,9 @@ public class ChainAugmenter<REQUEST extends AssistantRequest, CONTEXT extends Ra
     private final List<Augmenter<REQUEST, CONTEXT>> augmenters = new ArrayList<>();
 
     @Override
-    public REQUEST augment(REQUEST request, CONTEXT context) {
+    public REQUEST augment(REQUEST request, List<CONTEXT> contexts) {
         for (Augmenter<REQUEST, CONTEXT> augmenter : augmenters) {
-            augmenter.augment(request, context);
+            augmenter.augment(request, contexts);
         }
         return request;
     }
