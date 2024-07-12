@@ -12,6 +12,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -29,6 +31,8 @@ public class ThreadService {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final RestTemplate restTemplate = new RestTemplate();
+
+    private static final Logger logger = LoggerFactory.getLogger(ThreadService.class);
 
     public JsonNode getOrCreateThread(final String threadId) {
 
@@ -63,12 +67,12 @@ public class ThreadService {
         } catch (JsonProcessingException e) {
             throw new RuntimeException("Error during Request serialization: ", e);
         } catch (HttpClientErrorException ex) {
-            System.err.println("Error status code: " + ex.getStatusCode());
-            System.err.println("Response body: " + ex.getResponseBodyAsString());
+            logger.error("Error status code: " + ex.getStatusCode());
+            logger.error("Response body: " + ex.getResponseBodyAsString());
         }
     }
 
-    public SseEmitter createRunStream(final String threadId, final String assistantId) {
+    public SseEmitter createRunStream(final String threadId, final String assistantId, final String context) {
         SseEmitter emitter = new SseEmitter();
 
         new Thread(() -> {
@@ -78,6 +82,7 @@ public class ThreadService {
                                 put("assistant_id", assistantId);
                                 put("stream", true);
                                 put("tool_choice", null);
+                                put("additional_instructions", context);
                             }
                         };
 
@@ -87,7 +92,7 @@ public class ThreadService {
                         connection.setRequestMethod("POST");
                         connection.setRequestProperty(HttpHeaders.ACCEPT, "text/event-stream");
                         connection.setRequestProperty(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey);
-                        connection.setRequestProperty(CustomHttpHeaders.OPEN_AI_BETA, "assistants=v1");
+                        connection.setRequestProperty(CustomHttpHeaders.OPEN_AI_BETA, "assistants=v2");
                         connection.setRequestProperty(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
                         connection.setDoOutput(true);
                         connection.getOutputStream().write(bodyJson.getBytes());

@@ -30,9 +30,9 @@ public class SimpleOpenAiAssistantGenerator extends AbstractGenerator<BaseAssist
 
         updateSessionThreadId(threadId);
 
-        threadService.addMessageToThread(threadId, request.getQuery() + request.getContext());
+        threadService.addMessageToThread(threadId, request.getQuery());
 
-        return threadService.createRunStream(threadId, assistantId);
+        return threadService.createRunStream(threadId, assistantId, request.getContext());
     }
 
     private void updateSessionThreadId(final String threadId) {
