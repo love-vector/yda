@@ -1,41 +1,39 @@
 package ai.yda.framework.generator.assistant.openai.simple.service;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import ai.yda.framework.generator.assistant.openai.simple.util.CustomHttpHeaders;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import org.springframework.web.util.UriComponentsBuilder;
 
-import ai.yda.framework.generator.assistant.openai.simple.util.CustomHttpHeaders;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class ThreadService {
+    private static final String BASE_URL = "https://api.openai.com/v1/threads";
 
     private final String apiKey;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final RestTemplate restTemplate = new RestTemplate();
 
-    private static final Logger logger = LoggerFactory.getLogger(ThreadService.class);
-
     public JsonNode getOrCreateThread(final String threadId) {
-
         if (threadId == null) {
             return createThread();
         }
@@ -43,112 +41,97 @@ public class ThreadService {
     }
 
     public void addMessageToThread(final String threadId, final String content) {
-        var message = new HashMap<String, Object>() {
-            {
-                put("role", "user");
-                put("content", List.of(Map.of("type", "text", "text", content)));
-            }
-        };
-
+        var message = Map.of(
+                "role", "user",
+                "content", List.of(Map.of("type", "text", "text", content))
+        );
         try {
             var messageJson = objectMapper.writeValueAsString(message);
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setBearerAuth(apiKey);
-            headers.add(CustomHttpHeaders.OPEN_AI_BETA, "assistants=v2");
-
-            HttpEntity<String> entity = new HttpEntity<>(messageJson, headers);
-            restTemplate.exchange(
-                    "https://api.openai.com/v1/threads/{thread_id}/messages",
-                    HttpMethod.POST,
-                    entity,
-                    String.class,
-                    threadId);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Error during Request serialization: ", e);
-        } catch (HttpClientErrorException ex) {
-            logger.error("Error status code: " + ex.getStatusCode());
-            logger.error("Response body: " + ex.getResponseBodyAsString());
+            var httpEntity = new HttpEntity<>(messageJson, createHttpHeaders());
+            String url = UriComponentsBuilder.fromHttpUrl(BASE_URL)
+                    .pathSegment(threadId, "messages")
+                    .buildAndExpand()
+                    .toUriString();
+            restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
+        } catch (JsonProcessingException | HttpClientErrorException e) {
+            throw new RuntimeException(e);
         }
     }
 
     public SseEmitter createRunStream(final String threadId, final String assistantId, final String context) {
         SseEmitter emitter = new SseEmitter();
-
         new Thread(() -> {
-                    try {
-                        var body = new HashMap<String, Object>() {
-                            {
-                                put("assistant_id", assistantId);
-                                put("stream", true);
-                                put("tool_choice", null);
-                                put("additional_instructions", context);
-                            }
-                        };
+            try {
+                var body = Map.of(
+                        "assistant_id", assistantId,
+                        "stream", true,
+                        "additional_instructions", context
+                );
 
-                        var bodyJson = objectMapper.writeValueAsString(body);
-                        URL url = new URL("https://api.openai.com/v1/threads/" + threadId + "/runs");
-                        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                        connection.setRequestMethod("POST");
-                        connection.setRequestProperty(HttpHeaders.ACCEPT, "text/event-stream");
-                        connection.setRequestProperty(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey);
-                        connection.setRequestProperty(CustomHttpHeaders.OPEN_AI_BETA, "assistants=v2");
-                        connection.setRequestProperty(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
-                        connection.setDoOutput(true);
-                        connection.getOutputStream().write(bodyJson.getBytes());
+                var jsonBody = objectMapper.writeValueAsString(body);
+                var url = UriComponentsBuilder.fromHttpUrl(BASE_URL)
+                        .pathSegment(threadId, "runs")
+                        .buildAndExpand()
+                        .toUri()
+                        .toURL();
+                var httpConnection = openHttpURLConnection(url, jsonBody);
 
-                        try (BufferedReader reader =
-                                new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-                            String line;
-                            while ((line = reader.readLine()) != null) {
-                                emitter.send(SseEmitter.event().data(line));
-                            }
-                        } catch (Exception e) {
-                            emitter.completeWithError(e);
-                        } finally {
-                            emitter.complete();
-                        }
-                    } catch (Exception e) {
-                        emitter.completeWithError(e);
-                    }
-                })
+                var reader = new BufferedReader(new InputStreamReader(httpConnection.getInputStream()));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    emitter.send(SseEmitter.event().data(line));
+                }
+                reader.close();
+                emitter.complete();
+            } catch (Exception e) {
+                emitter.completeWithError(e);
+            }
+        })
                 .start();
-
         return emitter;
     }
 
     private JsonNode getThread(final String threadId) {
         try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setBearerAuth(apiKey);
-            headers.add(CustomHttpHeaders.OPEN_AI_BETA, "assistants=v2");
-
-            HttpEntity<Void> entity = new HttpEntity<>(headers);
-            ResponseEntity<String> response = restTemplate.exchange(
-                    "https://api.openai.com/v1/threads/{thread_id}", HttpMethod.GET, entity, String.class, threadId);
-
+            var httpEntity = new HttpEntity<>(createHttpHeaders());
+            var url = UriComponentsBuilder.fromHttpUrl(BASE_URL)
+                    .pathSegment(threadId)
+                    .buildAndExpand()
+                    .toUriString();
+            var response = restTemplate.exchange(url, HttpMethod.GET, httpEntity, String.class);
             return objectMapper.readTree(response.getBody());
-        } catch (HttpClientErrorException.NotFound ex) {
-            return null;
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Error processing JSON response", e);
+        } catch (JsonProcessingException | HttpClientErrorException e) {
+            throw new RuntimeException(e);
         }
     }
 
     private JsonNode createThread() {
         try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setBearerAuth(apiKey);
-            headers.add(CustomHttpHeaders.OPEN_AI_BETA, "assistants=v2");
-            headers.setContentType(MediaType.APPLICATION_JSON);
-
-            HttpEntity<String> entity = new HttpEntity<>(headers);
-            ResponseEntity<String> response =
-                    restTemplate.exchange("https://api.openai.com/v1/threads", HttpMethod.POST, entity, String.class);
-
+            var httpEntity = new HttpEntity<>(createHttpHeaders());
+            var response = restTemplate.exchange(BASE_URL, HttpMethod.POST, httpEntity, String.class);
             return objectMapper.readTree(response.getBody());
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Error during request serialization: ", e);
+            throw new RuntimeException(e);
         }
+    }
+
+    private HttpURLConnection openHttpURLConnection(URL url, String jsonBody) throws IOException {
+        var connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod(HttpMethod.POST.name());
+        connection.setRequestProperty(HttpHeaders.ACCEPT, MediaType.TEXT_EVENT_STREAM_VALUE);
+        connection.setRequestProperty(HttpHeaders.AUTHORIZATION, "Bearer ".concat(apiKey));
+        connection.setRequestProperty(CustomHttpHeaders.OPEN_AI_BETA, CustomHttpHeaders.OPEN_AI_VALUE);
+        connection.setRequestProperty(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+        connection.setDoOutput(true);
+        connection.getOutputStream().write(jsonBody.getBytes());
+        return connection;
+    }
+
+    private HttpHeaders createHttpHeaders() {
+        var headers = new HttpHeaders();
+        headers.setBearerAuth(apiKey);
+        headers.add(CustomHttpHeaders.OPEN_AI_BETA, CustomHttpHeaders.OPEN_AI_VALUE);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        return headers;
     }
 }

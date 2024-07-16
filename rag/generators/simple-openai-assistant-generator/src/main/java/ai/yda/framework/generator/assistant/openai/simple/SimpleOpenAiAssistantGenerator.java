@@ -20,7 +20,6 @@ public class SimpleOpenAiAssistantGenerator extends AbstractGenerator<BaseAssist
 
     @Override
     public SseEmitter generate(BaseAssistantRequest request) {
-
         var threadService = new ThreadService(apiKey);
 
         var threadId = threadService
@@ -31,7 +30,6 @@ public class SimpleOpenAiAssistantGenerator extends AbstractGenerator<BaseAssist
         updateSessionThreadId(threadId);
 
         threadService.addMessageToThread(threadId, request.getQuery());
-
         return threadService.createRunStream(threadId, assistantId, request.getContext());
     }
 
