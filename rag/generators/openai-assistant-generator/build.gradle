@@ -5,6 +5,11 @@ plugins {
 dependencies {
     api project(':yda-framework-core')
 
-    api 'org.springframework.ai:spring-ai-core:1.0.0-SNAPSHOT'
-    api 'org.springframework.ai:spring-ai-openai:1.0.0-SNAPSHOT'
+    implementation 'org.springframework:spring-web:6.1.10'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.17.1'
+    implementation 'org.springframework.boot:spring-boot-starter-web:3.3.0'
+
+    implementation 'org.springframework.boot:spring-boot-starter-webflux:3.3.0'
+
+    compileOnly 'jakarta.servlet:jakarta.servlet-api:6.1.0'
 }
