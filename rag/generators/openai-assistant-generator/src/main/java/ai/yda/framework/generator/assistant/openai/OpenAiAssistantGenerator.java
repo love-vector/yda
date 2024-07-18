@@ -1,6 +1,5 @@
 package ai.yda.framework.generator.assistant.openai;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -10,31 +9,34 @@ import ai.yda.common.shared.service.SessionProvider;
 import ai.yda.framework.generator.assistant.openai.service.ThreadService;
 import ai.yda.framework.rag.core.generator.AbstractGenerator;
 
-@RequiredArgsConstructor
 @Slf4j
 public class OpenAiAssistantGenerator extends AbstractGenerator<BaseAssistantRequest, SseEmitter> {
-
-    private final String apiKey;
+    private final ThreadService threadService;
     private final String assistantId;
     private final SessionProvider sessionProvider;
 
-    @Override
-    public SseEmitter generate(BaseAssistantRequest request) {
-        var threadService = new ThreadService(apiKey);
-
-        var threadId = threadService
-                .getOrCreateThread(sessionProvider.getThreadId())
-                .get("id")
-                .textValue();
-
-        updateSessionThreadId(threadId);
-
-        threadService.addMessageToThread(threadId, request.getQuery());
-        return threadService.createRunStream(threadId, assistantId, request.getContext());
+    public OpenAiAssistantGenerator(String apiKey, String assistantId, SessionProvider sessionProvider) {
+        this.threadService = new ThreadService(apiKey);
+        this.assistantId = assistantId;
+        this.sessionProvider = sessionProvider;
     }
 
-    private void updateSessionThreadId(final String threadId) {
-        sessionProvider.setThreadId(threadId);
-        log.info("Thread ID: {}", threadId);
+    @Override
+    public SseEmitter generate(BaseAssistantRequest request) {
+        String content = request.getQuery();
+        String threadId = sessionProvider
+                .getThreadId()
+                .map(id -> {
+                    threadService.addMessageToThread(id, content);
+                    return id;
+                })
+                .orElseGet(() -> {
+                    String newThreadId = threadService.createThread(content).getId();
+                    sessionProvider.setThreadId(newThreadId);
+                    return newThreadId;
+                });
+
+        log.debug("Thread ID: {}", threadId);
+        return threadService.createRunStream(threadId, assistantId, request.getContext());
     }
 }

@@ -15,14 +15,15 @@
  */
 package ai.yda.framework.generator.chat.openai.autoconfigure;
 
-import ai.yda.common.shared.model.impl.BaseAssistantRequest;
-import ai.yda.framework.generator.chat.openai.OpenAiChatGenerator;
-import ai.yda.framework.rag.core.generator.Generator;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+
+import ai.yda.common.shared.model.impl.BaseAssistantRequest;
+import ai.yda.framework.generator.chat.openai.OpenAiChatGenerator;
+import ai.yda.framework.rag.core.generator.Generator;
 
 @AutoConfiguration
 @EnableConfigurationProperties({OpenAiChatGeneratorProperties.class})

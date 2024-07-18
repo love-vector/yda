@@ -1,6 +1,7 @@
 package ai.yda.common.shared.service.impl;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import ai.yda.common.shared.service.SessionProvider;
@@ -16,8 +17,8 @@ public class ThreadLocalSessionProvider implements SessionProvider {
         sessionThreadMap.put(threadLocalSessionId.get(), threadId);
     }
 
-    public String getThreadId() {
-        return sessionThreadMap.get(threadLocalSessionId.get());
+    public Optional<String> getThreadId() {
+        return Optional.ofNullable(sessionThreadMap.get(threadLocalSessionId.get()));
     }
 
     @Override
