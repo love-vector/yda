@@ -3,8 +3,8 @@ ai:
     framework:
       rag:
         retriever:
-#          filesystem:
-#            localDirectoryPath: /Users/dmmrch/work/IdeaProjects/yda/.data/documents
+          #          filesystem:
+          #            localDirectoryPath: /Users/dmmrch/work/IdeaProjects/yda/.data/documents
           website:
             databaseName: default
             collectionName: websites
@@ -19,10 +19,8 @@ ai:
         generator:
           assistant:
             openai:
-              simple:
-                autoconfigure:
-                  api-key: sk-proj-eTAeDDwK4dEQY09ZQktbT3BlbkFJeaKh8oDF3sZT00LtAVnf
-                  assistant-id: asst_9S7lP9N2n99EPept42iUjLeL
+              api-key: sk-proj-eTAeDDwK4dEQY09ZQktbT3BlbkFJeaKh8oDF3sZT00LtAVnf
+              assistant-id: asst_9S7lP9N2n99EPept42iUjLeL
 #      channel:
 #        http:
 #          port: "8081"

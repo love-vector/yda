@@ -1,25 +1,42 @@
 package ai.yda.framework.generator.assistant.openai;
 
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.ai.chat.messages.AssistantMessage;
-import org.springframework.ai.chat.messages.UserMessage;
-import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import ai.yda.common.shared.model.impl.BaseAssistantRequest;
-import ai.yda.framework.rag.core.generator.Generator;
+import ai.yda.common.shared.service.SessionProvider;
+import ai.yda.framework.generator.assistant.openai.service.ThreadService;
+import ai.yda.framework.rag.core.generator.AbstractGenerator;
 
-@RequiredArgsConstructor
-public class OpenAiAssistantGenerator implements Generator<BaseAssistantRequest, AssistantMessage> {
+@Slf4j
+public class OpenAiAssistantGenerator extends AbstractGenerator<BaseAssistantRequest, SseEmitter> {
+    private final ThreadService threadService;
+    private final String assistantId;
+    private final SessionProvider sessionProvider;
 
-    private final OpenAiChatModel chatModel;
+    public OpenAiAssistantGenerator(String apiKey, String assistantId, SessionProvider sessionProvider) {
+        this.threadService = new ThreadService(apiKey);
+        this.assistantId = assistantId;
+        this.sessionProvider = sessionProvider;
+    }
 
     @Override
-    public AssistantMessage generate(BaseAssistantRequest request) {
+    public SseEmitter generate(BaseAssistantRequest request) {
+        String content = request.getQuery();
+        String threadId = sessionProvider
+                .getThreadId()
+                .map(id -> {
+                    threadService.addMessageToThread(id, content);
+                    return id;
+                })
+                .orElseGet(() -> {
+                    String newThreadId = threadService.createThread(content).getId();
+                    sessionProvider.setThreadId(newThreadId);
+                    return newThreadId;
+                });
 
-        Prompt prompt = new Prompt(new UserMessage(request.getQuery()));
-
-        return chatModel.call(prompt).getResult().getOutput();
+        log.debug("Thread ID: {}", threadId);
+        return threadService.createRunStream(threadId, assistantId, request.getContext());
     }
 }

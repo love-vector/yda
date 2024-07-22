@@ -11,8 +11,8 @@ dependencies {
 //    implementation project(':channel-http-autoconfigure') // non-sse
 
 //    Generator
-//    implementation project(':yda-openai-assistant-generator-autoconfigure') // non-sse
-    implementation project(':yda-simple-openai-assistant-generator-autoconfigure') // sse
+//    implementation project(':yda-openai-chat-generator-autoconfigure') // non-sse
+    implementation project(':yda-openai-assistant-generator-autoconfigure') // sse
 
 //  Retrievers
     implementation project(':yda-retriever-filesystem-autoconfigure')

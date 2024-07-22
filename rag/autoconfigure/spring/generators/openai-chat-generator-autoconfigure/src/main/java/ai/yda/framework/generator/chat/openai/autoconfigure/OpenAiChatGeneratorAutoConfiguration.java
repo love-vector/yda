@@ -13,22 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ai.yda.framework.generator.assistant.openai.autoconfigure;
+package ai.yda.framework.generator.chat.openai.autoconfigure;
 
+import org.springframework.ai.chat.messages.AssistantMessage;
+import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
-import ai.yda.common.shared.service.SessionProvider;
-import ai.yda.framework.generator.assistant.openai.OpenAiAssistantGenerator;
+import ai.yda.common.shared.model.impl.BaseAssistantRequest;
+import ai.yda.framework.generator.chat.openai.OpenAiChatGenerator;
+import ai.yda.framework.rag.core.generator.Generator;
 
 @AutoConfiguration
-@EnableConfigurationProperties({OpenAiAssistantGeneratorProperties.class})
-public class OpenAiAssistantGeneratorAutoConfiguration {
+@EnableConfigurationProperties({OpenAiChatGeneratorProperties.class})
+public class OpenAiChatGeneratorAutoConfiguration {
 
     @Bean
-    public OpenAiAssistantGenerator openAiGenerator(
-            OpenAiAssistantGeneratorProperties properties, SessionProvider sessionProvider) {
-        return new OpenAiAssistantGenerator(properties.getApiKey(), properties.getAssistantId(), sessionProvider);
+    public Generator<BaseAssistantRequest, AssistantMessage> openAiGenerator(OpenAiChatModel chatModel) {
+        return new OpenAiChatGenerator(chatModel);
     }
 }
