@@ -15,12 +15,13 @@ import ai.yda.framework.rag.retriever.website.service.WebsiteService;
 
 @Slf4j
 public class WebsiteRetriever implements Retriever<BaseAssistantRequest, BaseRagContext> {
+    private static final int TOP_K = 5;
+
     private final VectorStore vectorStore;
     private final WebsiteService websiteService = new WebsiteService();
-
     private final String url;
 
-    public WebsiteRetriever(VectorStore vectorStore, String url, boolean isCrawlingEnabled) {
+    public WebsiteRetriever(final VectorStore vectorStore, final String url, final boolean isCrawlingEnabled) {
         this.vectorStore = vectorStore;
         this.url = url;
         if (isCrawlingEnabled) {
@@ -29,14 +30,15 @@ public class WebsiteRetriever implements Retriever<BaseAssistantRequest, BaseRag
     }
 
     @Override
-    public BaseRagContext retrieve(BaseAssistantRequest request) {
+    public BaseRagContext retrieve(final BaseAssistantRequest request) {
         return BaseRagContext.builder()
-                .knowledge(vectorStore
-                        .similaritySearch(
-                                SearchRequest.query(request.getQuery()).withTopK(5))
-                        .stream()
-                        .map(Document::getContent)
-                        .collect(Collectors.toList()))
+                .knowledge(
+                        vectorStore
+                                .similaritySearch(
+                                        SearchRequest.query(request.getQuery()).withTopK(TOP_K))
+                                .stream()
+                                .map(Document::getContent)
+                                .collect(Collectors.toList()))
                 .build();
     }
 

@@ -44,13 +44,14 @@ public class RetrieverFilesystemAutoConfiguration {
 
     @Bean
     public FilesystemRetriever filesystemRetriever(
-            FilesystemRetrieverFactory filesystemRetrieverFactory, RetrieverFilesystemProperties properties) {
+            final FilesystemRetrieverFactory filesystemRetrieverFactory,
+            final RetrieverFilesystemProperties properties) {
         return filesystemRetrieverFactory.createRetriever(
                 Map.of(FilesystemRetrieverConfig.LOCAL_DIRECTORY_PATH, properties.getLocalDirectoryPath()));
     }
 
     @Bean
-    public FilesystemRetrieverFactory retrieverFactory(RetrieverFilesystemProperties properties) {
+    public FilesystemRetrieverFactory retrieverFactory(final RetrieverFilesystemProperties properties) {
         var milvusClient = milvusClient(properties);
         var embeddingModel = embeddingModel(properties);
         var vectorStore = vectorStore(milvusClient, embeddingModel, properties);
@@ -58,7 +59,9 @@ public class RetrieverFilesystemAutoConfiguration {
     }
 
     private VectorStore vectorStore(
-            MilvusServiceClient milvusClient, EmbeddingModel embeddingModel, RetrieverFilesystemProperties properties) {
+            final MilvusServiceClient milvusClient,
+            final EmbeddingModel embeddingModel,
+            final RetrieverFilesystemProperties properties) {
         var config = MilvusVectorStore.MilvusVectorStoreConfig.builder()
                 .withCollectionName(properties.getCollectionName())
                 .withDatabaseName(properties.getDatabaseName())
@@ -69,7 +72,7 @@ public class RetrieverFilesystemAutoConfiguration {
         return new MilvusVectorStore(milvusClient, embeddingModel, config, Boolean.TRUE);
     }
 
-    private EmbeddingModel embeddingModel(RetrieverFilesystemProperties properties) {
+    private EmbeddingModel embeddingModel(final RetrieverFilesystemProperties properties) {
         var openAiApi = new OpenAiApi(properties.getOpenAiKey());
         return new OpenAiEmbeddingModel(
                 openAiApi,
@@ -81,7 +84,7 @@ public class RetrieverFilesystemAutoConfiguration {
                 RetryUtils.DEFAULT_RETRY_TEMPLATE);
     }
 
-    private MilvusServiceClient milvusClient(RetrieverFilesystemProperties properties) {
+    private MilvusServiceClient milvusClient(final RetrieverFilesystemProperties properties) {
         return new MilvusServiceClient(ConnectParam.newBuilder()
                 .withAuthorization(properties.getUsername(), properties.getPassword())
                 .withUri(properties.getHost())

@@ -30,7 +30,7 @@ import ai.yda.framework.rag.core.generator.Generator;
 public class OpenAiChatGeneratorAutoConfiguration {
 
     @Bean
-    public Generator<BaseAssistantRequest, AssistantMessage> openAiGenerator(OpenAiChatModel chatModel) {
+    public Generator<BaseAssistantRequest, AssistantMessage> openAiGenerator(final OpenAiChatModel chatModel) {
         return new OpenAiChatGenerator(chatModel);
     }
 }

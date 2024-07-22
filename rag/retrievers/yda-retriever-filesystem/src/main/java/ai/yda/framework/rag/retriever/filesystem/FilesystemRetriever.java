@@ -21,12 +21,12 @@ import ai.yda.framework.rag.retriever.filesystem.service.DocumentService;
 
 @Slf4j
 public class FilesystemRetriever implements Retriever<BaseAssistantRequest, BaseRagContext> {
-
+    private static final int TOP_K = 5;
     private final Path localDirectoryPath;
     private final VectorStore vectorStore;
     private final DocumentService documentService = new DocumentService();
 
-    public FilesystemRetriever(String localDirectoryPath, VectorStore vectorStore) {
+    public FilesystemRetriever(final String localDirectoryPath, final VectorStore vectorStore) {
         this.localDirectoryPath = Paths.get(localDirectoryPath);
         this.vectorStore = vectorStore;
 
@@ -39,15 +39,16 @@ public class FilesystemRetriever implements Retriever<BaseAssistantRequest, Base
     }
 
     @Override
-    public BaseRagContext retrieve(BaseAssistantRequest request) {
+    public BaseRagContext retrieve(final BaseAssistantRequest request) {
 
         return BaseRagContext.builder()
-                .knowledge(vectorStore
-                        .similaritySearch(
-                                SearchRequest.query(request.getQuery()).withTopK(5))
-                        .stream()
-                        .map(Document::getContent)
-                        .collect(Collectors.toList()))
+                .knowledge(
+                        vectorStore
+                                .similaritySearch(
+                                        SearchRequest.query(request.getQuery()).withTopK(TOP_K))
+                                .stream()
+                                .map(Document::getContent)
+                                .collect(Collectors.toList()))
                 .build();
     }
 

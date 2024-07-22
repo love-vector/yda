@@ -16,7 +16,7 @@ public class OpenAiChatGenerator implements Generator<BaseAssistantRequest, Assi
     private final OpenAiChatModel chatModel;
 
     @Override
-    public AssistantMessage generate(BaseAssistantRequest request) {
+    public AssistantMessage generate(final BaseAssistantRequest request) {
 
         Prompt prompt = new Prompt(new UserMessage(request.getQuery()));
 

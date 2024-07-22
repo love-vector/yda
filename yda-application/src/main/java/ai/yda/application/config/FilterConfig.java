@@ -12,7 +12,7 @@ public class FilterConfig {
 
     @Bean
     public FilterRegistrationBean<HttpSessionThreadLocalFilter> threadLocalSessionFilter(
-            ThreadLocalSessionProvider sessionProvider) {
+            final ThreadLocalSessionProvider sessionProvider) {
         var registrationBean = new FilterRegistrationBean<HttpSessionThreadLocalFilter>();
         registrationBean.setFilter(new HttpSessionThreadLocalFilter(sessionProvider));
         return registrationBean;

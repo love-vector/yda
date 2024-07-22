@@ -9,5 +9,4 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.17.1'
 
     api 'org.springframework.ai:spring-ai-core:1.0.0-SNAPSHOT'
-
 }

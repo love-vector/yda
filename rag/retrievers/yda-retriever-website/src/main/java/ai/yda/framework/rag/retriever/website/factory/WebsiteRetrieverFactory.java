@@ -11,8 +11,7 @@ import ai.yda.common.shared.model.impl.BaseAssistantRequest;
 import ai.yda.framework.rag.core.model.impl.BaseRagContext;
 import ai.yda.framework.rag.core.retriever.factory.RetrieverFactory;
 import ai.yda.framework.rag.retriever.website.WebsiteRetriever;
-
-import static ai.yda.framework.rag.retriever.website.config.WebsiteRetrieverConfig.*;
+import ai.yda.framework.rag.retriever.website.config.WebsiteRetrieverConfig;
 
 @RequiredArgsConstructor
 public class WebsiteRetrieverFactory implements RetrieverFactory<BaseAssistantRequest, BaseRagContext> {
@@ -20,8 +19,10 @@ public class WebsiteRetrieverFactory implements RetrieverFactory<BaseAssistantRe
     private final VectorStore vectorStore;
 
     @Override
-    public WebsiteRetriever createRetriever(Map<? extends FactoryConfig, String> config) {
+    public WebsiteRetriever createRetriever(final Map<? extends FactoryConfig, String> config) {
         return new WebsiteRetriever(
-                vectorStore, config.get(WEBSITE_URL), Boolean.parseBoolean(config.get(IS_CRAWLING_ENABLED)));
+                vectorStore,
+                config.get(WebsiteRetrieverConfig.WEBSITE_URL),
+                Boolean.parseBoolean(config.get(WebsiteRetrieverConfig.IS_CRAWLING_ENABLED)));
     }
 }

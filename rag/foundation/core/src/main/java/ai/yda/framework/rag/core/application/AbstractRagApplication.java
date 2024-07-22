@@ -19,7 +19,7 @@ public abstract class AbstractRagApplication<REQUEST extends AssistantRequest, C
     private Generator<REQUEST, RESPONSE> generator;
 
     @Override
-    public RESPONSE doRag(REQUEST request) {
+    public RESPONSE doRag(final REQUEST request) {
         var rawContextList = retrievers.parallelStream()
                 .map(retriever -> retriever.retrieve(request))
                 .toList();

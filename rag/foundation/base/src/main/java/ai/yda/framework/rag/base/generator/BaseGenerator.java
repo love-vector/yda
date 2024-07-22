@@ -15,7 +15,7 @@ public class BaseGenerator implements Generator<BaseAssistantRequest, AssistantM
     private final ChatModel chat;
 
     @Override
-    public AssistantMessage generate(BaseAssistantRequest request) {
+    public AssistantMessage generate(final BaseAssistantRequest request) {
         var response = chat.call(new Prompt(request.getQuery()));
         return response.getResult().getOutput();
     }

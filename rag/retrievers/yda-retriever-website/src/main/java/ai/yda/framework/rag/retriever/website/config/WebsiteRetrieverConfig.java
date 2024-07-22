@@ -11,7 +11,7 @@ public enum WebsiteRetrieverConfig implements FactoryConfig {
 
     private final String key;
 
-    WebsiteRetrieverConfig(String key) {
+    WebsiteRetrieverConfig(final String key) {
         this.key = key;
     }
 }
