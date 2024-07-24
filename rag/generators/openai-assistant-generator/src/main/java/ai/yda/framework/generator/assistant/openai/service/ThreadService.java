@@ -5,7 +5,12 @@ import java.util.List;
 
 import com.azure.ai.openai.assistants.AssistantsClient;
 import com.azure.ai.openai.assistants.AssistantsClientBuilder;
-import com.azure.ai.openai.assistants.models.*;
+import com.azure.ai.openai.assistants.models.AssistantThread;
+import com.azure.ai.openai.assistants.models.AssistantThreadCreationOptions;
+import com.azure.ai.openai.assistants.models.CreateRunOptions;
+import com.azure.ai.openai.assistants.models.MessageRole;
+import com.azure.ai.openai.assistants.models.StreamMessageUpdate;
+import com.azure.ai.openai.assistants.models.ThreadMessageOptions;
 import com.azure.core.credential.KeyCredential;
 
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -13,7 +18,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 public class ThreadService {
     private final AssistantsClient assistantsClient;
 
-    public ThreadService(String apiKey) {
+    public ThreadService(final String apiKey) {
         this.assistantsClient = new AssistantsClientBuilder()
                 .credential(new KeyCredential(apiKey))
                 .buildClient();

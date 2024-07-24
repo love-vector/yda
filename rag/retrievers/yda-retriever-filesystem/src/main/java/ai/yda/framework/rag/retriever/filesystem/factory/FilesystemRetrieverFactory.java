@@ -12,7 +12,7 @@ import ai.yda.framework.rag.core.model.impl.BaseRagContext;
 import ai.yda.framework.rag.core.retriever.factory.RetrieverFactory;
 import ai.yda.framework.rag.retriever.filesystem.FilesystemRetriever;
 
-import static ai.yda.framework.rag.retriever.filesystem.config.FilesystemRetrieverConfig.LOCAL_DIRECTORY_PATH;
+import ai.yda.framework.rag.retriever.filesystem.config.FilesystemRetrieverConfig;
 
 @RequiredArgsConstructor
 public class FilesystemRetrieverFactory implements RetrieverFactory<BaseAssistantRequest, BaseRagContext> {
@@ -20,7 +20,7 @@ public class FilesystemRetrieverFactory implements RetrieverFactory<BaseAssistan
     private final VectorStore vectorStore;
 
     @Override
-    public FilesystemRetriever createRetriever(Map<? extends FactoryConfig, String> config) {
-        return new FilesystemRetriever(config.get(LOCAL_DIRECTORY_PATH), vectorStore);
+    public FilesystemRetriever createRetriever(final Map<? extends FactoryConfig, String> config) {
+        return new FilesystemRetriever(config.get(FilesystemRetrieverConfig.LOCAL_DIRECTORY_PATH), vectorStore);
     }
 }

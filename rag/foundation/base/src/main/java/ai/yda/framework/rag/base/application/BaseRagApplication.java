@@ -13,9 +13,9 @@ public class BaseRagApplication<RESPONSE>
         extends AbstractRagApplication<BaseAssistantRequest, BaseRagContext, RESPONSE> {
 
     public BaseRagApplication(
-            List<Retriever<BaseAssistantRequest, BaseRagContext>> retrievers,
-            Augmenter<BaseAssistantRequest, BaseRagContext> augmenter,
-            Generator<BaseAssistantRequest, RESPONSE> generator) {
+            final List<Retriever<BaseAssistantRequest, BaseRagContext>> retrievers,
+            final Augmenter<BaseAssistantRequest, BaseRagContext> augmenter,
+            final Generator<BaseAssistantRequest, RESPONSE> generator) {
         super(retrievers, augmenter, generator);
     }
 }

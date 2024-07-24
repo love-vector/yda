@@ -24,9 +24,12 @@ public final class RegexUtil {
 
     private RegexUtil() {}
 
-    private static class PatternConstant {
+    private static final class PatternConstant {
 
         private static final Pattern URL = Pattern.compile(
-                "(https:\\/\\/www\\.|http:\\/\\/www\\.|https:\\/\\/|http:\\/\\/)?[a-zA-Z0-9]{2,}(\\.[a-zA-Z0-9]{2,})(\\.[a-zA-Z0-9]{2,})?");
+                """
+                (https://www\\.|http://www\\.|https://|http://)?[a-zA-Z0-9]{2,}(\\.[a-zA-Z0-9]{2,})
+                (\\.[a-zA-Z0-9]{2,})?
+                """);
     }
 }

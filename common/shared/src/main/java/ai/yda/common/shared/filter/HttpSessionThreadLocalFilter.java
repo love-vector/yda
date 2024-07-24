@@ -2,7 +2,11 @@ package ai.yda.common.shared.filter;
 
 import java.io.IOException;
 
-import jakarta.servlet.*;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 
 import lombok.RequiredArgsConstructor;
@@ -16,9 +20,8 @@ public class HttpSessionThreadLocalFilter implements Filter {
 
     /**
      * Filters incoming requests and sets the HttpSession in the SessionProvider.
-     *
-     * This method retrieves the HttpSession from the HttpServletRequest, sets it in the SessionProvider along with the session ID,
-     * and then continues the filter chain.
+     * This method retrieves the HttpSession from the HttpServletRequest, sets it in the SessionProvider along with the
+     * session ID, and then continues the filter chain.
      *
      * @param request  the incoming ServletRequest
      * @param response the outgoing ServletResponse
@@ -27,7 +30,7 @@ public class HttpSessionThreadLocalFilter implements Filter {
      * @throws ServletException if a servlet error occurs during filtering
      */
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+    public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain)
             throws IOException, ServletException {
         if (request instanceof HttpServletRequest httpRequest) {
             var httpSession = httpRequest.getSession();

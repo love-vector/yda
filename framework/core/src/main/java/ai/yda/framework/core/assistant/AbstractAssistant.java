@@ -11,13 +11,13 @@ public abstract class AbstractAssistant<RESPONSE> implements Assistant<BaseAssis
     private final RagApplication<BaseAssistantRequest, ?, RESPONSE> ragApplication;
 
     @Override
-    public RESPONSE processRequest(BaseAssistantRequest request) {
+    public RESPONSE processRequest(final BaseAssistantRequest request) {
         return ragApplication.doRag(request);
     }
 
     public AbstractAssistant(
-            RagApplication<BaseAssistantRequest, ?, RESPONSE> ragApplication,
-            List<Channel<BaseAssistantRequest, RESPONSE>> channels) {
+            final RagApplication<BaseAssistantRequest, ?, RESPONSE> ragApplication,
+            final List<Channel<BaseAssistantRequest, RESPONSE>> channels) {
         this.ragApplication = ragApplication;
         channels.forEach(channel -> channel.setAssistant(this));
     }

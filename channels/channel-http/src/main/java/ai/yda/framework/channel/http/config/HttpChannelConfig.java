@@ -12,7 +12,7 @@ public enum HttpChannelConfig implements FactoryConfig {
 
     private final String key;
 
-    HttpChannelConfig(String key) {
+    HttpChannelConfig(final String key) {
         this.key = key;
     }
 }

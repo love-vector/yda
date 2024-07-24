@@ -9,8 +9,8 @@ import ai.yda.framework.rag.core.application.RagApplication;
 public class RagAssistant<RESPONSE> extends AbstractAssistant<RESPONSE> {
 
     public RagAssistant(
-            RagApplication<BaseAssistantRequest, ?, RESPONSE> ragApplication,
-            List<Channel<BaseAssistantRequest, RESPONSE>> channels) {
+            final RagApplication<BaseAssistantRequest, ?, RESPONSE> ragApplication,
+            final List<Channel<BaseAssistantRequest, RESPONSE>> channels) {
         super(ragApplication, channels);
     }
 }

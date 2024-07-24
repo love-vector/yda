@@ -28,7 +28,7 @@ public class OpenAiAssistantGeneratorAutoConfiguration {
 
     @Bean
     public OpenAiAssistantGenerator openAiGenerator(
-            OpenAiAssistantGeneratorProperties properties, SessionProvider sessionProvider) {
+            final OpenAiAssistantGeneratorProperties properties, final SessionProvider sessionProvider) {
         return new OpenAiAssistantGenerator(properties.getApiKey(), properties.getAssistantId(), sessionProvider);
     }
 }

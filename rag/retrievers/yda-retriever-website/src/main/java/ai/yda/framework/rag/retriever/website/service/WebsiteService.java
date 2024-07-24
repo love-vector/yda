@@ -1,7 +1,11 @@
 package ai.yda.framework.rag.retriever.website.service;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
@@ -17,9 +21,9 @@ import ai.yda.framework.rag.retriever.website.exception.WebsiteReadException;
 public class WebsiteService {
 
     /**
-     * Retrieves a map of document locations and their respective content chunks from the specified URL up to a certain depth.
-     *
-     * This method starts crawling from the provided URL, extracts links, connects to them safely, and processes the documents found.
+     * Retrieves a map of document locations and their respective content chunks from the specified URL up to a certain
+     * depth. This method starts crawling from the provided URL, extracts links, connects to them safely, and processes
+     * the documents found.
      *
      * @param url the starting URL for crawling
      * @return a map where the key is the document location (URL) and the value is a list of processed content chunks
@@ -50,7 +54,6 @@ public class WebsiteService {
 
     /**
      * Extracts all links from the given sitemap URL.
-     *
      * This method recursively processes sitemap index files to gather all individual URLs.
      *
      * @param url the URL of the sitemap
@@ -78,7 +81,6 @@ public class WebsiteService {
 
     /**
      * Safely connects to the given URL and retrieves its HTML Document.
-     *
      * This method handles IOExceptions by logging the error and throwing a custom WebsiteReadException.
      *
      * @param url the URL to connect to

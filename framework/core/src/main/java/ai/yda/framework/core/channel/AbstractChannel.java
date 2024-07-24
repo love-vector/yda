@@ -8,12 +8,12 @@ public abstract class AbstractChannel<RESPONSE> implements Channel<BaseAssistant
     private Assistant<BaseAssistantRequest, RESPONSE> assistant;
 
     @Override
-    public RESPONSE processRequest(BaseAssistantRequest request) {
+    public RESPONSE processRequest(final BaseAssistantRequest request) {
         return assistant.processRequest(request);
     }
 
     @Override
-    public void setAssistant(Assistant<BaseAssistantRequest, RESPONSE> assistant) {
+    public void setAssistant(final Assistant<BaseAssistantRequest, RESPONSE> assistant) {
         this.assistant = assistant;
     }
 }

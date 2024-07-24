@@ -1,16 +1,32 @@
 package ai.yda.framework.channel.http.factory;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.*;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.http.DefaultFullHttpResponse;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpServerCodec;
+import io.netty.handler.codec.http.HttpServerExpectContinueHandler;
+import io.netty.handler.codec.http.HttpVersion;
+import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.ai.chat.messages.AssistantMessage;
 
@@ -21,20 +37,24 @@ import ai.yda.framework.core.channel.Channel;
 import ai.yda.framework.core.channel.factory.AbstractChannelFactory;
 import ai.yda.framework.core.channel.factory.ChannelConfiguration;
 
+@Slf4j
 public class HttpNettyChannelFactory extends AbstractChannelFactory<BaseAssistantRequest, AssistantMessage> {
+    private static final int MAX_CONTENT_LENGTH = 65536;
 
     @Override
     public Channel<BaseAssistantRequest, AssistantMessage> createChannel(
-            ChannelConfiguration<BaseAssistantRequest, AssistantMessage> configuration) {
+            final ChannelConfiguration<BaseAssistantRequest, AssistantMessage> configuration) {
         return new HttpNettyChannel(configuration);
     }
 
     private static class HttpNettyChannel extends AbstractChannel<AssistantMessage> {
         private final ChannelConfiguration<BaseAssistantRequest, AssistantMessage> configuration;
 
-        public HttpNettyChannel(ChannelConfiguration<BaseAssistantRequest, AssistantMessage> configuration) {
+        HttpNettyChannel(final ChannelConfiguration<BaseAssistantRequest, AssistantMessage> configuration) {
             this.configuration = configuration;
-            Executors.newSingleThreadExecutor().execute(this::setupHttpServer);
+            try (ExecutorService executor = Executors.newSingleThreadExecutor()) {
+                executor.execute(this::setupHttpServer);
+            }
         }
 
         private void setupHttpServer() {
@@ -46,19 +66,20 @@ public class HttpNettyChannelFactory extends AbstractChannelFactory<BaseAssistan
                         .channel(NioServerSocketChannel.class)
                         .childHandler(new ChannelInitializer<SocketChannel>() {
                             @Override
-                            public void initChannel(SocketChannel ch) {
+                            public void initChannel(@NonNull final SocketChannel ch) {
                                 ch.pipeline().addLast(new HttpServerCodec());
-                                ch.pipeline().addLast(new HttpObjectAggregator(65536));
+                                ch.pipeline().addLast(new HttpObjectAggregator(MAX_CONTENT_LENGTH));
                                 ch.pipeline().addLast(new HttpServerExpectContinueHandler());
                                 ch.pipeline().addLast(new SimpleChannelInboundHandler<FullHttpRequest>() {
                                     @Override
-                                    protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest req)
+                                    protected void channelRead0(
+                                            final ChannelHandlerContext ctx, final FullHttpRequest req)
                                             throws IOException {
                                         if (!configuration
                                                 .getConfigs()
                                                 .get(HttpChannelConfig.METHOD)
                                                 .equalsIgnoreCase(req.method().name())) {
-                                            sendError(ctx, HttpResponseStatus.METHOD_NOT_ALLOWED);
+                                            sendError(ctx);
                                             return;
                                         }
 
@@ -79,12 +100,12 @@ public class HttpNettyChannelFactory extends AbstractChannelFactory<BaseAssistan
                                         ctx.writeAndFlush(httpResponse).addListener(ChannelFutureListener.CLOSE);
                                     }
 
-                                    private void sendError(ChannelHandlerContext ctx, HttpResponseStatus status) {
+                                    private void sendError(final ChannelHandlerContext ctx) {
                                         FullHttpResponse response = new DefaultFullHttpResponse(
                                                 HttpVersion.HTTP_1_1,
-                                                status,
+                                                HttpResponseStatus.METHOD_NOT_ALLOWED,
                                                 Unpooled.copiedBuffer(
-                                                        "Failure: " + status + "\r\n",
+                                                        "Failure: " + HttpResponseStatus.METHOD_NOT_ALLOWED + "\r\n",
                                                         io.netty.util.CharsetUtil.UTF_8));
                                         response.headers()
                                                 .set(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
@@ -99,7 +120,7 @@ public class HttpNettyChannelFactory extends AbstractChannelFactory<BaseAssistan
                         .sync();
                 f.channel().closeFuture().sync();
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                log.error(e.getMessage(), e);
             } finally {
                 bossGroup.shutdownGracefully();
                 workerGroup.shutdownGracefully();

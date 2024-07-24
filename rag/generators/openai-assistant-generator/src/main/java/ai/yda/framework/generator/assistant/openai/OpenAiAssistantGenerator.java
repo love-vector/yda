@@ -15,23 +15,24 @@ public class OpenAiAssistantGenerator extends AbstractGenerator<BaseAssistantReq
     private final String assistantId;
     private final SessionProvider sessionProvider;
 
-    public OpenAiAssistantGenerator(String apiKey, String assistantId, SessionProvider sessionProvider) {
+    public OpenAiAssistantGenerator(
+            final String apiKey, final String assistantId, final SessionProvider sessionProvider) {
         this.threadService = new ThreadService(apiKey);
         this.assistantId = assistantId;
         this.sessionProvider = sessionProvider;
     }
 
     @Override
-    public SseEmitter generate(BaseAssistantRequest request) {
-        String content = request.getQuery();
-        String threadId = sessionProvider
+    public SseEmitter generate(final BaseAssistantRequest request) {
+        var requestQuery = request.getQuery();
+        var threadId = sessionProvider
                 .getThreadId()
                 .map(id -> {
-                    threadService.addMessageToThread(id, content);
+                    threadService.addMessageToThread(id, requestQuery);
                     return id;
                 })
                 .orElseGet(() -> {
-                    String newThreadId = threadService.createThread(content).getId();
+                    var newThreadId = threadService.createThread(requestQuery).getId();
                     sessionProvider.setThreadId(newThreadId);
                     return newThreadId;
                 });

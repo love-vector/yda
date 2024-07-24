@@ -10,7 +10,7 @@ public enum FilesystemRetrieverConfig implements FactoryConfig {
 
     private final String key;
 
-    FilesystemRetrieverConfig(String key) {
+    FilesystemRetrieverConfig(final String key) {
         this.key = key;
     }
 }

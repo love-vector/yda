@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package ai.yda.framework.channel.http.spring.autoconfigure;
 
-import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -23,27 +24,23 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 
 import ai.yda.common.shared.model.impl.BaseAssistantRequest;
+import ai.yda.framework.channel.http.config.HttpChannelConfig;
 import ai.yda.framework.channel.http.factory.HttpNettyChannelFactory;
 import ai.yda.framework.core.channel.Channel;
-
-import static ai.yda.framework.channel.http.config.HttpChannelConfig.*;
 
 @AutoConfiguration
 @EnableConfigurationProperties({ChannelHttpProperties.class})
 public class ChannelHttpAutoConfiguration {
 
     @Bean
-    public Channel<BaseAssistantRequest, AssistantMessage> channelFactory(ChannelHttpProperties properties) {
+    public Channel<BaseAssistantRequest, AssistantMessage> channelFactory(final ChannelHttpProperties properties) {
         var channelFactory = new HttpNettyChannelFactory();
 
         var configuration = channelFactory.buildConfiguration(
-                new HashMap<>() {
-                    {
-                        put(METHOD, properties.getMethod());
-                        put(URI, properties.getUri());
-                        put(PORT, properties.getPort());
-                    }
-                },
+                Map.of(
+                        HttpChannelConfig.METHOD, properties.getMethod(),
+                        HttpChannelConfig.URI, properties.getUri(),
+                        HttpChannelConfig.PORT, properties.getPort()),
                 BaseAssistantRequest.class,
                 AssistantMessage.class);
 
