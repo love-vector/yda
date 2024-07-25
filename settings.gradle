@@ -41,6 +41,3 @@ project(':channel-http').projectDir = file('channels/channel-http')
 
 include 'channel-http-autoconfigure'
 project(':channel-http-autoconfigure').projectDir = file('channels/autoconfigure/spring/channel-http-autoconfigure')
-
-//test
-include 'yda-application'
