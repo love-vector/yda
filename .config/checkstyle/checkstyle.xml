@@ -114,12 +114,6 @@
         <!-- Checks for the use of the letter 'L' to denote long literals. -->
         <module name="UpperEll"/>
 
-        <!-- Suppression xpath filter. -->
-        <module name="SuppressionXpathFilter">
-            <property name="file" value="${config_loc}/suppressions.xml"/>
-            <property name="optional" value="false"/>
-        </module>
-
     </module>
 
 </module>
