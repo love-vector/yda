@@ -1,6 +1,7 @@
 plugins {
     id 'com.diffplug.spotless' version '6.25.0' apply true
     id 'checkstyle' apply true
+    id 'maven-publish' apply true
 }
 
 allprojects {
@@ -15,6 +16,7 @@ subprojects {
     apply plugin: 'java'
     apply plugin: 'com.diffplug.spotless'
     apply plugin: 'checkstyle'
+    apply plugin: 'maven-publish'
 
     group = 'ai.yda'
     version = '0.0.1'
@@ -53,4 +55,15 @@ subprojects {
     }
 
     check.dependsOn 'checkstyleMain', 'checkstyleTest'
+
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java
+            }
+        }
+        repositories {
+            mavenLocal()
+        }
+    }
 }

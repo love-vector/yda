@@ -11,7 +11,6 @@ import ai.yda.common.shared.model.impl.BaseAssistantRequest;
 import ai.yda.framework.rag.core.model.impl.BaseRagContext;
 import ai.yda.framework.rag.core.retriever.factory.RetrieverFactory;
 import ai.yda.framework.rag.retriever.filesystem.FilesystemRetriever;
-
 import ai.yda.framework.rag.retriever.filesystem.config.FilesystemRetrieverConfig;
 
 @RequiredArgsConstructor
