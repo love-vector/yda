@@ -36,8 +36,8 @@ project(':yda-retriever-website-autoconfigure').projectDir = file('rag/autoconfi
 include 'yda-framework-core'
 project(':yda-framework-core').projectDir = file('framework/core')
 
-include 'channel-http'
-project(':channel-http').projectDir = file('channels/channel-http')
+include 'yda-netty-channel'
+project(':yda-netty-channel').projectDir = file('channels/netty-channel')
 
-include 'channel-http-autoconfigure'
-project(':channel-http-autoconfigure').projectDir = file('channels/autoconfigure/spring/channel-http-autoconfigure')
+include 'yda-rest-spring-sync-channel'
+project(':yda-rest-spring-sync-channel').projectDir = file('channels/rest-spring-sync-channel')
