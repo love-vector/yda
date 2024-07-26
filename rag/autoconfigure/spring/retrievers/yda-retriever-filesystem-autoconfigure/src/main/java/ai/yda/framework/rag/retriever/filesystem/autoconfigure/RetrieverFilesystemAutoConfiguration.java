@@ -29,7 +29,6 @@ import org.springframework.ai.openai.OpenAiEmbeddingOptions;
 import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.ai.retry.RetryUtils;
 import org.springframework.ai.vectorstore.MilvusVectorStore;
-import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -51,14 +50,16 @@ public class RetrieverFilesystemAutoConfiguration {
     }
 
     @Bean
-    public FilesystemRetrieverFactory retrieverFactory(final RetrieverFilesystemProperties properties) {
+    public FilesystemRetrieverFactory retrieverFactory(final RetrieverFilesystemProperties properties)
+            throws Exception {
         var milvusClient = milvusClient(properties);
         var embeddingModel = embeddingModel(properties);
-        var vectorStore = vectorStore(milvusClient, embeddingModel, properties);
-        return new FilesystemRetrieverFactory(vectorStore);
+        var milvusVectorStore = vectorStore(milvusClient, embeddingModel, properties);
+        milvusVectorStore.afterPropertiesSet();
+        return new FilesystemRetrieverFactory(milvusVectorStore);
     }
 
-    private VectorStore vectorStore(
+    private MilvusVectorStore vectorStore(
             final MilvusServiceClient milvusClient,
             final EmbeddingModel embeddingModel,
             final RetrieverFilesystemProperties properties) {

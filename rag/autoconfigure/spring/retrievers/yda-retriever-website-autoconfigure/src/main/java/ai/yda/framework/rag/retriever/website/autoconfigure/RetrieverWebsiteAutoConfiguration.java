@@ -14,7 +14,6 @@ import org.springframework.ai.openai.OpenAiEmbeddingOptions;
 import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.ai.retry.RetryUtils;
 import org.springframework.ai.vectorstore.MilvusVectorStore;
-import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -35,14 +34,16 @@ public class RetrieverWebsiteAutoConfiguration {
     }
 
     @Bean
-    public WebsiteRetrieverFactory websiteRetrieverFactory(final RetrieverWebsiteProperties properties) {
+    public WebsiteRetrieverFactory websiteRetrieverFactory(final RetrieverWebsiteProperties properties)
+            throws Exception {
         var milvusClient = milvusClient(properties);
         var embeddingModel = embeddingModel(properties);
-        var vectorStore = vectorStore(milvusClient, embeddingModel, properties);
-        return new WebsiteRetrieverFactory(vectorStore);
+        var milvusVectorStore = vectorStore(milvusClient, embeddingModel, properties);
+        milvusVectorStore.afterPropertiesSet();
+        return new WebsiteRetrieverFactory(milvusVectorStore);
     }
 
-    private VectorStore vectorStore(
+    private MilvusVectorStore vectorStore(
             final MilvusServiceClient milvusClient,
             final EmbeddingModel embeddingModel,
             final RetrieverWebsiteProperties properties) {
