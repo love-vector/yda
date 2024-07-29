@@ -28,29 +28,28 @@ import io.netty.handler.codec.http.HttpVersion;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.ai.chat.messages.AssistantMessage;
-
-import ai.yda.common.shared.model.impl.BaseAssistantRequest;
 import ai.yda.framework.channel.netty.config.NettyChannelConfig;
 import ai.yda.framework.core.channel.AbstractChannel;
 import ai.yda.framework.core.channel.Channel;
 import ai.yda.framework.core.channel.factory.AbstractChannelFactory;
 import ai.yda.framework.core.channel.factory.ChannelConfiguration;
+import ai.yda.framework.rag.core.model.RagRequest;
+import ai.yda.framework.rag.core.model.RagResponse;
 
 @Slf4j
-public class NettyChannelFactory extends AbstractChannelFactory<BaseAssistantRequest, AssistantMessage> {
+public class NettyChannelFactory extends AbstractChannelFactory<RagRequest, RagResponse> {
     private static final int MAX_CONTENT_LENGTH = 65536;
 
     @Override
-    public Channel<BaseAssistantRequest, AssistantMessage> createChannel(
-            final ChannelConfiguration<BaseAssistantRequest, AssistantMessage> configuration) {
+    public Channel<RagRequest, RagResponse> createChannel(
+            final ChannelConfiguration<RagRequest, RagResponse> configuration) {
         return new HttpNettyChannel(configuration);
     }
 
-    private static class HttpNettyChannel extends AbstractChannel<AssistantMessage> {
-        private final ChannelConfiguration<BaseAssistantRequest, AssistantMessage> configuration;
+    private static class HttpNettyChannel extends AbstractChannel<RagRequest, RagResponse> {
+        private final ChannelConfiguration<RagRequest, RagResponse> configuration;
 
-        HttpNettyChannel(final ChannelConfiguration<BaseAssistantRequest, AssistantMessage> configuration) {
+        HttpNettyChannel(final ChannelConfiguration<RagRequest, RagResponse> configuration) {
             this.configuration = configuration;
             try (ExecutorService executor = Executors.newSingleThreadExecutor()) {
                 executor.execute(this::setupHttpServer);
@@ -83,7 +82,7 @@ public class NettyChannelFactory extends AbstractChannelFactory<BaseAssistantReq
                                             return;
                                         }
 
-                                        BaseAssistantRequest request = new ObjectMapper()
+                                        RagRequest request = new ObjectMapper()
                                                 .readValue(
                                                         req.content().toString(io.netty.util.CharsetUtil.UTF_8),
                                                         configuration.getRequestClass());

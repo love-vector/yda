@@ -13,7 +13,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
-import ai.yda.framework.rag.core.retriever.util.ContentUtil;
+import ai.yda.framework.rag.core.util.ContentUtil;
 import ai.yda.framework.rag.retriever.website.constants.Constants;
 import ai.yda.framework.rag.retriever.website.exception.WebsiteReadException;
 

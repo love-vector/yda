@@ -2,15 +2,14 @@ package ai.yda.framework.generator.assistant.openai;
 
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-
-import ai.yda.common.shared.model.impl.BaseAssistantRequest;
 import ai.yda.common.shared.service.SessionProvider;
 import ai.yda.framework.generator.assistant.openai.service.ThreadService;
-import ai.yda.framework.rag.core.generator.AbstractGenerator;
+import ai.yda.framework.rag.core.generator.Generator;
+import ai.yda.framework.rag.core.model.RagRequest;
+import ai.yda.framework.rag.core.model.RagResponse;
 
 @Slf4j
-public class OpenAiAssistantGenerator extends AbstractGenerator<BaseAssistantRequest, SseEmitter> {
+public class OpenAiAssistantGenerator implements Generator<RagRequest, RagResponse> {
     private final ThreadService threadService;
     private final String assistantId;
     private final SessionProvider sessionProvider;
@@ -23,7 +22,7 @@ public class OpenAiAssistantGenerator extends AbstractGenerator<BaseAssistantReq
     }
 
     @Override
-    public SseEmitter generate(final BaseAssistantRequest request) {
+    public RagResponse generate(final RagRequest request, final String context) {
         var requestQuery = request.getQuery();
         var threadId = sessionProvider
                 .getThreadId()
@@ -36,8 +35,8 @@ public class OpenAiAssistantGenerator extends AbstractGenerator<BaseAssistantReq
                     sessionProvider.setThreadId(newThreadId);
                     return newThreadId;
                 });
-
-        log.debug("Thread ID: {}", threadId);
-        return threadService.createRunStream(threadId, assistantId, request.getContext());
+        return RagResponse.builder()
+                .result(threadService.createRunAndWaitForResponse(threadId, assistantId, context))
+                .build();
     }
 }

@@ -12,7 +12,9 @@ public class RestSpringSyncProperties {
 
     public static final String CONFIG_PREFIX = "ai.yda.framework.channel.rest.spring.sync";
 
-    private String endpointRelativePath;
+    public static final String DEFAULT_ENDPOINT_RELATIVE_PATH = "/";
+
+    private String endpointRelativePath = RestSpringSyncProperties.DEFAULT_ENDPOINT_RELATIVE_PATH;
 
     private String securityToken;
 }
