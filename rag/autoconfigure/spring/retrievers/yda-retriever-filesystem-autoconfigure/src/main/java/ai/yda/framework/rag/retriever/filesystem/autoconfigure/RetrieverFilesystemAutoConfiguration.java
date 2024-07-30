@@ -33,6 +33,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
+import ai.yda.framework.rag.retriever.OptimizedMilvusVectorStore;
 import ai.yda.framework.rag.retriever.filesystem.FilesystemRetriever;
 import ai.yda.framework.rag.retriever.filesystem.config.FilesystemRetrieverConfig;
 import ai.yda.framework.rag.retriever.filesystem.factory.FilesystemRetrieverFactory;
@@ -46,7 +47,7 @@ public class RetrieverFilesystemAutoConfiguration {
             final FilesystemRetrieverFactory filesystemRetrieverFactory,
             final RetrieverFilesystemProperties properties) {
         return filesystemRetrieverFactory.createRetriever(
-                Map.of(FilesystemRetrieverConfig.LOCAL_DIRECTORY_PATH, properties.getLocalDirectoryPath()));
+                Map.of(FilesystemRetrieverConfig.LOCAL_DIRECTORY_PATH, properties.getFileStoragePath()));
     }
 
     @Bean
@@ -63,14 +64,17 @@ public class RetrieverFilesystemAutoConfiguration {
             final MilvusServiceClient milvusClient,
             final EmbeddingModel embeddingModel,
             final RetrieverFilesystemProperties properties) {
+        var collectionName = properties.getCollectionName();
+        var databaseName = properties.getDatabaseName();
         var config = MilvusVectorStore.MilvusVectorStoreConfig.builder()
-                .withCollectionName(properties.getCollectionName())
-                .withDatabaseName(properties.getDatabaseName())
+                .withCollectionName(collectionName)
+                .withDatabaseName(databaseName)
                 .withIndexType(IndexType.IVF_FLAT)
                 .withMetricType(MetricType.COSINE)
                 .withEmbeddingDimension(properties.getEmbeddingDimension())
                 .build();
-        return new MilvusVectorStore(milvusClient, embeddingModel, config, Boolean.TRUE);
+        return new OptimizedMilvusVectorStore(
+                milvusClient, embeddingModel, config, Boolean.TRUE, collectionName, databaseName);
     }
 
     private EmbeddingModel embeddingModel(final RetrieverFilesystemProperties properties) {
