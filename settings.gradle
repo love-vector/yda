@@ -4,10 +4,10 @@ include 'yda-common-shared'
 project(':yda-common-shared').projectDir = file('common/shared')
 
 include 'yda-rag-core'
-project(':yda-rag-core').projectDir = file('rag/foundation/core')
+project(':yda-rag-core').projectDir = file('rag/core')
 
-include 'yda-rag-base'
-project(':yda-rag-base').projectDir = file('rag/foundation/base')
+include 'yda-rag-application-starter'
+project(':yda-rag-application-starter').projectDir = file('rag/autoconfigure/spring/applications/rag-application-starter')
 
 include 'yda-openai-chat-generator'
 project(':yda-openai-chat-generator').projectDir = file('rag/generators/openai-chat-generator')

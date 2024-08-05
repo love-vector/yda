@@ -8,13 +8,13 @@ import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 
-import ai.yda.common.shared.model.impl.BaseAssistantRequest;
-import ai.yda.framework.rag.core.model.impl.BaseRagContext;
+import ai.yda.framework.rag.core.model.RagContext;
+import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.retriever.Retriever;
 import ai.yda.framework.rag.retriever.website.service.WebsiteService;
 
 @Slf4j
-public class WebsiteRetriever implements Retriever<BaseAssistantRequest, BaseRagContext> {
+public class WebsiteRetriever implements Retriever<RagRequest, RagContext> {
     private static final int TOP_K = 5;
 
     private final VectorStore vectorStore;
@@ -30,8 +30,8 @@ public class WebsiteRetriever implements Retriever<BaseAssistantRequest, BaseRag
     }
 
     @Override
-    public BaseRagContext retrieve(final BaseAssistantRequest request) {
-        return BaseRagContext.builder()
+    public RagContext retrieve(final RagRequest request) {
+        return RagContext.builder()
                 .knowledge(
                         vectorStore
                                 .similaritySearch(

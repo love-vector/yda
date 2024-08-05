@@ -15,8 +15,6 @@
  */
 package ai.yda.framework.rag.retriever.filesystem.autoconfigure;
 
-import java.util.Map;
-
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.param.ConnectParam;
 import io.milvus.param.IndexType;
@@ -34,29 +32,18 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 
 import ai.yda.framework.rag.retriever.filesystem.FilesystemRetriever;
-import ai.yda.framework.rag.retriever.filesystem.config.FilesystemRetrieverConfig;
-import ai.yda.framework.rag.retriever.filesystem.factory.FilesystemRetrieverFactory;
 
 @AutoConfiguration
 @EnableConfigurationProperties({RetrieverFilesystemProperties.class})
 public class RetrieverFilesystemAutoConfiguration {
 
     @Bean
-    public FilesystemRetriever filesystemRetriever(
-            final FilesystemRetrieverFactory filesystemRetrieverFactory,
-            final RetrieverFilesystemProperties properties) {
-        return filesystemRetrieverFactory.createRetriever(
-                Map.of(FilesystemRetrieverConfig.LOCAL_DIRECTORY_PATH, properties.getLocalDirectoryPath()));
-    }
-
-    @Bean
-    public FilesystemRetrieverFactory retrieverFactory(final RetrieverFilesystemProperties properties)
-            throws Exception {
+    public FilesystemRetriever filesystemRetriever(final RetrieverFilesystemProperties properties) throws Exception {
         var milvusClient = milvusClient(properties);
         var embeddingModel = embeddingModel(properties);
         var milvusVectorStore = vectorStore(milvusClient, embeddingModel, properties);
         milvusVectorStore.afterPropertiesSet();
-        return new FilesystemRetrieverFactory(milvusVectorStore);
+        return new FilesystemRetriever(properties.getLocalDirectoryPath(), milvusVectorStore);
     }
 
     private MilvusVectorStore vectorStore(

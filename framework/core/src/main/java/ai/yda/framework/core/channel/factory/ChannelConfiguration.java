@@ -6,11 +6,11 @@ import lombok.Getter;
 import lombok.Setter;
 
 import ai.yda.common.shared.factory.FactoryConfig;
-import ai.yda.common.shared.model.AssistantRequest;
+import ai.yda.framework.rag.core.model.RagRequest;
 
 @Setter
 @Getter
-public class ChannelConfiguration<REQUEST extends AssistantRequest, RESPONSE> {
+public class ChannelConfiguration<REQUEST extends RagRequest, RESPONSE> {
 
     private Class<? extends REQUEST> requestClass;
     private Class<? extends RESPONSE> responseClass;

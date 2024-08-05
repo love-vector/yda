@@ -8,17 +8,20 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import ai.yda.common.shared.model.impl.BaseAssistantRequest;
 import ai.yda.framework.channel.rest.spring.sync.RestSpringSyncProperties;
 import ai.yda.framework.core.channel.AbstractChannel;
+import ai.yda.framework.rag.core.model.RagRequest;
+import ai.yda.framework.rag.core.model.RagResponse;
 
 @RestController
-@RequestMapping(path = "${" + RestSpringSyncProperties.CONFIG_PREFIX + ".endpoint-relative-path}")
+@RequestMapping(
+        path = "${" + RestSpringSyncProperties.CONFIG_PREFIX + ".endpoint-relative-path:"
+                + RestSpringSyncProperties.DEFAULT_ENDPOINT_RELATIVE_PATH + "}")
 @RequiredArgsConstructor
-public class RestChannel extends AbstractChannel<String> {
+public class RestChannel extends AbstractChannel<RagRequest, RagResponse> {
 
     @PostMapping
-    public String call(@RequestBody @Validated final BaseAssistantRequest request) {
+    public RagResponse call(@RequestBody @Validated final RagRequest request) {
         return processRequest(request);
     }
 }

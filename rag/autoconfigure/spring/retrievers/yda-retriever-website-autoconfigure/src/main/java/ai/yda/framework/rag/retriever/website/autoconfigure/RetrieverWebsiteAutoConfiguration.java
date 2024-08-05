@@ -1,7 +1,5 @@
 package ai.yda.framework.rag.retriever.website.autoconfigure;
 
-import java.util.Map;
-
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.param.ConnectParam;
 import io.milvus.param.IndexType;
@@ -19,28 +17,17 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 
 import ai.yda.framework.rag.retriever.website.WebsiteRetriever;
-import ai.yda.framework.rag.retriever.website.config.WebsiteRetrieverConfig;
-import ai.yda.framework.rag.retriever.website.factory.WebsiteRetrieverFactory;
 
 @AutoConfiguration
 @EnableConfigurationProperties({RetrieverWebsiteProperties.class})
 public class RetrieverWebsiteAutoConfiguration {
     @Bean
-    public WebsiteRetriever websiteRetriever(
-            final WebsiteRetrieverFactory retrieverFactory, final RetrieverWebsiteProperties properties) {
-        return retrieverFactory.createRetriever(Map.of(
-                WebsiteRetrieverConfig.WEBSITE_URL, properties.getUrl(),
-                WebsiteRetrieverConfig.IS_CRAWLING_ENABLED, String.valueOf(properties.isCrawlingEnabled())));
-    }
-
-    @Bean
-    public WebsiteRetrieverFactory websiteRetrieverFactory(final RetrieverWebsiteProperties properties)
-            throws Exception {
+    public WebsiteRetriever websiteRetriever(final RetrieverWebsiteProperties properties) throws Exception {
         var milvusClient = milvusClient(properties);
         var embeddingModel = embeddingModel(properties);
         var milvusVectorStore = vectorStore(milvusClient, embeddingModel, properties);
         milvusVectorStore.afterPropertiesSet();
-        return new WebsiteRetrieverFactory(milvusVectorStore);
+        return new WebsiteRetriever(milvusVectorStore, properties.getUrl(), properties.isCrawlingEnabled());
     }
 
     private MilvusVectorStore vectorStore(
