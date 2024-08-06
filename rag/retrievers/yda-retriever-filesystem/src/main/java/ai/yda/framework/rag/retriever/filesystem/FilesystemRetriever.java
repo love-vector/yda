@@ -5,9 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,12 +21,12 @@ import ai.yda.framework.rag.retriever.filesystem.service.FilesystemService;
 @Slf4j
 public class FilesystemRetriever implements Retriever<RagRequest, RagContext> {
     private static final int TOP_K = 5;
-    private final Path localDirectoryPath;
+    private final Path fileStoragePath;
     private final VectorStore vectorStore;
     private final FilesystemService filesystemService = new FilesystemService();
 
-    public FilesystemRetriever(final String localDirectoryPath, final VectorStore vectorStore) {
-        this.localDirectoryPath = Paths.get(localDirectoryPath);
+    public FilesystemRetriever(final String fileStoragePath, final VectorStore vectorStore) {
+        this.fileStoragePath = Paths.get(fileStoragePath);
         this.vectorStore = vectorStore;
 
         try {
@@ -70,20 +68,15 @@ public class FilesystemRetriever implements Retriever<RagRequest, RagContext> {
      */
     private void processFolder() throws IOException {
 
-        try (Stream<Path> paths = Files.list(localDirectoryPath)) {
+        try (var paths = Files.list(fileStoragePath)) {
             var fileList = paths.filter(Files::isRegularFile).toList();
 
             if (fileList.isEmpty()) {
-                log.info("No files to process in directory: {}", localDirectoryPath);
+                log.info("No files to process in directory: {}", fileStoragePath);
                 return;
             }
 
-            var documents = fileList.parallelStream()
-                    .map(Path::toString)
-                    .map(filesystemService::createDocumentChunks)
-                    .flatMap(List::stream)
-                    .map(Document::new)
-                    .toList();
+            var documents = filesystemService.createChunkDocumentsFromFiles(fileList);
             vectorStore.add(documents);
         }
     }
@@ -98,13 +91,13 @@ public class FilesystemRetriever implements Retriever<RagRequest, RagContext> {
      * @throws IOException if an I/O error occurs when accessing or moving the files.
      */
     private void moveFilesToProcessed() throws IOException {
-        Path processedDir = localDirectoryPath.resolveSibling("processed");
+        var processedDir = fileStoragePath.resolveSibling("processed");
 
         if (!Files.exists(processedDir)) {
             Files.createDirectory(processedDir);
         }
 
-        try (Stream<Path> files = Files.list(localDirectoryPath)) {
+        try (var files = Files.list(fileStoragePath)) {
             files.filter(Files::isRegularFile).forEach(file -> {
                 try {
                     Files.move(file, processedDir.resolve(file.getFileName()), StandardCopyOption.REPLACE_EXISTING);

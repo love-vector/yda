@@ -3,12 +3,12 @@ package ai.yda.framework.rag.retriever.website.service;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map;
 
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
+
+import org.springframework.ai.document.Document;
 
 import ai.yda.framework.rag.core.util.ContentUtil;
 import ai.yda.framework.rag.retriever.website.exception.WebsiteReadException;
@@ -18,33 +18,29 @@ public class WebsiteService {
 
     public static final int CHUNK_MAX_LENGTH = 1000;
 
-    public Set<String> createContentChunks(final String url) {
-        var documents = ConcurrentHashMap.<String>newKeySet();
-
-        var document = safeConnect(url);
+    public List<Document> createChunkDocumentsFromSitemapUrl(final String sitemapUrl) {
+        var document = safeConnect(sitemapUrl);
         var sitemapIndexElements = document.select("loc");
-
-        sitemapIndexElements.parallelStream().forEach(element -> {
-            var link = element.text();
-            if (link.contains("sitemap")) {
-                documents.addAll(createContentChunks(link));
-            } else {
-                var documentChunks = splitDocumentIntoChunks(safeConnect(link));
-                documents.addAll(documentChunks);
-            }
-        });
-        return documents;
+        return sitemapIndexElements.parallelStream()
+                .map(element -> {
+                    var currentUrl = element.text();
+                    return currentUrl.contains("sitemap")
+                            ? createChunkDocumentsFromSitemapUrl(currentUrl)
+                            : splitWebsitePageIntoChunksDocuments(currentUrl);
+                })
+                .flatMap(List::stream)
+                .toList();
     }
 
-    private List<String> splitDocumentIntoChunks(final Document document) {
-        if (document != null) {
-            var documentContent = document.text();
-            if (!documentContent.trim().isEmpty()) {
-                var preprocessedContent = ContentUtil.preprocessContent(documentContent);
-                return ContentUtil.splitContent(preprocessedContent, CHUNK_MAX_LENGTH);
-            }
+    private List<Document> splitWebsitePageIntoChunksDocuments(final String websitePageUrl) {
+        var documentContent = safeConnect(websitePageUrl).text();
+        if (documentContent.trim().isEmpty()) {
+            return Collections.emptyList();
         }
-        return Collections.emptyList();
+        var preprocessedContent = ContentUtil.preprocessContent(documentContent);
+        return ContentUtil.splitContent(preprocessedContent, CHUNK_MAX_LENGTH).parallelStream()
+                .map(chunkContent -> new Document(chunkContent, Map.of("url", websitePageUrl)))
+                .toList();
     }
 
     /**
@@ -55,7 +51,7 @@ public class WebsiteService {
      * @return the Document object retrieved from the URL, or null if an error occurs
      * @throws WebsiteReadException if an IOException occurs during the connection attempt
      */
-    private Document safeConnect(final String url) {
+    private org.jsoup.nodes.Document safeConnect(final String url) {
         try {
             return Jsoup.connect(url).get();
         } catch (IOException e) {
