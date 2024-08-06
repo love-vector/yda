@@ -43,9 +43,7 @@ public class WebsiteRetriever implements Retriever<RagRequest, RagContext> {
     }
 
     private void processWebsite() {
-        var pageDocuments = websiteService.createContentChunks(url).parallelStream()
-                .map(Document::new)
-                .toList();
+        var pageDocuments = websiteService.createChunkDocumentsFromSitemapUrl(url);
         vectorStore.add(pageDocuments);
     }
 }

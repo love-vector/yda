@@ -13,7 +13,7 @@ import ai.yda.framework.rag.retriever.RetrieverProperties;
 public class RetrieverWebsiteProperties extends RetrieverProperties {
     public static final String CONFIG_PREFIX = "ai.yda.framework.rag.retriever.website";
 
-    private String url;
+    private String sitemapUrl;
 
     private boolean isCrawlingEnabled;
 }
