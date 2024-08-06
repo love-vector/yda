@@ -1,1 +1,1 @@
-ai.yda.framework.channel.rest.spring.sync.RestSpringSyncAutoConfig
+ai.yda.framework.channel.rest.spring.sync.RestSpringSyncAutoConfiguration

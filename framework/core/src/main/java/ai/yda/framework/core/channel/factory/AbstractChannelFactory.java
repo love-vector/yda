@@ -3,10 +3,11 @@ package ai.yda.framework.core.channel.factory;
 import java.util.Map;
 
 import ai.yda.common.shared.factory.FactoryConfig;
-import ai.yda.common.shared.model.AssistantRequest;
 import ai.yda.framework.core.channel.Channel;
+import ai.yda.framework.rag.core.model.RagRequest;
+import ai.yda.framework.rag.core.model.RagResponse;
 
-public abstract class AbstractChannelFactory<REQUEST extends AssistantRequest, RESPONSE>
+public abstract class AbstractChannelFactory<REQUEST extends RagRequest, RESPONSE extends RagResponse>
         implements ChannelFactory<REQUEST, RESPONSE> {
 
     @Override

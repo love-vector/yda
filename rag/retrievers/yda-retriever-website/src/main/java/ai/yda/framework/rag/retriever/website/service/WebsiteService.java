@@ -10,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
-import ai.yda.framework.rag.core.retriever.util.ContentUtil;
+import ai.yda.framework.rag.core.util.ContentUtil;
 import ai.yda.framework.rag.retriever.website.exception.WebsiteReadException;
 
 @Slf4j

@@ -15,13 +15,13 @@ import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 
-import ai.yda.common.shared.model.impl.BaseAssistantRequest;
-import ai.yda.framework.rag.core.model.impl.BaseRagContext;
+import ai.yda.framework.rag.core.model.RagContext;
+import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.retriever.Retriever;
 import ai.yda.framework.rag.retriever.filesystem.service.FilesystemService;
 
 @Slf4j
-public class FilesystemRetriever implements Retriever<BaseAssistantRequest, BaseRagContext> {
+public class FilesystemRetriever implements Retriever<RagRequest, RagContext> {
     private static final int TOP_K = 5;
     private final Path localDirectoryPath;
     private final VectorStore vectorStore;
@@ -40,9 +40,9 @@ public class FilesystemRetriever implements Retriever<BaseAssistantRequest, Base
     }
 
     @Override
-    public BaseRagContext retrieve(final BaseAssistantRequest request) {
+    public RagContext retrieve(final RagRequest request) {
 
-        return BaseRagContext.builder()
+        return RagContext.builder()
                 .knowledge(
                         vectorStore
                                 .similaritySearch(

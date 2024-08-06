@@ -1,6 +1,6 @@
 package ai.yda.framework.rag.retriever.filesystem.service;
 
-import ai.yda.framework.rag.core.retriever.util.ContentUtil;
+import ai.yda.framework.rag.core.util.ContentUtil;
 import ai.yda.framework.rag.retriever.filesystem.util.FileUtil;
 
 import java.io.File;
