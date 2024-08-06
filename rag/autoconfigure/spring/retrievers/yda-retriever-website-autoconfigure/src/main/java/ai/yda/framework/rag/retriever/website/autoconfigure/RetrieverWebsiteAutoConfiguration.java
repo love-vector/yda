@@ -16,6 +16,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
+import ai.yda.framework.rag.retriever.OptimizedMilvusVectorStore;
 import ai.yda.framework.rag.retriever.website.WebsiteRetriever;
 
 @AutoConfiguration
@@ -34,14 +35,17 @@ public class RetrieverWebsiteAutoConfiguration {
             final MilvusServiceClient milvusClient,
             final EmbeddingModel embeddingModel,
             final RetrieverWebsiteProperties properties) {
+        var collectionName = properties.getCollectionName();
+        var databaseName = properties.getDatabaseName();
         var config = MilvusVectorStore.MilvusVectorStoreConfig.builder()
-                .withCollectionName(properties.getCollectionName())
-                .withDatabaseName(properties.getDatabaseName())
+                .withCollectionName(collectionName)
+                .withDatabaseName(databaseName)
                 .withIndexType(IndexType.IVF_FLAT)
                 .withMetricType(MetricType.COSINE)
                 .withEmbeddingDimension(properties.getEmbeddingDimension())
                 .build();
-        return new MilvusVectorStore(milvusClient, embeddingModel, config, Boolean.TRUE);
+        return new OptimizedMilvusVectorStore(
+                milvusClient, embeddingModel, config, Boolean.TRUE, collectionName, databaseName);
     }
 
     private EmbeddingModel embeddingModel(final RetrieverWebsiteProperties properties) {

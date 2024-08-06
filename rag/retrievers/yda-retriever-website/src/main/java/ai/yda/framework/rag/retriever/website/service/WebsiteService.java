@@ -1,82 +1,50 @@
 package ai.yda.framework.rag.retriever.website.service;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.concurrent.ConcurrentHashMap;
 
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 
 import ai.yda.framework.rag.core.util.ContentUtil;
-import ai.yda.framework.rag.retriever.website.constants.Constants;
 import ai.yda.framework.rag.retriever.website.exception.WebsiteReadException;
 
 @Slf4j
 public class WebsiteService {
 
-    /**
-     * Retrieves a map of document locations and their respective content chunks from the specified URL up to a certain
-     * depth. This method starts crawling from the provided URL, extracts links, connects to them safely, and processes
-     * the documents found.
-     *
-     * @param url the starting URL for crawling
-     * @return a map where the key is the document location (URL) and the value is a list of processed content chunks
-     */
-    public Map<String, List<String>> getPageDocuments(final String url) {
-        return documentFilterData(
-                extractLinks(url).stream().map(this::safeConnect).collect(Collectors.toList()));
+    public static final int CHUNK_MAX_LENGTH = 1000;
+
+    public Set<String> createContentChunks(final String url) {
+        var documents = ConcurrentHashMap.<String>newKeySet();
+
+        var document = safeConnect(url);
+        var sitemapIndexElements = document.select("loc");
+
+        sitemapIndexElements.parallelStream().forEach(element -> {
+            var link = element.text();
+            if (link.contains("sitemap")) {
+                documents.addAll(createContentChunks(link));
+            } else {
+                var documentChunks = splitDocumentIntoChunks(safeConnect(link));
+                documents.addAll(documentChunks);
+            }
+        });
+        return documents;
     }
 
-    /**
-     * Filters and processes the content of the given documents, splitting them into chunks.
-     *
-     * @param documents the list of documents to process
-     * @return a map where the key is the document location (URL) and the value is a list of processed content chunks
-     */
-    private Map<String, List<String>> documentFilterData(final List<Document> documents) {
-        var result = new HashMap<String, List<String>>();
-        for (var document : documents) {
-            if (document != null) {
-                var documentContent = document.text();
+    private List<String> splitDocumentIntoChunks(final Document document) {
+        if (document != null) {
+            var documentContent = document.text();
+            if (!documentContent.trim().isEmpty()) {
                 var preprocessedContent = ContentUtil.preprocessContent(documentContent);
-                var chunks = ContentUtil.splitContent(preprocessedContent, Constants.CHUNK_MAX_LENGTH);
-                result.put(document.location(), chunks);
+                return ContentUtil.splitContent(preprocessedContent, CHUNK_MAX_LENGTH);
             }
         }
-        return result;
-    }
-
-    /**
-     * Extracts all links from the given sitemap URL.
-     * This method recursively processes sitemap index files to gather all individual URLs.
-     *
-     * @param url the URL of the sitemap
-     * @return a set of URLs extracted from the sitemap
-     */
-    private Set<String> extractLinks(final String url) {
-        var links = new HashSet<String>();
-        try {
-            var document = Jsoup.connect(url).get();
-            var sitemapIndexElements = document.select("loc");
-
-            for (var element : sitemapIndexElements) {
-                if (element.text().contains("sitemap")) {
-                    links.addAll(extractLinks(element.text()));
-                } else {
-                    return sitemapIndexElements.stream().map(Element::text).collect(Collectors.toSet());
-                }
-            }
-            return links;
-
-        } catch (IOException e) {
-            throw new WebsiteReadException(e);
-        }
+        return Collections.emptyList();
     }
 
     /**

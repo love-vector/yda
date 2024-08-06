@@ -1,0 +1,8 @@
+plugins {
+    id 'java-library'
+}
+
+dependencies {
+    api 'org.springframework.ai:spring-ai-milvus-store:1.0.0-SNAPSHOT'
+    api 'org.springframework.ai:spring-ai-openai:1.0.0-SNAPSHOT'
+}

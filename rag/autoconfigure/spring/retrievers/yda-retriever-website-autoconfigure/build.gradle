@@ -4,7 +4,5 @@ plugins {
 
 dependencies {
     api project(':yda-retriever-website')
-
-    api 'org.springframework.ai:spring-ai-milvus-store:1.0.0-SNAPSHOT'
-    api 'org.springframework.ai:spring-ai-openai:1.0.0-SNAPSHOT'
+    api project(':yda-retriever-autoconfigure-shared')
 }

@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -17,14 +18,14 @@ import org.springframework.ai.vectorstore.VectorStore;
 import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.retriever.Retriever;
-import ai.yda.framework.rag.retriever.filesystem.service.DocumentService;
+import ai.yda.framework.rag.retriever.filesystem.service.FilesystemService;
 
 @Slf4j
 public class FilesystemRetriever implements Retriever<RagRequest, RagContext> {
     private static final int TOP_K = 5;
     private final Path localDirectoryPath;
     private final VectorStore vectorStore;
-    private final DocumentService documentService = new DocumentService();
+    private final FilesystemService filesystemService = new FilesystemService();
 
     public FilesystemRetriever(final String localDirectoryPath, final VectorStore vectorStore) {
         this.localDirectoryPath = Paths.get(localDirectoryPath);
@@ -77,12 +78,13 @@ public class FilesystemRetriever implements Retriever<RagRequest, RagContext> {
                 return;
             }
 
-            fileList.parallelStream()
+            var documents = fileList.parallelStream()
                     .map(Path::toString)
-                    .map(documentService::createDocumentChunks)
-                    .map(chunkList ->
-                            chunkList.parallelStream().map(Document::new).collect(Collectors.toList()))
-                    .forEach(vectorStore::add);
+                    .map(filesystemService::createDocumentChunks)
+                    .flatMap(List::stream)
+                    .map(Document::new)
+                    .toList();
+            vectorStore.add(documents);
         }
     }
 
