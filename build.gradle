@@ -68,4 +68,8 @@ subprojects {
     }
 
     build.dependsOn 'publishToMavenLocal'
+
+    processResources {
+        from(rootProject.resources.text.fromFile('.config/log/logback-spring.xml'))
+    }
 }

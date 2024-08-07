@@ -72,7 +72,7 @@ public class FilesystemRetriever implements Retriever<RagRequest, RagContext> {
             var fileList = paths.filter(Files::isRegularFile).toList();
 
             if (fileList.isEmpty()) {
-                log.info("No files to process in directory: {}", fileStoragePath);
+                log.debug("No files to process in directory: {}", fileStoragePath);
                 return;
             }
 
