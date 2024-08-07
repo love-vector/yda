@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
 }
 dependencies {
-    api project(":yda-common-shared")
+    api project(":session-core")
 
     implementation 'edu.stanford.nlp:stanford-corenlp:4.5.7'
     implementation 'edu.stanford.nlp:stanford-corenlp:4.5.7:models'
