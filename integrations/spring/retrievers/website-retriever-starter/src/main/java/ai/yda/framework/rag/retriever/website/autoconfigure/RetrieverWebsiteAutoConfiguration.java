@@ -28,7 +28,11 @@ public class RetrieverWebsiteAutoConfiguration {
         var embeddingModel = embeddingModel(properties);
         var milvusVectorStore = vectorStore(milvusClient, embeddingModel, properties);
         milvusVectorStore.afterPropertiesSet();
-        return new WebsiteRetriever(milvusVectorStore, properties.getSitemapUrl(), properties.isCrawlingEnabled());
+        return new WebsiteRetriever(
+                milvusVectorStore,
+                properties.getSitemapUrl(),
+                properties.getTopK(),
+                properties.getIsProcessingEnabled());
     }
 
     private MilvusVectorStore vectorStore(
