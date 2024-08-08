@@ -1,0 +1,8 @@
+plugins {
+    id 'java-library'
+}
+
+dependencies {
+    api project(':filesystem-retriever')
+    api project(':retriever-shared-starter')
+}

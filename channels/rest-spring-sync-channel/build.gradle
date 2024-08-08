@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    api project(":yda-framework-core")
+    api project(":channel-core")
 
     api 'org.springframework.boot:spring-boot-starter-web:3.3.2'
     api 'org.springframework.boot:spring-boot-starter-security:3.3.2'
