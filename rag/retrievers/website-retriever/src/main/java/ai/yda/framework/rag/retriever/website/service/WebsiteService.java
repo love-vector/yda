@@ -37,6 +37,7 @@ public class WebsiteService {
         if (documentContent.trim().isEmpty()) {
             return Collections.emptyList();
         }
+        log.debug("Processing website's page url: {}", websitePageUrl);
         var preprocessedContent = ContentUtil.preprocessContent(documentContent);
         return ContentUtil.splitContent(preprocessedContent, CHUNK_MAX_LENGTH).parallelStream()
                 .map(chunkContent -> new Document(chunkContent, Map.of("url", websitePageUrl)))

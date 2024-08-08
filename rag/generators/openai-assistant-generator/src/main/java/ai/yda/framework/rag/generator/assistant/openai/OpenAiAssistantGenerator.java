@@ -35,6 +35,7 @@ public class OpenAiAssistantGenerator implements Generator<RagRequest, RagRespon
                     sessionProvider.setThreadId(newThreadId);
                     return newThreadId;
                 });
+        log.debug("Thread ID: {}", threadId);
         return RagResponse.builder()
                 .result(threadService.createRunAndWaitForResponse(threadId, assistantId, context))
                 .build();

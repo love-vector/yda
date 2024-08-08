@@ -1,0 +1,41 @@
+<configuration>
+    <!-- All log's configuration is written here.
+     If you want to delete a logger for particular package just delete lines where it is defined. -->
+
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>-->
+
+    <!-- Set log pattern for the console. You can override this to have a custom pattern. -->
+    <property name="CONSOLE_LOG_PATTERN" value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p})
+    %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint}
+    %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
+
+    <!--Retrieve log level property from the Spring Environment or set default value to 'ERROR'. -->
+    <springProperty scope="context" name="LOG_LEVEL" source="ai.yda.framework.log.level" defaultValue="ERROR"/>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Logger for standard Spring Boot logs. -->
+    <logger name="org.springframework.boot" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <!-- Logger for Tomcat. -->
+    <logger name="org.apache.catalina" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <!-- Logger for Spring embedded WebApplicationContext. -->
+    <logger name="org.springframework.web" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <!-- Root logger that configures logging for all classes in the project,
+         as well as those from other libraries used explicitly or implicitly. -->
+    <root level="${LOG_LEVEL}">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+</configuration>
