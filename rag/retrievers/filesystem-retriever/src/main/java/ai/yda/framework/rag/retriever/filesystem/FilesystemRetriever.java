@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
@@ -20,20 +21,22 @@ import ai.yda.framework.rag.retriever.filesystem.service.FilesystemService;
 
 @Slf4j
 public class FilesystemRetriever implements Retriever<RagRequest, RagContext> {
-    private static final int TOP_K = 5;
-    private final Path fileStoragePath;
     private final VectorStore vectorStore;
+    private final Path fileStoragePath;
+    private final Integer topK;
     private final FilesystemService filesystemService = new FilesystemService();
 
-    public FilesystemRetriever(final String fileStoragePath, final VectorStore vectorStore) {
-        this.fileStoragePath = Paths.get(fileStoragePath);
+    public FilesystemRetriever(
+            final VectorStore vectorStore,
+            final String fileStoragePath,
+            final Integer topK,
+            final Boolean isProcessingEnabled) {
         this.vectorStore = vectorStore;
+        this.fileStoragePath = Paths.get(fileStoragePath);
+        this.topK = topK;
 
-        try {
-            init();
-        } catch (IOException e) {
-            log.error("Failed initialize Retriever: {}", e.getClass());
-            throw new RuntimeException(e);
+        if (isProcessingEnabled) {
+            processFileStorageFolder();
         }
     }
 
@@ -41,19 +44,13 @@ public class FilesystemRetriever implements Retriever<RagRequest, RagContext> {
     public RagContext retrieve(final RagRequest request) {
 
         return RagContext.builder()
-                .knowledge(
-                        vectorStore
-                                .similaritySearch(
-                                        SearchRequest.query(request.getQuery()).withTopK(TOP_K))
-                                .stream()
-                                .map(Document::getContent)
-                                .collect(Collectors.toList()))
+                .knowledge(vectorStore
+                        .similaritySearch(
+                                SearchRequest.query(request.getQuery()).withTopK(topK))
+                        .stream()
+                        .map(Document::getContent)
+                        .collect(Collectors.toList()))
                 .build();
-    }
-
-    public void init() throws IOException {
-        processFolder();
-        moveFilesToProcessed();
     }
 
     /**
@@ -63,11 +60,8 @@ public class FilesystemRetriever implements Retriever<RagRequest, RagContext> {
      * and then adds these chunks to the vector store in parallel. If the directory is empty, it logs
      * an informational message and returns without processing.
      * </p>
-     *
-     * @throws IOException if an I/O error occurs when accessing the directory or files.
      */
-    private void processFolder() throws IOException {
-
+    private void processFileStorageFolder() {
         try (var paths = Files.list(fileStoragePath)) {
             var fileList = paths.filter(Files::isRegularFile).toList();
 
@@ -78,6 +72,10 @@ public class FilesystemRetriever implements Retriever<RagRequest, RagContext> {
 
             var documents = filesystemService.createChunkDocumentsFromFiles(fileList);
             vectorStore.add(documents);
+            moveFilesToProcessedFolder(fileList);
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -90,21 +88,19 @@ public class FilesystemRetriever implements Retriever<RagRequest, RagContext> {
      *
      * @throws IOException if an I/O error occurs when accessing or moving the files.
      */
-    private void moveFilesToProcessed() throws IOException {
+    private void moveFilesToProcessedFolder(final List<Path> fileList) throws IOException {
         var processedDir = fileStoragePath.resolveSibling("processed");
 
         if (!Files.exists(processedDir)) {
             Files.createDirectory(processedDir);
         }
 
-        try (var files = Files.list(fileStoragePath)) {
-            files.filter(Files::isRegularFile).forEach(file -> {
-                try {
-                    Files.move(file, processedDir.resolve(file.getFileName()), StandardCopyOption.REPLACE_EXISTING);
-                } catch (IOException e) {
-                    log.error("Failed to move file {} to processed directory: {}", file, e);
-                }
-            });
-        }
+        fileList.parallelStream().forEach(file -> {
+            try {
+                Files.move(file, processedDir.resolve(file.getFileName()), StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                log.error("Failed to move file {} to processed directory: {}", file, e);
+            }
+        });
     }
 }

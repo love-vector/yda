@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import org.springframework.ai.vectorstore.MilvusVectorStore;
+import org.springframework.ai.vectorstore.SearchRequest;
 
 @Setter
 @Getter
@@ -13,7 +14,11 @@ public class RetrieverProperties {
 
     private String collectionName = MilvusVectorStore.DEFAULT_COLLECTION_NAME;
 
-    private int embeddingDimension = MilvusVectorStore.OPENAI_EMBEDDING_DIMENSION_SIZE;
+    private Integer embeddingDimension = MilvusVectorStore.OPENAI_EMBEDDING_DIMENSION_SIZE;
+
+    private Integer topK = SearchRequest.DEFAULT_TOP_K;
+
+    private Boolean isProcessingEnabled = Boolean.FALSE;
 
     private String openAiKey;
 

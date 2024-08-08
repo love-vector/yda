@@ -44,7 +44,11 @@ public class RetrieverFilesystemAutoConfiguration {
         var embeddingModel = embeddingModel(properties);
         var milvusVectorStore = vectorStore(milvusClient, embeddingModel, properties);
         milvusVectorStore.afterPropertiesSet();
-        return new FilesystemRetriever(properties.getFileStoragePath(), milvusVectorStore);
+        return new FilesystemRetriever(
+                milvusVectorStore,
+                properties.getFileStoragePath(),
+                properties.getTopK(),
+                properties.getIsProcessingEnabled());
     }
 
     private MilvusVectorStore vectorStore(
