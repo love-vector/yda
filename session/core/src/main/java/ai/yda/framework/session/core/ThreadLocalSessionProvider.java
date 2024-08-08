@@ -1,16 +1,26 @@
 package ai.yda.framework.session.core;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 public class ThreadLocalSessionProvider implements SessionProvider {
 
-    private final ThreadLocal<String> threadLocal = new ThreadLocal<>();
+    private final ThreadLocal<Map<String, Object>> threadLocal = new ThreadLocal<>();
 
-    public void setThreadId(final String threadId) {
-        threadLocal.set(threadId);
+    @Override
+    public void put(final String key, final Object value) {
+        var threadLocalMap = threadLocal.get();
+        if (threadLocalMap == null) {
+            threadLocalMap = new HashMap<>();
+            threadLocal.set(threadLocalMap);
+        }
+        threadLocalMap.put(key, value);
     }
 
-    public Optional<String> getThreadId() {
-        return Optional.ofNullable(threadLocal.get());
+    @Override
+    public Optional<Object> get(final String key) {
+        var threadLocalMap = threadLocal.get();
+        return threadLocalMap == null ? Optional.empty() : Optional.ofNullable(threadLocalMap.get(key));
     }
 }

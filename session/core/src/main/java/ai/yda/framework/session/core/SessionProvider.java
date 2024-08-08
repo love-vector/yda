@@ -4,7 +4,7 @@ import java.util.Optional;
 
 public interface SessionProvider {
 
-    Optional<String> getThreadId();
+    void put(String key, Object value);
 
-    void setThreadId(String threadId);
+    Optional<Object> get(String key);
 }
