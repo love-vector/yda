@@ -1,46 +1,81 @@
 rootProject.name = 'project-yda'
 
-include 'yda-common-shared'
-project(':yda-common-shared').projectDir = file('common/shared')
+//______________________________________________________________________________________________________________________
 
-include 'yda-rag-core'
-project(':yda-rag-core').projectDir = file('rag/core')
+// Assistant
 
-include 'yda-rag-application-starter'
-project(':yda-rag-application-starter').projectDir = file('rag/autoconfigure/spring/applications/rag-application-starter')
+include 'framework-core'
+project(':framework-core').projectDir = file('core')
 
-include 'yda-openai-chat-generator'
-project(':yda-openai-chat-generator').projectDir = file('rag/generators/openai-chat-generator')
+//______________________________________________________________________________________________________________________
 
-include 'yda-openai-chat-generator-autoconfigure'
-project(':yda-openai-chat-generator-autoconfigure').projectDir = file('rag/autoconfigure/spring/generators/openai-chat-generator-autoconfigure')
+// Channel
 
-include 'yda-openai-assistant-generator'
-project(':yda-openai-assistant-generator').projectDir = file('rag/generators/openai-assistant-generator')
+include 'channel-core'
+project(':channel-core').projectDir = file('channels/core')
 
-include 'yda-openai-assistant-generator-autoconfigure'
-project(':yda-openai-assistant-generator-autoconfigure').projectDir = file('rag/autoconfigure/spring/generators/openai-assistant-generator-autoconfigure')
+include 'rest-spring-sync-channel'
+project(':rest-spring-sync-channel').projectDir = file('channels/rest-spring-sync-channel')
 
-include 'yda-retriever-filesystem'
-project(':yda-retriever-filesystem').projectDir = file('rag/retrievers/yda-retriever-filesystem')
+//______________________________________________________________________________________________________________________
 
-include 'yda-retriever-website'
-project(':yda-retriever-website').projectDir = file('rag/retrievers/yda-retriever-website')
+// RAG
 
-include 'yda-retriever-autoconfigure-shared'
-project(':yda-retriever-autoconfigure-shared').projectDir = file('rag/autoconfigure/spring/retrievers/shared')
+include 'rag-core'
+project(':rag-core').projectDir = file('rag/core')
 
-include 'yda-retriever-filesystem-autoconfigure'
-project(':yda-retriever-filesystem-autoconfigure').projectDir = file('rag/autoconfigure/spring/retrievers/yda-retriever-filesystem-autoconfigure')
+// RAG - Retrievers
 
-include'yda-retriever-website-autoconfigure'
-project(':yda-retriever-website-autoconfigure').projectDir = file('rag/autoconfigure/spring/retrievers/yda-retriever-website-autoconfigure')
+include 'filesystem-retriever'
+project(':filesystem-retriever').projectDir = file('rag/retrievers/filesystem-retriever')
 
-include 'yda-framework-core'
-project(':yda-framework-core').projectDir = file('framework/core')
+include 'website-retriever'
+project(':website-retriever').projectDir = file('rag/retrievers/website-retriever')
 
-include 'yda-netty-channel'
-project(':yda-netty-channel').projectDir = file('channels/netty-channel')
+// RAG - Generators
 
-include 'yda-rest-spring-sync-channel'
-project(':yda-rest-spring-sync-channel').projectDir = file('channels/rest-spring-sync-channel')
+include 'openai-assistant-generator'
+project(':openai-assistant-generator').projectDir = file('rag/generators/openai-assistant-generator')
+
+include 'openai-chat-generator'
+project(':openai-chat-generator').projectDir = file('rag/generators/openai-chat-generator')
+
+//______________________________________________________________________________________________________________________
+
+// Session
+
+include 'session-core'
+project(':session-core').projectDir = file('session/core')
+
+//______________________________________________________________________________________________________________________
+
+// Integrations - Spring
+
+// Assistant
+
+include 'rag-assistant-starter'
+project(':rag-assistant-starter').projectDir = file('integrations/spring/assistants/rag-assistant-starter')
+
+// RAG
+
+include 'rag-starter'
+project(':rag-starter').projectDir = file('integrations/spring/rags/rag-starter')
+
+// RAG - Retrievers
+
+include 'retriever-shared-starter'
+project(':retriever-shared-starter').projectDir = file('integrations/spring/retrievers/shared')
+
+include 'filesystem-retriever-starter'
+project(':filesystem-retriever-starter').projectDir = file('integrations/spring/retrievers/filesystem-retriever-starter')
+
+include'website-retriever-starter'
+project(':website-retriever-starter').projectDir = file('integrations/spring/retrievers/website-retriever-starter')
+
+// RAG - Generators
+
+include 'openai-chat-generator-starter'
+project(':openai-chat-generator-starter').projectDir = file('integrations/spring/generators/openai-chat-generator-starter')
+
+include 'openai-assistant-generator-starter'
+project(':openai-assistant-generator-starter').projectDir = file('integrations/spring/generators/openai-assistant-generator-starter')

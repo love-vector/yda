@@ -1,6 +1,0 @@
-plugins {
-    id 'java-library'
-}
-dependencies {
-    api project(":yda-rag-core")
-}

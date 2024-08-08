@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    api project(':yda-framework-core')
+    api project(':framework-core')
 
     implementation 'org.springframework.boot:spring-boot-starter-web:3.3.0'
     implementation 'com.azure:azure-ai-openai-assistants:1.0.0-beta.3'

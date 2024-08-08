@@ -1,8 +1,0 @@
-plugins {
-    id 'java-library'
-}
-
-dependencies {
-    api project(':yda-retriever-website')
-    api project(':yda-retriever-autoconfigure-shared')
-}
