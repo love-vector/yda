@@ -20,6 +20,8 @@ public class RetrieverProperties {
 
     private Boolean isProcessingEnabled = Boolean.FALSE;
 
+    private Boolean clearCollectionOnStartup = Boolean.FALSE;
+
     private String openAiKey;
 
     private String openAiModel;

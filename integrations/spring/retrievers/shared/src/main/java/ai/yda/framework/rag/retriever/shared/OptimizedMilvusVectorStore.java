@@ -1,11 +1,16 @@
 package ai.yda.framework.rag.retriever.shared;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import com.alibaba.fastjson.JSONObject;
 import io.milvus.client.MilvusServiceClient;
+import io.milvus.param.collection.HasCollectionParam;
 import io.milvus.param.dml.InsertParam;
+import io.milvus.param.dml.QueryParam;
+import io.milvus.response.QueryResultsWrapper;
 
 import org.springframework.ai.document.Document;
 import org.springframework.ai.embedding.EmbeddingModel;
@@ -20,6 +25,7 @@ public class OptimizedMilvusVectorStore extends MilvusVectorStore {
     private final EmbeddingModel embeddingModel;
     private final String databaseName;
     private final String collectionName;
+    private final boolean clearCollectionOnStartup;
 
     public OptimizedMilvusVectorStore(
             final MilvusServiceClient milvusClient,
@@ -27,13 +33,15 @@ public class OptimizedMilvusVectorStore extends MilvusVectorStore {
             final MilvusVectorStoreConfig config,
             final boolean initializeSchema,
             final String collectionName,
-            final String databaseName) {
+            final String databaseName,
+            final boolean clearCollectionOnStartup) {
 
         super(milvusClient, embeddingModel, config, initializeSchema);
         this.milvusClient = milvusClient;
         this.embeddingModel = embeddingModel;
         this.collectionName = collectionName;
         this.databaseName = databaseName;
+        this.clearCollectionOnStartup = clearCollectionOnStartup;
     }
 
     @Override
@@ -70,6 +78,14 @@ public class OptimizedMilvusVectorStore extends MilvusVectorStore {
         }
     }
 
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        if (this.clearCollectionOnStartup) {
+            clearCollection();
+        }
+        super.afterPropertiesSet();
+    }
+
     private List<List<Float>> embedDocuments(final List<String> documentsContent) {
         var embeddings = new ArrayList<List<Float>>();
         var totalSize = documentsContent.size();
@@ -84,5 +100,43 @@ public class OptimizedMilvusVectorStore extends MilvusVectorStore {
         }
 
         return embeddings;
+    }
+
+    private void clearCollection() {
+        if (isDatabaseCollectionExists()) {
+            var allEntitiesIds = getAllEntitiesIds();
+            delete(allEntitiesIds);
+        }
+    }
+
+    private Boolean isDatabaseCollectionExists() {
+        var collectionExistsResult = milvusClient.hasCollection(HasCollectionParam.newBuilder()
+                .withDatabaseName(this.databaseName)
+                .withCollectionName(this.collectionName)
+                .build());
+        if (collectionExistsResult.getException() != null) {
+            throw new RuntimeException(
+                    "Failed to check if database collection exists", collectionExistsResult.getException());
+        }
+        return collectionExistsResult.getData();
+    }
+
+    private List<String> getAllEntitiesIds() {
+        var getAllIdsQueryResult = milvusClient.query(QueryParam.newBuilder()
+                .withCollectionName(this.collectionName)
+                .withExpr(DOC_ID_FIELD_NAME + " >= \"\"")
+                .withOutFields(List.of(DOC_ID_FIELD_NAME))
+                .build());
+
+        if (getAllIdsQueryResult.getException() != null) {
+            throw new RuntimeException("Failed to retrieve all entities ids", getAllIdsQueryResult.getException());
+        }
+
+        return Optional.ofNullable(getAllIdsQueryResult.getData())
+                .map(data -> new QueryResultsWrapper(data)
+                        .getFieldWrapper(DOC_ID_FIELD_NAME).getFieldData().parallelStream()
+                                .map(Object::toString)
+                                .toList())
+                .orElse(Collections.emptyList());
     }
 }
