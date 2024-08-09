@@ -19,7 +19,7 @@ import ai.yda.framework.rag.core.model.RagResponse;
         path = "${" + RestSpringSyncProperties.CONFIG_PREFIX + ".endpoint-relative-path:"
                 + RestSpringSyncProperties.DEFAULT_ENDPOINT_RELATIVE_PATH + "}")
 @RequiredArgsConstructor
-public class RestChannel implements Channel<RagRequest, RagResponse> {
+public class RestSyncChannel implements Channel<RagRequest, RagResponse> {
 
     private final Assistant<RagRequest, RagResponse> assistant;
 
