@@ -33,9 +33,13 @@
         <appender-ref ref="CONSOLE"/>
     </logger>
 
-    <!-- Root logger that configures logging for all classes in the project,
-         as well as those from other libraries used explicitly or implicitly. -->
-    <root level="${LOG_LEVEL}">
+    <!-- Logger that configures logging for all classes in the yda-project. -->
+    <logger name="ai.yda" level="${LOG_LEVEL}" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <!--  Root logger configures logging for all libraries used explicitly or implicitly by YDA framework.-->
+    <root level="ERROR">
         <appender-ref ref="CONSOLE"/>
     </root>
 </configuration>

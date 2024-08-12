@@ -65,7 +65,13 @@ public class RetrieverFilesystemAutoConfiguration {
                 .withEmbeddingDimension(properties.getEmbeddingDimension())
                 .build();
         return new OptimizedMilvusVectorStore(
-                milvusClient, embeddingModel, config, Boolean.TRUE, collectionName, databaseName);
+                milvusClient,
+                embeddingModel,
+                config,
+                Boolean.TRUE,
+                collectionName,
+                databaseName,
+                properties.getClearCollectionOnStartup());
     }
 
     private EmbeddingModel embeddingModel(final RetrieverFilesystemProperties properties) {
