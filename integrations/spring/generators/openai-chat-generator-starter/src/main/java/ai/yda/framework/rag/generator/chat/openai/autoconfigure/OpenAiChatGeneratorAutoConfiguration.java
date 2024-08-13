@@ -17,7 +17,6 @@ package ai.yda.framework.rag.generator.chat.openai.autoconfigure;
 
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
 import ai.yda.framework.rag.core.generator.Generator;
@@ -26,7 +25,6 @@ import ai.yda.framework.rag.core.model.RagResponse;
 import ai.yda.framework.rag.generator.chat.openai.OpenAiChatGenerator;
 
 @AutoConfiguration
-@EnableConfigurationProperties({OpenAiChatGeneratorProperties.class})
 public class OpenAiChatGeneratorAutoConfiguration {
 
     @Bean

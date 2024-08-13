@@ -15,6 +15,8 @@
  */
 package ai.yda.framework.rag.generator.assistant.openai.autoconfigure;
 
+import org.springframework.ai.autoconfigure.openai.OpenAiChatProperties;
+import org.springframework.ai.autoconfigure.openai.OpenAiConnectionProperties;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -23,12 +25,15 @@ import ai.yda.framework.rag.generator.assistant.openai.OpenAiAssistantGenerator;
 import ai.yda.framework.session.core.SessionProvider;
 
 @AutoConfiguration
-@EnableConfigurationProperties({OpenAiAssistantGeneratorProperties.class})
+@EnableConfigurationProperties(OpenAiAssistantGeneratorProperties.class)
 public class OpenAiAssistantGeneratorAutoConfiguration {
 
     @Bean
     public OpenAiAssistantGenerator openAiGenerator(
-            final OpenAiAssistantGeneratorProperties properties, final SessionProvider sessionProvider) {
-        return new OpenAiAssistantGenerator(properties.getApiKey(), properties.getAssistantId(), sessionProvider);
+            final OpenAiAssistantGeneratorProperties assistantGeneratorProperties,
+            final OpenAiConnectionProperties openAiProperties,
+            final SessionProvider sessionProvider) {
+        return new OpenAiAssistantGenerator(
+                openAiProperties.getApiKey(), assistantGeneratorProperties.getAssistantId(), sessionProvider);
     }
 }
