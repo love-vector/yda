@@ -1,3 +1,22 @@
+/*
+ * YDA - Open-Source Java AI Assistant
+ * Copyright (C) 2024 Love Vector OÜ <https://vector-inc.dev/>
+
+ * This file is part of YDA.
+
+ * YDA is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+
+ * YDA is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
+*/
 package ai.yda.framework.rag.retriever.shared;
 
 import java.util.ArrayList;
@@ -14,6 +33,7 @@ import io.milvus.response.QueryResultsWrapper;
 
 import org.springframework.ai.document.Document;
 import org.springframework.ai.embedding.EmbeddingModel;
+import org.springframework.ai.model.EmbeddingUtils;
 import org.springframework.ai.vectorstore.MilvusVectorStore;
 import org.springframework.util.Assert;
 
@@ -94,7 +114,7 @@ public class OptimizedMilvusVectorStore extends MilvusVectorStore {
             var end = Math.min(start + MAX_EMBEDDING_ARRAY_DIMENSIONS, totalSize);
             var limitedDocumentContentSublist = documentsContent.subList(start, end);
             var embeddingsSublist = embeddingModel.embed(limitedDocumentContentSublist).stream()
-                    .map(list -> list.stream().map(Number::floatValue).toList())
+                    .map(EmbeddingUtils::toList)
                     .toList();
             embeddings.addAll(embeddingsSublist);
         }
