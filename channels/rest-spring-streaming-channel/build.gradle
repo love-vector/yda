@@ -1,0 +1,9 @@
+dependencies {
+    api project(":channel-core")
+    api project(":channel-shared")
+    api project(":framework-core")
+    api project(":session-core")
+
+    api 'org.springframework.boot:spring-boot-starter-webflux:3.3.2'
+    api 'org.springframework.boot:spring-boot-starter-security:3.3.2'
+}

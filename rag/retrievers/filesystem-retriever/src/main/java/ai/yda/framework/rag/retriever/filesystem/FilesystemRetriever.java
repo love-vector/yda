@@ -25,7 +25,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -61,14 +60,14 @@ public class FilesystemRetriever implements Retriever<RagRequest, RagContext> {
 
     @Override
     public RagContext retrieve(final RagRequest request) {
-
         return RagContext.builder()
-                .knowledge(vectorStore
-                        .similaritySearch(
-                                SearchRequest.query(request.getQuery()).withTopK(topK))
-                        .stream()
-                        .map(Document::getContent)
-                        .collect(Collectors.toList()))
+                .knowledge(
+                        vectorStore
+                                .similaritySearch(
+                                        SearchRequest.query(request.getQuery()).withTopK(topK))
+                                .parallelStream()
+                                .map(Document::getContent)
+                                .toList())
                 .build();
     }
 
