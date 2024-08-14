@@ -41,6 +41,7 @@ subprojects {
         java {
             palantirJavaFormat()
             removeUnusedImports()
+            licenseHeaderFile(rootProject.file("copyright.txt"))
             importOrder('java', 'javax|jakarta', '', 'org.springframework', 'ai.yda', '\\#')
         }
     }
@@ -60,6 +61,14 @@ subprojects {
         publications {
             mavenJava(MavenPublication) {
                 from components.java
+                pom {
+                    licenses {
+                        license {
+                            name = 'GNU LESSER GENERAL PUBLIC LICENSE, Version 3'
+                            url = 'https://www.gnu.org/licenses/lgpl-3.0.txt'
+                        }
+                    }
+                }
             }
         }
         repositories {
