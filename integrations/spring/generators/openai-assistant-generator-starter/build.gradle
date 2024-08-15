@@ -1,8 +1,5 @@
-plugins {
-    id 'java-library'
-}
-
 dependencies {
     api project(':openai-assistant-generator')
-    api 'org.springframework.ai:spring-ai-spring-boot-autoconfigure:1.0.0-SNAPSHOT'
+
+    implementation 'org.springframework.ai:spring-ai-spring-boot-autoconfigure:1.0.0-M1'
 }

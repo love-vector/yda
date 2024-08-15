@@ -33,7 +33,6 @@ import io.milvus.response.QueryResultsWrapper;
 
 import org.springframework.ai.document.Document;
 import org.springframework.ai.embedding.EmbeddingModel;
-import org.springframework.ai.model.EmbeddingUtils;
 import org.springframework.ai.vectorstore.MilvusVectorStore;
 import org.springframework.util.Assert;
 
@@ -114,7 +113,7 @@ public class OptimizedMilvusVectorStore extends MilvusVectorStore {
             var end = Math.min(start + MAX_EMBEDDING_ARRAY_DIMENSIONS, totalSize);
             var limitedDocumentContentSublist = documentsContent.subList(start, end);
             var embeddingsSublist = embeddingModel.embed(limitedDocumentContentSublist).stream()
-                    .map(EmbeddingUtils::toList)
+                    .map(list -> list.stream().map(Number::floatValue).toList())
                     .toList();
             embeddings.addAll(embeddingsSublist);
         }
