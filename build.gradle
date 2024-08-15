@@ -22,7 +22,13 @@ subprojects {
     version = '0.0.1'
 
     java {
-        sourceCompatibility = JavaVersion.VERSION_21
+        if (project.name.contains('core')) {
+            sourceCompatibility = JavaVersion.VERSION_11
+            targetCompatibility = JavaVersion.VERSION_11
+        } else {
+            sourceCompatibility = JavaVersion.VERSION_17
+            targetCompatibility = JavaVersion.VERSION_17
+        }
     }
 
     configurations {

@@ -1,5 +1,5 @@
 /*
- * YDA - Open-Source Java AI Assistant
+ * YDA - Open-Source Java AI Assistant.
  * Copyright (C) 2024 Love Vector OÜ <https://vector-inc.dev/>
 
  * This file is part of YDA.
@@ -48,7 +48,7 @@ public class DefaultRag implements Rag<RagRequest, RagResponse> {
     public RagResponse doRag(final RagRequest request) {
         var contexts = retrievers.parallelStream()
                 .map(retriever -> retriever.retrieve(request))
-                .toList();
+                .collect(Collectors.toUnmodifiableList());
         for (var augmenter : augmenters) {
             contexts = augmenter.augment(request, contexts);
         }

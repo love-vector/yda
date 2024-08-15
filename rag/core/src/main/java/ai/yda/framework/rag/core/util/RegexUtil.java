@@ -1,5 +1,5 @@
 /*
- * YDA - Open-Source Java AI Assistant
+ * YDA - Open-Source Java AI Assistant.
  * Copyright (C) 2024 Love Vector OÜ <https://vector-inc.dev/>
 
  * This file is part of YDA.
@@ -45,10 +45,8 @@ public final class RegexUtil {
 
     private static final class PatternConstant {
 
-        private static final Pattern URL = Pattern.compile(
-                """
-                (https://www\\.|http://www\\.|https://|http://)?[a-zA-Z0-9]{2,}(\\.[a-zA-Z0-9]{2,})
-                (\\.[a-zA-Z0-9]{2,})?
-                """);
+        private static final Pattern URL =
+                Pattern.compile("(https://www\\.|http://www\\.|https://|http://)?[a-zA-Z0-9]{2,}(\\.[a-zA-Z0-9]{2,})"
+                        + "(\\.[a-zA-Z0-9]{2,})?");
     }
 }
