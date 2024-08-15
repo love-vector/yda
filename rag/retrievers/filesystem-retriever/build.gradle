@@ -9,5 +9,4 @@ dependencies {
     implementation 'org.springframework.ai:spring-ai-openai:1.0.0-SNAPSHOT'
 
     implementation 'org.apache.pdfbox:pdfbox:3.0.2'
-
 }

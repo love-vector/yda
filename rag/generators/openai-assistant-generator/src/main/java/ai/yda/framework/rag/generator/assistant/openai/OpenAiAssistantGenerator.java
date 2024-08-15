@@ -1,5 +1,5 @@
 /*
- * YDA - Open-Source Java AI Assistant
+ * YDA - Open-Source Java AI Assistant.
  * Copyright (C) 2024 Love Vector OÜ <https://vector-inc.dev/>
 
  * This file is part of YDA.
