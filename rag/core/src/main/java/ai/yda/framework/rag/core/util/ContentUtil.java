@@ -121,7 +121,7 @@ public final class ContentUtil {
     private static void restoreCorruptedUrlsInChunks(
             final List<String> equalChunks, final List<MatchResult> urlMatches) {
         if (!equalChunks.isEmpty() && !urlMatches.isEmpty()) {
-            var chunksLength = equalChunks.getFirst().length();
+            var chunksLength = equalChunks.get(0).length();
             for (var urlMatch : urlMatches) {
                 var url = urlMatch.group();
                 var urlStartPositionInChunk = urlMatch.start() % chunksLength;

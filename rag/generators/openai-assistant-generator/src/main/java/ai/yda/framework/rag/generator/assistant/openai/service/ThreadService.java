@@ -72,7 +72,8 @@ public class ThreadService {
 
     private ThreadRun waitForRunToFinish(final ThreadRun threadRun) {
         var atomicThreadRun = new AtomicReference<>(threadRun);
-        try (var executor = Executors.newSingleThreadScheduledExecutor()) {
+        try {
+            var executor = Executors.newSingleThreadScheduledExecutor();
             var schedule = executor.scheduleAtFixedRate(
                     () -> {
                         var progressThreadRun = assistantsClient.getRun(threadRun.getThreadId(), threadRun.getId());
@@ -99,7 +100,7 @@ public class ThreadService {
 
     private String getLastMessage(final String threadId) {
         var messages = assistantsClient.listMessages(threadId);
-        return messages.getData().getFirst().getContent().stream()
+        return messages.getData().get(0).getContent().stream()
                 .map(content -> ((MessageTextContent) content).getText().getValue())
                 .collect(Collectors.joining(". "));
     }
