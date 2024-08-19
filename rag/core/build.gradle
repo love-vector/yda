@@ -1,10 +1,4 @@
-plugins {
-    id 'java-library'
-}
 dependencies {
-    api project(":session-core")
-
     implementation 'edu.stanford.nlp:stanford-corenlp:4.5.7'
-    implementation 'edu.stanford.nlp:stanford-corenlp:4.5.7:models'
     implementation 'org.jsoup:jsoup:1.17.2'
 }

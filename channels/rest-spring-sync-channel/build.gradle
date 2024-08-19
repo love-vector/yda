@@ -1,9 +1,7 @@
-plugins {
-    id 'java-library'
-}
-
 dependencies {
     api project(":channel-core")
+    api project(":framework-core")
+    api project(":session-core")
 
     api 'org.springframework.boot:spring-boot-starter-web:3.3.2'
     api 'org.springframework.boot:spring-boot-starter-security:3.3.2'

@@ -1,7 +1,0 @@
-plugins {
-    id 'java-library'
-}
-
-dependencies {
-    api 'jakarta.servlet:jakarta.servlet-api:6.1.0'
-}

@@ -1,7 +1,3 @@
-plugins {
-    id 'java-library'
-}
-
 dependencies {
     api project(':website-retriever')
     api project(':retriever-shared-starter')
