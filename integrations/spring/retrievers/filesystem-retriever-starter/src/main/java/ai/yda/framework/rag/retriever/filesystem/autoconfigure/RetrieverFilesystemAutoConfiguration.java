@@ -19,8 +19,8 @@
 */
 package ai.yda.framework.rag.retriever.filesystem.autoconfigure;
 
-import org.springframework.ai.autoconfigure.openai.OpenAiChatProperties;
 import org.springframework.ai.autoconfigure.openai.OpenAiConnectionProperties;
+import org.springframework.ai.autoconfigure.openai.OpenAiEmbeddingProperties;
 import org.springframework.ai.autoconfigure.vectorstore.milvus.MilvusServiceClientProperties;
 import org.springframework.ai.autoconfigure.vectorstore.milvus.MilvusVectorStoreProperties;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -40,7 +40,7 @@ public class RetrieverFilesystemAutoConfiguration {
             final MilvusVectorStoreProperties milvusProperties,
             final MilvusServiceClientProperties milvusClientProperties,
             final OpenAiConnectionProperties openAiConnectionProperties,
-            final OpenAiChatProperties openAiChatProperties)
+            final OpenAiEmbeddingProperties openAiEmbeddingProperties)
             throws Exception {
 
         var milvusVectorStore = MilvusVectorStoreUtil.createMilvusVectorStore(
@@ -48,7 +48,7 @@ public class RetrieverFilesystemAutoConfiguration {
                 milvusProperties,
                 milvusClientProperties,
                 openAiConnectionProperties,
-                openAiChatProperties);
+                openAiEmbeddingProperties);
         milvusVectorStore.afterPropertiesSet();
         return new FilesystemRetriever(
                 milvusVectorStore,

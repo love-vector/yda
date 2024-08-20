@@ -42,7 +42,7 @@ public final class ContentUtil {
     public static String preprocessContent(final String content) {
         var formattedContent = new String(content.getBytes(), StandardCharsets.UTF_8).toLowerCase();
         formattedContent = removeHtmlButPreserveLinks(formattedContent);
-        formattedContent = lemmatizeAndRemovePunctuation(formattedContent);
+        //        formattedContent = lemmatizeAndRemovePunctuation(formattedContent);
         formattedContent = removeSpacesAndParagraphs(formattedContent);
         return formattedContent;
     }
