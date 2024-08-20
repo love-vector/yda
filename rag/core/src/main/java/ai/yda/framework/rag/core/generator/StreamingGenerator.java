@@ -16,15 +16,42 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.rag.core.generator;
-
-import reactor.core.publisher.Flux;
 
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.model.RagResponse;
+import reactor.core.publisher.Flux;
 
+/**
+ * Provides a generic mechanism that takes the User's Request and the retrieved Context to produce a final Response,
+ * often by leveraging a language model or other generative mechanism.
+ * <p>
+ * This interface allow to generate responses in a streaming manner and is useful when Responses need to be generated
+ * progressively, such as when dealing with large amounts of data or when the Response is expected to be produced in
+ * chunks.
+ * </p>
+ *
+ * @param <REQUEST>  the generic type of the Request from the User, which must extend {@link RagRequest}.
+ * @param <RESPONSE> the generic type of the Response generated based on the given Request, which must extend
+ *                   {@link RagResponse}.
+ * @author Nikita Litvinov
+ * @see RagRequest
+ * @see RagResponse
+ * @see Generator
+ * @since 0.1.0
+ */
 public interface StreamingGenerator<REQUEST extends RagRequest, RESPONSE extends RagResponse> {
 
+    /**
+     * Streams Responses based on the provided Request and Context. The method returns a Flux that emits a sequence of
+     * Responses, allowing for the processing of data in a non-blocking and incremental manner.
+     *
+     * @param request the Request object that contains query data from the User.
+     * @param context the Context object that helps to better understand or interpret a Request that the User
+     *                provides.
+     * @return a {@link Flux stream} of Responses generated as a result of processing the Request and Context. Each
+     * response in the Flux represents a part of the overall Response, allowing for the incremental delivery of results.
+     */
     Flux<RESPONSE> streamGeneration(REQUEST request, String context);
 }

@@ -27,10 +27,41 @@ import org.springframework.context.annotation.Bean;
 import ai.yda.framework.rag.generator.assistant.openai.streaming.OpenAiAssistantStreamingGenerator;
 import ai.yda.framework.session.core.ReactiveSessionProvider;
 
+/**
+ * Autoconfiguration class for setting up an {@link OpenAiAssistantStreamingGenerator} bean. This class automatically
+ * configures the necessary components for integrating with the OpenAI API to create a streaming Assistant Generator.
+ * The configuration is based on properties defined in the external configuration files (e.g., application.properties or
+ * application.yml) under {@link OpenAiConnectionProperties#CONFIG_PREFIX} and
+ * {@link OpenAiAssistantStreamingGeneratorProperties#CONFIG_PREFIX} namespaces.
+ *
+ * @author Nikita Litvinov
+ * @see OpenAiAssistantStreamingGenerator
+ * @see OpenAiAssistantStreamingGeneratorProperties
+ * @see OpenAiConnectionProperties
+ * @see ReactiveSessionProvider
+ * @since 0.1.0
+ */
 @AutoConfiguration
 @EnableConfigurationProperties({OpenAiAssistantStreamingGeneratorProperties.class, OpenAiConnectionProperties.class})
 public class OpenAiAssistantStreamingGeneratorAutoConfiguration {
 
+    /**
+     * Default constructor for {@link OpenAiAssistantStreamingGeneratorAutoConfiguration}.
+     */
+    public OpenAiAssistantStreamingGeneratorAutoConfiguration() {}
+
+    /**
+     * Defines an {@link OpenAiAssistantStreamingGenerator} bean. This bean is configured using the provided properties
+     * for the streaming Assistant Generator and the OpenAI connection. The generator requires an API key and an
+     * Assistant ID, which are retrieved from the external configuration, and a {@link ReactiveSessionProvider} for
+     * managing User Sessions.
+     *
+     * @param assistantGeneratorProperties the properties related to the Assistant Generator, providing Assistant ID
+     *                                     configuration.
+     * @param openAiProperties             the properties related to the OpenAI connection, including the API key.
+     * @param sessionProvider              the Session Provider responsible for managing User Sessions.
+     * @return a configured {@link OpenAiAssistantStreamingGenerator} bean ready for use in the application.
+     */
     @Bean
     public OpenAiAssistantStreamingGenerator openAiGenerator(
             final OpenAiAssistantStreamingGeneratorProperties assistantGeneratorProperties,

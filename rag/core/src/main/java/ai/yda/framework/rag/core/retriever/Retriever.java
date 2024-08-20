@@ -16,17 +16,31 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.rag.core.retriever;
 
 import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
 
 /**
- * Retriever is responsible for fetching relevant data or documents that can provide
- * additional information or context based on the user's query.
+ * Provides a generic mechanism for fetching relevant data or documents that can provide Context based on the User
+ * Request.
+ *
+ * @param <REQUEST> the generic type of the Request from the User, which must extend {@link RagRequest}.
+ * @param <CONTEXT> the generic type of the Context data that will be retrieved based on the given Request, which must
+ *                  extend {@link RagContext}.
+ * @author Nikita Litvinov
+ * @see RagRequest
+ * @see RagContext
+ * @since 0.1.0
  */
 public interface Retriever<REQUEST extends RagRequest, CONTEXT extends RagContext> {
 
+    /**
+     * Fetches relevant data or documents that can provide additional information based on the User Request.
+     *
+     * @param request the Request object that contains query data from the User.
+     * @return the Context object generated that contains additional information based on the User Request.
+     */
     CONTEXT retrieve(REQUEST request);
 }

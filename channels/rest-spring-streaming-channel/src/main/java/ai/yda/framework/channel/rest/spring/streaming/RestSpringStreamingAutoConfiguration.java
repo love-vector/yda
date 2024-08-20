@@ -16,18 +16,37 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.channel.rest.spring.streaming;
-
-import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Import;
 
 import ai.yda.framework.channel.rest.spring.streaming.security.SecurityConfiguration;
 import ai.yda.framework.channel.rest.spring.streaming.session.RestReactiveSessionProvider;
 import ai.yda.framework.channel.rest.spring.streaming.web.RestStreamingChannel;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Import;
 
+/**
+ * Contains an autoconfiguration for the streaming REST Channel in the Spring application. This class is responsible for
+ * automatically configuring the necessary beans and components  required for the REST Channel, security and Session
+ * management. It simplifies the setup by ensuring that all the required configurations, properties, and components are
+ * loaded and initialized without needing explicit configuration by the developer. It is loaded, initialized and
+ * imported without developer's interference
+ *
+ * @author Nikita Litvinov
+ * @see RestSpringStreamingProperties
+ * @see RestStreamingChannel
+ * @see SecurityConfiguration
+ * @see RestReactiveSessionProvider
+ * @since 0.1.0
+ */
 @AutoConfiguration
 @EnableConfigurationProperties({RestSpringStreamingProperties.class})
 @Import({RestStreamingChannel.class, SecurityConfiguration.class, RestReactiveSessionProvider.class})
-public class RestSpringStreamingAutoConfiguration {}
+public class RestSpringStreamingAutoConfiguration {
+    /**
+     * Default constructor for {@link RestSpringStreamingAutoConfiguration}.
+     */
+    public RestSpringStreamingAutoConfiguration() {
+    }
+}

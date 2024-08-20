@@ -16,10 +16,25 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.channel.core;
 
+/**
+ * Provides a generic interface for implementing external access points to the Assistant.
+ *
+ * @param <REQUEST>  the generic type of the Request from the User.
+ * @param <RESPONSE> the generic type of the Response that will be generated based on the given Request.
+ * @author Nikita Litvinov
+ * @see StreamingChannel
+ * @since 0.1.0
+ */
 public interface Channel<REQUEST, RESPONSE> {
 
+    /**
+     * Processes Request data involving the Assistant.
+     *
+     * @param request the Request object to be processed.
+     * @return the Response object generated after processing the Request.
+     */
     RESPONSE processRequest(REQUEST request);
 }

@@ -22,16 +22,27 @@ package ai.yda.framework.rag.core.util;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Provides utility method for splitting the input string into equal parts with a maximum number of characters.
+ *
+ * @author Nikita Litvinov
+ * @see ContentUtil
+ * @see RegexUtil
+ * @since 0.1.0
+ */
 public final class StringUtil {
 
+    /**
+     * A constant representing the period (.) character.
+     */
     public static final String POINT = ".";
 
     /**
      * Splits the input string into equal parts with a maximum number of characters.
      *
-     * @param input         the input string
-     * @param maxCharacters the maximum number of characters per part
-     * @return a list of string parts
+     * @param input         the input string.
+     * @param maxCharacters the maximum number of characters per part.
+     * @return a list of string parts.
      */
     public static List<String> splitIntoEqualsParts(final String input, final Integer maxCharacters) {
         var parts = new ArrayList<String>();

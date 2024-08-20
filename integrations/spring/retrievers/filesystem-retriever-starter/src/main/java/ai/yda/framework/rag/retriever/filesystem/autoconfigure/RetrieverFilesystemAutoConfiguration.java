@@ -30,10 +30,54 @@ import org.springframework.context.annotation.Bean;
 import ai.yda.framework.rag.retriever.filesystem.FilesystemRetriever;
 import ai.yda.framework.rag.retriever.shared.MilvusVectorStoreUtil;
 
+/**
+ * Autoconfiguration class for setting up the {@link FilesystemRetriever} bean with the necessary properties and
+ * dependencies. The configuration is based on properties defined in the external configuration files
+ * <p>
+ * The configuration is based on properties defined in the external configuration files (e.g., application.properties
+ * or application.yml) under {@link RetrieverFilesystemProperties#CONFIG_PREFIX},
+ * {@link MilvusVectorStoreProperties#CONFIG_PREFIX} and {@link OpenAiConnectionProperties#CONFIG_PREFIX} namespaces.
+ * </p>
+ *
+ * @author Iryna Kopchak
+ * @author Dmitry Marchuk
+ * @see FilesystemRetriever
+ * @see RetrieverFilesystemProperties
+ * @see MilvusVectorStoreProperties
+ * @see MilvusServiceClientProperties
+ * @see OpenAiConnectionProperties
+ * @see OpenAiEmbeddingProperties
+ * @since 1.0.0
+ */
 @AutoConfiguration
 @EnableConfigurationProperties(RetrieverFilesystemProperties.class)
 public class RetrieverFilesystemAutoConfiguration {
 
+    /**
+     * Default constructor for {@link RetrieverFilesystemAutoConfiguration}.
+     */
+    public RetrieverFilesystemAutoConfiguration() {}
+
+    /**
+     * Creates and configures an instance of {@link FilesystemRetriever} using the provided properties and services.
+     *
+     * <p>This method performs the following steps:</p>
+     * <ul>
+     *     <li>Creates a {@code MilvusVectorStore} instance using the provided properties and services.</li>
+     *     <li>Initializes the {@code MilvusVectorStore} instance by calling {@code afterPropertiesSet()}.</li>
+     *     <li>Creates and returns a {@link FilesystemRetriever} instance with the initialized parameters</li>
+     * </ul>
+     *
+     * @param filesystemProperties       properties for configuring the {@link FilesystemRetriever}, including
+     *                                   collectionName, topK, isProcessingEnabled, clearCollectionOnStartup and
+     *                                   fileStoragePath settings.
+     * @param milvusProperties           properties for configuring the Milvus Vector Store.
+     * @param milvusClientProperties     properties for configuring the Milvus Service Client.
+     * @param openAiConnectionProperties properties for configuring the OpenAI connection.
+     * @param openAiEmbeddingProperties  properties for configuring the OpenAI Embeddings.
+     * @return a fully configured {@link FilesystemRetriever} instance.
+     * @throws Exception if an error occurs during initialization.
+     */
     @Bean
     public FilesystemRetriever filesystemRetriever(
             final RetrieverFilesystemProperties filesystemProperties,

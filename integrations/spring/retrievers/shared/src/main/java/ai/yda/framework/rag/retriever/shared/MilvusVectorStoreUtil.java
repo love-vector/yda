@@ -36,10 +36,31 @@ import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.ai.retry.RetryUtils;
 import org.springframework.ai.vectorstore.MilvusVectorStore;
 
+/**
+ * Utility class for creating and configuring instances of {@link MilvusVectorStore}. This class provides static methods
+ * to initialize a {@link MilvusVectorStore} with the necessary configuration and dependencies.
+ *
+ * @author Iryna Kopchak
+ * @see MilvusVectorStore
+ * @see RetrieverProperties
+ * @see MilvusVectorStore
+ * @see OptimizedMilvusVectorStore
+ * @since 0.1.0
+ */
 public final class MilvusVectorStoreUtil {
 
     private MilvusVectorStoreUtil() {}
 
+    /**
+     * Constructs a new {@link MilvusVectorStore} instance with the specified properties and configurations.
+     *
+     * @param retrieverProperties        the properties related to the Retriever configuration.
+     * @param milvusProperties           the properties specific to Milvus configuration.
+     * @param milvusClientProperties     the properties for Milvus Service Client.
+     * @param openAiConnectionProperties the properties for connecting to OpenAI API.
+     * @param openAiEmbeddingProperties  the properties related to OpenAI Embedding Model.
+     * @return a configured {@link MilvusVectorStore} instance.
+     */
     public static MilvusVectorStore createMilvusVectorStore(
             final RetrieverProperties retrieverProperties,
             final MilvusVectorStoreProperties milvusProperties,
@@ -72,6 +93,13 @@ public final class MilvusVectorStoreUtil {
                 retrieverProperties.getClearCollectionOnStartup());
     }
 
+    /**
+     * Creates an {@link EmbeddingModel} for OpenAI using the specified connection and embedding properties.
+     *
+     * @param connectionProperties      the properties for connecting to OpenAI API.
+     * @param openAiEmbeddingProperties the properties related to OpenAI embedding model.
+     * @return a configured {@link EmbeddingModel} instance.
+     */
     private static EmbeddingModel createEmbeddingModel(
             final OpenAiConnectionProperties connectionProperties,
             final OpenAiEmbeddingProperties openAiEmbeddingProperties) {
@@ -86,6 +114,12 @@ public final class MilvusVectorStoreUtil {
                 RetryUtils.DEFAULT_RETRY_TEMPLATE);
     }
 
+    /**
+     * Creates a {@link MilvusServiceClient} using the specified connection properties.
+     *
+     * @param properties the properties for Milvus service client connection.
+     * @return a configured {@link MilvusServiceClient} instance.
+     */
     private static MilvusServiceClient createMilvusClient(final MilvusServiceClientProperties properties) {
         return new MilvusServiceClient(ConnectParam.newBuilder()
                 .withAuthorization(properties.getUsername(), properties.getPassword())

@@ -19,16 +19,31 @@
 */
 package ai.yda.framework.rag.core.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
+/**
+ * Represents a Request object that encapsulates the User's query.
+ *
+ * @author Dmitry Marchuk
+ * @author Nikita Litvinov
+ * @since 0.1.0
+ */
 @Getter
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder(toBuilder = true)
 public class RagRequest {
 
-    private String query;
+    /**
+     * The query string provided by the User, which is used as input for the retrieval and generation processes.
+     */
+    private final String query;
+
+    /**
+     * Constructs a new {@link RagRequest} instance with the User's query.
+     *
+     * @param query the Request query from the User.
+     */
+    public RagRequest(final String query) {
+        this.query = query;
+    }
 }
