@@ -19,7 +19,6 @@
 */
 package ai.yda.framework.channel.rest.spring.streaming.security;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
@@ -40,8 +39,18 @@ import org.springframework.web.server.WebFilterChain;
 
 import ai.yda.framework.channel.shared.TokenAuthenticationException;
 
+/**
+ * Provides a reactive Spring Security filter that processes authentication requests containing a Bearer token in the
+ * Authorization header. The filter converts the Bearer token into an {@link Authentication} object and attempts to
+ * authenticate it using the {@link TokenAuthenticationManager}. If the authentication is successful, the authenticated
+ * user is stored in the {@link ServerSecurityContextRepository}.
+ *
+ * @author Nikita Litvinov
+ * @see TokenAuthenticationConverter
+ * @see TokenAuthenticationManager
+ * @since 0.1.0
+ */
 @Slf4j
-@RequiredArgsConstructor
 public class TokenAuthenticationFilter implements WebFilter {
 
     private final TokenAuthenticationConverter authenticationConverter = new TokenAuthenticationConverter();
@@ -56,12 +65,32 @@ public class TokenAuthenticationFilter implements WebFilter {
     private final ServerAuthenticationFailureHandler authenticationFailureHandler =
             new ServerAuthenticationEntryPointFailureHandler(new HttpBasicServerAuthenticationEntryPoint());
 
+    /**
+     * Constructs a new {@link TokenAuthenticationFilter} instance with the specified token and security context
+     * repository.
+     *
+     * @param token                     the token used for authentication.
+     * @param securityContextRepository the {@link ServerSecurityContextRepository} to manage the security context.
+     */
     public TokenAuthenticationFilter(
             final String token, final ServerSecurityContextRepository securityContextRepository) {
         this.authenticationManager = new TokenAuthenticationManager(token);
         this.securityContextRepository = securityContextRepository;
     }
 
+    /**
+     * Filters the request to authenticate the user based on the token.
+     * <p>
+     * This method attempts to convert the token from the request using {@link TokenAuthenticationConverter}.
+     * If successful, it proceeds with authentication using {@link TokenAuthenticationManager}. Upon successful
+     * authentication, it saves the security context and triggers the success handler. In case of authentication
+     * failure, it invokes the failure handler.
+     * </p>
+     *
+     * @param exchange the {@link ServerWebExchange} that contains the request and response objects.
+     * @param chain    the {@link WebFilterChain} that allows further processing of the request.
+     * @return a {@link Mono<Void>} object.
+     */
     @NonNull
     @Override
     public Mono<Void> filter(@NonNull final ServerWebExchange exchange, @NonNull final WebFilterChain chain) {
@@ -77,6 +106,13 @@ public class TokenAuthenticationFilter implements WebFilter {
                                 new WebFilterExchange(exchange, chain), exception));
     }
 
+    /**
+     * Handles the success of authentication by saving the security context and invoking the success handler.
+     *
+     * @param authentication    the successful {@link Authentication} result.
+     * @param webFilterExchange the {@link WebFilterExchange} containing the current request and response.
+     * @return a {@link Mono<Void>} object.
+     */
     protected Mono<Void> onAuthenticationSuccess(
             final Authentication authentication, final WebFilterExchange webFilterExchange) {
         ServerWebExchange exchange = webFilterExchange.getExchange();

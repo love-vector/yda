@@ -32,10 +32,37 @@ import org.springframework.security.web.server.context.WebSessionServerSecurityC
 import ai.yda.framework.channel.rest.spring.streaming.RestSpringStreamingProperties;
 import ai.yda.framework.channel.rest.spring.streaming.session.SessionHandlerFilter;
 
+/**
+ * This is a Web Flux Spring Security configuration that sets up security settings for the streaming REST channel.
+ *
+ * @author Nikita Litvinov
+ * @see RestSpringStreamingProperties
+ * @since 0.1.0
+ */
 @Configuration
 @EnableWebFluxSecurity
 public class SecurityConfiguration {
 
+    /**
+     * Default constructor for {@link SecurityConfiguration}.
+     */
+    public SecurityConfiguration() {}
+
+    /**
+     * This channel security configuration is used when 'security-token' property is configured.
+     * <p>
+     * Defines security filters, user authentication mechanisms, and authorization rules to control access to the
+     * channel. This configuration includes settings for {@link TokenAuthenticationFilter}, HTTP security configurations
+     * such as disabling CORS, disabling CSRF, and adding the {@link SessionHandlerFilter} after an
+     * AnonymousAuthenticationWebFilter. It also specifies authorization rules: requests to the endpoint are authorized
+     * and require authentication, while all other requests are not authorized and do not require authentication.
+     * </p>
+     *
+     * @param http       the {@link ServerHttpSecurity} to configure.
+     * @param properties the {@link RestSpringStreamingProperties} containing configuration properties for the security
+     *                   setup.
+     * @return a {@link SecurityWebFilterChain} instance configured with the specified HTTP security settings.
+     */
     @Bean
     @ConditionalOnProperty(prefix = RestSpringStreamingProperties.CONFIG_PREFIX, name = "security-token")
     public SecurityWebFilterChain filterChain(
@@ -55,6 +82,16 @@ public class SecurityConfiguration {
         return http.build();
     }
 
+    /**
+     * This channel security configuration is used when 'security-token' property is not configured.
+     * <p>
+     * This configuration disables CSRF protection and CORS, and sets up authorization rules such that all HTTP requests
+     * are permitted without authentication.
+     * </p>
+     *
+     * @param http the {@link ServerHttpSecurity} to configure.
+     * @return a {@link SecurityWebFilterChain} instance configured with the specified HTTP security settings.
+     */
     @Bean
     @ConditionalOnMissingBean
     public SecurityWebFilterChain defaultFilterChain(final ServerHttpSecurity http) {
@@ -66,6 +103,11 @@ public class SecurityConfiguration {
         return http.build();
     }
 
+    /**
+     * Adds the {@link SessionHandlerFilter} after an AnonymousAuthenticationWebFilter.
+     *
+     * @param http the {@link ServerHttpSecurity} to configure.
+     */
     private void configureSessionManagement(final ServerHttpSecurity http) {
         http.addFilterAfter(new SessionHandlerFilter(), SecurityWebFiltersOrder.ANONYMOUS_AUTHENTICATION);
     }

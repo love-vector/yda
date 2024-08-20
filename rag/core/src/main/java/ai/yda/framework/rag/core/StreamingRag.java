@@ -24,7 +24,30 @@ import reactor.core.publisher.Flux;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.model.RagResponse;
 
+/**
+ * Provides a generic mechanism that coordinates the retrieval, augmentation, and generation processes to produce a
+ * final response based on the user's query in a streaming manner.
+ * <p>
+ * This class is useful when responses need to be generated progressively, such as when dealing with large amounts of
+ * data or when the response is expected to be produced in chunks.
+ * </p>
+ *
+ * @param <REQUEST>  the generic type of the request from the user, which must extend {@link RagRequest}.
+ * @param <RESPONSE> the generic type of the response generated based on the given request, which must extend
+ *                   {@link RagResponse}.
+ * @author Nikita Litvinov
+ * @see Rag
+ * @see RagRequest
+ * @see RagResponse
+ * @since 0.1.0
+ */
 public interface StreamingRag<REQUEST extends RagRequest, RESPONSE extends RagResponse> {
 
+    /**
+     * Performs a Retrieval-Augmented Generation (RAG) operation based in a streaming manner on the provided request.
+     *
+     * @param request the request object containing the necessary information for performing the RAG operation.
+     * @return a {@link Flux stream} of response objects containing the results of the RAG operation.
+     */
     Flux<RESPONSE> streamRag(REQUEST request);
 }

@@ -27,9 +27,36 @@ import ai.yda.framework.rag.core.Rag;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.model.RagResponse;
 
+/**
+ * Autoconfiguration class for setting up the {@link RagAssistant} bean. This class is responsible for automatically
+ * configuring a {@link RagAssistant} instance within the Spring application context. The {@link RagAssistant} bean is
+ * created using a provided {@link Rag} instance, which is injected as a dependency. The configuration is applied
+ * automatically when the application starts, thanks to the {@link AutoConfiguration} annotation.
+ * <p>
+ * This setup allows the {@link RagAssistant} to be readily available for use in the application wherever it's needed,
+ * without requiring manual bean configuration.
+ * </p>
+ *
+ * @author Nikita Litvinov
+ * @see RagAssistant
+ * @see Rag
+ * @since 0.1.0
+ */
 @AutoConfiguration
 public class RagAssistantAutoConfiguration {
 
+    /**
+     * Default constructor for {@link RagAssistantAutoConfiguration}.
+     */
+    public RagAssistantAutoConfiguration() {}
+
+    /**
+     * Creates and configures a {@link RagAssistant} bean in the Spring application context.
+     *
+     * @param rag the {@link Rag} instance used by the {@link RagAssistant} to perform its operations.
+     *            This parameter is expected to be provided by the application or other autoconfiguration.
+     * @return a configured {@link RagAssistant} bean.
+     */
     @Bean
     public RagAssistant ragAssistant(final Rag<RagRequest, RagResponse> rag) {
         return new RagAssistant(rag);

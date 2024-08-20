@@ -25,6 +25,10 @@ import lombok.Setter;
 import org.springframework.ai.vectorstore.MilvusVectorStore;
 import org.springframework.ai.vectorstore.SearchRequest;
 
+/**
+ * Serves as the parent class for properties related to the retriever configuration. It provides common settings such as
+ * collection name, top K search results, processing enablement, and whether to clear the collection on startup.
+ */
 @Setter
 @Getter
 public class RetrieverProperties {
@@ -36,4 +40,9 @@ public class RetrieverProperties {
     private Boolean isProcessingEnabled = Boolean.FALSE;
 
     private Boolean clearCollectionOnStartup = Boolean.FALSE;
+
+    /**
+     * Default constructor for {@link RetrieverProperties}.
+     */
+    public RetrieverProperties() {}
 }

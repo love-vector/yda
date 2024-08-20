@@ -24,13 +24,22 @@ import java.util.List;
 import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
 
+/**
+ * Provides utility method for working with regular expressions. It is primarily focused on finding and extracting URL
+ * patterns from input strings.
+ *
+ * @author Nikita Litvinov
+ * @see ContentUtil
+ * @see StringUtil
+ * @since 0.1.0
+ */
 public final class RegexUtil {
 
     /**
      * Finds and returns all URL matches in the input string.
      *
-     * @param input the input string
-     * @return a list of match results for URLs
+     * @param input the input string.
+     * @return a list of match results for URLs.
      */
     public static List<MatchResult> urlMatches(final String input) {
         var matcher = PatternConstant.URL.matcher(input);
@@ -43,6 +52,9 @@ public final class RegexUtil {
 
     private RegexUtil() {}
 
+    /**
+     * The PatternConstant class stores precompiled regular expression for URL matching.
+     */
     private static final class PatternConstant {
 
         private static final Pattern URL =

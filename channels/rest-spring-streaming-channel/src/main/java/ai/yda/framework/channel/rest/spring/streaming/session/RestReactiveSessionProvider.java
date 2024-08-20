@@ -19,7 +19,6 @@
 */
 package ai.yda.framework.channel.rest.spring.streaming.session;
 
-import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
 import org.springframework.stereotype.Component;
@@ -27,9 +26,20 @@ import org.springframework.web.server.WebSession;
 
 import ai.yda.framework.session.core.ReactiveSessionProvider;
 
+/**
+ * Provides methods for storing and retrieving data associated with a session using a key-value store  within a REST
+ * context in a reactive manner.
+ *
+ * @author Nikita Litvinov
+ * @since 0.1.0
+ */
 @Component
-@RequiredArgsConstructor
 public class RestReactiveSessionProvider implements ReactiveSessionProvider {
+
+    /**
+     * Default constructor for {@link RestReactiveSessionProvider}.
+     */
+    public RestReactiveSessionProvider() {}
 
     @Override
     public Mono<Void> put(final String key, final Object value) {

@@ -19,7 +19,23 @@
 */
 package ai.yda.framework.core.assistant;
 
+/**
+ * Represents an assistant that processes user requests and provides appropriate responses.
+ *
+ * @param <REQUEST>  the generic type of the request from the user.
+ * @param <RESPONSE> the generic type of the response that will be generated based on the given request.
+ * @author Nikita Litvinov
+ * @see StreamingAssistant
+ * @see RagAssistant
+ * @since 0.1.0
+ */
 public interface Assistant<REQUEST, RESPONSE> {
 
+    /**
+     * Processes the given request and returns a corresponding response.
+     *
+     * @param request the request to be processed.
+     * @return the response generated from processing the request.
+     */
     RESPONSE assist(REQUEST request);
 }

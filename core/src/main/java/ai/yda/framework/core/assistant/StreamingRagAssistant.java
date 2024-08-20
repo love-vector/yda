@@ -19,17 +19,41 @@
 */
 package ai.yda.framework.core.assistant;
 
-import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
 
 import ai.yda.framework.rag.core.StreamingRag;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.model.RagResponse;
 
-@RequiredArgsConstructor
+/**
+ * Represents a streaming RAG assistant that processes a request and returns a response in a streaming manner. This
+ * class delegates the request processing to the {@link  StreamingRag} instance provided via constructor injection.
+ * <p>
+ * This class is useful when responses need to be generated progressively, such as when dealing with large amounts of
+ * data or when the response is expected to be produced in chunks.
+ * </p>
+ *
+ * @author Nikita Litvinov
+ * @see StreamingRag
+ * @see RagAssistant
+ * @since 0.1.0
+ */
 public class StreamingRagAssistant implements StreamingAssistant<RagRequest, RagResponse> {
-
+    /**
+     * The {@link StreamingRag} instance responsible for processing the {@link RagRequest} and generating the
+     * {@link RagResponse} in streaming manner.
+     */
     private final StreamingRag<RagRequest, RagResponse> rag;
+
+    /**
+     * Constructs a new {@link StreamingRagAssistant} instance with the specified {@link StreamingRag} instance.
+     *
+     * @param rag the {@link StreamingRag} instance used to handle {@link RagRequest} and {@link RagResponse}
+     *            processing. This parameter cannot be {@code null}.
+     */
+    public StreamingRagAssistant(final StreamingRag<RagRequest, RagResponse> rag) {
+        this.rag = rag;
+    }
 
     @Override
     public Flux<RagResponse> streamAssistance(final RagRequest request) {

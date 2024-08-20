@@ -30,14 +30,29 @@ import edu.stanford.nlp.util.PropertiesUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.TextNode;
 
+/**
+ * Provides utility methods for preprocessing and manipulating textual content. It includes methods for content
+ * formatting, HTML tag removal while preserving links, lemmatization, punctuation removal, content splitting into
+ * chunks, and restoration of corrupted URLs.
+ * <p>
+ * This class is designed to handle tasks often required when working with large or complex text data, such as preparing
+ * content for language models or other natural language processing pipelines. All methods in this class are static,
+ * making it easy to use them without needing to instantiate an object.
+ * </p>
+ *
+ * @author Nikita Litvinov
+ * @see RegexUtil
+ * @see StringUtil
+ * @since 0.1.0
+ */
 public final class ContentUtil {
 
     /**
-     * Preprocesses the content by formatting it, removing HTML tags but preserving links,
-     * lemmatizing, removing punctuation, and spaces and paragraphs.
+     * Preprocesses the content by formatting it, removing HTML tags but preserving links, lemmatizing, removing
+     * punctuation, and spaces and paragraphs.
      *
-     * @param content the content to be preprocessed
-     * @return the preprocessed content as a string
+     * @param content the content to be preprocessed.
+     * @return the preprocessed content as a string.
      */
     public static String preprocessContent(final String content) {
         var formattedContent = new String(content.getBytes(), StandardCharsets.UTF_8).toLowerCase();
@@ -49,9 +64,9 @@ public final class ContentUtil {
     /**
      * Splits the content into chunks with a maximum number of characters and restores corrupted URLs.
      *
-     * @param content       the content to be split
-     * @param maxCharacters the maximum number of characters per chunk
-     * @return a list of string chunks
+     * @param content       the content to be split.
+     * @param maxCharacters the maximum number of characters per chunk.
+     * @return a list of string chunks.
      */
     public static List<String> splitContent(final String content, final Integer maxCharacters) {
         var equalChunks = StringUtil.splitIntoEqualsParts(content, maxCharacters);
@@ -63,8 +78,8 @@ public final class ContentUtil {
     /**
      * Removes HTML tags but preserves links in the content.
      *
-     * @param content the content with HTML tags
-     * @return the content with HTML tags removed but links preserved
+     * @param content the content with HTML tags.
+     * @return the content with HTML tags removed but links preserved.
      */
     private static String removeHtmlButPreserveLinks(final String content) {
         var document = Jsoup.parse(content);
@@ -78,8 +93,8 @@ public final class ContentUtil {
     /**
      * Lemmatizes and removes punctuation from the content.
      *
-     * @param content the content to be lemmatized and cleaned of punctuation
-     * @return the content with lemmatized words and punctuation removed
+     * @param content the content to be lemmatized and cleaned of punctuation.
+     * @return the content with lemmatized words and punctuation removed.
      */
     private static String lemmatizeAndRemovePunctuation(final String content) {
         var properties = PropertiesUtils.asProperties("annotators", "tokenize, pos, lemma");
@@ -102,8 +117,8 @@ public final class ContentUtil {
     /**
      * Removes spaces and paragraphs from the content.
      *
-     * @param content the content to be cleaned
-     * @return the content with spaces and paragraphs removed
+     * @param content the content to be cleaned.
+     * @return the content with spaces and paragraphs removed.
      */
     private static String removeSpacesAndParagraphs(final String content) {
         return content.replaceAll("\\s+", " ");
@@ -114,8 +129,8 @@ public final class ContentUtil {
      * across adjacent chunks due to the chunking process. This method reassembles these links by
      * identifying their positions and reconstructing them within the appropriate chunks.
      *
-     * @param equalChunks the list of chunks
-     * @param urlMatches  the list of URL match results
+     * @param equalChunks the list of chunks.
+     * @param urlMatches  the list of URL match results.
      */
     private static void restoreCorruptedUrlsInChunks(
             final List<String> equalChunks, final List<MatchResult> urlMatches) {

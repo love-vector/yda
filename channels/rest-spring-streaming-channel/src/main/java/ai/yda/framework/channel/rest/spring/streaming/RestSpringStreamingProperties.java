@@ -24,16 +24,62 @@ import lombok.Setter;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+/**
+ * Provides configuration properties for the streaming REST channel. This class holds the configurable properties used
+ * in the streaming REST channel. These properties can be customized through the application’s external configuration,
+ * such as a properties file, YAML file, or environment variables. The properties include settings like the endpoint's
+ * relative path and other configurations relevant to the REST API.
+ * <p>
+ * The properties are prefixed with {@link #CONFIG_PREFIX} and can be customized by defining values under this prefix
+ * in the external configuration.Below are the properties that can be configured:
+ * </p>
+ * <pre>
+ * Example configuration in a YAML file:
+ *
+ * ai:
+ *   yda:
+ *     framework:
+ *       channel:
+ *         rest:
+ *           spring:
+ *              streaming:
+ *                  endpointRelativePath: /api/v1
+ *                  securityToken: your-security-token
+ * </pre>
+ *
+ * @author Nikita Litvinov
+ * @since 0.1.0
+ */
 @Setter
 @Getter
 @ConfigurationProperties(RestSpringStreamingProperties.CONFIG_PREFIX)
 public class RestSpringStreamingProperties {
 
+    /**
+     * The configuration prefix used to reference properties related to this channel in application configurations.
+     * This prefix is used for binding properties within the particular namespace.
+     */
     public static final String CONFIG_PREFIX = "ai.yda.framework.channel.rest.spring.streaming";
 
+    /**
+     * The default relative path for the REST endpoint.
+     */
     public static final String DEFAULT_ENDPOINT_RELATIVE_PATH = "/";
 
+    /**
+     * The relative path for the REST endpoint. This path can be customized based on specific configurations.
+     * By default, it is set to {@link #DEFAULT_ENDPOINT_RELATIVE_PATH}.
+     */
     private String endpointRelativePath = RestSpringStreamingProperties.DEFAULT_ENDPOINT_RELATIVE_PATH;
 
+    /**
+     * The security token used for authenticating requests to the REST endpoint.
+     * This token is expected to be provided by the client for authorization purposes.
+     */
     private String securityToken;
+
+    /**
+     * Default constructor for {@link RestSpringStreamingProperties}.
+     */
+    public RestSpringStreamingProperties() {}
 }

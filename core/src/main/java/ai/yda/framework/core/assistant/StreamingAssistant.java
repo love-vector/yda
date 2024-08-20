@@ -21,7 +21,28 @@ package ai.yda.framework.core.assistant;
 
 import reactor.core.publisher.Flux;
 
+/**
+ * Provides a generic mechanism for creating an assistant that processes a request and returns a response in a streaming
+ * manner.
+ * <p>
+ * This class is useful when responses need to be generated progressively, such as when dealing with large amounts of
+ * data or when the response is expected to be produced in chunks.
+ * </p>
+ *
+ * @param <REQUEST>  the generic type of the request from the user.
+ * @param <RESPONSE> the generic type of the response that will be generated based on the given request.
+ * @author Nikita Litvinov
+ * @see Assistant
+ * @see StreamingRagAssistant
+ * @since 0.1.0
+ */
 public interface StreamingAssistant<REQUEST, RESPONSE> {
 
+    /**
+     * Processes the given request and returns a corresponding response in a streaming manner.
+     *
+     * @param request the request to be processed.
+     * @return a {@link Flux stream} of response objects generated from processing the request.
+     */
     Flux<RESPONSE> streamAssistance(REQUEST request);
 }

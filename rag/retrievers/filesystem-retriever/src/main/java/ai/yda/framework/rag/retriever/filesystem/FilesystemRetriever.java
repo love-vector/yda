@@ -31,24 +31,66 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.lang.NonNull;
 
 import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.retriever.Retriever;
 import ai.yda.framework.rag.retriever.filesystem.service.FilesystemService;
 
+/**
+ * Retrieves filesystem context data from a vector store based on a query. It processes files stored in a specified
+ * directory and uses a vector store to perform similarity searches. If file processing is enabled, it processes files
+ * in the storage folder during initialization.
+ *
+ * @author Dmitry Marchuk
+ * @author Iryna Kopchak
+ * @see FilesystemService
+ * @see VectorStore
+ * @since 0.1.0
+ */
 @Slf4j
 public class FilesystemRetriever implements Retriever<RagRequest, RagContext> {
+    /**
+     * The vector store used to retrieve context data for user request through similarity search.
+     */
     private final VectorStore vectorStore;
+
+    /**
+     * The path to the directory where files are stored.
+     */
     private final Path fileStoragePath;
+
+    /**
+     * The number of top results to retrieve from the vector store.
+     */
     private final Integer topK;
+
     private final FilesystemService filesystemService = new FilesystemService();
 
+    /**
+     * Constructs a new {@link FilesystemRetriever} instance with the specified vectorStore, fileStoragePath, topK and
+     * isProcessingEnabled parameters.
+     *
+     * @param vectorStore         the {@link VectorStore} instance used for storing and retrieving vector data.
+     *                            This parameter cannot be {@code null} and is used to interact with the vector store.
+     * @param fileStoragePath     the path to the directory where files are stored. This parameter cannot be
+     *                            {@code null} and is used to process and store files to the vector store.
+     * @param topK                the number of top results to retrieve from the vector store. This value must be a
+     *                            positive integer.
+     * @param isProcessingEnabled a {@link Boolean} flag indicating whether file processing should be enabled during
+     *                            initialization. If {@code true}, the method {@link #processFileStorageFolder()} will
+     *                            be called to process the files in the specified storage path.
+     * @throws IllegalArgumentException if {@code topK} is not a positive number.
+     */
     public FilesystemRetriever(
-            final VectorStore vectorStore,
-            final String fileStoragePath,
-            final Integer topK,
-            final Boolean isProcessingEnabled) {
+            final @NonNull VectorStore vectorStore,
+            final @NonNull String fileStoragePath,
+            final @NonNull Integer topK,
+            final @NonNull Boolean isProcessingEnabled) {
+        if (topK <= 0) {
+            throw new IllegalArgumentException("TopK must be a positive number.");
+        }
         this.vectorStore = vectorStore;
         this.fileStoragePath = Paths.get(fileStoragePath);
         this.topK = topK;
@@ -58,6 +100,12 @@ public class FilesystemRetriever implements Retriever<RagRequest, RagContext> {
         }
     }
 
+    /**
+     * Retrieves context data based on the given request by performing a similarity search in the vector store.
+     *
+     * @param request the {@link RagRequest} object containing the user query for the similarity search.
+     * @return a {@link RagContext} object containing the knowledge obtained from the similarity search.
+     */
     @Override
     public RagContext retrieve(final RagRequest request) {
         return RagContext.builder()
@@ -72,12 +120,10 @@ public class FilesystemRetriever implements Retriever<RagRequest, RagContext> {
     }
 
     /**
-     * Processes all files in the local directory by creating document chunks and adding them to the vector store.
-     * <p>
-     * This method lists all regular files in the local directory, processes each file to create chunks,
-     * and then adds these chunks to the vector store in parallel. If the directory is empty, it logs
-     * an informational message and returns without processing.
-     * </p>
+     * Lists all regular files in the local directory, processes each file to create chunks, and then adds these chunks
+     * to the vector store.
+     *
+     * @throws RuntimeException if an I/O error occurs when processing file storage folder.
      */
     private void processFileStorageFolder() {
         try (var paths = Files.list(fileStoragePath)) {
@@ -99,10 +145,6 @@ public class FilesystemRetriever implements Retriever<RagRequest, RagContext> {
 
     /**
      * Moves all files from the local directory to the "processed" folder.
-     * <p>
-     * This method checks if the "processed" folder exists in the parent directory of the local directory,
-     * creates it if it does not exist, and then moves all files from the local directory to the "processed" folder.
-     * </p>
      *
      * @throws IOException if an I/O error occurs when accessing or moving the files.
      */

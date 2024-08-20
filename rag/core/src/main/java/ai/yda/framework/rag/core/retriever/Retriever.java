@@ -23,10 +23,24 @@ import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
 
 /**
- * Retriever is responsible for fetching relevant data or documents that can provide
- * additional information or context based on the user's query.
+ * Provides a generic mechanism for fetching relevant data or documents that can provide additional information or
+ * context based on the user's query.
+ *
+ * @param <REQUEST> the generic type of the request from the user, which must extend {@link RagRequest}.
+ * @param <CONTEXT> the generic type of the context data that will be retrieved based on the given request, which must
+ *                  extend {@link RagContext}.
+ * @author Nikita Litvinov
+ * @see RagRequest
+ * @see RagContext
+ * @since 0.1.0
  */
 public interface Retriever<REQUEST extends RagRequest, CONTEXT extends RagContext> {
 
+    /**
+     * Fetches relevant data or documents that can provide additional information or context based on the user's query.
+     *
+     * @param request the request object that contains query data from the user.
+     * @return the context object generated that contains additional information based on the user's query.
+     */
     CONTEXT retrieve(REQUEST request);
 }

@@ -25,11 +25,39 @@ import java.util.Map;
 import lombok.Builder;
 import lombok.Getter;
 
+/**
+ * Represents the context data associated with a particular user query. It encapsulates both the knowledge, which is
+ * typically a list of strings retrieved from external sources, and metadata, which contains additional key-value pairs
+ * providing context or other relevant information.
+ *
+ * @author Dmitry Marchuk
+ * @author Nikita Litvinov
+ * @since 0.1.0
+ */
 @Getter
 @Builder(toBuilder = true)
 public class RagContext {
 
-    private List<String> knowledge;
+    /**
+     * A list of strings representing the retrieved knowledge or information relevant to the user's query.
+     */
+    private final List<String> knowledge;
 
-    private Map<String, Object> metadata;
+    /**
+     * A map containing metadata related to the context. The keys are strings, and the values can be of any object type,
+     * allowing for flexible storage of various types of supplementary information.
+     */
+    private final Map<String, Object> metadata;
+
+    /**
+     * Constructs a new {@link RagContext} instance with the specified knowledge and metadata.
+     *
+     * @param knowledge the list of strings representing the retrieved knowledge or information relevant to the user's
+     *                  query.
+     * @param metadata  the map containing metadata related to the context.
+     */
+    public RagContext(final List<String> knowledge, final Map<String, Object> metadata) {
+        this.knowledge = knowledge;
+        this.metadata = metadata;
+    }
 }

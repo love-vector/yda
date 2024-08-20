@@ -21,11 +21,19 @@ package ai.yda.framework.channel.shared;
 
 import org.springframework.security.core.AuthenticationException;
 
+/**
+ * Thrown if an authentication request is rejected because the token is invalid.
+ *
+ * @author Nikita Litvinov
+ * @since 0.1.0
+ */
 public class TokenAuthenticationException extends AuthenticationException {
 
-    private static final String MESSAGE = "Invalid token";
-
+    /**
+     * Constructs a new {@link TokenAuthenticationException} instance with the predefined message "Authentication token
+     * is invalid".
+     */
     public TokenAuthenticationException() {
-        super(MESSAGE);
+        super("Authentication token is invalid");
     }
 }

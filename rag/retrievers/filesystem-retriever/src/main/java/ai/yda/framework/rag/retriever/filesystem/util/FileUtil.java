@@ -27,8 +27,23 @@ import org.apache.pdfbox.text.PDFTextStripper;
 
 import ai.yda.framework.rag.retriever.filesystem.exception.FileReadException;
 
+/**
+ * Provides utility method for reading files and returning their content as a string.
+ *
+ * @author Dmitry Marchuk
+ * @see Loader
+ * @see PDFTextStripper
+ * @since 0.1.0
+ */
 public final class FileUtil {
 
+    /**
+     * Reads the content of a PDF file and returns it as a string.
+     *
+     * @param file the PDF {@link File} to be read.
+     * @return the text content of the PDF file as a string.
+     * @throws FileReadException if an error occurs while reading the file.
+     */
     public static String readPdf(final File file) {
         try (var document = Loader.loadPDF(file)) {
             return new PDFTextStripper().getText(document);

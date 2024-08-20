@@ -36,8 +36,21 @@ import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.vectorstore.MilvusVectorStore;
 import org.springframework.util.Assert;
 
+/**
+ * The implementation of the {@link MilvusVectorStore} class that provides methods for optimized adding documents to the
+ * vector storage and clearing collection on startup.
+ *
+ * @author Iryna Kopchak
+ * @see EmbeddingModel
+ * @see MilvusServiceClient
+ * @see MilvusVectorStoreConfig
+ * @since 0.1.0
+ */
 public class OptimizedMilvusVectorStore extends MilvusVectorStore {
 
+    /**
+     * The maximum number of dimensions for an embedding array. This is the limitation of the OpenAi API.
+     */
     private static final int MAX_EMBEDDING_ARRAY_DIMENSIONS = 2048;
 
     private final MilvusServiceClient milvusClient;
@@ -46,6 +59,17 @@ public class OptimizedMilvusVectorStore extends MilvusVectorStore {
     private final String collectionName;
     private final boolean clearCollectionOnStartup;
 
+    /**
+     * Constructs a new {@link  OptimizedMilvusVectorStore} instance with the specified parameters.
+     *
+     * @param milvusClient             the client for interacting with the Milvus service.
+     * @param embeddingModel           the model used for embedding document content.
+     * @param config                   the configuration for the Milvus vector store.
+     * @param initializeSchema         whether to initialize the schema in the database.
+     * @param collectionName           the name of the collection in the Milvus database.
+     * @param databaseName             the name of the database in Milvus.
+     * @param clearCollectionOnStartup whether to clear the collection on startup.
+     */
     public OptimizedMilvusVectorStore(
             final MilvusServiceClient milvusClient,
             final EmbeddingModel embeddingModel,
@@ -63,6 +87,13 @@ public class OptimizedMilvusVectorStore extends MilvusVectorStore {
         this.clearCollectionOnStartup = clearCollectionOnStartup;
     }
 
+    /**
+     * Adds a list of documents to the Milvus collection. The documents are embedded using the specified
+     * {@link EmbeddingModel} before insertion.
+     *
+     * @param documents the list of documents to be added to the collection.
+     * @throws RuntimeException if the insertion fails.
+     */
     @Override
     public void add(final List<Document> documents) {
         Assert.notNull(documents, "Documents must not be null");
@@ -97,6 +128,12 @@ public class OptimizedMilvusVectorStore extends MilvusVectorStore {
         }
     }
 
+    /**
+     * Initializes the vector store after properties are set. Optionally clears the collection on startup if configured
+     * to do so.
+     *
+     * @throws Exception if an error occurs during initialization.
+     */
     @Override
     public void afterPropertiesSet() throws Exception {
         if (this.clearCollectionOnStartup) {
@@ -105,6 +142,12 @@ public class OptimizedMilvusVectorStore extends MilvusVectorStore {
         super.afterPropertiesSet();
     }
 
+    /**
+     * Embeds the content of documents using the {@link EmbeddingModel}.
+     *
+     * @param documentsContent the content of the documents to be embedded.
+     * @return a list of embedded vectors.
+     */
     private List<List<Float>> embedDocuments(final List<String> documentsContent) {
         var embeddings = new ArrayList<List<Float>>();
         var totalSize = documentsContent.size();
@@ -121,6 +164,9 @@ public class OptimizedMilvusVectorStore extends MilvusVectorStore {
         return embeddings;
     }
 
+    /**
+     * Clears the Milvus collection if it exists. This method deletes all entities from the collection.
+     */
     private void clearCollection() {
         if (isDatabaseCollectionExists()) {
             var allEntitiesIds = getAllEntitiesIds();
@@ -128,6 +174,12 @@ public class OptimizedMilvusVectorStore extends MilvusVectorStore {
         }
     }
 
+    /**
+     * Checks whether the specified collection exists in the Milvus database.
+     *
+     * @return {@code true} if the collection exists, {@code false} otherwise.
+     * @throws RuntimeException if the collection existence check fails.
+     */
     private Boolean isDatabaseCollectionExists() {
         var collectionExistsResult = milvusClient.hasCollection(HasCollectionParam.newBuilder()
                 .withDatabaseName(this.databaseName)
@@ -140,6 +192,12 @@ public class OptimizedMilvusVectorStore extends MilvusVectorStore {
         return collectionExistsResult.getData();
     }
 
+    /**
+     * Retrieves all entity IDs from the Milvus collection.
+     *
+     * @return a list of entity IDs.
+     * @throws RuntimeException if the query fails.
+     */
     private List<String> getAllEntitiesIds() {
         var getAllIdsQueryResult = milvusClient.query(QueryParam.newBuilder()
                 .withCollectionName(this.collectionName)

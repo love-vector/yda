@@ -29,14 +29,22 @@ import org.springframework.web.server.WebFilterChain;
 import org.springframework.web.server.WebSession;
 
 /**
- * Detects if a {@link WebSession} for the current {@link ServerWebExchange} has been started
- * and starts one if it's not.
+ * Detects if a {@link WebSession} for the current {@link ServerWebExchange} has been started and starts one if it's
+ * not.
  *
  * @author Nikita Litvinov
  * @since 0.1.0
  */
 public class SessionHandlerFilter implements WebFilter {
 
+    /**
+     * Default constructor for {@link SessionHandlerFilter}.
+     */
+    public SessionHandlerFilter() {}
+
+    /**
+     * {@inheritDoc}
+     */
     @NonNull
     @Override
     public Mono<Void> filter(@NonNull final ServerWebExchange exchange, @NonNull final WebFilterChain chain) {

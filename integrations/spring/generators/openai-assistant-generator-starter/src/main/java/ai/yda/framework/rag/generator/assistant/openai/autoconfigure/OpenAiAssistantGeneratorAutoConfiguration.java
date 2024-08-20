@@ -27,10 +27,41 @@ import org.springframework.context.annotation.Bean;
 import ai.yda.framework.rag.generator.assistant.openai.OpenAiAssistantGenerator;
 import ai.yda.framework.session.core.SessionProvider;
 
+/**
+ * Autoconfiguration class for setting up an {@link OpenAiAssistantGenerator} bean. This class automatically configures
+ * the necessary components for integrating with the OpenAI API to create an assistant generator. The configuration is
+ * based on properties defined in the external configuration files (e.g., application.properties or application.yml)
+ * under {@link OpenAiConnectionProperties#CONFIG_PREFIX} and {@link OpenAiAssistantGeneratorProperties#CONFIG_PREFIX}
+ * namespaces.
+ *
+ * @author Iryna Kopchak
+ * @author Dmitry Marchuk
+ * @see OpenAiAssistantGenerator
+ * @see OpenAiAssistantGeneratorProperties
+ * @see OpenAiConnectionProperties
+ * @see SessionProvider
+ * @since 0.1.0
+ */
 @AutoConfiguration
 @EnableConfigurationProperties({OpenAiAssistantGeneratorProperties.class, OpenAiConnectionProperties.class})
 public class OpenAiAssistantGeneratorAutoConfiguration {
 
+    /**
+     * Default constructor for {@link OpenAiAssistantGeneratorAutoConfiguration}.
+     */
+    public OpenAiAssistantGeneratorAutoConfiguration() {}
+
+    /**
+     * Defines an {@link OpenAiAssistantGenerator} bean. This bean is configured using the provided properties for the
+     * assistant generator and the OpenAI connection. The generator requires an API key and an assistant ID, which are
+     * retrieved from the external configuration, and a {@link SessionProvider} for managing user sessions.
+     *
+     * @param assistantGeneratorProperties the properties related to the assistant generator, providing assistant ID
+     *                                     configuration.
+     * @param openAiProperties             the properties related to the OpenAI connection, including the API key.
+     * @param sessionProvider              the session provider responsible for managing user sessions.
+     * @return a configured {@link OpenAiAssistantGenerator} bean ready for use in the application.
+     */
     @Bean
     public OpenAiAssistantGenerator openAiGenerator(
             final OpenAiAssistantGeneratorProperties assistantGeneratorProperties,

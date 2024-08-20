@@ -44,27 +44,67 @@ import com.azure.core.credential.KeyCredential;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
 
+/**
+ * Provides methods to interact with the Azure OpenAI Assistant API. It facilitates creating and managing conversation
+ * threads, sending messages, and retrieving responses from the assistant service.
+ * <p>
+ * This service uses an {@link AssistantsClient} to perform operations such as creating threads, adding messages,
+ * and running assistant tasks. It also supports streaming responses for real-time updates.
+ * </p>
+ *
+ * @author Nikita Litvinov
+ * @author Iryna Kopchak
+ * @see AssistantsClient
+ * @see AssistantThread
+ * @since 0.1.0
+ */
 public class AzureOpenAiAssistantService {
 
     private final AssistantsClient assistantsClient;
 
+    /**
+     * Constructs a new {@link AzureOpenAiAssistantService} instance with the specified API key.
+     * Initializes the {@link AssistantsClient} with the provided API key for authentication.
+     *
+     * @param apiKey the API key for authenticating to the OpenAI Assistant API.
+     */
     public AzureOpenAiAssistantService(final String apiKey) {
         this.assistantsClient = new AssistantsClientBuilder()
                 .credential(new KeyCredential(apiKey))
                 .buildClient();
     }
 
+    /**
+     * Creates a new thread in the Azure OpenAI Assistant service with an initial message.
+     *
+     * @param content the content of the initial message to include in the thread.
+     * @return the {@link AssistantThread} representing the created thread.
+     */
     public AssistantThread createThread(final String content) {
         var threadMessageOptions = new ThreadMessageOptions(MessageRole.USER, content);
         var creationOptions = new AssistantThreadCreationOptions().setMessages(List.of(threadMessageOptions));
         return assistantsClient.createThread(creationOptions);
     }
 
+    /**
+     * Adds a message to an existing thread in the Azure OpenAI Assistant service.
+     *
+     * @param threadId the ID of the thread to which the message should be added.
+     * @param content  the content of the message to add.
+     */
     public void addMessageToThread(final String threadId, final String content) {
         var threadMessageOptions = new ThreadMessageOptions(MessageRole.USER, content);
         assistantsClient.createMessage(threadId, threadMessageOptions);
     }
 
+    /**
+     * Creates a run for a given thread and waits for the response.
+     *
+     * @param threadId    the ID of the thread in which to create the run.
+     * @param assistantId the ID of the assistant to use for the run.
+     * @param context     additional instructions to include in the run.
+     * @return the content of the last message in the thread after the run completes.
+     */
     public String createRunAndWaitForResponse(final String threadId, final String assistantId, final String context) {
         var createRunOptions = new CreateRunOptions(assistantId).setAdditionalInstructions(context);
         var threadRun = assistantsClient.createRun(threadId, createRunOptions);
@@ -72,6 +112,31 @@ public class AzureOpenAiAssistantService {
         return getLastMessage(threadRun.getThreadId());
     }
 
+    /**
+     * Streams responses from the Azure OpenAI Assistant service for a given run.
+     *
+     * @param threadId    the ID of the thread for which to stream responses.
+     * @param assistantId the ID of the assistant to use for the run.
+     * @param context     additional instructions to include in the run.
+     * @return a {@link Flux stream} of response content updates as they are received.
+     */
+    public Flux<String> createRunStream(final String threadId, final String assistantId, final String context) {
+        var createRunOptions = new CreateRunOptions(assistantId).setAdditionalInstructions(context);
+        return Flux.fromIterable(assistantsClient.createRunStream(threadId, createRunOptions))
+                .subscribeOn(Schedulers.boundedElastic())
+                .filter(streamUpdate -> streamUpdate instanceof StreamMessageUpdate)
+                .map(deltaMessage -> extractDeltaContent(((StreamMessageUpdate) deltaMessage).getMessage()));
+    }
+
+    /**
+     * Waits for the completion of a given thread run. It periodically polls the status of the thread run until it is
+     * no longer in the QUEUED or IN_PROGRESS states. The thread run is updated with the final
+     * {@code progressThreadRun} once the polling completes.
+     *
+     * @param threadRun the initial {@link ThreadRun} object representing the run to be monitored.
+     * @return the updated {@link ThreadRun} object once the run has completed.
+     * @throws RuntimeException if an error occurs while waiting for the thread run to finish.
+     */
     private ThreadRun waitForRunToFinish(final ThreadRun threadRun) {
         var atomicThreadRun = new AtomicReference<>(threadRun);
         try {
@@ -101,14 +166,12 @@ public class AzureOpenAiAssistantService {
         return atomicThreadRun.get();
     }
 
-    public Flux<String> createRunStream(final String threadId, final String assistantId, final String context) {
-        var createRunOptions = new CreateRunOptions(assistantId).setAdditionalInstructions(context);
-        return Flux.fromIterable(assistantsClient.createRunStream(threadId, createRunOptions))
-                .subscribeOn(Schedulers.boundedElastic())
-                .filter(streamUpdate -> streamUpdate instanceof StreamMessageUpdate)
-                .map(deltaMessage -> extractDeltaContent(((StreamMessageUpdate) deltaMessage).getMessage()));
-    }
-
+    /**
+     * Queries all messages in the specified thread and returns the content of the most recent message.
+     *
+     * @param threadId the ID of the thread from which to retrieve the last message.
+     * @return the content of the last message in the thread.
+     */
     private String getLastMessage(final String threadId) {
         var messages = assistantsClient.listMessages(threadId);
         return messages.getData().get(0).getContent().stream()
@@ -116,6 +179,13 @@ public class AzureOpenAiAssistantService {
                 .collect(Collectors.joining(". "));
     }
 
+    /**
+     * Processes a {@link MessageDeltaChunk} to extract the text content updates and concatenates them into a single
+     * string.
+     *
+     * @param delta the {@link MessageDeltaChunk} containing delta content updates.
+     * @return the concatenated delta content as a string.
+     */
     private String extractDeltaContent(final MessageDeltaChunk delta) {
         return delta.getDelta().getContent().parallelStream()
                 .map(content ->
