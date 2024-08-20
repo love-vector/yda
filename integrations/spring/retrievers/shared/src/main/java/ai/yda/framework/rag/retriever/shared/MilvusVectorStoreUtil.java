@@ -24,8 +24,8 @@ import io.milvus.param.ConnectParam;
 import io.milvus.param.IndexType;
 import io.milvus.param.MetricType;
 
-import org.springframework.ai.autoconfigure.openai.OpenAiChatProperties;
 import org.springframework.ai.autoconfigure.openai.OpenAiConnectionProperties;
+import org.springframework.ai.autoconfigure.openai.OpenAiEmbeddingProperties;
 import org.springframework.ai.autoconfigure.vectorstore.milvus.MilvusServiceClientProperties;
 import org.springframework.ai.autoconfigure.vectorstore.milvus.MilvusVectorStoreProperties;
 import org.springframework.ai.document.MetadataMode;
@@ -45,10 +45,10 @@ public final class MilvusVectorStoreUtil {
             final MilvusVectorStoreProperties milvusProperties,
             final MilvusServiceClientProperties milvusClientProperties,
             final OpenAiConnectionProperties openAiConnectionProperties,
-            final OpenAiChatProperties openAiChatProperties) {
+            final OpenAiEmbeddingProperties openAiEmbeddingProperties) {
 
         var milvusClient = createMilvusClient(milvusClientProperties);
-        var embeddingModel = createEmbeddingModel(openAiConnectionProperties, openAiChatProperties);
+        var embeddingModel = createEmbeddingModel(openAiConnectionProperties, openAiEmbeddingProperties);
 
         var collectionName = retrieverProperties.getCollectionName();
         var databaseName = milvusProperties.getDatabaseName();
@@ -73,13 +73,14 @@ public final class MilvusVectorStoreUtil {
     }
 
     private static EmbeddingModel createEmbeddingModel(
-            final OpenAiConnectionProperties connectionProperties, final OpenAiChatProperties chatProperties) {
+            final OpenAiConnectionProperties connectionProperties,
+            final OpenAiEmbeddingProperties openAiEmbeddingProperties) {
         var openAiApi = new OpenAiApi(connectionProperties.getApiKey());
         return new OpenAiEmbeddingModel(
                 openAiApi,
                 MetadataMode.EMBED,
                 OpenAiEmbeddingOptions.builder()
-                        .withModel(chatProperties.getOptions().getModel())
+                        .withModel(openAiEmbeddingProperties.getOptions().getModel())
                         .withUser("user")
                         .build(),
                 RetryUtils.DEFAULT_RETRY_TEMPLATE);
