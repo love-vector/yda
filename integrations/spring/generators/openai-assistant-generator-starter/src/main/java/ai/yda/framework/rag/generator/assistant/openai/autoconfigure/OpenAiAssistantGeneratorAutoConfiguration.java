@@ -28,7 +28,7 @@ import ai.yda.framework.rag.generator.assistant.openai.OpenAiAssistantGenerator;
 import ai.yda.framework.session.core.SessionProvider;
 
 @AutoConfiguration
-@EnableConfigurationProperties(OpenAiAssistantGeneratorProperties.class)
+@EnableConfigurationProperties({OpenAiAssistantGeneratorProperties.class, OpenAiConnectionProperties.class})
 public class OpenAiAssistantGeneratorAutoConfiguration {
 
     @Bean

@@ -19,8 +19,6 @@
 */
 package ai.yda.framework.rag.retriever.website;
 
-import java.util.stream.Collectors;
-
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.ai.document.Document;
@@ -56,12 +54,13 @@ public class WebsiteRetriever implements Retriever<RagRequest, RagContext> {
     @Override
     public RagContext retrieve(final RagRequest request) {
         return RagContext.builder()
-                .knowledge(vectorStore
-                        .similaritySearch(
-                                SearchRequest.query(request.getQuery()).withTopK(topK))
-                        .stream()
-                        .map(Document::getContent)
-                        .collect(Collectors.toList()))
+                .knowledge(
+                        vectorStore
+                                .similaritySearch(
+                                        SearchRequest.query(request.getQuery()).withTopK(topK))
+                                .parallelStream()
+                                .map(Document::getContent)
+                                .toList())
                 .build();
     }
 

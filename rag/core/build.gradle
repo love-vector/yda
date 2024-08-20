@@ -1,4 +1,6 @@
 dependencies {
+    api 'io.projectreactor:reactor-core:3.6.8'
+
     implementation 'edu.stanford.nlp:stanford-corenlp:4.5.7'
     implementation 'org.jsoup:jsoup:1.17.2'
 }
