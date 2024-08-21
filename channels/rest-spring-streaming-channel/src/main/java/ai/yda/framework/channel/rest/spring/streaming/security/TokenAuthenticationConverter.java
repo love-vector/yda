@@ -25,7 +25,6 @@ import reactor.core.publisher.Mono;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.web.server.authentication.ServerAuthenticationConverter;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
@@ -53,12 +52,6 @@ public class TokenAuthenticationConverter implements ServerAuthenticationConvert
             return Mono.error(new BadCredentialsException("Empty bearer authentication token"));
         }
         var token = authHeader.substring(TOKEN_START_POSITION);
-        return ReactiveSecurityContextHolder.getContext().flatMap(context -> {
-            var currentAuthentication = context.getAuthentication();
-            return currentAuthentication == null
-                    ? Mono.just(new TokenAuthentication(token))
-                    : Mono.just(new TokenAuthentication(
-                            token, currentAuthentication.getPrincipal(), currentAuthentication.getAuthorities()));
-        });
+        return Mono.just(new TokenAuthentication(token));
     }
 }

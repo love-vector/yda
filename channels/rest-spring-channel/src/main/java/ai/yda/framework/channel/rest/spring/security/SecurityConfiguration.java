@@ -40,7 +40,7 @@ public class SecurityConfiguration {
     @ConditionalOnProperty(prefix = RestSpringProperties.CONFIG_PREFIX, name = "security-token")
     public SecurityFilterChain filterChain(final HttpSecurity http, final RestSpringProperties properties)
             throws Exception {
-        return http.csrf(AbstractHttpConfigurer::disable)
+        http.csrf(AbstractHttpConfigurer::disable)
                 .cors(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(properties.getEndpointRelativePath())
@@ -49,19 +49,24 @@ public class SecurityConfiguration {
                         .permitAll())
                 .addFilterAfter(
                         new TokenAuthenticationFilter(properties.getSecurityToken()),
-                        AnonymousAuthenticationFilter.class)
-                .sessionManagement(sessionManagement -> sessionManagement
-                        .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
-                        .maximumSessions(1))
-                .build();
+                        AnonymousAuthenticationFilter.class);
+        configureSessionManagement(http);
+        return http.build();
     }
 
     @Bean
     @ConditionalOnMissingBean
     public SecurityFilterChain defaultFilterChain(final HttpSecurity http) throws Exception {
-        return http.csrf(AbstractHttpConfigurer::disable)
+        http.csrf(AbstractHttpConfigurer::disable)
                 .cors(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll())
-                .build();
+                .authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll());
+        configureSessionManagement(http);
+        return http.build();
+    }
+
+    private void configureSessionManagement(final HttpSecurity http) throws Exception {
+        http.sessionManagement(sessionManagement -> sessionManagement
+                .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
+                .maximumSessions(1));
     }
 }

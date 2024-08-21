@@ -21,32 +21,27 @@ package ai.yda.framework.channel.rest.spring.session;
 
 import java.util.Optional;
 
+import jakarta.servlet.http.HttpSession;
+
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import ai.yda.framework.channel.shared.TokenAuthentication;
 import ai.yda.framework.session.core.SessionProvider;
 
 @Component
 @RequiredArgsConstructor
 public class RestSessionProvider implements SessionProvider {
 
+    private final HttpSession httpSession;
+
     @Override
     public void put(final String key, final Object value) {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication instanceof TokenAuthentication tokenAuthentication) {
-            tokenAuthentication.getAttributes().put(key, value);
-        }
+        httpSession.setAttribute(key, value);
     }
 
     @Override
     public Optional<Object> get(final String key) {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication instanceof TokenAuthentication tokenAuthentication) {
-            return Optional.ofNullable(tokenAuthentication.getAttributes().get(key));
-        }
-        return Optional.empty();
+        return Optional.ofNullable(httpSession.getAttribute(key));
     }
 }

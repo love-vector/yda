@@ -33,6 +33,7 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.security.web.authentication.AuthenticationConverter;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -42,6 +43,9 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
     private final AuthenticationConverter authenticationConverter = new TokenAuthenticationConverter();
 
     private final TokenAuthenticationManager authenticationManager;
+
+    private final SecurityContextHolderStrategy securityContextHolderStrategy =
+            SecurityContextHolder.getContextHolderStrategy();
 
     public TokenAuthenticationFilter(final String token) {
         this.authenticationManager = new TokenAuthenticationManager(token);
@@ -63,7 +67,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             }
             if (authenticationIsRequired(authRequest)) {
                 var authResult = authenticationManager.authenticate(authRequest);
-                SecurityContextHolder.getContext().setAuthentication(authResult);
+                securityContextHolderStrategy.getContext().setAuthentication(authResult);
             }
         } catch (final AuthenticationException ignored) {
         }
@@ -73,7 +77,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
     protected boolean authenticationIsRequired(final Authentication authentication) {
         // Only reauthenticate if token doesn't match SecurityContextHolder and user
         // isn't authenticated (see SEC-53)
-        var currentAuthentication = SecurityContextHolder.getContext().getAuthentication();
+        var currentAuthentication = securityContextHolderStrategy.getContext().getAuthentication();
         if (currentAuthentication == null
                 || !currentAuthentication.getCredentials().equals(authentication.getCredentials())
                 || !currentAuthentication.isAuthenticated()) {

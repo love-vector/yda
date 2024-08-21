@@ -27,9 +27,10 @@ import org.springframework.security.config.annotation.web.reactive.EnableWebFlux
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
-import org.springframework.security.web.server.authentication.SessionLimit;
+import org.springframework.security.web.server.context.WebSessionServerSecurityContextRepository;
 
 import ai.yda.framework.channel.rest.spring.streaming.RestSpringStreamingProperties;
+import ai.yda.framework.channel.rest.spring.streaming.session.SessionHandlerFilter;
 
 @Configuration
 @EnableWebFluxSecurity
@@ -39,26 +40,33 @@ public class SecurityConfiguration {
     @ConditionalOnProperty(prefix = RestSpringStreamingProperties.CONFIG_PREFIX, name = "security-token")
     public SecurityWebFilterChain filterChain(
             final ServerHttpSecurity http, final RestSpringStreamingProperties properties) {
-        return http.csrf(ServerHttpSecurity.CsrfSpec::disable)
+        var securityContextRepository = new WebSessionServerSecurityContextRepository();
+        http.csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .cors(ServerHttpSecurity.CorsSpec::disable)
                 .authorizeExchange(exchange -> exchange.pathMatchers(properties.getEndpointRelativePath())
                         .authenticated()
                         .anyExchange()
                         .permitAll())
+                .securityContextRepository(securityContextRepository)
                 .addFilterAfter(
-                        new TokenAuthenticationFilter(properties.getSecurityToken()),
-                        SecurityWebFiltersOrder.ANONYMOUS_AUTHENTICATION)
-                .sessionManagement(sessionManagement -> sessionManagement.concurrentSessions(
-                        concurrentSessions -> concurrentSessions.maximumSessions(SessionLimit.of(1))))
-                .build();
+                        new TokenAuthenticationFilter(properties.getSecurityToken(), securityContextRepository),
+                        SecurityWebFiltersOrder.ANONYMOUS_AUTHENTICATION);
+        configureSessionManagement(http);
+        return http.build();
     }
 
     @Bean
     @ConditionalOnMissingBean
     public SecurityWebFilterChain defaultFilterChain(final ServerHttpSecurity http) {
-        return http.csrf(ServerHttpSecurity.CsrfSpec::disable)
+        http.csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .cors(ServerHttpSecurity.CorsSpec::disable)
                 .authorizeExchange(exchange -> exchange.anyExchange().permitAll())
-                .build();
+                .securityContextRepository(new WebSessionServerSecurityContextRepository());
+        configureSessionManagement(http);
+        return http.build();
+    }
+
+    private void configureSessionManagement(final ServerHttpSecurity http) {
+        http.addFilterAfter(new SessionHandlerFilter(), SecurityWebFiltersOrder.ANONYMOUS_AUTHENTICATION);
     }
 }

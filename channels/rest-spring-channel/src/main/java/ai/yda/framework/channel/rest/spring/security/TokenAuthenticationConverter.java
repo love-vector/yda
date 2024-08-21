@@ -53,7 +53,8 @@ public class TokenAuthenticationConverter implements AuthenticationConverter {
             throw new BadCredentialsException("Empty bearer authentication token");
         }
         var token = authHeader.substring(TOKEN_START_POSITION);
-        var currentAuthentication = SecurityContextHolder.getContext().getAuthentication();
+        var currentAuthentication =
+                SecurityContextHolder.getContextHolderStrategy().getContext().getAuthentication();
         return currentAuthentication == null
                 ? new TokenAuthentication(token)
                 : new TokenAuthentication(

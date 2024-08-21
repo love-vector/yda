@@ -22,8 +22,6 @@ package ai.yda.framework.channel.shared;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 import lombok.Getter;
 
@@ -43,8 +41,6 @@ public class TokenAuthentication extends AbstractAuthenticationToken implements 
     private final Object principal;
 
     private final int keyHash;
-
-    private final Map<String, Object> attributes = new HashMap<>();
 
     public TokenAuthentication(final String key) {
         this(extractKeyHash(key), "anonymousUser", AuthorityUtils.createAuthorityList("ROLE_ANONYMOUS"));

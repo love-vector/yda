@@ -53,11 +53,14 @@ public class OpenAiAssistantStreamingGenerator implements StreamingGenerator<Rag
                 .map(Object::toString)
                 .flatMap(threadId -> Mono.fromRunnable(
                                 () -> assistantService.addMessageToThread(threadId, request.getQuery()))
+                        .subscribeOn(Schedulers.boundedElastic())
                         .thenReturn(threadId))
                 .switchIfEmpty(Mono.defer(() -> Mono.fromCallable(() -> assistantService
-                                .createThread(request.getQuery())
-                                .getId())
-                        .subscribeOn(Schedulers.boundedElastic())))
+                                        .createThread(request.getQuery())
+                                        .getId())
+                                .subscribeOn(Schedulers.boundedElastic()))
+                        .flatMap(threadId ->
+                                sessionProvider.put(THREAD_ID_KEY, threadId).thenReturn(threadId)))
                 .doOnNext(threadId -> log.debug("Thread ID: {}", threadId))
                 .flatMapMany(threadId -> assistantService.createRunStream(threadId, assistantId, context))
                 .map(deltaMessage -> RagResponse.builder().result(deltaMessage).build());

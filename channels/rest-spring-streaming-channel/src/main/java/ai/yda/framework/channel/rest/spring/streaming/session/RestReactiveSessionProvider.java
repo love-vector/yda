@@ -22,10 +22,9 @@ package ai.yda.framework.channel.rest.spring.streaming.session;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
-import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.WebSession;
 
-import ai.yda.framework.channel.shared.TokenAuthentication;
 import ai.yda.framework.session.core.ReactiveSessionProvider;
 
 @Component
@@ -34,24 +33,22 @@ public class RestReactiveSessionProvider implements ReactiveSessionProvider {
 
     @Override
     public Mono<Void> put(final String key, final Object value) {
-        return ReactiveSecurityContextHolder.getContext().flatMap(securityContext -> {
-            if (securityContext.getAuthentication() instanceof TokenAuthentication tokenAuthentication) {
-                tokenAuthentication.getAttributes().put(key, value);
-            }
+        return Mono.deferContextual(contextView -> {
+            var session = contextView.getOrEmpty(WebSession.class);
+            session.ifPresent(s -> ((WebSession) s).getAttributes().put(key, value));
             return Mono.empty();
         });
     }
 
     @Override
     public Mono<Object> get(final String key) {
-        return ReactiveSecurityContextHolder.getContext().flatMap(securityContext -> {
-            if (securityContext.getAuthentication() instanceof TokenAuthentication tokenAuthentication) {
-                var attribute = tokenAuthentication.getAttributes().get(key);
-                if (attribute != null) {
-                    return Mono.just(attribute);
-                }
-            }
-            return Mono.empty();
+        return Mono.deferContextual(contextView -> {
+            var session = contextView.getOrEmpty(WebSession.class);
+            return session.map(s -> {
+                        var attributes = ((WebSession) s).getAttributes();
+                        return attributes.containsKey(key) ? Mono.just(attributes.get(key)) : Mono.empty();
+                    })
+                    .orElseGet(Mono::empty);
         });
     }
 }

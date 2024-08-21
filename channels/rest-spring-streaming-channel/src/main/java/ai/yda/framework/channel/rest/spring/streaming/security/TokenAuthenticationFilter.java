@@ -24,12 +24,21 @@ import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 import org.springframework.lang.NonNull;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextImpl;
+import org.springframework.security.web.server.WebFilterExchange;
+import org.springframework.security.web.server.authentication.HttpBasicServerAuthenticationEntryPoint;
+import org.springframework.security.web.server.authentication.ServerAuthenticationEntryPointFailureHandler;
+import org.springframework.security.web.server.authentication.ServerAuthenticationFailureHandler;
+import org.springframework.security.web.server.authentication.ServerAuthenticationSuccessHandler;
+import org.springframework.security.web.server.authentication.WebFilterChainServerAuthenticationSuccessHandler;
+import org.springframework.security.web.server.context.ServerSecurityContextRepository;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
+
+import ai.yda.framework.channel.shared.TokenAuthenticationException;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -39,8 +48,18 @@ public class TokenAuthenticationFilter implements WebFilter {
 
     private final TokenAuthenticationManager authenticationManager;
 
-    public TokenAuthenticationFilter(final String token) {
+    private final ServerSecurityContextRepository securityContextRepository;
+
+    private final ServerAuthenticationSuccessHandler authenticationSuccessHandler =
+            new WebFilterChainServerAuthenticationSuccessHandler();
+
+    private final ServerAuthenticationFailureHandler authenticationFailureHandler =
+            new ServerAuthenticationEntryPointFailureHandler(new HttpBasicServerAuthenticationEntryPoint());
+
+    public TokenAuthenticationFilter(
+            final String token, final ServerSecurityContextRepository securityContextRepository) {
         this.authenticationManager = new TokenAuthenticationManager(token);
+        this.securityContextRepository = securityContextRepository;
     }
 
     @NonNull
@@ -48,28 +67,24 @@ public class TokenAuthenticationFilter implements WebFilter {
     public Mono<Void> filter(@NonNull final ServerWebExchange exchange, @NonNull final WebFilterChain chain) {
         return this.authenticationConverter
                 .convert(exchange)
-                .flatMap(authentication -> authenticationIsRequired(authentication)
-                        .flatMap(isRequired ->
-                                isRequired ? authenticationManager.authenticate(authentication) : Mono.empty()))
-                .flatMap(authentication -> ReactiveSecurityContextHolder.getContext()
-                        .flatMap(securityContext -> {
-                            securityContext.setAuthentication(authentication);
-                            return Mono.empty();
-                        }))
-                .then(chain.filter(exchange));
+                .switchIfEmpty(chain.filter(exchange).then(Mono.empty()))
+                .flatMap(authenticationManager::authenticate)
+                .flatMap(authentication ->
+                        onAuthenticationSuccess(authentication, new WebFilterExchange(exchange, chain)))
+                .onErrorResume(
+                        TokenAuthenticationException.class,
+                        (exception) -> this.authenticationFailureHandler.onAuthenticationFailure(
+                                new WebFilterExchange(exchange, chain), exception));
     }
 
-    protected Mono<Boolean> authenticationIsRequired(final Authentication authentication) {
-        // Only reauthenticate if token doesn't match SecurityContextHolder and user
-        // isn't authenticated (see SEC-53)
-        return ReactiveSecurityContextHolder.getContext().flatMap(context -> {
-            var currentAuthentication = context.getAuthentication();
-            if (currentAuthentication == null
-                    || !currentAuthentication.getCredentials().equals(authentication.getCredentials())
-                    || !currentAuthentication.isAuthenticated()) {
-                return Mono.just(Boolean.TRUE);
-            }
-            return Mono.just(currentAuthentication instanceof AnonymousAuthenticationToken);
-        });
+    protected Mono<Void> onAuthenticationSuccess(
+            final Authentication authentication, final WebFilterExchange webFilterExchange) {
+        ServerWebExchange exchange = webFilterExchange.getExchange();
+        SecurityContextImpl securityContext = new SecurityContextImpl();
+        securityContext.setAuthentication(authentication);
+        return this.securityContextRepository
+                .save(exchange, securityContext)
+                .then(this.authenticationSuccessHandler.onAuthenticationSuccess(webFilterExchange, authentication))
+                .contextWrite(ReactiveSecurityContextHolder.withSecurityContext(Mono.just(securityContext)));
     }
 }
