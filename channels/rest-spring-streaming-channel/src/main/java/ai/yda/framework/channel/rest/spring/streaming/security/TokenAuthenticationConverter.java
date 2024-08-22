@@ -45,7 +45,7 @@ public class TokenAuthenticationConverter implements ServerAuthenticationConvert
         if (authHeaders == null) {
             return Mono.empty();
         }
-        var authHeader = authHeaders.getFirst().trim();
+        var authHeader = authHeaders.get(0).trim();
         if (!StringUtils.startsWithIgnoreCase(authHeader, AUTHENTICATION_SCHEME_BEARER)) {
             return Mono.empty();
         }
