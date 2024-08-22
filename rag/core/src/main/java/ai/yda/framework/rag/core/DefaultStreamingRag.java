@@ -34,7 +34,7 @@ import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.model.RagResponse;
 import ai.yda.framework.rag.core.retriever.Retriever;
-import ai.yda.framework.rag.core.util.StringUtil;
+import ai.yda.framework.rag.core.util.ContentUtil;
 
 @Getter(AccessLevel.PROTECTED)
 @RequiredArgsConstructor
@@ -63,7 +63,7 @@ public class DefaultStreamingRag implements StreamingRag<RagRequest, RagResponse
 
     protected Mono<String> mergeContexts(final List<RagContext> contexts) {
         return Flux.fromStream(contexts.parallelStream())
-                .map(ragContext -> String.join(StringUtil.POINT, ragContext.getKnowledge()))
-                .collect(Collectors.joining(StringUtil.POINT));
+                .map(ragContext -> String.join(ContentUtil.SENTENCE_SEPARATOR, ragContext.getKnowledge()))
+                .collect(Collectors.joining(ContentUtil.SENTENCE_SEPARATOR));
     }
 }

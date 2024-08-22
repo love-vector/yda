@@ -32,7 +32,10 @@ import ai.yda.framework.rag.retriever.filesystem.util.FileUtil;
 
 @Slf4j
 public class FilesystemService {
+
     private static final int CHUNK_MAX_LENGTH = 1000;
+
+    public FilesystemService() {}
 
     public List<Document> createChunkDocumentsFromFiles(final List<Path> filePathList) {
         return filePathList.parallelStream()
@@ -45,8 +48,7 @@ public class FilesystemService {
         var pdfContent = FileUtil.readPdf(filePath.toFile());
         var fileName = filePath.getFileName();
         log.debug("Processing file: {}", fileName);
-        var preprocessedContent = ContentUtil.preprocessContent(pdfContent);
-        return ContentUtil.splitContent(preprocessedContent, CHUNK_MAX_LENGTH).parallelStream()
+        return ContentUtil.preprocessAndSplitContent(pdfContent, CHUNK_MAX_LENGTH).parallelStream()
                 .map(documentChunk -> new Document(documentChunk, Map.of("fileName", fileName)))
                 .toList();
     }
