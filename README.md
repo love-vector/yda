@@ -46,9 +46,6 @@ For integrations and specific implementations, YDA leverages Java 17 to take adv
 - **Spring Framework:** YDA heavily integrates with the Spring Framework. To fully utilize YDA's capabilities, your project must be set up within a Spring-based environment.
 - **Vector Databases:** YDA leverages vector databases like Milvus for efficient data processing and retrieval.
 
-### Best Practices
-We recommend keeping your Java environment and dependencies up-to-date to ensure optimal performance and security. Given the importance of compatibility and security, staying current with the latest versions of Java and Spring Framework is highly advised.
-
 ### Compatibility and Configuration
 YDA works seamlessly with your platform's native tools and libraries. However, to fully leverage its capabilities, including the advanced data processing features, ensure that your environment is configured with the required dependencies, particularly those related to Spring and vector databases.
 
