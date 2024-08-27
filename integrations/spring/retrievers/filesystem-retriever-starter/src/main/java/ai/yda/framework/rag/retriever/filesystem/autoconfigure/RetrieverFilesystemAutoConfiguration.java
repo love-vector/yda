@@ -71,10 +71,10 @@ public class RetrieverFilesystemAutoConfiguration {
      * @param filesystemProperties       properties for configuring the {@link FilesystemRetriever}, including
      *                                   collectionName, topK, isProcessingEnabled, clearCollectionOnStartup and
      *                                   fileStoragePath settings.
-     * @param milvusProperties           properties for configuring the Milvus vector store.
-     * @param milvusClientProperties     properties for configuring the Milvus service client.
+     * @param milvusProperties           properties for configuring the Milvus Vector Store.
+     * @param milvusClientProperties     properties for configuring the Milvus Service Client.
      * @param openAiConnectionProperties properties for configuring the OpenAI connection.
-     * @param openAiEmbeddingProperties  properties for configuring the OpenAI embeddings.
+     * @param openAiEmbeddingProperties  properties for configuring the OpenAI Embeddings.
      * @return a fully configured {@link FilesystemRetriever} instance.
      * @throws Exception if an error occurs during initialization.
      */

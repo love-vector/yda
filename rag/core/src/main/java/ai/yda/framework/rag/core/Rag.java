@@ -24,10 +24,10 @@ import ai.yda.framework.rag.core.model.RagResponse;
 
 /**
  * Provides a generic mechanism that coordinates the retrieval, augmentation, and generation processes to produce a
- * final response based on the user's query.
+ * final Response based on the User Request.
  *
- * @param <REQUEST>  the generic type of the request from the user, which must extend {@link RagRequest}.
- * @param <RESPONSE> the generic type of the response generated based on the given request, which must extend
+ * @param <REQUEST>  the generic type of the Request from the User, which must extend {@link RagRequest}.
+ * @param <RESPONSE> the generic type of the Response generated based on the given Request, which must extend
  *                   {@link RagResponse}.
  * @author Nikita Litvinov
  * @see StreamingRag
@@ -38,10 +38,10 @@ import ai.yda.framework.rag.core.model.RagResponse;
 public interface Rag<REQUEST extends RagRequest, RESPONSE extends RagResponse> {
 
     /**
-     * Performs a Retrieval-Augmented Generation (RAG) operation based on the provided request.
+     * Performs a Retrieval-Augmented Generation (RAG) operation based on the provided Request.
      *
-     * @param request the request query from the user.
-     * @return the response object containing the results of the RAG operation.
+     * @param request the Request query from the User.
+     * @return the Response object containing the results of the RAG operation.
      */
     RESPONSE doRag(REQUEST request);
 }

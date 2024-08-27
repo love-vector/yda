@@ -54,11 +54,11 @@ public final class MilvusVectorStoreUtil {
     /**
      * Constructs a new {@link MilvusVectorStore} instance with the specified properties and configurations.
      *
-     * @param retrieverProperties        the properties related to the retriever configuration.
+     * @param retrieverProperties        the properties related to the Retriever configuration.
      * @param milvusProperties           the properties specific to Milvus configuration.
-     * @param milvusClientProperties     the properties for Milvus service client.
+     * @param milvusClientProperties     the properties for Milvus Service Client.
      * @param openAiConnectionProperties the properties for connecting to OpenAI API.
-     * @param openAiEmbeddingProperties  the properties related to OpenAI embedding model.
+     * @param openAiEmbeddingProperties  the properties related to OpenAI Embedding Model.
      * @return a configured {@link MilvusVectorStore} instance.
      */
     public static MilvusVectorStore createMilvusVectorStore(

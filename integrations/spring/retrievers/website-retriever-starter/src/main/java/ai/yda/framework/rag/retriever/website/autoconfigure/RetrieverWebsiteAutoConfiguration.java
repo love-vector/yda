@@ -70,10 +70,10 @@ public class RetrieverWebsiteAutoConfiguration {
      *
      * @param websiteProperties          properties for configuring the {@link RetrieverWebsiteProperties}, including
      *                                   file storage path, topK value, and processing enablement.
-     * @param milvusProperties           properties for configuring the Milvus vector store.
-     * @param milvusClientProperties     properties for configuring the Milvus service client.
+     * @param milvusProperties           properties for configuring the Milvus Vector Store.
+     * @param milvusClientProperties     properties for configuring the Milvus Service Client.
      * @param openAiConnectionProperties properties for configuring the OpenAI connection.
-     * @param openAiEmbeddingProperties  properties for configuring the OpenAI embeddings.
+     * @param openAiEmbeddingProperties  properties for configuring the OpenAI Embeddings.
      * @return a fully configured {@link WebsiteRetriever} instance.
      * @throws Exception if an error occurs during initialization.
      */

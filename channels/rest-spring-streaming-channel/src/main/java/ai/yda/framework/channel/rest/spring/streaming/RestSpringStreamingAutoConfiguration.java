@@ -28,8 +28,8 @@ import ai.yda.framework.channel.rest.spring.streaming.session.RestReactiveSessio
 import ai.yda.framework.channel.rest.spring.streaming.web.RestStreamingChannel;
 
 /**
- * Contains an autoconfiguration for the streaming REST channel in the Spring application. This class is responsible for
- * automatically configuring the necessary beans and components  required for the REST channel, security and session
+ * Contains an autoconfiguration for the streaming REST Channel in the Spring application. This class is responsible for
+ * automatically configuring the necessary beans and components  required for the REST Channel, security and session
  * management. It simplifies the setup by ensuring that all the required configurations, properties, and components are
  * loaded and initialized without needing explicit configuration by the developer. It is loaded, initialized and
  * imported without developer's interference

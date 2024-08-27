@@ -22,7 +22,7 @@ package ai.yda.framework.session.core;
 import java.util.Optional;
 
 /**
- * Defines methods for storing and retrieving data associated with a session using a key-value store.
+ * Defines methods for storing and retrieving data associated with a Session using a key-value store.
  *
  * @author Dmitry Marchuk
  * @author Nikita Litvinov
@@ -33,19 +33,19 @@ import java.util.Optional;
 public interface SessionProvider {
 
     /**
-     * Stores a value in the session associated with the specified key.
+     * Stores a value in the Session associated with the specified key.
      *
      * @param key   the key under which the value is to be stored.
-     * @param value the value to be stored in the session.
+     * @param value the value to be stored in the Session.
      */
     void put(String key, Object value);
 
     /**
-     * Retrieves the value associated with the specified key from the session.
+     * Retrieves the value associated with the specified key from the Session.
      *
      * @param key the key whose associated value is to be retrieved.
      * @return an {@link Optional} containing the value associated with the key, or an empty {@link Optional} if the key
-     * does not exist in the session
+     * does not exist in the Session
      */
     Optional<Object> get(String key);
 }

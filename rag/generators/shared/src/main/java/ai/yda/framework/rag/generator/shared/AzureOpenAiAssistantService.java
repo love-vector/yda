@@ -46,10 +46,10 @@ import reactor.core.scheduler.Schedulers;
 
 /**
  * Provides methods to interact with the Azure OpenAI Assistant API. It facilitates creating and managing conversation
- * threads, sending messages, and retrieving responses from the assistant service.
+ * Threads, sending messages, and retrieving Responses from the Assistant service.
  * <p>
- * This service uses an {@link AssistantsClient} to perform operations such as creating threads, adding messages,
- * and running assistant tasks. It also supports streaming responses for real-time updates.
+ * This service uses an {@link AssistantsClient} to perform operations such as creating Threads, adding messages,
+ * and running Assistant tasks. It also supports streaming Responses for real-time updates.
  * </p>
  *
  * @author Nikita Litvinov
@@ -75,10 +75,10 @@ public class AzureOpenAiAssistantService {
     }
 
     /**
-     * Creates a new thread in the Azure OpenAI Assistant service with an initial message.
+     * Creates a new Thread in the Azure OpenAI Assistant Service with an initial message.
      *
-     * @param content the content of the initial message to include in the thread.
-     * @return the {@link AssistantThread} representing the created thread.
+     * @param content the content of the initial message to include in the Thread.
+     * @return the {@link AssistantThread} representing the created Thread.
      */
     public AssistantThread createThread(final String content) {
         var threadMessageOptions = new ThreadMessageOptions(MessageRole.USER, content);
@@ -87,9 +87,9 @@ public class AzureOpenAiAssistantService {
     }
 
     /**
-     * Adds a message to an existing thread in the Azure OpenAI Assistant service.
+     * Adds a message to an existing Thread in the Azure OpenAI Assistant Service.
      *
-     * @param threadId the ID of the thread to which the message should be added.
+     * @param threadId the ID of the Thread to which the message should be added.
      * @param content  the content of the message to add.
      */
     public void addMessageToThread(final String threadId, final String content) {
@@ -98,12 +98,12 @@ public class AzureOpenAiAssistantService {
     }
 
     /**
-     * Creates a run for a given thread and waits for the response.
+     * Creates a run for a given Thread and waits for the Response.
      *
-     * @param threadId    the ID of the thread in which to create the run.
-     * @param assistantId the ID of the assistant to use for the run.
+     * @param threadId    the ID of the Thread in which to create the run.
+     * @param assistantId the ID of the Assistant to use for the run.
      * @param context     additional instructions to include in the run.
-     * @return the content of the last message in the thread after the run completes.
+     * @return the content of the last message in the Thread after the run completes.
      */
     public String createRunAndWaitForResponse(final String threadId, final String assistantId, final String context) {
         var createRunOptions = new CreateRunOptions(assistantId).setAdditionalInstructions(context);
@@ -113,12 +113,12 @@ public class AzureOpenAiAssistantService {
     }
 
     /**
-     * Streams responses from the Azure OpenAI Assistant service for a given run.
+     * Streams responses from the Azure OpenAI Assistant Service for a given run.
      *
-     * @param threadId    the ID of the thread for which to stream responses.
-     * @param assistantId the ID of the assistant to use for the run.
+     * @param threadId    the ID of the Thread for which to stream Responses.
+     * @param assistantId the ID of the Assistant to use for the run.
      * @param context     additional instructions to include in the run.
-     * @return a {@link Flux stream} of response content updates as they are received.
+     * @return a {@link Flux stream} of Response content updates as they are received.
      */
     public Flux<String> createRunStream(final String threadId, final String assistantId, final String context) {
         var createRunOptions = new CreateRunOptions(assistantId).setAdditionalInstructions(context);
@@ -129,13 +129,13 @@ public class AzureOpenAiAssistantService {
     }
 
     /**
-     * Waits for the completion of a given thread run. It periodically polls the status of the thread run until it is
-     * no longer in the QUEUED or IN_PROGRESS states. The thread run is updated with the final
+     * Waits for the completion of a given Thread run. It periodically polls the status of the Thread run until it is
+     * no longer in the QUEUED or IN_PROGRESS states. The Thread run is updated with the final
      * {@code progressThreadRun} once the polling completes.
      *
      * @param threadRun the initial {@link ThreadRun} object representing the run to be monitored.
      * @return the updated {@link ThreadRun} object once the run has completed.
-     * @throws RuntimeException if an error occurs while waiting for the thread run to finish.
+     * @throws RuntimeException if an error occurs while waiting for the Thread run to finish.
      */
     private ThreadRun waitForRunToFinish(final ThreadRun threadRun) {
         var atomicThreadRun = new AtomicReference<>(threadRun);
@@ -167,10 +167,10 @@ public class AzureOpenAiAssistantService {
     }
 
     /**
-     * Queries all messages in the specified thread and returns the content of the most recent message.
+     * Queries all messages in the specified Thread and returns the content of the most recent message.
      *
-     * @param threadId the ID of the thread from which to retrieve the last message.
-     * @return the content of the last message in the thread.
+     * @param threadId the ID of the Thread from which to retrieve the last message.
+     * @return the content of the last message in the Thread.
      */
     private String getLastMessage(final String threadId) {
         var messages = assistantsClient.listMessages(threadId);

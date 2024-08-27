@@ -25,9 +25,9 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * Provides configuration properties for OpenAi assistant generator. These properties can be customized through the
+ * Provides configuration properties for OpenAi Assistant Generator. These properties can be customized through the
  * application’s external configuration, such as a properties file, YAML file, or environment variables. The properties
- * include assistantId settings.
+ * include Assistant id settings.
  * <p>
  * The properties are prefixed with {@link #CONFIG_PREFIX} and can be customized by defining values under this prefix
  * in the external configuration.
@@ -54,8 +54,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class OpenAiAssistantGeneratorProperties {
 
     /**
-     * The configuration prefix used to reference properties related to this channel in application configurations.
-     * This prefix is used for binding properties within the particular namespace.
+     * The configuration prefix used to reference properties related to the Assistant Generator in application
+     * configurations. This prefix is used for binding properties within the particular namespace.
      */
     public static final String CONFIG_PREFIX = "ai.yda.framework.rag.generator.assistant.openai";
 

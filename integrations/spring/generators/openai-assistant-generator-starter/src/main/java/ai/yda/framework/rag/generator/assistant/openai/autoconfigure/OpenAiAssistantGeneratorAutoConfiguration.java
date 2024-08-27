@@ -53,13 +53,13 @@ public class OpenAiAssistantGeneratorAutoConfiguration {
 
     /**
      * Defines an {@link OpenAiAssistantGenerator} bean. This bean is configured using the provided properties for the
-     * assistant generator and the OpenAI connection. The generator requires an API key and an assistant ID, which are
-     * retrieved from the external configuration, and a {@link SessionProvider} for managing user sessions.
+     * Assistant Generator and the OpenAI connection. The Generator requires an API key and an Assistant ID, which are
+     * retrieved from the external configuration, and a {@link SessionProvider} for managing user Sessions.
      *
-     * @param assistantGeneratorProperties the properties related to the assistant generator, providing assistant ID
+     * @param assistantGeneratorProperties the properties related to the Assistant Generator, providing Assistant ID
      *                                     configuration.
      * @param openAiProperties             the properties related to the OpenAI connection, including the API key.
-     * @param sessionProvider              the session provider responsible for managing user sessions.
+     * @param sessionProvider              the Session Provider responsible for managing User Sessions.
      * @return a configured {@link OpenAiAssistantGenerator} bean ready for use in the application.
      */
     @Bean

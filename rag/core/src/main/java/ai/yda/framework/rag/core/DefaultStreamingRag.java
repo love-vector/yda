@@ -16,16 +16,8 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.rag.core;
-
-import java.util.List;
-import java.util.stream.Collectors;
-
-import lombok.AccessLevel;
-import lombok.Getter;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import ai.yda.framework.rag.core.augmenter.Augmenter;
 import ai.yda.framework.rag.core.generator.StreamingGenerator;
@@ -33,15 +25,23 @@ import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.model.RagResponse;
 import ai.yda.framework.rag.core.retriever.Retriever;
-import ai.yda.framework.rag.core.util.StringUtil;
+
+import lombok.AccessLevel;
+import lombok.Getter;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import ai.yda.framework.rag.core.util.ContentUtil;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Provides a default mechanism for executing a Retrieval-Augmented Generation (RAG) process in a streaming manner.
  * <p>
- * This class is useful when responses need to be generated progressively, such as when dealing with large amounts of
- * data or when the response is expected to be produced in chunks. The StreamingRag process is executed by retrieving
- * relevant contexts using a list of retrievers, augmenting these contexts using a list of augmenters, and generating a
- * response using a generator in a streaming manner.
+ * This class is useful when Responses need to be generated progressively, such as when dealing with large amounts of
+ * data or when the Response is expected to be produced in chunks. The streaming rag process is executed by retrieving
+ * relevant Contexts using a list of Retrievers, augmenting these Contexts using a list of Augmenters, and generating a
+ * Response using a Generator in a streaming manner.
  * </p>
  *
  * @author Nikita Litvinov
@@ -79,7 +79,12 @@ public class DefaultStreamingRag implements StreamingRag<RagRequest, RagResponse
     }
 
     /**
-     * {@inheritDoc}
+     * Executes the Retrieval-Augmented Generation (RAG) process by retrieving relevant Contexts using a list of
+     * Retrievers, augmenting these Contexts using a list of Augmenters, and generating a Response using a streaming
+     * Generator.
+     *
+     * @param request the {@link RagRequest} object from the User.
+     * @return a {@link Flux stream} of {@link RagResponse} objects containing the results of the RAG operation.
      */
     @Override
     public Flux<RagResponse> streamRag(final RagRequest request) {
@@ -106,7 +111,7 @@ public class DefaultStreamingRag implements StreamingRag<RagRequest, RagResponse
      */
     protected Mono<String> mergeContexts(final List<RagContext> contexts) {
         return Flux.fromStream(contexts.parallelStream())
-                .map(ragContext -> String.join(StringUtil.POINT, ragContext.getKnowledge()))
-                .collect(Collectors.joining(StringUtil.POINT));
+                .map(ragContext -> String.join(ContentUtil.SENTENCE_SEPARATOR, ragContext.getKnowledge()))
+                .collect(Collectors.joining(ContentUtil.SENTENCE_SEPARATOR));
     }
 }

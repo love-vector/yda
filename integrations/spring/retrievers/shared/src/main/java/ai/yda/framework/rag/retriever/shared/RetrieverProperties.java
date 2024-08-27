@@ -26,7 +26,7 @@ import org.springframework.ai.vectorstore.MilvusVectorStore;
 import org.springframework.ai.vectorstore.SearchRequest;
 
 /**
- * Serves as the parent class for properties related to the retriever configuration. It provides common settings such as
+ * Serves as the parent class for properties related to the Retriever configuration. It provides common settings such as
  * collection name, top K search results, processing enablement, and whether to clear the collection on startup.
  */
 @Setter

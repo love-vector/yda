@@ -16,7 +16,7 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.rag.generator.assistant.openai.streaming.autoconfigure;
 
 import lombok.Getter;
@@ -25,7 +25,7 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * Provides configuration properties for streaming OpenAi assistant generator. These properties can be customized
+ * Provides configuration properties for streaming OpenAi Assistant Generator. These properties can be customized
  * through the application’s external configuration, such as a properties file, YAML file, or environment variables. The
  * properties include assistantId settings.
  * <p>
@@ -54,8 +54,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class OpenAiAssistantStreamingGeneratorProperties {
 
     /**
-     * The configuration prefix used to reference properties related to this channel in application configurations.
-     * This prefix is used for binding properties within the particular namespace.
+     * The configuration prefix used to reference properties related to the streaming Assistant Generator in
+     * application configurations. This prefix is used for binding properties within the particular namespace.
      */
     public static final String CONFIG_PREFIX = "ai.yda.framework.rag.generator.assistant.openai.streaming";
 
@@ -64,5 +64,6 @@ public class OpenAiAssistantStreamingGeneratorProperties {
     /**
      * Default constructor for {@link OpenAiAssistantStreamingGeneratorProperties}.
      */
-    public OpenAiAssistantStreamingGeneratorProperties() {}
+    public OpenAiAssistantStreamingGeneratorProperties() {
+    }
 }

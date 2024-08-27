@@ -16,25 +16,24 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.rag.core.generator;
-
-import reactor.core.publisher.Flux;
 
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.model.RagResponse;
+import reactor.core.publisher.Flux;
 
 /**
- * Provides a generic mechanism that takes the user's query and the retrieved context to produce a final response,
+ * Provides a generic mechanism that takes the User's Request and the retrieved Context to produce a final Response,
  * often by leveraging a language model or other generative mechanism.
  * <p>
- * This interface allow to generate responses in a streaming manner and is useful when responses need to be generated
- * progressively, such as when dealing with large amounts of data or when the response is expected to be produced in
+ * This interface allow to generate responses in a streaming manner and is useful when Responses need to be generated
+ * progressively, such as when dealing with large amounts of data or when the Response is expected to be produced in
  * chunks.
  * </p>
  *
- * @param <REQUEST>  the generic type of the request from the user, which must extend {@link RagRequest}.
- * @param <RESPONSE> the generic type of the response generated based on the given request, which must extend
+ * @param <REQUEST>  the generic type of the Request from the User, which must extend {@link RagRequest}.
+ * @param <RESPONSE> the generic type of the Response generated based on the given Request, which must extend
  *                   {@link RagResponse}.
  * @author Nikita Litvinov
  * @see RagRequest
@@ -45,14 +44,14 @@ import ai.yda.framework.rag.core.model.RagResponse;
 public interface StreamingGenerator<REQUEST extends RagRequest, RESPONSE extends RagResponse> {
 
     /**
-     * Streams responses based on the provided request and context. The method returns a Flux that emits a sequence of
-     * responses, allowing for the processing of data in a non-blocking and incremental manner.
+     * Streams Responses based on the provided Request and Context. The method returns a Flux that emits a sequence of
+     * Responses, allowing for the processing of data in a non-blocking and incremental manner.
      *
-     * @param request the request object that contains query data from the user.
-     * @param context the context object that helps to better understand or interpret a request or question that a user
+     * @param request the Request object that contains query data from the User.
+     * @param context the Context object that helps to better understand or interpret a Request that the User
      *                provides.
-     * @return a {@link Flux stream} of responses generated as a result of processing the request and context. Each
-     * response in the Flux represents a part of the overall response, allowing for the incremental delivery of results.
+     * @return a {@link Flux stream} of Responses generated as a result of processing the Request and Context. Each
+     * response in the Flux represents a part of the overall Response, allowing for the incremental delivery of results.
      */
     Flux<RESPONSE> streamGeneration(REQUEST request, String context);
 }

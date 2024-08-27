@@ -22,7 +22,7 @@ package ai.yda.framework.session.core;
 import reactor.core.publisher.Mono;
 
 /**
- * Defines methods for storing and retrieving data associated with a reactive session using a key-value store.
+ * Defines methods for storing and retrieving data associated with a reactive Session using a key-value store.
  *
  * @author Nikita Litvinov
  * @see SessionProvider
@@ -31,20 +31,20 @@ import reactor.core.publisher.Mono;
 public interface ReactiveSessionProvider {
 
     /**
-     * Stores a value in the session associated with the specified key.
+     * Stores a value in the Session associated with the specified key.
      *
      * @param key   the key under which the value is to be stored.
-     * @param value the value to be stored in the session.
+     * @param value the value to be stored in the Session.
      * @return a {@link Mono} that completes when the value is successfully stored.
      */
     Mono<Void> put(String key, Object value);
 
     /**
-     * Retrieves the value associated with the specified key from the session.
+     * Retrieves the value associated with the specified key from the Session.
      *
      * @param key the key whose associated value is to be retrieved.
      * @return a {@link Mono} that emits the value associated with the key, or completes without emitting a value
-     * if the key does not exist in the session.
+     * if the key does not exist in the Session.
      */
     Mono<Object> get(String key);
 }

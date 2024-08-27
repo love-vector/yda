@@ -33,7 +33,7 @@ import org.springframework.security.web.authentication.AnonymousAuthenticationFi
 import ai.yda.framework.channel.rest.spring.RestSpringProperties;
 
 /**
- * This is a Spring Security configuration that sets up security settings for the synchronized REST channel.
+ * This is a Spring Security configuration that sets up security settings for the synchronized REST Channel.
  *
  * @author Nikita Litvinov
  * @see RestSpringProperties
@@ -49,10 +49,10 @@ public class SecurityConfiguration {
     public SecurityConfiguration() {}
 
     /**
-     * This channel security configuration is used when 'security-token' property is configured.
+     * This Channel security configuration is used when 'security-token' property is configured.
      * <p>
      * Defines security filters, user authentication mechanisms, and authorization rules to control access to the
-     * channel. This configuration includes settings for {@link TokenAuthenticationFilter}, HTTP security configurations
+     * Channel. This configuration includes settings for {@link TokenAuthenticationFilter}, HTTP security configurations
      * such as disabling CORS, disabling CSRF, and setting the session management creation policy to always. It also
      * specifies authorization rules: requests to the endpoint are authorized and require authentication, while all
      * other requests are not authorized and do not require authentication.
@@ -82,7 +82,7 @@ public class SecurityConfiguration {
     }
 
     /**
-     * This channel security configuration is used when 'security-token' property is not configured.
+     * This Channel security configuration is used when 'security-token' property is not configured.
      * <p>
      * This configuration disables CSRF protection and CORS, and sets up authorization rules such that all HTTP requests
      * are permitted without authentication.

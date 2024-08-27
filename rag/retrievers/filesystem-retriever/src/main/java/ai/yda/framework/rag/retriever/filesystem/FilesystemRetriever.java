@@ -16,7 +16,7 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.rag.retriever.filesystem;
 
 import java.io.IOException;
@@ -39,8 +39,8 @@ import ai.yda.framework.rag.core.retriever.Retriever;
 import ai.yda.framework.rag.retriever.filesystem.service.FilesystemService;
 
 /**
- * Retrieves filesystem context data from a vector store based on a query. It processes files stored in a specified
- * directory and uses a vector store to perform similarity searches. If file processing is enabled, it processes files
+ * Retrieves filesystem Context data from a Vector Store based on a Request. It processes files stored in a specified
+ * directory and uses a Vector Store to perform similarity searches. If file processing is enabled, it processes files
  * in the storage folder during initialization.
  *
  * @author Dmitry Marchuk
@@ -52,7 +52,7 @@ import ai.yda.framework.rag.retriever.filesystem.service.FilesystemService;
 @Slf4j
 public class FilesystemRetriever implements Retriever<RagRequest, RagContext> {
     /**
-     * The vector store used to retrieve context data for user request through similarity search.
+     * The Vector Store used to retrieve Context data for User Request through similarity search.
      */
     private final VectorStore vectorStore;
 
@@ -62,7 +62,7 @@ public class FilesystemRetriever implements Retriever<RagRequest, RagContext> {
     private final Path fileStoragePath;
 
     /**
-     * The number of top results to retrieve from the vector store.
+     * The number of top results to retrieve from the Vector Store.
      */
     private final Integer topK;
 
@@ -73,10 +73,10 @@ public class FilesystemRetriever implements Retriever<RagRequest, RagContext> {
      * isProcessingEnabled parameters.
      *
      * @param vectorStore         the {@link VectorStore} instance used for storing and retrieving vector data.
-     *                            This parameter cannot be {@code null} and is used to interact with the vector store.
+     *                            This parameter cannot be {@code null} and is used to interact with the Vector Store.
      * @param fileStoragePath     the path to the directory where files are stored. This parameter cannot be
-     *                            {@code null} and is used to process and store files to the vector store.
-     * @param topK                the number of top results to retrieve from the vector store. This value must be a
+     *                            {@code null} and is used to process and store files to the Vector Store.
+     * @param topK                the number of top results to retrieve from the Vector Store. This value must be a
      *                            positive integer.
      * @param isProcessingEnabled a {@link Boolean} flag indicating whether file processing should be enabled during
      *                            initialization. If {@code true}, the method {@link #processFileStorageFolder()} will
@@ -101,10 +101,10 @@ public class FilesystemRetriever implements Retriever<RagRequest, RagContext> {
     }
 
     /**
-     * Retrieves context data based on the given request by performing a similarity search in the vector store.
+     * Retrieves Context data based on the given Request by performing a similarity search in the Vector Store.
      *
-     * @param request the {@link RagRequest} object containing the user query for the similarity search.
-     * @return a {@link RagContext} object containing the knowledge obtained from the similarity search.
+     * @param request the {@link RagRequest} object containing the User query for the similarity search.
+     * @return a {@link RagContext} object containing the Knowledge obtained from the similarity search.
      */
     @Override
     public RagContext retrieve(final RagRequest request) {

@@ -25,8 +25,8 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * Provides configuration properties for the REST channel. This class holds the configurable properties used in the REST
- * channel. These properties can be customized through the application’s external configuration, such as a properties
+ * Provides configuration properties for the REST Channel. This class holds the configurable properties used in the REST
+ * Channel. These properties can be customized through the application’s external configuration, such as a properties
  * file, YAML file, or environment variables. The properties include settings like the endpoint's relative path and
  * other configurations relevant to the REST API.
  * <p>
@@ -55,7 +55,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class RestSpringProperties {
 
     /**
-     * The configuration prefix used to reference properties related to this channel in application configurations.
+     * The configuration prefix used to reference properties related to this Channel in application configurations.
      * This prefix is used for binding properties within the particular namespace.
      */
     public static final String CONFIG_PREFIX = "ai.yda.framework.channel.rest.spring";

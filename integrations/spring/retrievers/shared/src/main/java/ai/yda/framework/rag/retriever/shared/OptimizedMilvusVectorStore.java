@@ -62,9 +62,9 @@ public class OptimizedMilvusVectorStore extends MilvusVectorStore {
     /**
      * Constructs a new {@link  OptimizedMilvusVectorStore} instance with the specified parameters.
      *
-     * @param milvusClient             the client for interacting with the Milvus service.
-     * @param embeddingModel           the model used for embedding document content.
-     * @param config                   the configuration for the Milvus vector store.
+     * @param milvusClient             the Client for interacting with the Milvus Service.
+     * @param embeddingModel           the Model used for Embedding document content.
+     * @param config                   the configuration for the Milvus Vector Store.
      * @param initializeSchema         whether to initialize the schema in the database.
      * @param collectionName           the name of the collection in the Milvus database.
      * @param databaseName             the name of the database in Milvus.
@@ -129,7 +129,7 @@ public class OptimizedMilvusVectorStore extends MilvusVectorStore {
     }
 
     /**
-     * Initializes the vector store after properties are set. Optionally clears the collection on startup if configured
+     * Initializes the Vector Store after properties are set. Optionally clears the collection on startup if configured
      * to do so.
      *
      * @throws Exception if an error occurs during initialization.

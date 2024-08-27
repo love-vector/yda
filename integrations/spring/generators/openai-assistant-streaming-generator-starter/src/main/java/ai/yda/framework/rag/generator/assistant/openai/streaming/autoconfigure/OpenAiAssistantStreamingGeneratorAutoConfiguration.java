@@ -29,7 +29,7 @@ import ai.yda.framework.session.core.ReactiveSessionProvider;
 
 /**
  * Autoconfiguration class for setting up an {@link OpenAiAssistantStreamingGenerator} bean. This class automatically
- * configures the necessary components for integrating with the OpenAI API to create a streaming assistant generator.
+ * configures the necessary components for integrating with the OpenAI API to create a streaming Assistant Generator.
  * The configuration is based on properties defined in the external configuration files (e.g., application.properties or
  * application.yml) under {@link OpenAiConnectionProperties#CONFIG_PREFIX} and
  * {@link OpenAiAssistantStreamingGeneratorProperties#CONFIG_PREFIX} namespaces.
@@ -52,14 +52,14 @@ public class OpenAiAssistantStreamingGeneratorAutoConfiguration {
 
     /**
      * Defines an {@link OpenAiAssistantStreamingGenerator} bean. This bean is configured using the provided properties
-     * for the streaming assistant generator and the OpenAI connection. The generator requires an API key and an
-     * assistant ID, which are retrieved from the external configuration, and a {@link ReactiveSessionProvider} for
-     * managing user sessions.
+     * for the streaming Assistant Generator and the OpenAI connection. The generator requires an API key and an
+     * Assistant ID, which are retrieved from the external configuration, and a {@link ReactiveSessionProvider} for
+     * managing User Sessions.
      *
-     * @param assistantGeneratorProperties the properties related to the assistant generator, providing assistant ID
+     * @param assistantGeneratorProperties the properties related to the Assistant Generator, providing Assistant ID
      *                                     configuration.
      * @param openAiProperties             the properties related to the OpenAI connection, including the API key.
-     * @param sessionProvider              the session provider responsible for managing user sessions.
+     * @param sessionProvider              the Session Provider responsible for managing User Sessions.
      * @return a configured {@link OpenAiAssistantStreamingGenerator} bean ready for use in the application.
      */
     @Bean

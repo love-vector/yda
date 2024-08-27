@@ -35,8 +35,8 @@ import ai.yda.framework.rag.core.retriever.Retriever;
 /**
  * Autoconfiguration class for setting up a {@link DefaultRag} bean. This class provides the automatic configuration for
  * a {@link DefaultRag} instance, which is a key component in the Retrieval-Augmented Generation (RAG) framework. The
- * {@link DefaultRag} is configured with a list of retrievers that fetch relevant context, augmenters that enhance
- * the context, and a generator that produces the final response based on the augmented context.
+ * {@link DefaultRag} is configured with a list of Retrievers that fetch relevant Context, Augmenters that enhance
+ * the Context, and a Generator that produces the final Response based on the augmented Context.
  *
  * @author Nikita Litvinov
  * @see DefaultRag
@@ -55,11 +55,11 @@ public class RagAutoConfiguration {
 
     /**
      * Defines a {@link DefaultRag} bean, which is configured with the provided lists of {@link Retriever} and
-     * {@link Augmenter}, along with the {@link Generator} used to generate responses.
+     * {@link Augmenter}, along with the {@link Generator} used to generate Responses.
      *
-     * @param retrievers the list of {@link Retriever} beans used for retrieving context based on the request.
-     * @param augmenters the list of {@link Augmenter} beans used for enhancing the retrieved context.
-     * @param generator  the {@link Generator} bean used for generating responses based on the augmented context.
+     * @param retrievers the list of {@link Retriever} beans used for retrieving Context based on the Request.
+     * @param augmenters the list of {@link Augmenter} beans used for enhancing the retrieved Context.
+     * @param generator  the {@link Generator} bean used for generating Responses based on the augmented Context.
      * @return a configured {@link DefaultRag} instance.
      */
     @Bean

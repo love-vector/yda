@@ -16,7 +16,7 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.core.assistant;
 
 import ai.yda.framework.rag.core.Rag;
@@ -24,8 +24,8 @@ import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.model.RagResponse;
 
 /**
- * Represents an RAG assistant that processes a request and returns a response. This class delegates the request
- * processing to the {@link  Rag} instance provided via constructor injection.
+ * Represents a RAG Assistant that processes a Request and returns a Response. This class delegates the Request
+ * processing to the {@link Rag} instance provided via constructor injection.
  *
  * @author Nikita Litvinov
  * @see Rag

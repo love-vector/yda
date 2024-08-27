@@ -26,8 +26,10 @@ import org.springframework.web.server.WebSession;
 
 import ai.yda.framework.session.core.ReactiveSessionProvider;
 
+import java.util.Optional;
+
 /**
- * Provides methods for storing and retrieving data associated with a session using a key-value store  within a REST
+ * Provides methods for storing and retrieving data associated with a Session using a key-value store  within a REST
  * context in a reactive manner.
  *
  * @author Nikita Litvinov
@@ -41,6 +43,12 @@ public class RestReactiveSessionProvider implements ReactiveSessionProvider {
      */
     public RestReactiveSessionProvider() {}
 
+    /**
+     * Stores an object in the Session with the specified key.
+     *
+     * @param key   the key with which the object is to be associated.
+     * @param value the object to be stored in the Session.
+     */
     @Override
     public Mono<Void> put(final String key, final Object value) {
         return Mono.deferContextual(contextView -> {
@@ -50,6 +58,13 @@ public class RestReactiveSessionProvider implements ReactiveSessionProvider {
         });
     }
 
+    /**
+     * Retrieves an object from the Session associated with the specified key.
+     *
+     * @param key the key whose associated value is to be retrieved.
+     * @return an {@link Mono<Object>} containing the value associated with the key, or an empty {@link Mono} if the key
+     * does not exist in the Session.
+     */
     @Override
     public Mono<Object> get(final String key) {
         return Mono.deferContextual(contextView -> {

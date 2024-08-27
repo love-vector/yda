@@ -16,7 +16,7 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.core.assistant;
 
 import reactor.core.publisher.Flux;
@@ -26,11 +26,11 @@ import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.model.RagResponse;
 
 /**
- * Represents a streaming RAG assistant that processes a request and returns a response in a streaming manner. This
- * class delegates the request processing to the {@link  StreamingRag} instance provided via constructor injection.
+ * Represents a streaming RAG Assistant that processes a Request and returns a Response in a streaming manner. This
+ * class delegates the Request processing to the {@link  StreamingRag} instance provided via constructor injection.
  * <p>
- * This class is useful when responses need to be generated progressively, such as when dealing with large amounts of
- * data or when the response is expected to be produced in chunks.
+ * This class is useful when Responses need to be generated progressively, such as when dealing with large amounts of
+ * data or when the Response is expected to be produced in chunks.
  * </p>
  *
  * @author Nikita Litvinov

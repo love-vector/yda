@@ -28,8 +28,8 @@ import ai.yda.framework.channel.rest.spring.session.RestSessionProvider;
 import ai.yda.framework.channel.rest.spring.web.RestChannel;
 
 /**
- * Contains an autoconfiguration for the REST channel in the Spring application. This class is responsible for
- * automatically configuring the necessary beans and components for the REST channel, security and session management.
+ * Contains an autoconfiguration for the REST Channel in the Spring application. This class is responsible for
+ * automatically configuring the necessary beans and components for the REST Channel, security and session management.
  * It simplifies the setup by ensuring that all the required configurations, properties, and components are loaded and
  * initialized without needing explicit configuration by the developer. It is loaded, initialized and imported without
  * developer's interference

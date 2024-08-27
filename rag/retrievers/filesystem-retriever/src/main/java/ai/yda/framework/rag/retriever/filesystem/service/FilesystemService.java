@@ -31,8 +31,8 @@ import ai.yda.framework.rag.core.util.ContentUtil;
 import ai.yda.framework.rag.retriever.filesystem.util.FileUtil;
 
 /**
- * Provides methods to process files from the filesystem, specifically for creating chunked documents from PDF files.
- * This class handles the reading, preprocessing, and splitting of PDF files into smaller chunks, which are then
+ * Provides methods to process files from the filesystem, specifically for creating chunked documents from files.
+ * This class handles the reading, preprocessing, and splitting of files into smaller chunks, which are then
  * converted into {@link Document} objects. It is used to manage and transform file contents to facilitate further
  * processing or retrieval.
  *
@@ -82,8 +82,7 @@ public class FilesystemService {
         var pdfContent = FileUtil.readPdf(filePath.toFile());
         var fileName = filePath.getFileName();
         log.debug("Processing file: {}", fileName);
-        var preprocessedContent = ContentUtil.preprocessContent(pdfContent);
-        return ContentUtil.splitContent(preprocessedContent, CHUNK_MAX_LENGTH).parallelStream()
+        return ContentUtil.preprocessAndSplitContent(pdfContent, CHUNK_MAX_LENGTH).parallelStream()
                 .map(documentChunk -> new Document(documentChunk, Map.of("fileName", fileName)))
                 .toList();
     }

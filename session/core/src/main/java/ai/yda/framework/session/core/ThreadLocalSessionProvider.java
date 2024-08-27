@@ -16,7 +16,7 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.session.core;
 
 import java.util.HashMap;
@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Provides a way to store and retrieve session data that is specific to the current thread of execution. Each thread
+ * Provides a way to store and retrieve Session data that is specific to the current thread of execution. Each thread
  * has its own separate storage.
  *
  * @author Nikita Litvinov
@@ -39,14 +39,15 @@ public class ThreadLocalSessionProvider implements SessionProvider {
     /**
      * Default constructor for {@link ThreadLocalSessionProvider}.
      */
-    public ThreadLocalSessionProvider() {}
+    public ThreadLocalSessionProvider() {
+    }
 
     /**
-     * Stores a value associated with a specific key in the current thread's session storage. If the session storage
+     * Stores a value associated with a specific key in the current thread's Session storage. If the Session storage
      * for the current thread does not exist, a new {@link HashMap} will be created and associated with the thread.
      *
      * @param key   the key to associate with the value.
-     * @param value the value to store in the session.
+     * @param value the value to store in the Session.
      */
     @Override
     public void put(final String key, final Object value) {
@@ -59,7 +60,7 @@ public class ThreadLocalSessionProvider implements SessionProvider {
     }
 
     /**
-     * Retrieves a value associated with the specified key from the current thread's session storage. If the session
+     * Retrieves a value associated with the specified key from the current thread's Session storage. If the Session
      * storage for the current thread does not exist or does not contain the key, this method returns
      * an empty {@link Optional}.
      *

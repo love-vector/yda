@@ -26,14 +26,14 @@ import ai.yda.framework.rag.core.model.RagResponse;
 
 /**
  * Provides a generic mechanism that coordinates the retrieval, augmentation, and generation processes to produce a
- * final response based on the user's query in a streaming manner.
+ * final Response based on the User Request in a streaming manner.
  * <p>
- * This class is useful when responses need to be generated progressively, such as when dealing with large amounts of
- * data or when the response is expected to be produced in chunks.
+ * This class is useful when Responses need to be generated progressively, such as when dealing with large amounts of
+ * data or when the Response is expected to be produced in chunks.
  * </p>
  *
- * @param <REQUEST>  the generic type of the request from the user, which must extend {@link RagRequest}.
- * @param <RESPONSE> the generic type of the response generated based on the given request, which must extend
+ * @param <REQUEST>  the generic type of the Request from the User, which must extend {@link RagRequest}.
+ * @param <RESPONSE> the generic type of the Response generated based on the given Request, which must extend
  *                   {@link RagResponse}.
  * @author Nikita Litvinov
  * @see Rag
@@ -44,10 +44,10 @@ import ai.yda.framework.rag.core.model.RagResponse;
 public interface StreamingRag<REQUEST extends RagRequest, RESPONSE extends RagResponse> {
 
     /**
-     * Performs a Retrieval-Augmented Generation (RAG) operation based in a streaming manner on the provided request.
+     * Performs a Retrieval-Augmented Generation (RAG) operation in a streaming manner based on the provided Request.
      *
-     * @param request the request object containing the necessary information for performing the RAG operation.
-     * @return a {@link Flux stream} of response objects containing the results of the RAG operation.
+     * @param request the Request object containing the necessary information for performing the RAG operation.
+     * @return a {@link Flux stream} of Response objects containing the results of the RAG operation.
      */
     Flux<RESPONSE> streamRag(REQUEST request);
 }

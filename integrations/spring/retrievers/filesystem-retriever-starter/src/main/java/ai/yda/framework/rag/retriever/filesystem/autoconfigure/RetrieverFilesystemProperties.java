@@ -27,7 +27,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import ai.yda.framework.rag.retriever.shared.RetrieverProperties;
 
 /**
- * Provides configuration properties for filesystem retriever. These properties can be customized through the
+ * Provides configuration properties for filesystem Retriever. These properties can be customized through the
  * application’s external configuration, such as a properties file, YAML file, or environment variables. The
  * properties include collectionName, topK, isProcessingEnabled, clearCollectionOnStartup and fileStoragePath settings.
  * <p>
@@ -58,8 +58,8 @@ import ai.yda.framework.rag.retriever.shared.RetrieverProperties;
 public class RetrieverFilesystemProperties extends RetrieverProperties {
 
     /**
-     * The configuration prefix used to reference properties related to this channel in application configurations.
-     * This prefix is used for binding properties within the particular namespace.
+     * The configuration prefix used to reference properties related to the filesystem Retriever in application
+     * configurations. This prefix is used for binding properties within the particular namespace.
      */
     public static final String CONFIG_PREFIX = "ai.yda.framework.rag.retriever.filesystem";
 

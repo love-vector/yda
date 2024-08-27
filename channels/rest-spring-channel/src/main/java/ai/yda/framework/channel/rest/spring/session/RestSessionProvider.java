@@ -28,11 +28,11 @@ import org.springframework.stereotype.Component;
 import ai.yda.framework.session.core.SessionProvider;
 
 /**
- * Provides methods for storing and retrieving data associated with a session using a key-value store in the REST
+ * Provides methods for storing and retrieving data associated with a Session using a key-value store in the REST
  * context.
  * <p>
- * This component interacts with the {@link HttpSession} to manage session attributes. It provides methods to
- * add and retrieve objects from the session based on a key.
+ * This component interacts with the {@link HttpSession} to manage Session attributes. It provides methods to
+ * add and retrieve objects from the Session based on a key.
  * </p>
  *
  * @author Nikita Litvinov
@@ -46,17 +46,17 @@ public class RestSessionProvider implements SessionProvider {
     /**
      * Constructs a new {@link RestSessionProvider} instance with the specified {@link HttpSession}.
      *
-     * @param httpSession the {@link HttpSession} to be used for storing and retrieving session attributes.
+     * @param httpSession the {@link HttpSession} to be used for storing and retrieving Session attributes.
      */
     public RestSessionProvider(final HttpSession httpSession) {
         this.httpSession = httpSession;
     }
 
     /**
-     * Stores an object in the session with the specified key.
+     * Stores an object in the Session with the specified key.
      *
      * @param key   the key with which the object is to be associated.
-     * @param value the object to be stored in the session.
+     * @param value the object to be stored in the Session.
      */
     @Override
     public void put(final String key, final Object value) {
@@ -64,11 +64,11 @@ public class RestSessionProvider implements SessionProvider {
     }
 
     /**
-     * Retrieves an object from the session associated with the specified key.
+     * Retrieves an object from the Session associated with the specified key.
      *
      * @param key the key whose associated value is to be retrieved.
      * @return an {@link Optional} containing the value associated with the key, or an empty {@link Optional} if the key
-     * does not exist in the session.
+     * does not exist in the Session.
      */
     @Override
     public Optional<Object> get(final String key) {

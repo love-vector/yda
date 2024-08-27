@@ -23,7 +23,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 /**
- * Represents a request object that encapsulates the user's query.
+ * Represents a Request object that encapsulates the User's query.
  *
  * @author Dmitry Marchuk
  * @author Nikita Litvinov
@@ -34,14 +34,14 @@ import lombok.Getter;
 public class RagRequest {
 
     /**
-     * The query string provided by the user, which is used as input for the retrieval and generation processes.
+     * The query string provided by the User, which is used as input for the retrieval and generation processes.
      */
     private final String query;
 
     /**
-     * Constructs a new {@link RagRequest} instance with the user's query.
+     * Constructs a new {@link RagRequest} instance with the User's query.
      *
-     * @param query the request query from the user.
+     * @param query the Request query from the User.
      */
     public RagRequest(final String query) {
         this.query = query;
