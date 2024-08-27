@@ -20,7 +20,7 @@
 package ai.yda.framework.channel.core;
 
 /**
- * Provides a generic interface for implementing external access points to the Assistant.
+ * Provides a generic interface for implementing communication gateways to the Assistant.
  *
  * @param <REQUEST>  the generic type of the Request from the User.
  * @param <RESPONSE> the generic type of the Response that will be generated based on the given Request.

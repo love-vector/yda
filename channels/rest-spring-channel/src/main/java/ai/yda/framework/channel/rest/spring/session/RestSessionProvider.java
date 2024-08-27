@@ -16,65 +16,62 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.channel.rest.spring.session;
 
 import java.util.Optional;
 
-import org.springframework.security.core.context.SecurityContextHolder;
+import jakarta.servlet.http.HttpSession;
+
 import org.springframework.stereotype.Component;
 
-import ai.yda.framework.channel.shared.TokenAuthentication;
 import ai.yda.framework.session.core.SessionProvider;
 
 /**
  * Provides methods for storing and retrieving data associated with a Session using a key-value store in the REST
  * context.
+ * <p>
+ * This component interacts with the {@link HttpSession} to manage Session attributes. It provides methods to
+ * add and retrieve objects from the Session based on a key.
+ * </p>
  *
  * @author Nikita Litvinov
- * @see TokenAuthentication
  * @since 0.1.0
  */
 @Component
 public class RestSessionProvider implements SessionProvider {
 
+    private final HttpSession httpSession;
+
     /**
-     * Default constructor for {@link RestSessionProvider}.
+     * Constructs a new {@link RestSessionProvider} instance with the specified {@link HttpSession}.
+     *
+     * @param httpSession the {@link HttpSession} to be used for storing and retrieving Session attributes.
      */
-    public RestSessionProvider() {
+    public RestSessionProvider(final HttpSession httpSession) {
+        this.httpSession = httpSession;
     }
 
     /**
-     * Stores a Session attribute in the security context. This method retrieves the current authentication from the
-     * {@link SecurityContextHolder}. If the authentication is an instance of {@link TokenAuthentication}, the Session
-     * attribute is added to the attributes map of the token.
+     * Stores an object in the Session with the specified key.
      *
-     * @param key   the key under which the value is to be stored.
-     * @param value the value to be stored in the Session.
+     * @param key   the key with which the object is to be associated.
+     * @param value the object to be stored in the Session.
      */
     @Override
     public void put(final String key, final Object value) {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication instanceof TokenAuthentication tokenAuthentication) {
-            tokenAuthentication.getAttributes().put(key, value);
-        }
+        httpSession.setAttribute(key, value);
     }
 
     /**
-     * Retrieves a Session attribute from the security context. This method retrieves the current authentication from
-     * the {@link SecurityContextHolder}. If the authentication is an instance of {@link TokenAuthentication}, the
-     * Session attribute corresponding to the given key is returned as an {@link Optional}.
+     * Retrieves an object from the Session associated with the specified key.
      *
      * @param key the key whose associated value is to be retrieved.
      * @return an {@link Optional} containing the value associated with the key, or an empty {@link Optional} if the key
-     * does not exist in the Session
+     * does not exist in the Session.
      */
     @Override
     public Optional<Object> get(final String key) {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication instanceof TokenAuthentication tokenAuthentication) {
-            return Optional.ofNullable(tokenAuthentication.getAttributes().get(key));
-        }
-        return Optional.empty();
+        return Optional.ofNullable(httpSession.getAttribute(key));
     }
 }

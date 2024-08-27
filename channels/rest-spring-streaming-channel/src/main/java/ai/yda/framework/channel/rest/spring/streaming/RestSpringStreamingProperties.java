@@ -56,8 +56,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class RestSpringStreamingProperties {
 
     /**
-     * The configuration prefix used to reference properties related to the streaming Channel in application
-     * configurations. This prefix is used for binding properties within the particular namespace.
+     * The configuration prefix used to reference properties related to this Channel in application configurations.
+     * This prefix is used for binding properties within the particular namespace.
      */
     public static final String CONFIG_PREFIX = "ai.yda.framework.channel.rest.spring.streaming";
 

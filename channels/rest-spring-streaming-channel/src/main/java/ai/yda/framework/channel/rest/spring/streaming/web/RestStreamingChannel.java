@@ -16,21 +16,23 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.channel.rest.spring.streaming.web;
 
-import ai.yda.framework.channel.core.StreamingChannel;
-import ai.yda.framework.channel.rest.spring.streaming.RestSpringStreamingProperties;
-import ai.yda.framework.core.assistant.StreamingAssistant;
-import ai.yda.framework.rag.core.model.RagRequest;
-import ai.yda.framework.rag.core.model.RagResponse;
+import reactor.core.publisher.Flux;
+
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Flux;
+
+import ai.yda.framework.channel.core.StreamingChannel;
+import ai.yda.framework.channel.rest.spring.streaming.RestSpringStreamingProperties;
+import ai.yda.framework.core.assistant.StreamingAssistant;
+import ai.yda.framework.rag.core.model.RagRequest;
+import ai.yda.framework.rag.core.model.RagResponse;
 
 /**
  * Provides REST controller logic that handles incoming requests for processing using a streaming assistant. The path

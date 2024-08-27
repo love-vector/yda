@@ -54,9 +54,8 @@ public class SecurityConfiguration {
      * Defines security filters, user authentication mechanisms, and authorization rules to control access to the
      * Channel. This configuration includes settings for {@link TokenAuthenticationFilter}, HTTP security configurations
      * such as disabling CORS, disabling CSRF, and setting the session management creation policy to always. It also
-     * specifies authorization rules: requests to the endpoint defined by
-     * {@code RestSpringProperties#getEndpointRelativePath()} are authorized and require authentication, while all other
-     * requests are not authorized and do not require authentication.
+     * specifies authorization rules: requests to the endpoint are authorized and require authentication, while all
+     * other requests are not authorized and do not require authentication.
      * </p>
      *
      * @param http       the {@link HttpSecurity} to configure.
@@ -68,7 +67,7 @@ public class SecurityConfiguration {
     @ConditionalOnProperty(prefix = RestSpringProperties.CONFIG_PREFIX, name = "security-token")
     public SecurityFilterChain filterChain(final HttpSecurity http, final RestSpringProperties properties)
             throws Exception {
-        return http.csrf(AbstractHttpConfigurer::disable)
+        http.csrf(AbstractHttpConfigurer::disable)
                 .cors(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(properties.getEndpointRelativePath())
@@ -77,11 +76,9 @@ public class SecurityConfiguration {
                         .permitAll())
                 .addFilterAfter(
                         new TokenAuthenticationFilter(properties.getSecurityToken()),
-                        AnonymousAuthenticationFilter.class)
-                .sessionManagement(sessionManagement -> sessionManagement
-                        .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
-                        .maximumSessions(1))
-                .build();
+                        AnonymousAuthenticationFilter.class);
+        configureSessionManagement(http);
+        return http.build();
     }
 
     /**
@@ -98,9 +95,22 @@ public class SecurityConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public SecurityFilterChain defaultFilterChain(final HttpSecurity http) throws Exception {
-        return http.csrf(AbstractHttpConfigurer::disable)
+        http.csrf(AbstractHttpConfigurer::disable)
                 .cors(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll())
-                .build();
+                .authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll());
+        configureSessionManagement(http);
+        return http.build();
+    }
+
+    /**
+     * Configures session management to always create a session and limits the number of sessions to 1.
+     *
+     * @param http the {@link HttpSecurity} to configure.
+     * @throws Exception if an error occurs during configuration.
+     */
+    private void configureSessionManagement(final HttpSecurity http) throws Exception {
+        http.sessionManagement(sessionManagement -> sessionManagement
+                .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
+                .maximumSessions(1));
     }
 }

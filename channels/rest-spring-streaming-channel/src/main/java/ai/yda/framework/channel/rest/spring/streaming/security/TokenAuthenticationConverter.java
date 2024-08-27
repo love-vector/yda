@@ -16,7 +16,7 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.channel.rest.spring.streaming.security;
 
 import reactor.core.publisher.Mono;
@@ -24,7 +24,6 @@ import reactor.core.publisher.Mono;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.web.server.authentication.ServerAuthenticationConverter;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
@@ -57,8 +56,7 @@ public class TokenAuthenticationConverter implements ServerAuthenticationConvert
     /**
      * Default constructor for {@link TokenAuthenticationConverter}.
      */
-    public TokenAuthenticationConverter() {
-    }
+    public TokenAuthenticationConverter() {}
 
     /**
      * Converts the given {@link ServerWebExchange} to an {@link Mono<TokenAuthentication>}. If the result is null,
@@ -81,12 +79,6 @@ public class TokenAuthenticationConverter implements ServerAuthenticationConvert
             return Mono.error(new BadCredentialsException("Empty bearer authentication token"));
         }
         var token = authHeader.substring(TOKEN_START_POSITION);
-        return ReactiveSecurityContextHolder.getContext().flatMap(context -> {
-            var currentAuthentication = context.getAuthentication();
-            return currentAuthentication == null
-                    ? Mono.just(new TokenAuthentication(token))
-                    : Mono.just(new TokenAuthentication(
-                    token, currentAuthentication.getPrincipal(), currentAuthentication.getAuthorities()));
-        });
+        return Mono.just(new TokenAuthentication(token));
     }
 }

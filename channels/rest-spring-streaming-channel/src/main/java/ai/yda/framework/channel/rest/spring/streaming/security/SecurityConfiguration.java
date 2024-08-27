@@ -27,9 +27,10 @@ import org.springframework.security.config.annotation.web.reactive.EnableWebFlux
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
-import org.springframework.security.web.server.authentication.SessionLimit;
+import org.springframework.security.web.server.context.WebSessionServerSecurityContextRepository;
 
 import ai.yda.framework.channel.rest.spring.streaming.RestSpringStreamingProperties;
+import ai.yda.framework.channel.rest.spring.streaming.session.SessionHandlerFilter;
 
 /**
  * This is a Web Flux Spring Security configuration that sets up security settings for the streaming REST Channel.
@@ -52,9 +53,9 @@ public class SecurityConfiguration {
      * <p>
      * Defines security filters, user authentication mechanisms, and authorization rules to control access to the
      * Channel. This configuration includes settings for {@link TokenAuthenticationFilter}, HTTP security configurations
-     * such as disabling CORS, disabling CSRF, and session management. It also specifies authorization rules: requests
-     * to the endpoint defined by {@code RestSpringStreamingProperties#getEndpointRelativePath()} are authorized and
-     * require authentication, while all other requests are not authorized and do not require authentication.
+     * such as disabling CORS, disabling CSRF, and adding the {@link SessionHandlerFilter} after an
+     * AnonymousAuthenticationWebFilter. It also specifies authorization rules: requests to the endpoint are authorized
+     * and require authentication, while all other requests are not authorized and do not require authentication.
      * </p>
      *
      * @param http       the {@link ServerHttpSecurity} to configure.
@@ -66,18 +67,19 @@ public class SecurityConfiguration {
     @ConditionalOnProperty(prefix = RestSpringStreamingProperties.CONFIG_PREFIX, name = "security-token")
     public SecurityWebFilterChain filterChain(
             final ServerHttpSecurity http, final RestSpringStreamingProperties properties) {
-        return http.csrf(ServerHttpSecurity.CsrfSpec::disable)
+        var securityContextRepository = new WebSessionServerSecurityContextRepository();
+        http.csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .cors(ServerHttpSecurity.CorsSpec::disable)
                 .authorizeExchange(exchange -> exchange.pathMatchers(properties.getEndpointRelativePath())
                         .authenticated()
                         .anyExchange()
                         .permitAll())
+                .securityContextRepository(securityContextRepository)
                 .addFilterAfter(
-                        new TokenAuthenticationFilter(properties.getSecurityToken()),
-                        SecurityWebFiltersOrder.ANONYMOUS_AUTHENTICATION)
-                .sessionManagement(sessionManagement -> sessionManagement.concurrentSessions(
-                        concurrentSessions -> concurrentSessions.maximumSessions(SessionLimit.of(1))))
-                .build();
+                        new TokenAuthenticationFilter(properties.getSecurityToken(), securityContextRepository),
+                        SecurityWebFiltersOrder.ANONYMOUS_AUTHENTICATION);
+        configureSessionManagement(http);
+        return http.build();
     }
 
     /**
@@ -93,9 +95,20 @@ public class SecurityConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public SecurityWebFilterChain defaultFilterChain(final ServerHttpSecurity http) {
-        return http.csrf(ServerHttpSecurity.CsrfSpec::disable)
+        http.csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .cors(ServerHttpSecurity.CorsSpec::disable)
                 .authorizeExchange(exchange -> exchange.anyExchange().permitAll())
-                .build();
+                .securityContextRepository(new WebSessionServerSecurityContextRepository());
+        configureSessionManagement(http);
+        return http.build();
+    }
+
+    /**
+     * Adds the {@link SessionHandlerFilter} after an AnonymousAuthenticationWebFilter.
+     *
+     * @param http the {@link ServerHttpSecurity} to configure.
+     */
+    private void configureSessionManagement(final ServerHttpSecurity http) {
+        http.addFilterAfter(new SessionHandlerFilter(), SecurityWebFiltersOrder.ANONYMOUS_AUTHENTICATION);
     }
 }

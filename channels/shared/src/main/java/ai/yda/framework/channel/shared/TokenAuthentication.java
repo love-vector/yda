@@ -22,8 +22,6 @@ package ai.yda.framework.channel.shared;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 import lombok.Getter;
 
@@ -58,11 +56,6 @@ public class TokenAuthentication extends AbstractAuthenticationToken implements 
      * A hash of the key, used to verify the integrity of the token.
      */
     private final int keyHash;
-
-    /**
-     * A map of additional attributes associated with the authentication token.
-     */
-    private final Map<String, Object> attributes = new HashMap<>();
 
     /**
      * Constructs a new {@link TokenAuthentication} instance with the specified key.

@@ -16,15 +16,15 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.channel.rest.spring.streaming.session;
 
-import ai.yda.framework.channel.shared.TokenAuthentication;
-import ai.yda.framework.session.core.ReactiveSessionProvider;
-import org.springframework.security.core.context.ReactiveSecurityContextHolder;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
+
+import org.springframework.stereotype.Component;
+import org.springframework.web.server.WebSession;
+
+import ai.yda.framework.session.core.ReactiveSessionProvider;
 
 import java.util.Optional;
 
@@ -33,7 +33,6 @@ import java.util.Optional;
  * context in a reactive manner.
  *
  * @author Nikita Litvinov
- * @see TokenAuthentication
  * @since 0.1.0
  */
 @Component
@@ -42,47 +41,39 @@ public class RestReactiveSessionProvider implements ReactiveSessionProvider {
     /**
      * Default constructor for {@link RestReactiveSessionProvider}.
      */
-    public RestReactiveSessionProvider() {
-    }
+    public RestReactiveSessionProvider() {}
 
     /**
-     * Stores a Session attribute in the security context. This method retrieves the current authentication from the
-     * {@link SecurityContextHolder}. If the authentication is an instance of {@link TokenAuthentication}, the Session
-     * attribute is added to the attributes map of the token.
+     * Stores an object in the Session with the specified key.
      *
-     * @param key   the key under which the value is to be stored.
-     * @param value the value to be stored in the Session.
-     * @return a {@link Mono} that completes when the value is successfully stored.
+     * @param key   the key with which the object is to be associated.
+     * @param value the object to be stored in the Session.
      */
     @Override
     public Mono<Void> put(final String key, final Object value) {
-        return ReactiveSecurityContextHolder.getContext().flatMap(securityContext -> {
-            if (securityContext.getAuthentication() instanceof TokenAuthentication tokenAuthentication) {
-                tokenAuthentication.getAttributes().put(key, value);
-            }
+        return Mono.deferContextual(contextView -> {
+            var session = contextView.getOrEmpty(WebSession.class);
+            session.ifPresent(s -> ((WebSession) s).getAttributes().put(key, value));
             return Mono.empty();
         });
     }
 
     /**
-     * Retrieves a Session attribute from the security context. This method retrieves the current authentication from
-     * the {@link SecurityContextHolder}. If the authentication is an instance of {@link TokenAuthentication}, the
-     * Session attribute corresponding to the given key is returned as an {@link Optional}.
+     * Retrieves an object from the Session associated with the specified key.
      *
      * @param key the key whose associated value is to be retrieved.
-     * @return a {@link Mono} that emits the value associated with the key, or completes without emitting a value
-     * if the key does not exist in the Session.
+     * @return an {@link Mono<Object>} containing the value associated with the key, or an empty {@link Mono} if the key
+     * does not exist in the Session.
      */
     @Override
     public Mono<Object> get(final String key) {
-        return ReactiveSecurityContextHolder.getContext().flatMap(securityContext -> {
-            if (securityContext.getAuthentication() instanceof TokenAuthentication tokenAuthentication) {
-                var attribute = tokenAuthentication.getAttributes().get(key);
-                if (attribute != null) {
-                    return Mono.just(attribute);
-                }
-            }
-            return Mono.empty();
+        return Mono.deferContextual(contextView -> {
+            var session = contextView.getOrEmpty(WebSession.class);
+            return session.map(s -> {
+                        var attributes = ((WebSession) s).getAttributes();
+                        return attributes.containsKey(key) ? Mono.just(attributes.get(key)) : Mono.empty();
+                    })
+                    .orElseGet(Mono::empty);
         });
     }
 }
