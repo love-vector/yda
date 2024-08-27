@@ -1,32 +1,35 @@
 # YDA Framework
 
-YDA Framework is a technology based on the principles of Retrieval-Augmented Generation (RAG), specifically designed for rapid creation and integration of artificial intelligence into web applications with minimal resource expenditure. Developed in Java, YDA provides a suite of built-in tools for processing large volumes of data, including functionalities for search, sorting, and data retrieval. These capabilities can be optionally disabled according to the user’s needs.
-
-## What does this project do?
-
-The YDA Framework helps developers integrate and rapidly launch virtual assistants on various platforms. The framework simplifies the creation of assistants that can utilize platform data to provide relevant answers to user queries.
+YDA is a software project designed to empower Java enterprises with cutting-edge AI Assistant capabilities. By adopting a modular approach, YDA enables the development of custom components, offering flexibility to either create tailored solutions or select from pre-built options. The YDA Framework helps developers integrate and rapidly launch virtual assistants on various platforms, simplifying the creation of assistants that can utilize platform data to provide relevant answers to user queries.
 
 ## Why is this project useful?
 
-- **Quick Integration**: Minimal effort required to add an assistant to an existing project.
-- **Scalability**: Supports large platforms with high traffic.
-- **Context Utilization**: Assistants use platform data and context to deliver relevant responses.
+- **Bringing AI Assistant Technology to Java Enterprises**: YDA is pioneering the integration of AI assistant technology in the Java ecosystem, making it accessible to a wide range of enterprises that rely on this platform.
+- **Data Ownership and Flexibility**: We empower enterprises to truly own their data, offering the flexibility to either deploy data in the cloud or manage it securely within their own infrastructure.
+- **Modularity for Custom Solutions**: YDA’s modular architecture is designed with enterprise needs in mind, allowing businesses to easily customize and extend the framework to meet their specific requirements. Modularity is key in enterprise environments, and YDA delivers it effectively.
+
+Building from Source
+-------
+
+You don’t need to build from source to use YDA (binaries in [repo.yda](https://github.com/love-vector/yda)), but if you want to try out the latest and greatest, YDA can be built and published to your local Maven cache using the Gradle wrapper. You also need JDK 17 and JDK 11 if you use only YDA core functionality
+
+```
+$ ./gradlew publishToMavenLocal
+```
+
+This will build all of the jars and documentation and publish them to your local Maven cache.
+It won't run any of the tests.
+If you want to build everything, use the `build` task:
+
+```
+$ ./gradlew build
+```
 
 ## Getting Started
-- [Download the repository](https://github.com/love-vector/yda)
-- build project
-- publish to mavenLocal
-
-  ![image](https://github.com/user-attachments/assets/dd4ac652-87a7-462a-93f0-fb973328a443)
-
-- create your project and follow the steps below
-### Example Usage
-
-Before starting with YDA Framework, ensure your project is set up to include the dependencies listed below.
 
 ### Dependencies
 
-To integrate the YDA Framework into your project, add the following dependencies to your `build.gradle` (Gradle) or `pom.xml` (Maven) file:
+To integrate the YDA Framework into your project, add the following dependencies to your `build.gradle` (Gradle) file:
 
 #### Gradle:
 
@@ -72,101 +75,32 @@ dependencies {
 }
 ```
 
-#### Maven:
-```
-<properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <yda.framework.version>0.0.1</yda.framework.version>
-        <spring.boot.version>3.3.2</spring.boot.version>
-        <lombok.version>1.18.30</lombok.version>
-    </properties>
+### Modules
 
-    <repositories>
-        <repository>
-            <id>spring-milestones</id>
-            <name>Spring Milestones</name>
-            <url>https://repo.spring.io/milestone</url>
-        </repository>
-        <repository>
-            <id>spring-snapshots</id>
-            <name>Spring Snapshots</name>
-            <url>https://repo.spring.io/snapshot</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
+There are several key modules in the YDA Framework. Here is a quick overview:
 
-    <dependencies>
-        <dependency>
-            <groupId>ai.yda</groupId>
-            <artifactId>rag-starter</artifactId>
-            <version>${yda.framework.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>ai.yda</groupId>
-            <artifactId>rag-assistant-starter</artifactId>
-            <version>${yda.framework.version}</version>
-        </dependency>
+#### WebsiteRetriever
 
-        <dependency>
-            <groupId>ai.yda</groupId>
-            <artifactId>rest-spring-channel</artifactId>
-            <version>${yda.framework.version}</version>
-        </dependency>
+The `WebsiteRetriever` module is designed to fetch and process information from websites. This module is responsible for scraping content from specified websites, processing the data, and loading it into a vector database such as Milvus for further use in AI-driven applications. Key features include:
 
-        <dependency>
-            <groupId>ai.yda</groupId>
-            <artifactId>openai-assistant-generator-starter</artifactId>
-            <version>${yda.framework.version}</version>
-        </dependency>
+-   **Web Scraping:** Collects data from web pages based on configured site maps and rules.
+-   **Data Processing:** Cleans and preprocesses the scraped data to ensure consistency and quality.
+-   **Vectorization:** Converts processed content into vector representations that can be stored in a vector database for efficient retrieval.
 
-        <dependency>
-            <groupId>ai.yda</groupId>
-            <artifactId>website-retriever-starter</artifactId>
-            <version>${yda.framework.version}</version>
-        </dependency>
+#### FileSystemRetriever
 
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
-            <version>${spring.boot.version}</version>
-        </dependency>
+The `FileSystemRetriever` module is intended for processing files stored in local or networked file systems. This module reads various file formats, extracts relevant information, and loads it into the vector database. It is particularly useful for enterprises that need to integrate large volumes of document data into their AI systems. Key features include:
 
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
-            <scope>provided</scope>
-        </dependency>
-    </dependencies>
+-   **File Parsing:** Supports a variety of file formats (e.g., PDF, DOCX, TXT) and extracts meaningful content.
+-   **Data Normalization:** Standardizes and cleans the extracted data to make it ready for vectorization.
+-   **Vector Storage:** Stores the vectorized file content in the database, making it available for AI applications and search.
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring.boot.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
-```
 
 You will also need to configure environment variables for normal operation
-#### Environment Variables:
+#### Environment Variables :
+
+
+#### WebsiteRetriever
 ```
 ai:
   yda:
@@ -179,42 +113,46 @@ ai:
             topK: [SET_YOUR_VALUE]
             isProcessingEnabled: ${PROCESSING_ENABLE}
             clearCollectionOnStartup: ${CLEAR_COLLECTION_ON_STARTUP}
-        generator:
-          assistant:
-            openai:
-              assistant-id: ${ASSISTANT_ID}
-      channel:
-        rest:
-          spring:
-            endpoint-relative-path: ${ENDPOINT_RELATIVE_PATH}
-            security-token: ${SECURITY_TOKEN}
-
-spring:
-  ai:
-    vectorstore:
-      milvus:
-        client:
-          host: ${MILVUS_HOST}
-          port: ${MILVUS_PORT}
-          username: ${USERNAME}
-          password: ${PASSWORD}
-        databaseName: ${DATABASE_NAME}
-        collectionName: ${COLLECTION_NAME}
-        embeddingDimension: 1536
-        indexType: IVF_FLAT
-        metricType: COSINE
-        initializeSchema: ${ENABLE_INITIALIZE}
-    openai:
-      api-key: ${OPENAI_API_KEY}
-      chat:
-        options:
-          model: ${MODEL}
-          temperature:${TEMPERATURE}
-      embedding:
-        options:
-          model: ${EMBEDING_MODEL}
 ```
-Lastly, you will need to configure your main class as shown in the following example
+
+#### FileSystemRetriever
+```
+ai:  
+  yda:  
+    framework:  
+      rag:  
+        retriever:  
+          filesystem:  
+            localDirectoryPath:${FILE_PATH}
+```
+
+#### VectorStore
+```
+spring:  
+  ai:  
+    vectorstore:  
+      milvus:  
+        client:  
+          host: ${MILVUS_HOST}  
+          port: ${MILVUS_PORT}  
+          username: ""  
+  password: ""  
+  databaseName: "default"  
+  collectionName: "documents"  
+  embeddingDimension: 1536  
+  indexType: IVF_FLAT  
+  metricType: COSINE  
+  initializeSchema: ${ENABLE_INITIALIZE}  
+    openai:  
+      api-key: ${OPENAI_API_KEY}  
+      chat:  
+        options:  
+          model: gpt-3.5-turbo  
+          temperature: 0.7  
+  embedding:  
+        options:  
+          model: text-embedding-3-small
+```
 
 #### Main:
 ```
@@ -237,23 +175,24 @@ Contributing
 -------
 For contribution guidelines, see [CONTRIBUTING](link).
 
-License
--------
-```
-                    GNU GENERAL PUBLIC LICENSE
-                       Version 3, 29 June 2007
 
- Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>
- Everyone is permitted to copy and distribute verbatim copies
- of this license document, but changing it is not allowed.
-```
+## Requirements
 
-Requirements
--------
-YDA Framework operates on Java 17+ and heavily integrates with the Spring Framework. If you plan to utilize the existing tools provided by YDA, you will need to implement it within a Spring-based environment.
+### Core Framework
+YDA Framework's core operates on Java 11. This allows for broader integration with existing enterprise systems that may still rely on Java 11.
 
-YDA also leverages vector databases like Milvus for efficient data processing and retrieval.
+### Integrations and Implementations
+For integrations and specific implementations, YDA leverages Java 17 to take advantage of the latest language features and performance improvements. This provides a more modern and efficient environment for building and deploying AI-powered solutions.
 
+### Additional Requirements
+- **Spring Framework:** YDA heavily integrates with the Spring Framework. To fully utilize YDA's capabilities, your project must be set up within a Spring-based environment.
+- **Vector Databases:** YDA leverages vector databases like Milvus for efficient data processing and retrieval.
+
+### Best Practices
 We recommend keeping your Java environment and dependencies up-to-date to ensure optimal performance and security. Given the importance of compatibility and security, staying current with the latest versions of Java and Spring Framework is highly advised.
 
+### Compatibility and Configuration
 YDA works seamlessly with your platform's native tools and libraries. However, to fully leverage its capabilities, including the advanced data processing features, ensure that your environment is configured with the required dependencies, particularly those related to Spring and vector databases.
+
+## License
+The YDA Framework is released under version 3 of the [GNU Lesser General Public License](https://www.gnu.org/licenses/lgpl-3.0-standalone.html).
