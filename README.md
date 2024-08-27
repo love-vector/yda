@@ -34,44 +34,15 @@ To integrate the YDA Framework into your project, add the following dependencies
 #### Gradle:
 
 ```groovy
-plugins {
-    id "java"
-    id "org.springframework.boot" version "3.3.2"
-    id "io.spring.dependency-management" version "1.1.6"
-}
-
-ext {
-    ydaFrameworkVersion = "0.0.1"
-}
-
-bootJar {
-    enabled = true
-}
-
-jar {
-    enabled = false
-}
-
-group = 'org.projects'
-version = '1.0-SNAPSHOT'
-
-repositories {
-    mavenLocal()
-    mavenCentral()
-    maven { url 'https://repo.spring.io/milestone' }
-}
-
 dependencies {
-    implementation "ai.yda:rag-starter:${ydaFrameworkVersion}"
-    implementation "ai.yda:rag-assistant-starter:${ydaFrameworkVersion}"
-    implementation "ai.yda:rest-spring-channel:${ydaFrameworkVersion}"
-    implementation "ai.yda:openai-assistant-generator-starter:${ydaFrameworkVersion}" // sse
-    implementation "ai.yda:website-retriever-starter:${ydaFrameworkVersion}"
+    implementation "ai.yda:rag-starter"
+    implementation "ai.yda:rag-assistant-starter"
+    implementation "ai.yda:rest-spring-channel"
+    implementation "ai.yda:openai-assistant-generator-starter"
+    implementation "ai.yda:website-retriever-starter"
     implementation 'org.springframework.boot:spring-boot-starter'
-    compileOnly "org.projectlombok:lombok:1.18.30"
-    annotationProcessor "org.projectlombok:lombok:1.18.30"
-    testImplementation platform('org.junit:junit-bom:5.9.1')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
+    compileOnly "org.projectlombok:lombok"
+    annotationProcessor "org.projectlombok:lombok"
 }
 ```
 
