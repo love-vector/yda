@@ -154,7 +154,7 @@ public class AzureOpenAiAssistantService {
                     1,
                     TimeUnit.SECONDS);
             schedule.get();
-            executor.close();
+            executor.shutdown();
         } catch (ExecutionException | InterruptedException exception) {
             throw new RuntimeException(
                     String.format(

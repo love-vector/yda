@@ -25,9 +25,10 @@ import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.model.RagResponse;
 import ai.yda.framework.rag.core.retriever.Retriever;
-import ai.yda.framework.rag.core.util.StringUtil;
+
 import lombok.AccessLevel;
 import lombok.Getter;
+import ai.yda.framework.rag.core.util.ContentUtil;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -101,7 +102,7 @@ public class DefaultRag implements Rag<RagRequest, RagResponse> {
      */
     protected String mergeContexts(final List<RagContext> contexts) {
         return contexts.parallelStream()
-                .map(ragContext -> String.join(StringUtil.POINT, ragContext.getKnowledge()))
-                .collect(Collectors.joining(StringUtil.POINT));
+                .map(ragContext -> String.join(ContentUtil.SENTENCE_SEPARATOR, ragContext.getKnowledge()))
+                .collect(Collectors.joining(ContentUtil.SENTENCE_SEPARATOR));
     }
 }

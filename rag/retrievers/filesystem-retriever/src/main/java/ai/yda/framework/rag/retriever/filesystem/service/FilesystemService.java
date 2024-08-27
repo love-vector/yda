@@ -82,8 +82,7 @@ public class FilesystemService {
         var pdfContent = FileUtil.readPdf(filePath.toFile());
         var fileName = filePath.getFileName();
         log.debug("Processing file: {}", fileName);
-        var preprocessedContent = ContentUtil.preprocessContent(pdfContent);
-        return ContentUtil.splitContent(preprocessedContent, CHUNK_MAX_LENGTH).parallelStream()
+        return ContentUtil.preprocessAndSplitContent(pdfContent, CHUNK_MAX_LENGTH).parallelStream()
                 .map(documentChunk -> new Document(documentChunk, Map.of("fileName", fileName)))
                 .toList();
     }
