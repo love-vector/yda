@@ -19,7 +19,7 @@ subprojects {
     apply plugin: 'maven-publish'
 
     group = 'ai.yda'
-    version = '0.0.1'
+    version = '0.1.0'
 
     java {
         if (project.name.contains('core')) {
@@ -39,8 +39,8 @@ subprojects {
 
     dependencies {
         // Lombok
-        compileOnly 'org.projectlombok:lombok:1.18.30'
-        annotationProcessor 'org.projectlombok:lombok:1.18.30'
+        compileOnly 'org.projectlombok:lombok:1.18.34'
+        annotationProcessor 'org.projectlombok:lombok:1.18.34'
     }
 
     spotless {

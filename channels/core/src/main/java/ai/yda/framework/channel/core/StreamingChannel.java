@@ -21,7 +21,22 @@ package ai.yda.framework.channel.core;
 
 import reactor.core.publisher.Flux;
 
+/**
+ * Provides a generic interface for implementing external access points to the streaming Assistant.
+ *
+ * @param <REQUEST>  the generic type of the Request from the User.
+ * @param <RESPONSE> the generic type of the Response that will be generated based on the given Request.
+ * @author Nikita Litvinov
+ * @see Channel
+ * @since 0.1.0
+ */
 public interface StreamingChannel<REQUEST, RESPONSE> {
 
+    /**
+     * Processes Request data involving the streaming Assistant.
+     *
+     * @param request the Request object to be processed.
+     * @return a {@link Flux stream} of Response objects generated after processing the Request.
+     */
     Flux<RESPONSE> processRequest(REQUEST request);
 }

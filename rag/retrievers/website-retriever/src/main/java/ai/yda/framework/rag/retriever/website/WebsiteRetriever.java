@@ -16,7 +16,7 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.rag.retriever.website;
 
 import lombok.extern.slf4j.Slf4j;
@@ -24,24 +24,66 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.lang.NonNull;
 
 import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.retriever.Retriever;
 import ai.yda.framework.rag.retriever.website.service.WebsiteService;
 
+/**
+ * Retrieves website Context data from a Vector Store based on a User Request. It processes website sitemap and uses a
+ * Vector Store to perform similarity searches. If website processing is enabled, it processes website urls during
+ * initialization.
+ *
+ * @author Iryna Kopchak
+ * @author Bogdan Synenko
+ * @see WebsiteService
+ * @see VectorStore
+ * @since 0.1.0
+ */
 @Slf4j
 public class WebsiteRetriever implements Retriever<RagRequest, RagContext> {
+    /**
+     * The Vector Store used to retrieve Context data for user Request through similarity search.
+     */
     private final VectorStore vectorStore;
+
+    /**
+     * The website's sitemap url.
+     */
     private final String sitemapUrl;
+
+    /**
+     * The number of top results to retrieve from the Vector Store.
+     */
     private final Integer topK;
+
     private final WebsiteService websiteService = new WebsiteService();
 
+    /**
+     * Constructs a new {@link WebsiteRetriever} instance with the specified vectorStore, sitemapUrl, topK and
+     * isProcessingEnabled parameters.
+     *
+     * @param vectorStore         the {@link VectorStore} instance used for storing and retrieving vector data.
+     *                            This parameter cannot be {@code null} and is used to interact with the Vector Store.
+     * @param sitemapUrl          the website's sitemap url. This parameter cannot be {@code null} and is used to
+     *                            process and store data to the Vector Store.
+     * @param topK                the number of top results to retrieve from the Vector Store. This value must be a
+     *                            positive integer.
+     * @param isProcessingEnabled a {@link Boolean} flag indicating whether website processing should be enabled during
+     *                            initialization. If {@code true}, the method {@link #processWebsite()} will
+     *                            be called to process the files in the specified storage path.
+     * @throws IllegalArgumentException if {@code topK} is not a positive number.
+     */
     public WebsiteRetriever(
-            final VectorStore vectorStore,
-            final String sitemapUrl,
-            final Integer topK,
-            final Boolean isProcessingEnabled) {
+            final @NonNull VectorStore vectorStore,
+            final @NonNull String sitemapUrl,
+            final @NonNull Integer topK,
+            final @NonNull Boolean isProcessingEnabled) {
+        if (topK <= 0) {
+            throw new IllegalArgumentException("TopK must be a positive number.");
+        }
         this.vectorStore = vectorStore;
         this.sitemapUrl = sitemapUrl;
         this.topK = topK;
@@ -51,6 +93,12 @@ public class WebsiteRetriever implements Retriever<RagRequest, RagContext> {
         }
     }
 
+    /**
+     * Retrieves Context data based on the given Request by performing a similarity search in the Vector Store.
+     *
+     * @param request the Request object containing the User query for the similarity search.
+     * @return a {@link RagContext} object containing the Knowledge obtained from the similarity search.
+     */
     @Override
     public RagContext retrieve(final RagRequest request) {
         return RagContext.builder()
@@ -64,6 +112,9 @@ public class WebsiteRetriever implements Retriever<RagRequest, RagContext> {
                 .build();
     }
 
+    /**
+     * Processes all website urls by creating document chunks and adding them to the Vector Store.
+     */
     private void processWebsite() {
         var pageDocuments = websiteService.createChunkDocumentsFromSitemapUrl(sitemapUrl);
         vectorStore.add(pageDocuments);

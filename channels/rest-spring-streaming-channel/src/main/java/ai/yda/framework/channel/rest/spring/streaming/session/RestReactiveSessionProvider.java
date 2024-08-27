@@ -16,22 +16,44 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.channel.rest.spring.streaming.session;
-
-import lombok.RequiredArgsConstructor;
-import reactor.core.publisher.Mono;
-
-import org.springframework.security.core.context.ReactiveSecurityContextHolder;
-import org.springframework.stereotype.Component;
 
 import ai.yda.framework.channel.shared.TokenAuthentication;
 import ai.yda.framework.session.core.ReactiveSessionProvider;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
 
+import java.util.Optional;
+
+/**
+ * Provides methods for storing and retrieving data associated with a Session using a key-value store  within a REST
+ * context in a reactive manner.
+ *
+ * @author Nikita Litvinov
+ * @see TokenAuthentication
+ * @since 0.1.0
+ */
 @Component
-@RequiredArgsConstructor
 public class RestReactiveSessionProvider implements ReactiveSessionProvider {
 
+    /**
+     * Default constructor for {@link RestReactiveSessionProvider}.
+     */
+    public RestReactiveSessionProvider() {
+    }
+
+    /**
+     * Stores a Session attribute in the security context. This method retrieves the current authentication from the
+     * {@link SecurityContextHolder}. If the authentication is an instance of {@link TokenAuthentication}, the Session
+     * attribute is added to the attributes map of the token.
+     *
+     * @param key   the key under which the value is to be stored.
+     * @param value the value to be stored in the Session.
+     * @return a {@link Mono} that completes when the value is successfully stored.
+     */
     @Override
     public Mono<Void> put(final String key, final Object value) {
         return ReactiveSecurityContextHolder.getContext().flatMap(securityContext -> {
@@ -42,6 +64,15 @@ public class RestReactiveSessionProvider implements ReactiveSessionProvider {
         });
     }
 
+    /**
+     * Retrieves a Session attribute from the security context. This method retrieves the current authentication from
+     * the {@link SecurityContextHolder}. If the authentication is an instance of {@link TokenAuthentication}, the
+     * Session attribute corresponding to the given key is returned as an {@link Optional}.
+     *
+     * @param key the key whose associated value is to be retrieved.
+     * @return a {@link Mono} that emits the value associated with the key, or completes without emitting a value
+     * if the key does not exist in the Session.
+     */
     @Override
     public Mono<Object> get(final String key) {
         return ReactiveSecurityContextHolder.getContext().flatMap(securityContext -> {

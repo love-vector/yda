@@ -27,9 +27,37 @@ import ai.yda.framework.rag.core.StreamingRag;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.model.RagResponse;
 
+/**
+ * Autoconfiguration class for setting up a {@link StreamingRagAssistant} bean. This class is responsible for
+ * automatically configuring a {@link StreamingRagAssistant} instance within the Spring application context. The
+ * {@link StreamingRagAssistant} bean is created using a provided {@link StreamingRag} instance, which is injected as a
+ * dependency. The configuration is applied automatically when the application starts, thanks to the
+ * {@link AutoConfiguration} annotation.
+ * <p>
+ * This setup allows the {@link StreamingRagAssistant} to be readily available for use in the application wherever it's
+ * needed, without requiring manual bean configuration.
+ * </p>
+ *
+ * @author Nikita Litvinov
+ * @see StreamingRagAssistant
+ * @see StreamingRag
+ * @since 0.1.0
+ */
 @AutoConfiguration
 public class StreamingRagAssistantAutoConfiguration {
 
+    /**
+     * Default constructor for {@link StreamingRagAssistantAutoConfiguration}.
+     */
+    public StreamingRagAssistantAutoConfiguration() {}
+
+    /**
+     * Creates and configures a {@link StreamingRagAssistant} bean in the Spring application context.
+     *
+     * @param rag the {@link StreamingRag} instance used by the {@link StreamingRagAssistant} to perform its operations.
+     *            This parameter is expected to be provided by the application or other autoconfiguration.
+     * @return a configured {@link StreamingRagAssistant} bean.
+     */
     @Bean
     public StreamingRagAssistant streamingRagAssistant(final StreamingRag<RagRequest, RagResponse> rag) {
         return new StreamingRagAssistant(rag);

@@ -32,10 +32,38 @@ import org.springframework.security.web.authentication.AnonymousAuthenticationFi
 
 import ai.yda.framework.channel.rest.spring.RestSpringProperties;
 
+/**
+ * This is a Spring Security configuration that sets up security settings for the synchronized REST Channel.
+ *
+ * @author Nikita Litvinov
+ * @see RestSpringProperties
+ * @since 0.1.0
+ */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
 
+    /**
+     * Default constructor for {@link SecurityConfiguration}.
+     */
+    public SecurityConfiguration() {}
+
+    /**
+     * This Channel security configuration is used when 'security-token' property is configured.
+     * <p>
+     * Defines security filters, user authentication mechanisms, and authorization rules to control access to the
+     * Channel. This configuration includes settings for {@link TokenAuthenticationFilter}, HTTP security configurations
+     * such as disabling CORS, disabling CSRF, and setting the session management creation policy to always. It also
+     * specifies authorization rules: requests to the endpoint defined by
+     * {@code RestSpringProperties#getEndpointRelativePath()} are authorized and require authentication, while all other
+     * requests are not authorized and do not require authentication.
+     * </p>
+     *
+     * @param http       the {@link HttpSecurity} to configure.
+     * @param properties the {@link RestSpringProperties} containing configuration properties for the security setup.
+     * @return a {@link SecurityFilterChain} instance configured with the specified HTTP security settings.
+     * @throws Exception if an error occurs during configuration.
+     */
     @Bean
     @ConditionalOnProperty(prefix = RestSpringProperties.CONFIG_PREFIX, name = "security-token")
     public SecurityFilterChain filterChain(final HttpSecurity http, final RestSpringProperties properties)
@@ -56,6 +84,17 @@ public class SecurityConfiguration {
                 .build();
     }
 
+    /**
+     * This Channel security configuration is used when 'security-token' property is not configured.
+     * <p>
+     * This configuration disables CSRF protection and CORS, and sets up authorization rules such that all HTTP requests
+     * are permitted without authentication.
+     * </p>
+     *
+     * @param http the {@link HttpSecurity} to configure.
+     * @return a {@link SecurityFilterChain} instance configured with the specified HTTP security settings.
+     * @throws Exception if an error occurs during configuration.
+     */
     @Bean
     @ConditionalOnMissingBean
     public SecurityFilterChain defaultFilterChain(final HttpSecurity http) throws Exception {

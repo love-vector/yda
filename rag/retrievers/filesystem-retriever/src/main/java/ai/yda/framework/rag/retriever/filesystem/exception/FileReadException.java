@@ -19,8 +19,20 @@
 */
 package ai.yda.framework.rag.retriever.filesystem.exception;
 
+/**
+ * Thrown to indicate that file read operation has failed.
+ *
+ * @author Dmitry Marchuk
+ * @since 0.1.0
+ */
 public class FileReadException extends RuntimeException {
 
+    /**
+     * Constructs a new {@link  FileReadException}instance with the specified cause.
+     * This constructor initializes the exception with a predefined message "Failed to read file".
+     *
+     * @param cause the cause of the exception, which can be retrieved later using {@link Throwable#getCause()}.
+     */
     public FileReadException(final Throwable cause) {
         super("Failed to read file", cause);
     }

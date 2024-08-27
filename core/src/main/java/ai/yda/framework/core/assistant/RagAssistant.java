@@ -16,20 +16,46 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.core.assistant;
-
-import lombok.RequiredArgsConstructor;
 
 import ai.yda.framework.rag.core.Rag;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.model.RagResponse;
 
-@RequiredArgsConstructor
+/**
+ * Represents a RAG Assistant that processes a Request and returns a Response. This class delegates the Request
+ * processing to the {@link Rag} instance provided via constructor injection.
+ *
+ * @author Nikita Litvinov
+ * @see Rag
+ * @see StreamingRagAssistant
+ * @since 0.1.0
+ */
 public class RagAssistant implements Assistant<RagRequest, RagResponse> {
 
+    /**
+     * The {@link Rag} instance responsible for processing the {@link RagRequest} and generating the
+     * {@link RagResponse}.
+     */
     private final Rag<RagRequest, RagResponse> rag;
 
+    /**
+     * Constructs a new {@link RagAssistant} instance with the specified {@link Rag} instance.
+     *
+     * @param rag the {@link Rag} instance used to handle {@link RagRequest} and {@link RagResponse} processing.
+     */
+    public RagAssistant(final Rag<RagRequest, RagResponse> rag) {
+        this.rag = rag;
+    }
+
+    /**
+     * Processes the given {@link RagRequest} by delegating to the {@link Rag#doRag(RagRequest)} method and returns the
+     * resulting {@link RagResponse}.
+     *
+     * @param request the {@link RagRequest} to be processed.
+     * @return the {@link RagResponse} generated from processing the request.
+     */
     @Override
     public RagResponse assist(final RagRequest request) {
         return rag.doRag(request);

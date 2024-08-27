@@ -25,10 +25,27 @@ import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
 
 /**
- * An Augmenter modifies or enriches the retrieved contexts to enhance the final response
+ * Provides a generic mechanism for modifying or enriching the retrieved Contexts to enhance the final Response
  * generation. This can involve filtering, re-ranking, or adding new information.
+ *
+ * @param <REQUEST> the generic type of the Request from the User, which must extend {@link RagRequest}.
+ * @param <CONTEXT> the generic type of the Context data that will be augmented or enhanced based on the given Request,
+ *                  which must extend {@link RagContext}.
+ * @author Nikita Litvinov
+ * @see RagRequest
+ * @see RagContext
+ * @since 0.1.0
  */
 public interface Augmenter<REQUEST extends RagRequest, CONTEXT extends RagContext> {
 
+    /**
+     * Augments the given list of Context objects based on the provided Request.
+     *
+     * @param request  the Request object that contains query data from the User.
+     * @param contexts a list of Context objects to be augmented. These Contexts are modified or enriched according to
+     *                 the logic defined in the implementation of this method.
+     * @return a list of augmented Context objects, which may be the same as the input list or a modified version,
+     * depending on the augmentation logic.
+     */
     List<CONTEXT> augment(REQUEST request, List<CONTEXT> contexts);
 }
