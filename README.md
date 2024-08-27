@@ -11,7 +11,7 @@ YDA is a software project designed to empower Java enterprises with cutting-edge
 Building from Source
 -------
 
-You don’t need to build from source to use YDA (binaries in [repo.yda](https://github.com/love-vector/yda)), but if you want to try out the latest and greatest, YDA can be built and published to your local Maven cache using the Gradle wrapper. You also need JDK 17 and JDK 11 if you use only YDA core functionality
+You don’t need to build from source to use YDA (binaries in [repo.yda](https://github.com/love-vector/yda)), but if you want to try out the latest and greatest, YDA can be built and published to your local Maven cache using the Gradle wrapper. If you are using only YDA core functionality, JDK 11 is sufficient. For Spring integrations, JDK 17 is required.
 
 ```
 $ ./gradlew publishToMavenLocal
