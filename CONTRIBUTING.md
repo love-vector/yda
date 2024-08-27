@@ -1,4 +1,3 @@
-
 # CONTRIBUTING
 
 ## Thank You for Contributing
@@ -30,7 +29,7 @@ All changes to the project must be made through a Pull Request (PR). Please foll
     ```
 
 4. **Open a Pull Request:**
-   - Once your changes are ready, open a Pull Request against the main branch of the repository.
+   - Once your changes are ready, open a Pull Request in the main repository targeting the main branch.
    - In the PR description, briefly explain the purpose of the changes, what has been modified, and how it has been documented.
 
 5. **Review:** Your Pull Request will be reviewed by a team member. We aim to provide feedback and conduct reviews promptly. Once the review is successful, your changes will be merged into the main project.
