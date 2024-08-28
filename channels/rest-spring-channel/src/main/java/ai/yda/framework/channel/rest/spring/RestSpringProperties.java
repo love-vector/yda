@@ -19,6 +19,10 @@
 */
 package ai.yda.framework.channel.rest.spring;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -76,6 +80,21 @@ public class RestSpringProperties {
      * This token is expected to be provided by the client for authorization purposes.
      */
     private String securityToken;
+
+    /**
+     * Enable or disable CORS configuration.
+     */
+    private boolean corsEnabled = false;
+
+    /**
+     * List of allowed origins for CORS.
+     */
+    private List<String> allowedOrigins = Arrays.asList("*");
+
+    /**
+     * List of allowed methods for CORS.
+     */
+    private List<String> allowedMethods = new ArrayList<>(Arrays.asList("GET", "POST", "PUT", "DELETE"));
 
     /**
      * Default constructor for {@link RestSpringProperties}.

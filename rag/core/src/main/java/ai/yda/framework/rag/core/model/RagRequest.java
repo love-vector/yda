@@ -21,6 +21,7 @@ package ai.yda.framework.rag.core.model;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 /**
  * Represents a Request object that encapsulates the User's query.
@@ -31,12 +32,13 @@ import lombok.Getter;
  */
 @Getter
 @Builder(toBuilder = true)
+@NoArgsConstructor
 public class RagRequest {
 
     /**
      * The query string provided by the User, which is used as input for the retrieval and generation processes.
      */
-    private final String query;
+    private String query;
 
     /**
      * Constructs a new {@link RagRequest} instance with the User's query.
