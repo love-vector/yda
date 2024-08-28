@@ -37,7 +37,7 @@ For contribution guidelines, see [CONTRIBUTING](#).
 YDA core operates on Java 11.
 
 ### Integrations and Implementations
-YDA currently provides integrations and implementations exclusively for the Spring Framework, relying on Java 17. RAG Implementation relies on [Milvus](https://milvus.io/) and the [OpenAI](https://platform.openai.com/docs/assistants/overview)
+YDA currently provides integrations and implementations exclusively for the Spring Framework, relying on Java 17. RAG implementation relies on [Milvus](https://milvus.io/) and [OpenAI](https://platform.openai.com/docs/assistants/overview).
 
 ## License
 YDA is released under version 3 of the [GNU Lesser General Public License](https://www.gnu.org/licenses/lgpl-3.0-standalone.html).
