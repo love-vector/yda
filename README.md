@@ -1,5 +1,5 @@
 
-# YDA
+# YDA – Open-Source Java AI Assistant
 
 YDA is a software project designed to empower Java enterprises with cutting-edge AI Assistant capabilities. Adopting a modular approach, YDA enables the development of custom components, offering flexibility to create tailored solutions or select from pre-built options.
 
