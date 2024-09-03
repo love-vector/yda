@@ -16,12 +16,13 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.rag.core.generator;
+
+import reactor.core.publisher.Flux;
 
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.model.RagResponse;
-import reactor.core.publisher.Flux;
 
 /**
  * Provides a generic mechanism that takes the User's Request and the retrieved Context to produce a final Response,

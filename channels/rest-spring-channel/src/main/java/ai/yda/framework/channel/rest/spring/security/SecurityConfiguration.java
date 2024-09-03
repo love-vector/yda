@@ -50,21 +50,13 @@ public class SecurityConfiguration {
     public SecurityConfiguration() {}
 
     /**
-     * This Channel security configuration is used when both 'security-token' and 'cors-enabled' properties are configured.
+     * This Channel security configuration is used when 'security-token' property is configured.
      * <p>
-     * This configuration defines security filters, user authentication mechanisms, and authorization rules to control
-     * access to the Channel. It includes settings for {@link TokenAuthenticationFilter}, HTTP security configurations
-     * such as conditionally enabling or disabling CORS, disabling CSRF, and setting the session management creation
-     * policy to always.
-     * </p>
-     * <p>
-     * If CORS is enabled via the 'cors-enabled' property, the configuration will include CORS settings based on the
-     * properties provided in {@link RestSpringProperties}. If CORS is not enabled, it will be disabled explicitly.
-     * </p>
-     * <p>
-     * If the 'security-token' property is set, requests to the endpoint specified in {@link RestSpringProperties#getEndpointRelativePath()}
-     * are authenticated using the {@link TokenAuthenticationFilter}, while all other requests are permitted without
-     * authentication. If the 'security-token' is not set, all requests are permitted without authentication.
+     * Defines security filters, user authentication mechanisms, and authorization rules to control access to the
+     * Channel. This configuration includes settings for {@link TokenAuthenticationFilter}, HTTP security configurations
+     * such as enabling or disabling CORS, disabling CSRF, and setting the session management creation policy to always.
+     * It also specifies authorization rules: requests to the endpoint are authorized and require authentication, while
+     * all other requests are not authorized and do not require authentication.
      * </p>
      *
      * @param http       the {@link HttpSecurity} to configure.
@@ -73,39 +65,19 @@ public class SecurityConfiguration {
      * @throws Exception if an error occurs during configuration.
      */
     @Bean
-    @ConditionalOnProperty(
-            prefix = RestSpringProperties.CONFIG_PREFIX,
-            name = {"security-token", "cors-enabled"})
+    @ConditionalOnProperty(prefix = RestSpringProperties.CONFIG_PREFIX, name = "security-token")
     public SecurityFilterChain combinedFilterChain(final HttpSecurity http, final RestSpringProperties properties)
             throws Exception {
-        http.csrf(AbstractHttpConfigurer::disable);
-
-        if (properties.isCorsEnabled()) {
-            http.cors(cors -> {
-                CorsConfiguration config = new CorsConfiguration();
-                config.setAllowedOrigins(properties.getAllowedOrigins());
-                config.setAllowedMethods(properties.getAllowedMethods());
-                config.setAllowCredentials(true);
-                config.addAllowedHeader("*");
-                cors.configurationSource(request -> config);
-            });
-        } else {
-            http.cors(AbstractHttpConfigurer::disable);
-        }
-
-        if (properties.getSecurityToken() != null) {
-            http.authorizeHttpRequests(authorize -> authorize
-                            .requestMatchers(properties.getEndpointRelativePath())
-                            .authenticated()
-                            .anyRequest()
-                            .permitAll())
-                    .addFilterAfter(
-                            new TokenAuthenticationFilter(properties.getSecurityToken()),
-                            AnonymousAuthenticationFilter.class);
-        } else {
-            http.authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll());
-        }
-
+        http.csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(properties.getEndpointRelativePath())
+                        .authenticated()
+                        .anyRequest()
+                        .permitAll())
+                .addFilterAfter(
+                        new TokenAuthenticationFilter(properties.getSecurityToken()),
+                        AnonymousAuthenticationFilter.class);
+        configureCors(http, properties);
         configureSessionManagement(http);
         return http.build();
     }
@@ -123,12 +95,35 @@ public class SecurityConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public SecurityFilterChain defaultFilterChain(final HttpSecurity http) throws Exception {
+    public SecurityFilterChain defaultFilterChain(final HttpSecurity http, final RestSpringProperties properties)
+            throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
-                .cors(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll());
+        configureCors(http, properties);
         configureSessionManagement(http);
         return http.build();
+    }
+
+    /**
+     * Configures CORS with provided properties.
+     *
+     * @param http       the {@link HttpSecurity} to configure.
+     * @param properties for configuring CORS
+     * @throws Exception if an error occurs during configuration.
+     */
+    private void configureCors(final HttpSecurity http, final RestSpringProperties properties) throws Exception {
+        if (properties.getCorsEnabled()) {
+            http.cors(cors -> {
+                var config = new CorsConfiguration();
+                config.setAllowedOrigins(properties.getAllowedOrigins());
+                config.setAllowedMethods(properties.getAllowedMethods());
+                config.setAllowCredentials(true);
+                config.addAllowedHeader("*");
+                cors.configurationSource(request -> config);
+            });
+        } else {
+            http.cors(AbstractHttpConfigurer::disable);
+        }
     }
 
     /**

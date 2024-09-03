@@ -20,7 +20,6 @@
 package ai.yda.framework.rag.retriever.shared;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -214,6 +213,6 @@ public class OptimizedMilvusVectorStore extends MilvusVectorStore {
                         .getFieldWrapper(DOC_ID_FIELD_NAME).getFieldData().parallelStream()
                                 .map(Object::toString)
                                 .toList())
-                .orElse(Collections.emptyList());
+                .orElse(List.of());
     }
 }

@@ -19,9 +19,10 @@
 */
 package ai.yda.framework.rag.core.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 /**
  * Represents a Request object that encapsulates the User's query.
@@ -32,20 +33,20 @@ import lombok.NoArgsConstructor;
  */
 @Getter
 @Builder(toBuilder = true)
-@NoArgsConstructor
 public class RagRequest {
 
     /**
      * The query string provided by the User, which is used as input for the retrieval and generation processes.
      */
-    private String query;
+    private final String query;
 
     /**
      * Constructs a new {@link RagRequest} instance with the User's query.
      *
      * @param query the Request query from the User.
      */
-    public RagRequest(final String query) {
+    @JsonCreator
+    public RagRequest(@JsonProperty("query") final String query) {
         this.query = query;
     }
 }

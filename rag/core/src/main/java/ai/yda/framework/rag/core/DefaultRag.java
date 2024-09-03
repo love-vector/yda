@@ -16,8 +16,14 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.rag.core;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import lombok.AccessLevel;
+import lombok.Getter;
 
 import ai.yda.framework.rag.core.augmenter.Augmenter;
 import ai.yda.framework.rag.core.generator.Generator;
@@ -25,13 +31,7 @@ import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.model.RagResponse;
 import ai.yda.framework.rag.core.retriever.Retriever;
-
-import lombok.AccessLevel;
-import lombok.Getter;
 import ai.yda.framework.rag.core.util.ContentUtil;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Provides a default mechanism for executing a Retrieval-Augmented Generation (RAG) process.

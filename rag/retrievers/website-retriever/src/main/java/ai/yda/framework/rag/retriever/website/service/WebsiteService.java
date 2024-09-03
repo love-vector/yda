@@ -16,11 +16,10 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.rag.retriever.website.service;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -90,7 +89,7 @@ public class WebsiteService {
     private List<Document> splitWebsitePageIntoChunksDocuments(final String websitePageUrl) {
         var documentContent = safeConnect(websitePageUrl).text();
         if (documentContent.trim().isEmpty()) {
-            return Collections.emptyList();
+            return List.of();
         }
         log.debug("Processing website's page url: {}", websitePageUrl);
         return ContentUtil.preprocessAndSplitContent(documentContent, CHUNK_MAX_LENGTH).parallelStream()

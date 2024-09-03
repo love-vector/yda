@@ -23,11 +23,13 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.context.WebSessionServerSecurityContextRepository;
+import org.springframework.web.cors.CorsConfiguration;
 
 import ai.yda.framework.channel.rest.spring.streaming.RestSpringStreamingProperties;
 import ai.yda.framework.channel.rest.spring.streaming.session.SessionHandlerFilter;
@@ -53,7 +55,7 @@ public class SecurityConfiguration {
      * <p>
      * Defines security filters, user authentication mechanisms, and authorization rules to control access to the
      * Channel. This configuration includes settings for {@link TokenAuthenticationFilter}, HTTP security configurations
-     * such as disabling CORS, disabling CSRF, and adding the {@link SessionHandlerFilter} after an
+     * such as enabling or disabling CORS, disabling CSRF, and adding the {@link SessionHandlerFilter} after an
      * AnonymousAuthenticationWebFilter. It also specifies authorization rules: requests to the endpoint are authorized
      * and require authentication, while all other requests are not authorized and do not require authentication.
      * </p>
@@ -69,7 +71,6 @@ public class SecurityConfiguration {
             final ServerHttpSecurity http, final RestSpringStreamingProperties properties) {
         var securityContextRepository = new WebSessionServerSecurityContextRepository();
         http.csrf(ServerHttpSecurity.CsrfSpec::disable)
-                .cors(ServerHttpSecurity.CorsSpec::disable)
                 .authorizeExchange(exchange -> exchange.pathMatchers(properties.getEndpointRelativePath())
                         .authenticated()
                         .anyExchange()
@@ -78,6 +79,7 @@ public class SecurityConfiguration {
                 .addFilterAfter(
                         new TokenAuthenticationFilter(properties.getSecurityToken(), securityContextRepository),
                         SecurityWebFiltersOrder.ANONYMOUS_AUTHENTICATION);
+        configureCors(http, properties);
         configureSessionManagement(http);
         return http.build();
     }
@@ -94,17 +96,39 @@ public class SecurityConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public SecurityWebFilterChain defaultFilterChain(final ServerHttpSecurity http) {
+    public SecurityWebFilterChain defaultFilterChain(
+            final ServerHttpSecurity http, final RestSpringStreamingProperties properties) {
         http.csrf(ServerHttpSecurity.CsrfSpec::disable)
-                .cors(ServerHttpSecurity.CorsSpec::disable)
                 .authorizeExchange(exchange -> exchange.anyExchange().permitAll())
                 .securityContextRepository(new WebSessionServerSecurityContextRepository());
+        configureCors(http, properties);
         configureSessionManagement(http);
         return http.build();
     }
 
     /**
-     * Adds the {@link SessionHandlerFilter} after an AnonymousAuthenticationWebFilter.
+     * Configures CORS with provided properties.
+     *
+     * @param http       the {@link HttpSecurity} to configure.
+     * @param properties for configuring CORS
+     */
+    private void configureCors(final ServerHttpSecurity http, final RestSpringStreamingProperties properties) {
+        if (properties.getCorsEnabled()) {
+            http.cors(cors -> {
+                var config = new CorsConfiguration();
+                config.setAllowedOrigins(properties.getAllowedOrigins());
+                config.setAllowedMethods(properties.getAllowedMethods());
+                config.setAllowCredentials(true);
+                config.addAllowedHeader("*");
+                cors.configurationSource(request -> config);
+            });
+        } else {
+            http.cors(ServerHttpSecurity.CorsSpec::disable);
+        }
+    }
+
+    /**
+     * Adds the {@link SessionHandlerFilter} after an AnonymousAuthenticationWebFilter to handle session creation.
      *
      * @param http the {@link ServerHttpSecurity} to configure.
      */
