@@ -16,7 +16,7 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.rag.generator.assistant.openai.streaming;
 
 import lombok.extern.slf4j.Slf4j;
@@ -94,11 +94,14 @@ public class OpenAiAssistantStreamingGenerator implements StreamingGenerator<Rag
                 .map(Object::toString)
                 .flatMap(threadId -> Mono.fromRunnable(
                                 () -> assistantService.addMessageToThread(threadId, request.getQuery()))
+                        .subscribeOn(Schedulers.boundedElastic())
                         .thenReturn(threadId))
                 .switchIfEmpty(Mono.defer(() -> Mono.fromCallable(() -> assistantService
                                 .createThread(request.getQuery())
                                 .getId())
-                        .subscribeOn(Schedulers.boundedElastic())))
+                        .subscribeOn(Schedulers.boundedElastic())
+                        .flatMap(threadId ->
+                                sessionProvider.put(THREAD_ID_KEY, threadId).thenReturn(threadId))))
                 .doOnNext(threadId -> log.debug("Thread ID: {}", threadId))
                 .flatMapMany(threadId -> assistantService.createRunStream(threadId, assistantId, context))
                 .map(deltaMessage -> RagResponse.builder().result(deltaMessage).build());

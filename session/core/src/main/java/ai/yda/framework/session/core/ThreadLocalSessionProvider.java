@@ -16,7 +16,7 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.session.core;
 
 import java.util.HashMap;
@@ -39,8 +39,7 @@ public class ThreadLocalSessionProvider implements SessionProvider {
     /**
      * Default constructor for {@link ThreadLocalSessionProvider}.
      */
-    public ThreadLocalSessionProvider() {
-    }
+    public ThreadLocalSessionProvider() {}
 
     /**
      * Stores a value associated with a specific key in the current thread's Session storage. If the Session storage

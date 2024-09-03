@@ -26,8 +26,6 @@ import org.springframework.web.server.WebSession;
 
 import ai.yda.framework.session.core.ReactiveSessionProvider;
 
-import java.util.Optional;
-
 /**
  * Provides methods for storing and retrieving data associated with a Session using a key-value store  within a REST
  * context in a reactive manner.

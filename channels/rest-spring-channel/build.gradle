@@ -6,4 +6,6 @@ dependencies {
 
     api 'org.springframework.boot:spring-boot-starter-web:3.3.2'
     api 'org.springframework.boot:spring-boot-starter-security:3.3.2'
+
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor:3.3.2'
 }

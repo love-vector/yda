@@ -16,7 +16,7 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.rag.generator.assistant.openai.streaming.autoconfigure;
 
 import lombok.Getter;
@@ -64,6 +64,5 @@ public class OpenAiAssistantStreamingGeneratorProperties {
     /**
      * Default constructor for {@link OpenAiAssistantStreamingGeneratorProperties}.
      */
-    public OpenAiAssistantStreamingGeneratorProperties() {
-    }
+    public OpenAiAssistantStreamingGeneratorProperties() {}
 }
