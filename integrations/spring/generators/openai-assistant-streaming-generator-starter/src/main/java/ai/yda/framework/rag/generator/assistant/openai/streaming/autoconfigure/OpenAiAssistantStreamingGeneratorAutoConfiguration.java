@@ -21,8 +21,10 @@ package ai.yda.framework.rag.generator.assistant.openai.streaming.autoconfigure;
 
 import org.springframework.ai.autoconfigure.openai.OpenAiConnectionProperties;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.web.client.RestClient;
 
 import ai.yda.framework.rag.generator.assistant.openai.streaming.OpenAiAssistantStreamingGenerator;
 import ai.yda.framework.session.core.ReactiveSessionProvider;
@@ -69,5 +71,16 @@ public class OpenAiAssistantStreamingGeneratorAutoConfiguration {
             final ReactiveSessionProvider sessionProvider) {
         return new OpenAiAssistantStreamingGenerator(
                 openAiProperties.getApiKey(), assistantGeneratorProperties.getAssistantId(), sessionProvider);
+    }
+
+    /**
+     * Defines a {@link RestClient.Builder} bean if none is provided.
+     *
+     * @return Rest Client builder
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public RestClient.Builder restClientBuilder() {
+        return RestClient.builder();
     }
 }
