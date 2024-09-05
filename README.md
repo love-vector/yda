@@ -5,7 +5,7 @@ YDA is a software project designed to empower Java enterprises with cutting-edge
 
 ## Using YDA
 
-YDA binaries are available at [repo.yda](https://github.com/love-vector/yda).    
+YDA binaries are available at [repo.yda](#).    
 To access the latest features, YDA can be built from source.    
 JDK 11 is required for YDA core functionality, while JDK 17 is necessary for Spring integrations.
 
@@ -25,11 +25,11 @@ This command builds all JARs and documentation, then publishes them to the local
 
 ## Getting Started
 
-[The reference documentation](#) includes detailed installation instructions as well as a comprehensive getting started guide.
+[The reference documentation](https://docs.yda-framework.ai/getting-started) includes detailed installation instructions as well as a comprehensive getting started guide.
 
 Contributing
 -------
-For contribution guidelines, see [CONTRIBUTING](#).
+For contribution guidelines, see [CONTRIBUTING](https://github.com/love-vector/yda/blob/main/CONTRIBUTING.md).
 
 ## Requirements
 
