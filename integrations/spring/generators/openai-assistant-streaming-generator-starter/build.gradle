@@ -2,6 +2,7 @@ dependencies {
     api project(':openai-assistant-streaming-generator')
 
     implementation 'org.springframework.ai:spring-ai-spring-boot-autoconfigure:1.0.0-M1'
+    implementation 'org.springframework:spring-web:6.1.12'
 
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor:3.3.2'
 }
