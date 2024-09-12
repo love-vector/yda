@@ -28,7 +28,6 @@ import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.lang.NonNull;
@@ -114,7 +113,10 @@ public class FilesystemRetriever implements Retriever<RagRequest, RagContext> {
                                 .similaritySearch(
                                         SearchRequest.query(request.getQuery()).withTopK(topK))
                                 .parallelStream()
-                                .map(Document::getContent)
+                                .map(document -> {
+                                    log.debug("Document metadata: {}", document.getMetadata());
+                                    return document.getContent();
+                                })
                                 .toList())
                 .build();
     }
