@@ -20,11 +20,13 @@
 package ai.yda.framework.rag.generator.assistant.openai.autoconfigure;
 
 import org.springframework.ai.autoconfigure.openai.OpenAiConnectionProperties;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
 import ai.yda.framework.rag.generator.assistant.openai.OpenAiAssistantGenerator;
+import ai.yda.framework.session.core.ReactiveSessionProvider;
 import ai.yda.framework.session.core.SessionProvider;
 
 /**
@@ -54,20 +56,27 @@ public class OpenAiAssistantGeneratorAutoConfiguration {
     /**
      * Defines an {@link OpenAiAssistantGenerator} bean. This bean is configured using the provided properties for the
      * Assistant Generator and the OpenAI connection. The Generator requires an API key and an Assistant ID, which are
-     * retrieved from the external configuration, and a {@link SessionProvider} for managing user Sessions.
+     * retrieved from the external configuration, and {@link SessionProvider} or {@link ReactiveSessionProvider} for
+     * managing user Sessions.
      *
      * @param assistantGeneratorProperties the properties related to the Assistant Generator, providing Assistant ID
      *                                     configuration.
      * @param openAiProperties             the properties related to the OpenAI connection, including the API key.
      * @param sessionProvider              the Session Provider responsible for managing User Sessions.
+     * @param reactiveSessionProvider      the Reactive Session Provider responsible for managing User Sessions in a
+     *                                     reactive manner.
      * @return a configured {@link OpenAiAssistantGenerator} bean ready for use in the application.
      */
     @Bean
     public OpenAiAssistantGenerator openAiGenerator(
             final OpenAiAssistantGeneratorProperties assistantGeneratorProperties,
             final OpenAiConnectionProperties openAiProperties,
-            final SessionProvider sessionProvider) {
+            @Autowired(required = false) final SessionProvider sessionProvider,
+            @Autowired(required = false) final ReactiveSessionProvider reactiveSessionProvider) {
         return new OpenAiAssistantGenerator(
-                openAiProperties.getApiKey(), assistantGeneratorProperties.getAssistantId(), sessionProvider);
+                openAiProperties.getApiKey(),
+                assistantGeneratorProperties.getAssistantId(),
+                sessionProvider,
+                reactiveSessionProvider);
     }
 }
