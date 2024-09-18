@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.rag.generator.shared;
+package ai.yda.framework.rag.generator.assistant.openai;
 
 import java.util.List;
 import java.util.concurrent.CancellationException;
@@ -38,6 +38,7 @@ import com.azure.ai.openai.assistants.models.MessageRole;
 import com.azure.ai.openai.assistants.models.MessageTextContent;
 import com.azure.ai.openai.assistants.models.RunStatus;
 import com.azure.ai.openai.assistants.models.StreamMessageUpdate;
+import com.azure.ai.openai.assistants.models.ThreadMessage;
 import com.azure.ai.openai.assistants.models.ThreadMessageOptions;
 import com.azure.ai.openai.assistants.models.ThreadRun;
 import com.azure.core.credential.KeyCredential;
@@ -60,6 +61,9 @@ import reactor.core.scheduler.Schedulers;
  */
 public class AzureOpenAiAssistantService {
 
+    /**
+     * Client used to interact with the Azure OpenAI Assistant API.
+     */
     private final AssistantsClient assistantsClient;
 
     /**
@@ -92,9 +96,9 @@ public class AzureOpenAiAssistantService {
      * @param threadId the ID of the Thread to which the message should be added.
      * @param content  the content of the message to add.
      */
-    public void addMessageToThread(final String threadId, final String content) {
+    public ThreadMessage addMessageToThread(final String threadId, final String content) {
         var threadMessageOptions = new ThreadMessageOptions(MessageRole.USER, content);
-        assistantsClient.createMessage(threadId, threadMessageOptions);
+        return assistantsClient.createMessage(threadId, threadMessageOptions);
     }
 
     /**

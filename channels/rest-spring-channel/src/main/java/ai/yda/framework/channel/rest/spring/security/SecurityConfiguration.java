@@ -133,8 +133,7 @@ public class SecurityConfiguration {
      * @throws Exception if an error occurs during configuration.
      */
     private void configureSessionManagement(final HttpSecurity http) throws Exception {
-        http.sessionManagement(sessionManagement -> sessionManagement
-                .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
-                .maximumSessions(1));
+        http.sessionManagement(
+                sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.ALWAYS));
     }
 }

@@ -1,5 +1,6 @@
 dependencies {
     api project(':framework-core')
     api project(':session-core')
-    api project(':generator-shared')
+
+    api 'com.azure:azure-ai-openai-assistants:1.0.0-beta.3'
 }

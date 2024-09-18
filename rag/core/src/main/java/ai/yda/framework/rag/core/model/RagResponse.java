@@ -19,8 +19,8 @@
 */
 package ai.yda.framework.rag.core.model;
 
-import lombok.Builder;
 import lombok.Getter;
+import lombok.experimental.SuperBuilder;
 
 /**
  * Represents a Response object generated as a result of processing the Request and Context. The Response should
@@ -31,7 +31,7 @@ import lombok.Getter;
  * @since 0.1.0
  */
 @Getter
-@Builder(toBuilder = true)
+@SuperBuilder(toBuilder = true)
 public class RagResponse {
 
     /**

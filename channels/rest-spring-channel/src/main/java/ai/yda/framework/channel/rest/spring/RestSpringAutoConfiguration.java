@@ -23,6 +23,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Import;
 
+import ai.yda.framework.channel.rest.spring.config.RagRequestDeserializerConfig;
 import ai.yda.framework.channel.rest.spring.security.SecurityConfiguration;
 import ai.yda.framework.channel.rest.spring.session.RestSessionProvider;
 import ai.yda.framework.channel.rest.spring.web.RestChannel;
@@ -39,11 +40,12 @@ import ai.yda.framework.channel.rest.spring.web.RestChannel;
  * @see RestChannel
  * @see SecurityConfiguration
  * @see RestSessionProvider
+ * @see RagRequestDeserializerConfig
  * @since 0.1.0
  */
 @AutoConfiguration
 @EnableConfigurationProperties({RestSpringProperties.class})
-@Import({RestChannel.class, SecurityConfiguration.class, RestSessionProvider.class})
+@Import({RestChannel.class, SecurityConfiguration.class, RestSessionProvider.class, RagRequestDeserializerConfig.class})
 public class RestSpringAutoConfiguration {
     /**
      * Default constructor for {@link RestSpringAutoConfiguration}.

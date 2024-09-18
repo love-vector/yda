@@ -21,8 +21,8 @@ package ai.yda.framework.rag.core.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Builder;
 import lombok.Getter;
+import lombok.experimental.SuperBuilder;
 
 /**
  * Represents a Request object that encapsulates the User's query.
@@ -32,7 +32,7 @@ import lombok.Getter;
  * @since 0.1.0
  */
 @Getter
-@Builder(toBuilder = true)
+@SuperBuilder(toBuilder = true)
 public class RagRequest {
 
     /**
