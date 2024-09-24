@@ -40,14 +40,8 @@ project(':website-retriever').projectDir = file('rag/retrievers/website-retrieve
 
 // RAG - Generators
 
-include 'generator-shared'
-project(':generator-shared').projectDir = file('rag/generators/shared')
-
 include 'openai-assistant-generator'
 project(':openai-assistant-generator').projectDir = file('rag/generators/openai-assistant-generator')
-
-include 'openai-assistant-streaming-generator'
-project(':openai-assistant-streaming-generator').projectDir = file('rag/generators/openai-assistant-streaming-generator')
 
 include 'openai-chat-generator'
 project(':openai-chat-generator').projectDir = file('rag/generators/openai-chat-generator')
@@ -97,6 +91,3 @@ project(':openai-chat-generator-starter').projectDir = file('integrations/spring
 
 include 'openai-assistant-generator-starter'
 project(':openai-assistant-generator-starter').projectDir = file('integrations/spring/generators/openai-assistant-generator-starter')
-
-include 'openai-assistant-streaming-generator-starter'
-project(':openai-assistant-streaming-generator-starter').projectDir = file('integrations/spring/generators/openai-assistant-streaming-generator-starter')

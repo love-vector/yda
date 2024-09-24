@@ -1,5 +1,0 @@
-dependencies {
-    api project(':framework-core')
-    api project(':session-core')
-    api project(':generator-shared')
-}
