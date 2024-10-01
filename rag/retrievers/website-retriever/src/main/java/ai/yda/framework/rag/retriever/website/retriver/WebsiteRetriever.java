@@ -16,19 +16,29 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
-package ai.yda.framework.rag.retriever.website;
+ */
+package ai.yda.framework.rag.retriever.website.retriver;
 
+import ai.yda.framework.rag.core.model.Chunk;
+import ai.yda.framework.rag.core.model.CrawlResult;
+import ai.yda.framework.rag.core.retriever.*;
+import ai.yda.framework.rag.retriever.website.services.chunking.SlidingWindowChunking;
+import ai.yda.framework.rag.retriever.website.services.crawling.WebsiteService;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.lang.NonNull;
 
 import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
-import ai.yda.framework.rag.core.retriever.Retriever;
-import ai.yda.framework.rag.retriever.website.service.WebsiteService;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Retrieves website Context data from a Vector Store based on a User Request. It processes website sitemap and uses a
@@ -42,7 +52,7 @@ import ai.yda.framework.rag.retriever.website.service.WebsiteService;
  * @since 0.1.0
  */
 @Slf4j
-public class WebsiteRetriever implements Retriever<RagRequest, RagContext> {
+public class WebsiteRetriever implements Retriever<RagRequest, RagContext>, Indexer {
     /**
      * The Vector Store used to retrieve Context data for user Request through similarity search.
      */
@@ -88,8 +98,38 @@ public class WebsiteRetriever implements Retriever<RagRequest, RagContext> {
         this.topK = topK;
 
         if (isProcessingEnabled) {
-            processWebsite();
+            process(null);
         }
+    }
+
+    @Override
+    public List<Document> index(final List<CrawlResult> list) {
+        var chunks = process(list);
+        var documents = chunks.stream()
+                .map(chunk -> new Document(chunk.getText(), Map.of("url", chunk.getUrl(), "chunkIndex", String.valueOf(chunk.getIndex()))))
+                .collect(Collectors.toList());
+        save(documents);
+        return documents;
+    }
+
+    @Override
+    public List<Chunk> process(List<CrawlResult> chunks) {
+        List<Chunk> result = new ArrayList<>();
+        ChunkStrategy chunkStrategy = new SlidingWindowChunking(10, 1);
+        int chunkIndex = 0;
+        for (CrawlResult crawlResult : chunks) {
+            var chunkedTexts = chunkStrategy.splitChunks(crawlResult.getContent());
+            for (String chunkText : chunkedTexts) {
+                var chunk = new Chunk(chunkText, chunkIndex++, crawlResult.getLink());
+                result.add(chunk);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public void save(List<Document> documents) {
+        vectorStore.add(documents);
     }
 
     /**
@@ -112,13 +152,5 @@ public class WebsiteRetriever implements Retriever<RagRequest, RagContext> {
                                 })
                                 .toList())
                 .build();
-    }
-
-    /**
-     * Processes all website urls by creating document chunks and adding them to the Vector Store.
-     */
-    private void processWebsite() {
-        var pageDocuments = websiteService.createChunkDocumentsFromSitemapUrl(sitemapUrl);
-        vectorStore.add(pageDocuments);
     }
 }

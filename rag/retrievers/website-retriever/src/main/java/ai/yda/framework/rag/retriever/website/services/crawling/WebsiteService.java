@@ -16,8 +16,8 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
-package ai.yda.framework.rag.retriever.website.service;
+ */
+package ai.yda.framework.rag.retriever.website.services.crawling;
 
 import java.io.IOException;
 import java.util.List;
@@ -53,7 +53,8 @@ public class WebsiteService {
     /**
      * Default constructor for {@link WebsiteService}.
      */
-    public WebsiteService() {}
+    public WebsiteService() {
+    }
 
     /**
      * Processes a sitemap urls and creates chunked {@link Document} objects from them. This method connects to the
