@@ -28,7 +28,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 
 import ai.yda.framework.rag.retriever.shared.MilvusVectorStoreUtil;
-import ai.yda.framework.rag.retriever.website.WebsiteRetriever;
+import ai.yda.framework.rag.retriever.website.retriver.WebsiteRetriever;
 
 /**
  * Autoconfiguration class for setting up the {@link WebsiteRetriever} bean with the necessary properties and
