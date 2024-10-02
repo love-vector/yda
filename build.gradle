@@ -3,6 +3,7 @@ plugins {
     id 'com.diffplug.spotless' version '6.25.0+'
     id 'checkstyle'
     id 'maven-publish'
+    id 'org.jreleaser' version '1.13.1'
 }
 
 allprojects {
@@ -17,11 +18,14 @@ subprojects {
     apply plugin: 'com.diffplug.spotless'
     apply plugin: 'checkstyle'
     apply plugin: 'maven-publish'
+    apply plugin: 'org.jreleaser'
 
-    group = 'ai.yda'
+    group = 'ai.yda-framework'
     version = '0.1.0'
 
     java {
+        withJavadocJar()
+        withSourcesJar()
         if (project.name.contains('core')) {
             sourceCompatibility = JavaVersion.VERSION_11
             targetCompatibility = JavaVersion.VERSION_11
@@ -68,17 +72,72 @@ subprojects {
             mavenJava(MavenPublication) {
                 from components.java
                 pom {
+                    name = project.findProperty('projectName') ?: null
+                    description = project.findProperty('projectDescription') ?: null
+                    url = 'https://yda-framework.ai/'
                     licenses {
                         license {
                             name = 'GNU LESSER GENERAL PUBLIC LICENSE, Version 3'
                             url = 'https://www.gnu.org/licenses/lgpl-3.0.txt'
                         }
                     }
+                    scm {
+                        connection = 'scm:git:https://github.com/love-vector/yda.git'
+                        developerConnection = 'scm:git:ssh://github.com/love-vector/yda.git'
+                        url = 'https://github.com/love-vector/yda'
+                    }
+                    developers {
+                        developer { name = 'Nikita Litvinov'; email = 'n.litvinov@vector-inc.dev' }
+                        developer { name = 'Dmitry Marchuk'; email = 'd.marchuk@vector-inc.dev' }
+                        developer { name = 'Iryna Kopchak'; email = 'i.kopchak@vector-inc.dev' }
+                        developer { name = 'Bogdan Synenko'; email = 'b.synenko@vector-inc.dev' }
+                    }
                 }
             }
         }
         repositories {
-            mavenLocal()
+            maven {
+                url = layout.buildDirectory.dir('staging-deploy')
+            }
+        }
+    }
+
+    jreleaser {
+        strict = false
+        gitRootSearch = true
+        signing {
+            active = 'ALWAYS'
+            armored = true
+        }
+        deploy {
+            maven {
+                mavenCentral {
+                    sonatype {
+                        checksums = true
+                        active = 'ALWAYS'
+                        url = 'https://central.sonatype.com/api/v1/publisher'
+                        stagingRepository(layout.buildDirectory.dir("staging-deploy").get().toString())
+                    }
+                }
+            }
+        }
+    }
+
+    tasks.named('publish') {
+        doLast {
+            def jreleaserDir = file("${project.buildDir}/jreleaser")
+            if (!jreleaserDir.exists()) {
+                jreleaserDir.mkdirs()
+            }
+            println "Folder jreleaser for project: ${project.name}"
+        }
+    }
+
+    afterEvaluate {
+        if (plugins.hasPlugin('org.jreleaser.gradle.plugin.JReleaserPlugin')) {
+            tasks.register("runJReleaserConfig") {
+                dependsOn tasks.named("jreleaserConfig")
+            }
         }
     }
 
@@ -86,5 +145,37 @@ subprojects {
 
     processResources {
         from(rootProject.resources.text.fromFile('.config/log/logback-spring.xml'))
+    }
+}
+
+task runJReleaserConfigInAllSubprojects {
+    dependsOn subprojects.findAll { subproject ->
+        subproject.tasks.findByName("jreleaserConfig") != null
+    }.collect { subproject ->
+        subproject.tasks.named("jreleaserConfig")
+    }
+}
+
+task runJReleaserConfigAndFullReleaseForAllSubprojects {
+    dependsOn subprojects.findAll { subproject ->
+        subproject.tasks.findByName("jreleaserConfig") != null
+    }.collect { subproject ->
+        subproject.tasks.named("jreleaserConfig")
+    }
+
+    finalizedBy subprojects.findAll { subproject ->
+        subproject.tasks.findByName("jreleaserFullRelease") != null
+    }.collect { subproject ->
+        subproject.tasks.named("jreleaserFullRelease")
+    }
+
+    doLast {
+        subprojects.each { subproject ->
+            if (subproject.tasks.findByName("jreleaserConfig")?.state?.failure) {
+                println "Skipping jreleaserFullRelease for project: ${subproject.name} due to failure in jreleaserConfig."
+            } else {
+                println "jreleaserConfig for project: ${subproject.name} was successful, proceeding to jreleaserFullRelease."
+            }
+        }
     }
 }
