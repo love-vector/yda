@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
  */
-package ai.yda.framework.rag.retriever.filesystem.service.file_reader;
+package ai.yda.framework.rag.retriever.filesystem.service;
 
 import java.nio.file.Path;
 import java.util.List;

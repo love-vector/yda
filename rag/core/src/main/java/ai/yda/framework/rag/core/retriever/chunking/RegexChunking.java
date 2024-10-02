@@ -1,7 +1,4 @@
-package ai.yda.framework.rag.retriever.website.services.chunking;
-
-import ai.yda.framework.rag.core.retriever.ChunkStrategy;
-import org.springframework.lang.NonNull;
+package ai.yda.framework.rag.core.retriever.chunking;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,7 +7,7 @@ import java.util.List;
 public class RegexChunking implements ChunkStrategy {
     private final List<String> patterns;
 
-    public RegexChunking(final @NonNull List<String> patterns) {
+    public RegexChunking(final List<String> patterns) {
         if (patterns.isEmpty()) {
             this.patterns = List.of("\\n\\n");
         } else {

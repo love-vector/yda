@@ -1,14 +1,11 @@
-package ai.yda.framework.rag.retriever.website.services.chunking;
-
-import ai.yda.framework.rag.core.retriever.ChunkStrategy;
-import org.springframework.lang.NonNull;
+package ai.yda.framework.rag.core.retriever.chunking;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class FixedLengthWordChunking implements ChunkStrategy {
     private final int chunkSize;
-    public FixedLengthWordChunking(final @NonNull int chunkSize) {
+    public FixedLengthWordChunking(final int chunkSize) {
         this.chunkSize = chunkSize;
     }
 

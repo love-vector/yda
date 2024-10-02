@@ -20,18 +20,19 @@
 package ai.yda.framework.rag.retriever.website.retriver;
 
 import ai.yda.framework.rag.core.model.Chunk;
-import ai.yda.framework.rag.core.retriever.*;
-import ai.yda.framework.rag.retriever.website.services.chunking.SlidingWindowChunking;
+import ai.yda.framework.rag.core.model.RagContext;
+import ai.yda.framework.rag.core.model.RagRequest;
+import ai.yda.framework.rag.core.retriever.Indexer;
+import ai.yda.framework.rag.core.retriever.Retriever;
+import ai.yda.framework.rag.core.retriever.chunking.ChunkStrategy;
+import ai.yda.framework.rag.core.retriever.chunking.SlidingWindowChunking;
+import ai.yda.framework.rag.retriever.website.services.WebsiteService;
 import ai.yda.framework.rag.retriever.website.services.crawling.WebsiteService;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.lang.NonNull;
-
-import ai.yda.framework.rag.core.model.RagContext;
-import ai.yda.framework.rag.core.model.RagRequest;
 
 import java.util.ArrayList;
 import java.util.List;
