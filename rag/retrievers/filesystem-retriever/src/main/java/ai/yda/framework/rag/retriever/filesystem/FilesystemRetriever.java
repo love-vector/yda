@@ -16,7 +16,7 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.rag.retriever.filesystem;
 
 import java.io.IOException;
@@ -24,10 +24,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import ai.yda.framework.rag.core.model.Chunk;
+import ai.yda.framework.rag.core.retriever.ChunkStrategy;
+import ai.yda.framework.rag.core.retriever.Indexer;
+import ai.yda.framework.rag.retriever.filesystem.service.chunking.SlidingWindowChunking;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.lang.NonNull;
@@ -35,7 +42,7 @@ import org.springframework.lang.NonNull;
 import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.retriever.Retriever;
-import ai.yda.framework.rag.retriever.filesystem.service.FilesystemService;
+import ai.yda.framework.rag.retriever.filesystem.service.file_reader.FilesystemService;
 
 /**
  * Retrieves filesystem Context data from a Vector Store based on a Request. It processes files stored in a specified
@@ -49,7 +56,7 @@ import ai.yda.framework.rag.retriever.filesystem.service.FilesystemService;
  * @since 0.1.0
  */
 @Slf4j
-public class FilesystemRetriever implements Retriever<RagRequest, RagContext> {
+public class FilesystemRetriever implements Retriever<RagRequest, RagContext>, Indexer {
     /**
      * The Vector Store used to retrieve Context data for User Request through similarity search.
      */
@@ -78,7 +85,7 @@ public class FilesystemRetriever implements Retriever<RagRequest, RagContext> {
      * @param topK                the number of top results to retrieve from the Vector Store. This value must be a
      *                            positive integer.
      * @param isProcessingEnabled a {@link Boolean} flag indicating whether file processing should be enabled during
-     *                            initialization. If {@code true}, the method {@link #processFileStorageFolder()} will
+     *                            initialization. If {@code true}, the method {@link #index()} will
      *                            be called to process the files in the specified storage path.
      * @throws IllegalArgumentException if {@code topK} is not a positive number.
      */
@@ -95,7 +102,7 @@ public class FilesystemRetriever implements Retriever<RagRequest, RagContext> {
         this.topK = topK;
 
         if (isProcessingEnabled) {
-            processFileStorageFolder();
+            index();
         }
     }
 
@@ -127,22 +134,48 @@ public class FilesystemRetriever implements Retriever<RagRequest, RagContext> {
      *
      * @throws RuntimeException if an I/O error occurs when processing file storage folder.
      */
-    private void processFileStorageFolder() {
+
+    @Override
+    public void index() {
+        var documents = process();
+        save(documents);
+    }
+
+    @Override
+    public List<Document> process() {
+        List<Document> result = new ArrayList<>();
         try (var paths = Files.list(fileStoragePath)) {
             var fileList = paths.filter(Files::isRegularFile).toList();
 
             if (fileList.isEmpty()) {
                 log.debug("No files to process in directory: {}", fileStoragePath);
-                return;
+                return null;
             }
 
-            var documents = filesystemService.createChunkDocumentsFromFiles(fileList);
-            vectorStore.add(documents);
-            moveFilesToProcessedFolder(fileList);
+            final int[] chunkIndex = {0};
+            var documents = filesystemService.createDocumentsFromFiles(fileList);
+            documents.forEach(document -> {
+                var fileName = document.getMetadata().get("fileName").toString();
+                ChunkStrategy chunkStrategy = new SlidingWindowChunking(10, 1);
+                var chunkList = chunkStrategy.splitChunks(document.getContent());
 
+                chunkList.forEach(chunkiterator -> {
+                    var chunk = new Chunk(chunkiterator, chunkIndex[0]++, fileName);
+                    var chunkDocument = new Document(chunk.getText(), Map.of("fileName", fileName, "chunkIndex", chunkIndex));
+                    result.add(chunkDocument);
+                });
+            });
+
+            moveFilesToProcessedFolder(fileList);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        return result;
+    }
+
+    @Override
+    public void save(List<Document> documents) {
+        vectorStore.add(documents);
     }
 
     /**
