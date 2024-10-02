@@ -1,4 +1,4 @@
-package ai.yda.framework.rag.core.model;
+package ai.yda.framework.rag.retriever.website.retriver;
 
 public class CrawlResult {
     private String link;

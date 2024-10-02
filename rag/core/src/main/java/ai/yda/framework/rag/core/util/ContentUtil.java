@@ -16,7 +16,7 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.rag.core.util;
 
 import java.nio.charset.StandardCharsets;
@@ -43,21 +43,14 @@ public final class ContentUtil {
      * Preprocesses the provided content by converting it to UTF-8, formatting it to lowercase, normalizing whitespaces,
      * removing HTML tags and splitting it into chunks of a specified maximum length.
      *
-     * @param content       the textual content to be preprocessed.
-     * @param maxCharacters the maximum number of characters per chunk.
+     * @param content the textual content to be preprocessed.
      * @return a list of strings where each string is a chunk of the processed content. The list is unmodifiable.
      */
-    public static List<String> preprocessAndSplitContent(final String content, final Integer maxCharacters) {
+    public static String preprocessAndSplitContent(final String content) {
         var preprocessedContent = new String(content.getBytes(), StandardCharsets.UTF_8).toLowerCase();
         preprocessedContent = normalizeWhitespaces(preprocessedContent);
         preprocessedContent = removeHtmlTags(preprocessedContent);
-
-        var contentChunks = new ArrayList<String>();
-        for (int i = 0; i < preprocessedContent.length(); i += maxCharacters) {
-            contentChunks.add(
-                    preprocessedContent.substring(i, Math.min(preprocessedContent.length(), i + maxCharacters)));
-        }
-        return contentChunks;
+        return preprocessedContent;
     }
 
     /**
@@ -82,5 +75,6 @@ public final class ContentUtil {
         return document.text();
     }
 
-    private ContentUtil() {}
+    private ContentUtil() {
+    }
 }

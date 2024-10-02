@@ -16,8 +16,8 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
-package ai.yda.framework.rag.retriever.filesystem.service;
+ */
+package ai.yda.framework.rag.retriever.filesystem.service.file_reader;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -46,26 +46,14 @@ import ai.yda.framework.rag.retriever.filesystem.util.FileUtil;
 public class FilesystemService {
 
     /**
-     * The maximum length of a chunk in characters.
-     */
-    private static final int CHUNK_MAX_LENGTH = 1000;
-
-    /**
      * Default constructor for {@link FilesystemService}.
      */
-    public FilesystemService() {}
+    public FilesystemService() {
+    }
 
-    /**
-     * Processes a list of file paths, reads each file, preprocesses the content, splits it into chunks, and then
-     * converts each chunk into a {@link Document} object.
-     *
-     * @param filePathList a list of {@link Path} to the files to be processed.
-     * @return a list of {@link Document} objects created from the chunks of files.
-     */
-    public List<Document> createChunkDocumentsFromFiles(final List<Path> filePathList) {
+    public List<Document> createDocumentsFromFiles(final List<Path> filePathList) {
         return filePathList.parallelStream()
-                .map(this::splitFileIntoChunkDocuments)
-                .flatMap(List::stream)
+                .map(this::splitFileIntoDocument)
                 .toList();
     }
 
@@ -78,12 +66,11 @@ public class FilesystemService {
      * @param filePath the {@link Path} of the file to be processed.
      * @return a list of {@link Document} objects created from the chunks of the file.
      */
-    private List<Document> splitFileIntoChunkDocuments(final Path filePath) {
+    public Document splitFileIntoDocument(final Path filePath) {
         var pdfContent = FileUtil.readPdf(filePath.toFile());
         var fileName = filePath.getFileName();
         log.debug("Processing file: {}", fileName);
-        return ContentUtil.preprocessAndSplitContent(pdfContent, CHUNK_MAX_LENGTH).parallelStream()
-                .map(documentChunk -> new Document(documentChunk, Map.of("fileName", fileName)))
-                .toList();
+        ContentUtil.preprocessAndSplitContent(pdfContent);
+        return new Document(pdfContent, Map.of("fileName", fileName));
     }
 }

@@ -20,7 +20,6 @@
 package ai.yda.framework.rag.retriever.website.retriver;
 
 import ai.yda.framework.rag.core.model.Chunk;
-import ai.yda.framework.rag.core.model.CrawlResult;
 import ai.yda.framework.rag.core.retriever.*;
 import ai.yda.framework.rag.retriever.website.services.chunking.SlidingWindowChunking;
 import ai.yda.framework.rag.retriever.website.services.crawling.WebsiteService;
@@ -35,10 +34,8 @@ import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Retrieves website Context data from a Vector Store based on a User Request. It processes website sitemap and uses a
@@ -97,33 +94,33 @@ public class WebsiteRetriever implements Retriever<RagRequest, RagContext>, Inde
         this.sitemapUrl = sitemapUrl;
         this.topK = topK;
 
-        if (isProcessingEnabled) {
-            process(null);
+        if (Boolean.TRUE.equals(isProcessingEnabled)) {
+            index();
         }
     }
 
     @Override
-    public List<Document> index(final List<CrawlResult> list) {
-        var chunks = process(list);
-        var documents = chunks.stream()
-                .map(chunk -> new Document(chunk.getText(), Map.of("url", chunk.getUrl(), "chunkIndex", String.valueOf(chunk.getIndex()))))
-                .collect(Collectors.toList());
+    public void index() {
+        var documents = process();
         save(documents);
-        return documents;
     }
 
     @Override
-    public List<Chunk> process(List<CrawlResult> chunks) {
-        List<Chunk> result = new ArrayList<>();
+    public List<Document> process() {
+        List<CrawlResult> crawlResultList = new ArrayList<>(){};
+        List<Document> result = new ArrayList<>();
         ChunkStrategy chunkStrategy = new SlidingWindowChunking(10, 1);
-        int chunkIndex = 0;
-        for (CrawlResult crawlResult : chunks) {
-            var chunkedTexts = chunkStrategy.splitChunks(crawlResult.getContent());
-            for (String chunkText : chunkedTexts) {
-                var chunk = new Chunk(chunkText, chunkIndex++, crawlResult.getLink());
-                result.add(chunk);
-            }
-        }
+        final int[] chunkIndex = {0};
+
+        crawlResultList.forEach(crawlResult -> {
+            var chunkList = chunkStrategy.splitChunks(crawlResult.getContent());
+            chunkList.forEach(chunkText -> {
+                var chunk = new Chunk(chunkText, chunkIndex[0]++, crawlResult.getLink());
+                var document = new Document(chunk.getText(), Map.of("url", chunk.getDocumentId(), "chunkIndex", String.valueOf(chunk.getIndex())));
+                result.add(document);
+            });
+        });
+
         return result;
     }
 
