@@ -1,7 +1,4 @@
-package ai.yda.framework.rag.retriever.filesystem.service.chunking;
-
-import ai.yda.framework.rag.core.retriever.ChunkStrategy;
-import org.springframework.lang.NonNull;
+package ai.yda.framework.rag.core.retriever.chunking;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +7,7 @@ public class SlidingWindowChunking implements ChunkStrategy {
     private final int windowSize;
     private final int step;
 
-    public SlidingWindowChunking(final @NonNull int windowSize, final @NonNull int step) {
+    public SlidingWindowChunking(final int windowSize, final int step) {
         this.windowSize = windowSize;
         this.step = step;
     }

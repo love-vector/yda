@@ -19,6 +19,21 @@
  */
 package ai.yda.framework.rag.retriever.filesystem;
 
+import ai.yda.framework.rag.core.model.Chunk;
+import ai.yda.framework.rag.core.model.RagContext;
+import ai.yda.framework.rag.core.model.RagRequest;
+import ai.yda.framework.rag.core.retriever.Indexer;
+import ai.yda.framework.rag.core.retriever.Retriever;
+import ai.yda.framework.rag.core.retriever.chunking.ChunkStrategy;
+import ai.yda.framework.rag.core.retriever.chunking.SlidingWindowChunking;
+import ai.yda.framework.rag.retriever.filesystem.exception.FileReadException;
+import ai.yda.framework.rag.retriever.filesystem.service.FilesystemService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.document.Document;
+import org.springframework.ai.vectorstore.SearchRequest;
+import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.lang.NonNull;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,22 +42,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import ai.yda.framework.rag.core.model.Chunk;
-import ai.yda.framework.rag.core.retriever.ChunkStrategy;
-import ai.yda.framework.rag.core.retriever.Indexer;
-import ai.yda.framework.rag.retriever.filesystem.service.chunking.SlidingWindowChunking;
-import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.ai.document.Document;
-import org.springframework.ai.vectorstore.SearchRequest;
-import org.springframework.ai.vectorstore.VectorStore;
-import org.springframework.lang.NonNull;
-
-import ai.yda.framework.rag.core.model.RagContext;
-import ai.yda.framework.rag.core.model.RagRequest;
-import ai.yda.framework.rag.core.retriever.Retriever;
-import ai.yda.framework.rag.retriever.filesystem.service.file_reader.FilesystemService;
 
 /**
  * Retrieves filesystem Context data from a Vector Store based on a Request. It processes files stored in a specified
@@ -159,8 +158,8 @@ public class FilesystemRetriever implements Retriever<RagRequest, RagContext>, I
                 ChunkStrategy chunkStrategy = new SlidingWindowChunking(10, 1);
                 var chunkList = chunkStrategy.splitChunks(document.getContent());
 
-                chunkList.forEach(chunkiterator -> {
-                    var chunk = new Chunk(chunkiterator, chunkIndex[0]++, fileName);
+                chunkList.forEach(chunkIterator -> {
+                    var chunk = new Chunk(chunkIterator, chunkIndex[0]++, fileName);
                     var chunkDocument = new Document(chunk.getText(), Map.of("fileName", fileName, "chunkIndex", chunkIndex));
                     result.add(chunkDocument);
                 });
@@ -168,7 +167,7 @@ public class FilesystemRetriever implements Retriever<RagRequest, RagContext>, I
 
             moveFilesToProcessedFolder(fileList);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new FileReadException(e);
         }
         return result;
     }

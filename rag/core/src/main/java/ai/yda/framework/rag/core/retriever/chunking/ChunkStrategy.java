@@ -1,4 +1,4 @@
-package ai.yda.framework.rag.core.retriever;
+package ai.yda.framework.rag.core.retriever.chunking;
 
 import java.util.List;
 
