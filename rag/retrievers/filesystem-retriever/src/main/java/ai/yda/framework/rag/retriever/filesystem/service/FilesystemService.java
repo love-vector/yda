@@ -71,6 +71,6 @@ public class FilesystemService {
         var fileName = filePath.getFileName();
         log.debug("Processing file: {}", fileName);
         ContentUtil.preprocessAndSplitContent(pdfContent);
-        return new Document(pdfContent, Map.of("fileName", fileName));
+        return new Document(pdfContent, Map.of("documentId", fileName));
     }
 }

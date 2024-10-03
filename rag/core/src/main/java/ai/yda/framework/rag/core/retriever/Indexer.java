@@ -7,7 +7,7 @@ import java.util.List;
 public interface Indexer {
     void index();
 
-    List<Document> process();
+    List<Document> process(List<Document> crawlResult);
 
     void save(List<Document> documents);
 

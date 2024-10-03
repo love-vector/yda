@@ -27,7 +27,6 @@ import ai.yda.framework.rag.core.retriever.Retriever;
 import ai.yda.framework.rag.core.retriever.chunking.ChunkStrategy;
 import ai.yda.framework.rag.core.retriever.chunking.SlidingWindowChunking;
 import ai.yda.framework.rag.retriever.website.services.WebsiteService;
-import ai.yda.framework.rag.retriever.website.services.crawling.WebsiteService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
@@ -102,26 +101,22 @@ public class WebsiteRetriever implements Retriever<RagRequest, RagContext>, Inde
 
     @Override
     public void index() {
-        var documents = process();
+        List<CrawlResult> crawlResultList = new ArrayList<>(){};
+        List<Document> documented = new ArrayList<>();
+        crawlResultList.forEach(crawlResult -> documented.add(new Document(crawlResult.getContent(), Map.of("documentId", crawlResult.getLink()))));
+        var documents = process(documented);
         save(documents);
     }
 
     @Override
-    public List<Document> process() {
-        List<CrawlResult> crawlResultList = new ArrayList<>(){};
+    public List<Document> process(List<Document> crawlResult) {
         List<Document> result = new ArrayList<>();
         ChunkStrategy chunkStrategy = new SlidingWindowChunking(10, 1);
-        final int[] chunkIndex = {0};
-
-        crawlResultList.forEach(crawlResult -> {
-            var chunkList = chunkStrategy.splitChunks(crawlResult.getContent());
-            chunkList.forEach(chunkText -> {
-                var chunk = new Chunk(chunkText, chunkIndex[0]++, crawlResult.getLink());
-                var document = new Document(chunk.getText(), Map.of("url", chunk.getDocumentId(), "chunkIndex", String.valueOf(chunk.getIndex())));
-                result.add(document);
-            });
+        var chunkList = chunkStrategy.splitChunks(crawlResult);
+        chunkList.forEach(chunk -> {
+            var document = new Document(chunk.getText(), Map.of("documentId", chunk.getDocumentId(), "chunkIndex", String.valueOf(chunk.getIndex())));
+            result.add(document);
         });
-
         return result;
     }
 

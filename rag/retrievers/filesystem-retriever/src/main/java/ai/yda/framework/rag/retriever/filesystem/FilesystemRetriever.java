@@ -34,6 +34,7 @@ import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.lang.NonNull;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -136,39 +137,27 @@ public class FilesystemRetriever implements Retriever<RagRequest, RagContext>, I
 
     @Override
     public void index() {
-        var documents = process();
-        save(documents);
-    }
-
-    @Override
-    public List<Document> process() {
-        List<Document> result = new ArrayList<>();
         try (var paths = Files.list(fileStoragePath)) {
             var fileList = paths.filter(Files::isRegularFile).toList();
-
             if (fileList.isEmpty()) {
                 log.debug("No files to process in directory: {}", fileStoragePath);
-                return null;
+                return;
             }
-
-            final int[] chunkIndex = {0};
-            var documents = filesystemService.createDocumentsFromFiles(fileList);
-            documents.forEach(document -> {
-                var fileName = document.getMetadata().get("fileName").toString();
-                ChunkStrategy chunkStrategy = new SlidingWindowChunking(10, 1);
-                var chunkList = chunkStrategy.splitChunks(document.getContent());
-
-                chunkList.forEach(chunkIterator -> {
-                    var chunk = new Chunk(chunkIterator, chunkIndex[0]++, fileName);
-                    var chunkDocument = new Document(chunk.getText(), Map.of("fileName", fileName, "chunkIndex", chunkIndex));
-                    result.add(chunkDocument);
-                });
-            });
-
+            var fileReadingResult = filesystemService.createDocumentsFromFiles(fileList);
+            var documents = process(fileReadingResult);
             moveFilesToProcessedFolder(fileList);
+            save(documents);
         } catch (IOException e) {
             throw new FileReadException(e);
         }
+    }
+
+    @Override
+    public List<Document> process(final List<Document> fileReadingResult) {
+        List<Document> result = new ArrayList<>();
+        ChunkStrategy chunkStrategy = new SlidingWindowChunking(10, 1);
+        var chunkList = chunkStrategy.splitChunks(fileReadingResult);
+        chunkList.forEach(chunkIterator -> result.add(new Document(chunkIterator.getText(), Map.of("documentId", chunkIterator.getDocumentId(), "chunkIndex", chunkIterator.getIndex()))));
         return result;
     }
 

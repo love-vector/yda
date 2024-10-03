@@ -1,27 +1,38 @@
 package ai.yda.framework.rag.core.retriever.chunking;
 
+import ai.yda.framework.rag.core.model.Chunk;
+import org.springframework.ai.document.Document;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class FixedLengthWordChunking implements ChunkStrategy {
     private final int chunkSize;
+
     public FixedLengthWordChunking(final int chunkSize) {
         this.chunkSize = chunkSize;
     }
 
     @Override
-    public List<String> splitChunks(final String text) {
-        String[] words = text.split("\\s+");
-        List<String> chunks = new ArrayList<>();
+    public List<Chunk> splitChunks(final List<Document> documents) {
+        List<Chunk> chunks = new ArrayList<>();
+        final int[] chunkIndex = {0};
 
-        for (int i = 0; i < words.length; i += chunkSize) {
-            StringBuilder chunk = new StringBuilder();
-            for (int j = i; j < i + chunkSize && j < words.length; j++) {
-                chunk.append(words[j]).append(" ");
+        documents.forEach(document -> {
+            var text = document.getContent();
+            var documentId = document.getMetadata().get("documentId").toString();
+            var words = text.split("\\s+");
+
+            for (int i = 0; i < words.length; i += chunkSize) {
+                StringBuilder chunkText = new StringBuilder();
+                for (int j = i; j < i + chunkSize && j < words.length; j++) {
+                    chunkText.append(words[j]).append(" ");
+                }
+
+                var chunk = new Chunk(chunkText.toString().trim(), chunkIndex[0]++, documentId);
+                chunks.add(chunk);
             }
-            chunks.add(chunk.toString().trim());
-        }
-
+        });
         return chunks;
     }
 }
