@@ -1,5 +1,8 @@
 package ai.yda.framework.rag.core.retriever.chunking;
 
+import ai.yda.framework.rag.core.model.Chunk;
+import org.springframework.ai.document.Document;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,17 +16,25 @@ public class SlidingWindowChunking implements ChunkStrategy {
     }
 
     @Override
-    public List<String> splitChunks(final String text) {
-        String[] words = text.split("\\s+");
-        List<String> chunks = new ArrayList<>();
+    public List<Chunk> splitChunks(final List<Document> documents) {
+        List<Chunk> chunks = new ArrayList<>();
+        final int[] chunkIndex = {0};
+        documents.forEach(document -> {
+            var text = document.getContent();
+            var documentId = document.getMetadata().get("documentId").toString();
+            document.getMetadata();
 
-        for (int i = 0; i < words.length; i += step) {
-            StringBuilder chunk = new StringBuilder();
-            for (int j = i; j < i + windowSize && j < words.length; j++) {
-                chunk.append(words[j]).append(" ");
+            String[] words = text.split("\\s+");
+
+            for (int i = 0; i < words.length; i += step) {
+                StringBuilder chunkText = new StringBuilder();
+                for (int j = i; j < i + windowSize && j < words.length; j++) {
+                    chunkText.append(words[j]).append(" ");
+                }
+                Chunk chunk = new Chunk(chunkText.toString().trim(), chunkIndex[0]++, documentId);
+                chunks.add(chunk);
             }
-            chunks.add(chunk.toString().trim());
-        }
+        });
         return chunks;
     }
 }
