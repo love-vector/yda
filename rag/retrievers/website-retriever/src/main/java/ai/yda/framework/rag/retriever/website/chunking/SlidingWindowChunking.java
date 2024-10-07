@@ -1,10 +1,11 @@
-package ai.yda.framework.rag.core.retriever.chunking;
-
-import ai.yda.framework.rag.core.model.Chunk;
-import org.springframework.ai.document.Document;
+package ai.yda.framework.rag.retriever.website.chunking;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.springframework.ai.document.Document;
+
+import ai.yda.framework.rag.core.model.Chunk;
 
 public class SlidingWindowChunking implements ChunkStrategy {
     private final int windowSize;

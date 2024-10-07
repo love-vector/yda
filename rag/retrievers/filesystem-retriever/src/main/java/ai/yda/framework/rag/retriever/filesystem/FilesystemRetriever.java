@@ -16,7 +16,7 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.rag.retriever.filesystem;
 
 import java.io.IOException;
@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import ai.yda.framework.rag.core.retriever.Indexer;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.ai.document.Document;
@@ -38,9 +37,10 @@ import org.springframework.lang.NonNull;
 
 import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
+import ai.yda.framework.rag.core.retriever.Indexer;
 import ai.yda.framework.rag.core.retriever.Retriever;
-import ai.yda.framework.rag.core.retriever.chunking.ChunkStrategy;
-import ai.yda.framework.rag.core.retriever.chunking.FixedLengthWordChunking;
+import ai.yda.framework.rag.retriever.filesystem.chunking.ChunkStrategy;
+import ai.yda.framework.rag.retriever.filesystem.chunking.FixedLengthWordChunking;
 import ai.yda.framework.rag.retriever.filesystem.exception.FileReadException;
 import ai.yda.framework.rag.retriever.filesystem.service.FilesystemService;
 
@@ -56,7 +56,7 @@ import ai.yda.framework.rag.retriever.filesystem.service.FilesystemService;
  * @since 0.1.0
  */
 @Slf4j
-public class FilesystemRetriever implements Retriever<RagRequest, RagContext>, Indexer {
+public class FilesystemRetriever implements Retriever<RagRequest, RagContext>, Indexer<Document> {
     /**
      * The Vector Store used to retrieve Context data for User Request through similarity search.
      */

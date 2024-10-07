@@ -1,34 +1,9 @@
-/*
- * YDA - Open-Source Java AI Assistant.
- * Copyright (C) 2024 Love Vector OÜ <https://vector-inc.dev/>
-
- * This file is part of YDA.
-
- * YDA is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
-
- * YDA is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
-
- * You should have received a copy of the GNU Lesser General Public License
- * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
 package ai.yda.framework.rag.retriever.website.retriver;
-
-import java.util.List;
-import java.util.Map;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import ai.yda.framework.rag.core.retriever.Indexer;
-import ai.yda.framework.rag.core.retriever.chunking.ChunkStrategy;
-import ai.yda.framework.rag.core.retriever.chunking.FixedLengthWordChunking;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.ai.document.Document;
@@ -38,8 +13,10 @@ import org.springframework.lang.NonNull;
 
 import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
+import ai.yda.framework.rag.core.retriever.Indexer;
 import ai.yda.framework.rag.core.retriever.Retriever;
-import ai.yda.framework.rag.core.util.ContentUtil;
+import ai.yda.framework.rag.retriever.website.chunking.ChunkStrategy;
+import ai.yda.framework.rag.retriever.website.chunking.FixedLengthWordChunking;
 import ai.yda.framework.rag.retriever.website.extractor.WebExtractor;
 
 /**
@@ -53,7 +30,7 @@ import ai.yda.framework.rag.retriever.website.extractor.WebExtractor;
  * @since 0.1.0
  */
 @Slf4j
-public class WebsiteRetriever implements Retriever<RagRequest, RagContext>, Indexer {
+public class WebsiteRetriever implements Retriever<RagRequest, RagContext>, Indexer<Document> {
     /**
      * The Vector Store used to retrieve Context data for user Request through similarity search.
      */
@@ -86,7 +63,7 @@ public class WebsiteRetriever implements Retriever<RagRequest, RagContext>, Inde
      * @param topK                the number of top results to retrieve from the Vector Store. This value must be a
      *                            positive integer.
      * @param isProcessingEnabled a {@link Boolean} flag indicating whether website processing should be enabled during
-     *                            initialization. If {@code true}, the method {@link #processUrl()} will
+     *                            initialization. If {@code true}, the method {@link #index()} will
      *                            be called to process the files in the specified storage path.
      * @throws IllegalArgumentException if {@code topK} is not a positive number.
      */
@@ -105,32 +82,29 @@ public class WebsiteRetriever implements Retriever<RagRequest, RagContext>, Inde
         this.topK = topK;
 
         if (isProcessingEnabled) {
-            processUrl();
+            index();
         }
     }
 
     @Override
     public void index() {
-        List<CrawlResult> crawlResultList = new ArrayList<>() {};
-        List<Document> documented = new ArrayList<>();
-        crawlResultList.forEach(crawlResult ->
-                documented.add(new Document(crawlResult.getContent(), Map.of("documentId", crawlResult.getLink()))));
-        var documents = process(documented);
+        var pageDocuments = webExtractor.extract(url);
+        List<Document> documentsForChunking = new ArrayList<>();
+        pageDocuments.forEach(crawlResult -> documentsForChunking.add(
+                new Document(crawlResult.getContent(), Map.of("documentId", crawlResult.getUrl()))));
+        var documents = process(documentsForChunking);
         save(documents);
     }
 
     @Override
-    public List<Document> process(List<Document> crawlResult) {
-        List<Document> result = new ArrayList<>();
+    public List<Document> process(List<Document> documents) {
         ChunkStrategy chunkStrategy = new FixedLengthWordChunking(1000);
-        var chunkList = chunkStrategy.splitChunks(crawlResult);
-        chunkList.forEach(chunk -> {
-            var document = new Document(
-                    chunk.getText(),
-                    Map.of("documentId", chunk.getDocumentId(), "chunkIndex", String.valueOf(chunk.getIndex())));
-            result.add(document);
-        });
-        return result;
+        var chunks = chunkStrategy.splitChunks(documents);
+        return chunks.parallelStream()
+                .map(chunk -> new Document(
+                        chunk.getText(),
+                        Map.of("documentId", chunk.getDocumentId(), "chunkIndex", String.valueOf(chunk.getIndex()))))
+                .toList();
     }
 
     @Override
@@ -158,19 +132,5 @@ public class WebsiteRetriever implements Retriever<RagRequest, RagContext>, Inde
                                 })
                                 .toList())
                 .build();
-    }
-
-    /**
-     * Extracts data from url and processes by creating document chunks and adding them to the Vector Store.
-     */
-    private void processUrl() {
-        var pageDocuments = webExtractor.extract(url).parallelStream()
-                .map(result ->
-                        ContentUtil.preprocessAndSplitContent(result.getContent(), CHUNK_MAX_LENGTH).parallelStream()
-                                .map(chunkContent -> new Document(chunkContent, Map.of("url", result.getUrl())))
-                                .toList())
-                .flatMap(List::stream)
-                .toList();
-        vectorStore.add(pageDocuments);
     }
 }

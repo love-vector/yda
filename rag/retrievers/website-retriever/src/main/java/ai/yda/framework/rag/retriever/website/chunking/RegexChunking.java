@@ -1,4 +1,4 @@
-package ai.yda.framework.rag.core.retriever.chunking;
+package ai.yda.framework.rag.retriever.website.chunking;
 
 import java.util.ArrayList;
 import java.util.Arrays;
