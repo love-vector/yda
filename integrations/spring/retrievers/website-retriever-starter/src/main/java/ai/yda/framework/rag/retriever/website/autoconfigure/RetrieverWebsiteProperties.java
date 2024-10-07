@@ -45,7 +45,7 @@ import ai.yda.framework.rag.retriever.shared.RetrieverProperties;
  *                    topK: your-top-k
  *                    isProcessingEnabled: true/false
  *                    clearCollectionOnStartup: true/false
- *                    sitemapUrl: your-file-storage-path
+ *                    url: website-or-sitemap-url
  * </pre>
  *
  * @author Dmitry Marchuk
@@ -63,7 +63,10 @@ public class RetrieverWebsiteProperties extends RetrieverProperties {
      */
     public static final String CONFIG_PREFIX = "ai.yda.framework.rag.retriever.website";
 
-    private String sitemapUrl;
+    /**
+     * Operational URL of website or sitemap.
+     */
+    private String url;
 
     /**
      * Default constructor for {@link RetrieverWebsiteProperties}.
