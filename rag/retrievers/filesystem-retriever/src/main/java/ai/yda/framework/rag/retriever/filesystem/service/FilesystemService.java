@@ -48,17 +48,14 @@ public class FilesystemService {
     /**
      * Default constructor for {@link FilesystemService}.
      */
-    public FilesystemService() {
-    }
+    public FilesystemService() {}
 
     public List<Document> createDocumentsFromFiles(final List<Path> filePathList) {
-        return filePathList.parallelStream()
-                .map(this::splitFileIntoDocument)
-                .toList();
+        return filePathList.parallelStream().map(this::splitFileIntoDocument).toList();
     }
 
     /**
-     * Preprocesses and split of each file into chunks of a maximum length defined by {@link #CHUNK_MAX_LENGTH}. The
+     * Preprocesses and split of each file into chunks of a maximum length defined by {@link }. The
      * method reads the content of a PDF file, preprocesses it to clean and format the text, and then splits the
      * preprocessed content into smaller chunks based on the maximum length. Each chunk is converted into a
      * {@link Document} object with associated metadata.

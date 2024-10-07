@@ -19,23 +19,24 @@
  */
 package ai.yda.framework.rag.retriever.website.retriver;
 
-import ai.yda.framework.rag.core.model.Chunk;
-import ai.yda.framework.rag.core.model.RagContext;
-import ai.yda.framework.rag.core.model.RagRequest;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import ai.yda.framework.rag.core.retriever.Indexer;
-import ai.yda.framework.rag.core.retriever.Retriever;
 import ai.yda.framework.rag.core.retriever.chunking.ChunkStrategy;
-import ai.yda.framework.rag.core.retriever.chunking.SlidingWindowChunking;
-import ai.yda.framework.rag.retriever.website.services.WebsiteService;
+import ai.yda.framework.rag.core.retriever.chunking.FixedLengthWordChunking;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.lang.NonNull;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import ai.yda.framework.rag.core.model.RagContext;
+import ai.yda.framework.rag.core.model.RagRequest;
+import ai.yda.framework.rag.core.retriever.Retriever;
+import ai.yda.framework.rag.retriever.website.services.WebsiteService;
 
 /**
  * Retrieves website Context data from a Vector Store based on a User Request. It processes website sitemap and uses a
@@ -78,7 +79,7 @@ public class WebsiteRetriever implements Retriever<RagRequest, RagContext>, Inde
      * @param topK                the number of top results to retrieve from the Vector Store. This value must be a
      *                            positive integer.
      * @param isProcessingEnabled a {@link Boolean} flag indicating whether website processing should be enabled during
-     *                            initialization. If {@code true}, the method {@link #processWebsite()} will
+     *                            initialization. If {@code true}, the method {@link #index()} will
      *                            be called to process the files in the specified storage path.
      * @throws IllegalArgumentException if {@code topK} is not a positive number.
      */
@@ -101,9 +102,10 @@ public class WebsiteRetriever implements Retriever<RagRequest, RagContext>, Inde
 
     @Override
     public void index() {
-        List<CrawlResult> crawlResultList = new ArrayList<>(){};
+        List<CrawlResult> crawlResultList = new ArrayList<>() {};
         List<Document> documented = new ArrayList<>();
-        crawlResultList.forEach(crawlResult -> documented.add(new Document(crawlResult.getContent(), Map.of("documentId", crawlResult.getLink()))));
+        crawlResultList.forEach(crawlResult ->
+                documented.add(new Document(crawlResult.getContent(), Map.of("documentId", crawlResult.getLink()))));
         var documents = process(documented);
         save(documents);
     }
@@ -111,10 +113,12 @@ public class WebsiteRetriever implements Retriever<RagRequest, RagContext>, Inde
     @Override
     public List<Document> process(List<Document> crawlResult) {
         List<Document> result = new ArrayList<>();
-        ChunkStrategy chunkStrategy = new SlidingWindowChunking(10, 1);
+        ChunkStrategy chunkStrategy = new FixedLengthWordChunking(1000);
         var chunkList = chunkStrategy.splitChunks(crawlResult);
         chunkList.forEach(chunk -> {
-            var document = new Document(chunk.getText(), Map.of("documentId", chunk.getDocumentId(), "chunkIndex", String.valueOf(chunk.getIndex())));
+            var document = new Document(
+                    chunk.getText(),
+                    Map.of("documentId", chunk.getDocumentId(), "chunkIndex", String.valueOf(chunk.getIndex())));
             result.add(document);
         });
         return result;

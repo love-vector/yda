@@ -20,8 +20,6 @@
 package ai.yda.framework.rag.core.util;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.jsoup.Jsoup;
 
@@ -75,6 +73,5 @@ public final class ContentUtil {
         return document.text();
     }
 
-    private ContentUtil() {
-    }
+    private ContentUtil() {}
 }

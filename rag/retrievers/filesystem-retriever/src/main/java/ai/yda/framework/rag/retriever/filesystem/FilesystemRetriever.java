@@ -19,22 +19,6 @@
  */
 package ai.yda.framework.rag.retriever.filesystem;
 
-import ai.yda.framework.rag.core.model.Chunk;
-import ai.yda.framework.rag.core.model.RagContext;
-import ai.yda.framework.rag.core.model.RagRequest;
-import ai.yda.framework.rag.core.retriever.Indexer;
-import ai.yda.framework.rag.core.retriever.Retriever;
-import ai.yda.framework.rag.core.retriever.chunking.ChunkStrategy;
-import ai.yda.framework.rag.core.retriever.chunking.SlidingWindowChunking;
-import ai.yda.framework.rag.retriever.filesystem.exception.FileReadException;
-import ai.yda.framework.rag.retriever.filesystem.service.FilesystemService;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.ai.document.Document;
-import org.springframework.ai.vectorstore.SearchRequest;
-import org.springframework.ai.vectorstore.VectorStore;
-import org.springframework.lang.NonNull;
-
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -43,6 +27,22 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import ai.yda.framework.rag.core.retriever.Indexer;
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.ai.document.Document;
+import org.springframework.ai.vectorstore.SearchRequest;
+import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.lang.NonNull;
+
+import ai.yda.framework.rag.core.model.RagContext;
+import ai.yda.framework.rag.core.model.RagRequest;
+import ai.yda.framework.rag.core.retriever.Retriever;
+import ai.yda.framework.rag.core.retriever.chunking.ChunkStrategy;
+import ai.yda.framework.rag.core.retriever.chunking.FixedLengthWordChunking;
+import ai.yda.framework.rag.retriever.filesystem.exception.FileReadException;
+import ai.yda.framework.rag.retriever.filesystem.service.FilesystemService;
 
 /**
  * Retrieves filesystem Context data from a Vector Store based on a Request. It processes files stored in a specified
@@ -134,7 +134,6 @@ public class FilesystemRetriever implements Retriever<RagRequest, RagContext>, I
      *
      * @throws RuntimeException if an I/O error occurs when processing file storage folder.
      */
-
     @Override
     public void index() {
         try (var paths = Files.list(fileStoragePath)) {
@@ -155,9 +154,11 @@ public class FilesystemRetriever implements Retriever<RagRequest, RagContext>, I
     @Override
     public List<Document> process(final List<Document> fileReadingResult) {
         List<Document> result = new ArrayList<>();
-        ChunkStrategy chunkStrategy = new SlidingWindowChunking(10, 1);
+        ChunkStrategy chunkStrategy = new FixedLengthWordChunking(1000);
         var chunkList = chunkStrategy.splitChunks(fileReadingResult);
-        chunkList.forEach(chunkIterator -> result.add(new Document(chunkIterator.getText(), Map.of("documentId", chunkIterator.getDocumentId(), "chunkIndex", chunkIterator.getIndex()))));
+        chunkList.forEach(chunkIterator -> result.add(new Document(
+                chunkIterator.getText(),
+                Map.of("documentId", chunkIterator.getDocumentId(), "chunkIndex", chunkIterator.getIndex()))));
         return result;
     }
 
