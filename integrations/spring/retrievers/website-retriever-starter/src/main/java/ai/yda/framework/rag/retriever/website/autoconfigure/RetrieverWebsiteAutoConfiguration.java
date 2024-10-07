@@ -24,33 +24,26 @@ import org.springframework.ai.autoconfigure.openai.OpenAiEmbeddingProperties;
 import org.springframework.ai.autoconfigure.vectorstore.milvus.MilvusServiceClientProperties;
 import org.springframework.ai.autoconfigure.vectorstore.milvus.MilvusVectorStoreProperties;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
 import ai.yda.framework.rag.retriever.shared.MilvusVectorStoreUtil;
 import ai.yda.framework.rag.retriever.website.WebsiteRetriever;
+import ai.yda.framework.rag.retriever.website.extractor.WebExtractor;
 
 /**
- * Autoconfiguration class for setting up the {@link WebsiteRetriever} bean with the necessary properties and
- * dependencies. The configuration is based on properties defined in the external configuration files.
- * <p>
- * The configuration is based on properties defined in the external configuration files (e.g., application.properties
- * or application.yml) under {@link RetrieverWebsiteProperties#CONFIG_PREFIX},
- * {@link MilvusVectorStoreProperties#CONFIG_PREFIX} and {@link OpenAiConnectionProperties#CONFIG_PREFIX} namespaces.
- * </p>
+ * Autoconfiguration class for creating and configuring all necessary components for Web Retrieving.
  *
  * @author Iryna Kopchak
  * @author Bogdan Synenko
+ * @author Nikita Litvinov
  * @see WebsiteRetriever
- * @see RetrieverWebsiteProperties
- * @see MilvusVectorStoreProperties
- * @see MilvusServiceClientProperties
- * @see OpenAiConnectionProperties
- * @see OpenAiEmbeddingProperties
+ * @see WebExtractor
  * @since 1.0.0
  */
 @AutoConfiguration
-@EnableConfigurationProperties(RetrieverWebsiteProperties.class)
+@EnableConfigurationProperties({RetrieverWebsiteProperties.class, WebExtractorProperties.class})
 public class RetrieverWebsiteAutoConfiguration {
 
     /**
@@ -68,6 +61,7 @@ public class RetrieverWebsiteAutoConfiguration {
      *     <li>Creates and returns a {@link WebsiteRetriever} instance with the initialized parameters</li>
      * </ul>
      *
+     * @param webExtractor               the extractor used for crawling and extracting web content.
      * @param websiteProperties          properties for configuring the {@link RetrieverWebsiteProperties}, including
      *                                   file storage path, topK value, and processing enablement.
      * @param milvusProperties           properties for configuring the Milvus Vector Store.
@@ -79,6 +73,7 @@ public class RetrieverWebsiteAutoConfiguration {
      */
     @Bean
     public WebsiteRetriever websiteRetriever(
+            final WebExtractor webExtractor,
             final RetrieverWebsiteProperties websiteProperties,
             final MilvusVectorStoreProperties milvusProperties,
             final MilvusServiceClientProperties milvusClientProperties,
@@ -94,9 +89,33 @@ public class RetrieverWebsiteAutoConfiguration {
                 openAiEmbeddingProperties);
         milvusVectorStore.afterPropertiesSet();
         return new WebsiteRetriever(
+                webExtractor,
                 milvusVectorStore,
-                websiteProperties.getSitemapUrl(),
+                websiteProperties.getUrl(),
                 websiteProperties.getTopK(),
                 websiteProperties.getIsProcessingEnabled());
+    }
+
+    /**
+     * Creates a {@link WebExtractor} bean with the specified properties.
+     * <p>
+     * The {@link WebExtractor} is configured using the provided {@link WebExtractorProperties},
+     * which defines the crawler's behavior, such as the maximum number of threads, retry times,
+     * sleep times, and depth limits.
+     * </p>
+     *
+     * @param crawlerProperties the properties used to configure the {@link WebExtractor}.
+     * @return a configured {@link WebExtractor} instance.
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public WebExtractor webExtractor(final WebExtractorProperties crawlerProperties) {
+        return new WebExtractor(
+                crawlerProperties.getCrawlerMaxThreads(),
+                crawlerProperties.getCrawlerRetryTimes(),
+                crawlerProperties.getCrawlerSleepTime(),
+                crawlerProperties.getCrawlerMaxDepth(),
+                crawlerProperties.getBrowserSleepTime(),
+                crawlerProperties.getBrowserPoolSize());
     }
 }
