@@ -1,1 +1,2 @@
 ai.yda.framework.assistant.rag.autoconfigure.RagAssistantAutoConfiguration
+ai.yda.framework.assistant.rag.autoconfigure.StreamingRagAssistantAutoConfiguration

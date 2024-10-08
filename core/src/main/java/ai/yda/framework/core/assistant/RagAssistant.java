@@ -24,34 +24,30 @@ import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.model.RagResponse;
 
 /**
- * Represents a RAG Assistant that processes a Request and returns a Response. This class delegates the Request
- * processing to the {@link Rag} instance provided via constructor injection.
+ * Represents a RAG Assistant that synchronously processes a {@link RagRequest} and returns a corresponding
+ * {@link RagResponse}.
  *
  * @author Nikita Litvinov
- * @see Rag
- * @see StreamingRagAssistant
  * @since 0.1.0
  */
 public class RagAssistant implements Assistant<RagRequest, RagResponse> {
 
     /**
-     * The {@link Rag} instance responsible for processing the {@link RagRequest} and generating the
-     * {@link RagResponse}.
+     * The {@link Rag} instance responsible for synchronous RAG processing.
      */
     private final Rag<RagRequest, RagResponse> rag;
 
     /**
-     * Constructs a new {@link RagAssistant} instance with the specified {@link Rag} instance.
+     * Constructs a new {@link RagAssistant} instance.
      *
-     * @param rag the {@link Rag} instance used to handle {@link RagRequest} and {@link RagResponse} processing.
+     * @param rag the {@link Rag} instance used for synchronous request-response processing.
      */
     public RagAssistant(final Rag<RagRequest, RagResponse> rag) {
         this.rag = rag;
     }
 
     /**
-     * Processes the given {@link RagRequest} by delegating to the {@link Rag#doRag(RagRequest)} method and returns the
-     * resulting {@link RagResponse}.
+     * Processes the given {@link RagRequest} synchronously by delegating to the {@link Rag#doRag(RagRequest)} method.
      *
      * @param request the {@link RagRequest} to be processed.
      * @return the {@link RagResponse} generated from processing the request.

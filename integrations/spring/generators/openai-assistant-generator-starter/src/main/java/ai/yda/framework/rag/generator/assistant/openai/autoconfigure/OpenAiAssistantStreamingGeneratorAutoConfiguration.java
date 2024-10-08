@@ -24,61 +24,62 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
-import ai.yda.framework.rag.generator.assistant.openai.OpenAiAssistantGenerator;
+import ai.yda.framework.rag.generator.assistant.openai.OpenAiAssistantStreamingGenerator;
 import ai.yda.framework.rag.generator.assistant.openai.service.AzureOpenAiAssistantService;
-import ai.yda.framework.rag.generator.assistant.openai.util.ContextResolver;
-import ai.yda.framework.session.core.SessionProvider;
+import ai.yda.framework.rag.generator.assistant.openai.util.StreamingContextResolver;
+import ai.yda.framework.session.core.ReactiveSessionProvider;
 
 /**
- * Autoconfiguration class for setting up an {@link OpenAiAssistantGenerator} bean and related components for OpenAI
- * integration.
+ * Autoconfiguration class for setting up the {@link OpenAiAssistantStreamingGenerator} bean and related components for
+ * OpenAI integration.
  *
- * @author Iryna Kopchak
- * @author Dmitry Marchuk
  * @author Nikita Litvinov
- * @since 0.1.0
+ * @since 0.2.0
  */
 @AutoConfiguration
 @EnableConfigurationProperties(OpenAiAssistantGeneratorProperties.class)
-@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-public class OpenAiAssistantGeneratorAutoConfiguration {
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
+public class OpenAiAssistantStreamingGeneratorAutoConfiguration {
 
     /**
-     * Default constructor for {@link OpenAiAssistantGeneratorAutoConfiguration}.
+     * Default constructor for {@link OpenAiAssistantStreamingGeneratorAutoConfiguration}.
      */
-    public OpenAiAssistantGeneratorAutoConfiguration() {}
+    public OpenAiAssistantStreamingGeneratorAutoConfiguration() {}
 
     /**
-     * Creates and configures an {@link OpenAiAssistantGenerator} bean.
+     * Creates and configures an {@link OpenAiAssistantStreamingGenerator} bean.
      *
      * @param assistantService             the {@link AzureOpenAiAssistantService} used for interacting with OpenAI.
-     * @param sessionProvider              the {@link SessionProvider} responsible for managing User Sessions.
+     * @param reactiveSessionProvider      the {@link ReactiveSessionProvider} responsible for managing User Sessions in
+     *                                     a reactive manner.
      * @param assistantGeneratorProperties the properties for configuring the Assistant Generator.
-     * @return a configured {@link OpenAiAssistantGenerator} bean.
+     * @return a configured {@link OpenAiAssistantStreamingGenerator} bean.
      */
     @Bean
-    public OpenAiAssistantGenerator openAiAssistantGenerator(
+    public OpenAiAssistantStreamingGenerator openAiAssistantStreamingGenerator(
             final AzureOpenAiAssistantService assistantService,
-            final SessionProvider sessionProvider,
+            final ReactiveSessionProvider reactiveSessionProvider,
             final OpenAiAssistantGeneratorProperties assistantGeneratorProperties) {
-        return new OpenAiAssistantGenerator(
-                assistantService, sessionProvider, assistantGeneratorProperties.getAssistantId());
+        return new OpenAiAssistantStreamingGenerator(
+                assistantService, reactiveSessionProvider, assistantGeneratorProperties.getAssistantId());
     }
 
     /**
-     * Creates and configures a {@link ContextResolver} bean.
+     * Creates and configures a {@link StreamingContextResolver} bean.
      *
      * @param assistantService             the {@link AzureOpenAiAssistantService} used for interacting with OpenAI.
-     * @param sessionProvider              the {@link SessionProvider} responsible for managing User Sessions.
+     * @param reactiveSessionProvider      the {@link ReactiveSessionProvider} responsible for managing User Sessions.
      * @param assistantGeneratorProperties the properties for configuring the Context Resolver.
-     * @return a configured {@link ContextResolver} bean.
+     * @return a configured {@link StreamingContextResolver} bean.
      */
     @Bean
-    public ContextResolver contextResolver(
+    public StreamingContextResolver streamingContextResolver(
             final AzureOpenAiAssistantService assistantService,
-            final SessionProvider sessionProvider,
+            final ReactiveSessionProvider reactiveSessionProvider,
             final OpenAiAssistantGeneratorProperties assistantGeneratorProperties) {
-        return new ContextResolver(
-                assistantService, sessionProvider, assistantGeneratorProperties.getContextResolverAssistantId());
+        return new StreamingContextResolver(
+                assistantService,
+                reactiveSessionProvider,
+                assistantGeneratorProperties.getContextResolverAssistantId());
     }
 }

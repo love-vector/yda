@@ -22,6 +22,7 @@ package ai.yda.framework.rag.autoconfigure;
 import java.util.List;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 
 import ai.yda.framework.rag.core.DefaultRag;
@@ -31,21 +32,16 @@ import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.model.RagResponse;
 import ai.yda.framework.rag.core.retriever.Retriever;
+import ai.yda.framework.rag.core.util.RequestTransformer;
 
 /**
- * Autoconfiguration class for setting up a {@link DefaultRag} bean. This class provides the automatic configuration for
- * a {@link DefaultRag} instance, which is a key component in the Retrieval-Augmented Generation (RAG) framework. The
- * {@link DefaultRag} is configured with a list of Retrievers that fetch relevant Context, Augmenters that enhance
- * the Context, and a Generator that produces the final Response based on the augmented Context.
+ * Autoconfiguration class for setting up a {@link DefaultRag} bean in the RAG framework.
  *
  * @author Nikita Litvinov
- * @see DefaultRag
- * @see Retriever
- * @see Augmenter
- * @see Generator
  * @since 0.1.0
  */
 @AutoConfiguration
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 public class RagAutoConfiguration {
 
     /**
@@ -54,19 +50,21 @@ public class RagAutoConfiguration {
     public RagAutoConfiguration() {}
 
     /**
-     * Defines a {@link DefaultRag} bean, which is configured with the provided lists of {@link Retriever} and
-     * {@link Augmenter}, along with the {@link Generator} used to generate Responses.
+     * Creates and configures a {@link DefaultRag} bean.
      *
-     * @param retrievers the list of {@link Retriever} beans used for retrieving Context based on the Request.
-     * @param augmenters the list of {@link Augmenter} beans used for enhancing the retrieved Context.
-     * @param generator  the {@link Generator} bean used for generating Responses based on the augmented Context.
+     * @param retrievers          the list of {@link Retriever} beans for retrieving Context based on the Request.
+     * @param augmenters          the list of {@link Augmenter} beans for enhancing the retrieved Context.
+     * @param generator           the {@link Generator} bean for generating Responses based on the augmented Context.
+     * @param requestTransformers the list of {@link RequestTransformer} beans for transforming Requests before
+     *                            processing.
      * @return a configured {@link DefaultRag} instance.
      */
     @Bean
     public DefaultRag defaultRag(
             final List<Retriever<RagRequest, RagContext>> retrievers,
             final List<Augmenter<RagRequest, RagContext>> augmenters,
-            final Generator<RagRequest, RagResponse> generator) {
-        return new DefaultRag(retrievers, augmenters, generator);
+            final Generator<RagRequest, RagResponse> generator,
+            final List<RequestTransformer<RagRequest>> requestTransformers) {
+        return new DefaultRag(retrievers, augmenters, generator, requestTransformers);
     }
 }

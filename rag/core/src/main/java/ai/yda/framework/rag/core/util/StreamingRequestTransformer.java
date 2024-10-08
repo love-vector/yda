@@ -17,26 +17,26 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.channel.core;
+package ai.yda.framework.rag.core.util;
 
-import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import ai.yda.framework.rag.core.model.RagRequest;
 
 /**
- * Provides a generic interface for implementing communication gateways to the streaming Assistant.
+ * Defines a contract for transforming a {@link REQUEST} in a streaming manner.
  *
- * @param <REQUEST>  the generic type of the Request from the User.
- * @param <RESPONSE> the generic type of the Response that will be generated based on the given Request.
+ * @param <REQUEST> the generic type of the request that extends {@link RagRequest}.
  * @author Nikita Litvinov
- * @see Channel
- * @since 0.1.0
+ * @since 0.2.0
  */
-public interface StreamingChannel<REQUEST, RESPONSE> {
+public interface StreamingRequestTransformer<REQUEST extends RagRequest> {
 
     /**
-     * Processes the Request data involving the streaming Assistant.
+     * Transforms the given {@link REQUEST} and returns the transformed version as a {@link Mono}.
      *
-     * @param request the Request object to be processed.
-     * @return a {@link Flux} stream of Response objects generated after processing the Request.
+     * @param request the request to transform.
+     * @return a {@link Mono} containing the transformed request.
      */
-    Flux<RESPONSE> processRequest(REQUEST request);
+    Mono<REQUEST> transformRequest(REQUEST request);
 }

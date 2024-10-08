@@ -26,37 +26,37 @@ import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.model.RagResponse;
 
 /**
- * Represents a streaming RAG Assistant that processes a Request and returns a Response in a streaming manner. This
- * class delegates the Request processing to the {@link  StreamingRag} instance provided via constructor injection.
- * <p>
- * This class is useful when Responses need to be generated progressively, such as when dealing with large amounts of
- * data or when the Response is expected to be produced in chunks.
- * </p>
+ * Represents a RAG Assistant that processes a {@link RagRequest} and returns a {@link Flux} of {@link RagResponse}
+ * in a streaming manner.
  *
  * @author Nikita Litvinov
- * @see StreamingRag
- * @see RagAssistant
  * @since 0.1.0
  */
 public class StreamingRagAssistant implements StreamingAssistant<RagRequest, RagResponse> {
-    /**
-     * The {@link StreamingRag} instance responsible for processing the {@link RagRequest} and generating the
-     * {@link RagResponse} in streaming manner.
-     */
-    private final StreamingRag<RagRequest, RagResponse> rag;
 
     /**
-     * Constructs a new {@link StreamingRagAssistant} instance with the specified {@link StreamingRag} instance.
-     *
-     * @param rag the {@link StreamingRag} instance used to handle {@link RagRequest} and {@link RagResponse}
-     *            processing. This parameter cannot be {@code null}.
+     * The {@link StreamingRag} instance responsible for asynchronous RAG processing.
      */
-    public StreamingRagAssistant(final StreamingRag<RagRequest, RagResponse> rag) {
-        this.rag = rag;
+    private final StreamingRag<RagRequest, RagResponse> streamingRag;
+
+    /**
+     * Constructs a new {@link StreamingRagAssistant} instance.
+     *
+     * @param streamingRag the {@link StreamingRag} instance used for streaming request-response processing.
+     */
+    public StreamingRagAssistant(final StreamingRag<RagRequest, RagResponse> streamingRag) {
+        this.streamingRag = streamingRag;
     }
 
+    /**
+     * Processes the given {@link RagRequest} by delegating to the {@link StreamingRag#streamRag(RagRequest)} method
+     * and returns a {@link Flux} of {@link RagResponse}.
+     *
+     * @param request the {@link RagRequest} to be processed.
+     * @return a {@link Flux} stream of {@link RagResponse} objects.
+     */
     @Override
     public Flux<RagResponse> streamAssistance(final RagRequest request) {
-        return rag.streamRag(request);
+        return streamingRag.streamRag(request);
     }
 }

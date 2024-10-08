@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.rag.generator.assistant.openai;
+package ai.yda.framework.rag.generator.assistant.openai.service;
 
 import java.util.List;
 import java.util.concurrent.CancellationException;
@@ -95,10 +95,25 @@ public class AzureOpenAiAssistantService {
      *
      * @param threadId the ID of the Thread to which the message should be added.
      * @param content  the content of the message to add.
+     * @return the {@link ThreadMessage} representing the message that was added to the Thread.
      */
     public ThreadMessage addMessageToThread(final String threadId, final String content) {
         var threadMessageOptions = new ThreadMessageOptions(MessageRole.USER, content);
         return assistantsClient.createMessage(threadId, threadMessageOptions);
+    }
+
+    /**
+     * Creates a run for a given Thread and waits for the Response.
+     *
+     * @param threadId    the ID of the Thread in which to create the run.
+     * @param assistantId the ID of the Assistant to use for the run.
+     * @return the content of the last message in the Thread after the run completes.
+     */
+    public String createRunAndWaitForResponse(final String threadId, final String assistantId) {
+        var createRunOptions = new CreateRunOptions(assistantId);
+        var threadRun = assistantsClient.createRun(threadId, createRunOptions);
+        threadRun = waitForRunToFinish(threadRun);
+        return getLastMessage(threadRun.getThreadId());
     }
 
     /**

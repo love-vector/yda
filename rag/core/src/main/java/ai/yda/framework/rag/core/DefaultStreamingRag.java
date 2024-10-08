@@ -22,10 +22,9 @@ package ai.yda.framework.rag.core;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import lombok.AccessLevel;
-import lombok.Getter;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import ai.yda.framework.rag.core.augmenter.Augmenter;
 import ai.yda.framework.rag.core.generator.StreamingGenerator;
@@ -34,80 +33,99 @@ import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.model.RagResponse;
 import ai.yda.framework.rag.core.retriever.Retriever;
 import ai.yda.framework.rag.core.util.ContentUtil;
+import ai.yda.framework.rag.core.util.StreamingRequestTransformer;
 
 /**
- * Provides a default mechanism for executing a Retrieval-Augmented Generation (RAG) process in a streaming manner.
- * <p>
- * This class is useful when Responses need to be generated progressively, such as when dealing with large amounts of
- * data or when the Response is expected to be produced in chunks. The streaming rag process is executed by retrieving
- * relevant Contexts using a list of Retrievers, augmenting these Contexts using a list of Augmenters, and generating a
- * Response using a Generator in a streaming manner.
- * </p>
+ * Default implementation of the Retrieval-Augmented Generation (RAG) process in a streaming manner.
  *
  * @author Nikita Litvinov
- * @see Retriever
- * @see Augmenter
- * @see StreamingGenerator
  * @since 0.1.0
  */
-@Getter(AccessLevel.PROTECTED)
 public class DefaultStreamingRag implements StreamingRag<RagRequest, RagResponse> {
 
+    /**
+     * The list of {@link Retriever} instances used to retrieving {@link RagContext} based on the {@link RagRequest}.
+     */
     private final List<Retriever<RagRequest, RagContext>> retrievers;
 
+    /**
+     * The list of {@link Augmenter} instances used to modify or enhance the retrieved {@link RagContext}.
+     */
     private final List<Augmenter<RagRequest, RagContext>> augmenters;
 
-    private final StreamingGenerator<RagRequest, RagResponse> generator;
+    /**
+     * The {@link StreamingGenerator} responsible for generating the final {@link RagResponse} in a streaming manner.
+     */
+    private final StreamingGenerator<RagRequest, RagResponse> streamingGenerator;
 
     /**
-     * Constructs a new {@link DefaultStreamingRag} instance with the specified retrievers, augmenters and generator.
+     * The list of {@link StreamingRequestTransformer} instances used to transform the incoming {@link RagRequest}.
+     */
+    private final List<StreamingRequestTransformer<RagRequest>> requestTransformers;
+
+    /**
+     * Constructs a new {@link DefaultStreamingRag} instance.
      *
-     * @param retrievers the list of {@link Retriever} objects used to retrieve {@link RagContext} data based on the
-     *                   {@link RagRequest}.
-     * @param augmenters the list of {@link Augmenter} objects used to augment or modify the list {@link RagContext}
-     *                   based on the {@link RagRequest}.
-     * @param generator  the {@link StreamingGenerator} object that generates the {@link Flux stream} of the of
-     *                   {@link RagResponse} objects based on the {@link RagRequest}.
+     * @param retrievers          the list of {@link Retriever} objects used to retrieve {@link RagContext} data.
+     * @param augmenters          the list of {@link Augmenter} objects used to augment the retrieved Contexts.
+     * @param streamingGenerator  the {@link StreamingGenerator} used to generate {@link RagResponse} objects in a
+     *                            streaming manner.
+     * @param requestTransformers the list of {@link StreamingRequestTransformer} objects used to transform the
+     *                            {@link RagRequest}.
      */
     public DefaultStreamingRag(
             final List<Retriever<RagRequest, RagContext>> retrievers,
             final List<Augmenter<RagRequest, RagContext>> augmenters,
-            final StreamingGenerator<RagRequest, RagResponse> generator) {
+            final StreamingGenerator<RagRequest, RagResponse> streamingGenerator,
+            final List<StreamingRequestTransformer<RagRequest>> requestTransformers) {
         this.retrievers = retrievers;
         this.augmenters = augmenters;
-        this.generator = generator;
+        this.streamingGenerator = streamingGenerator;
+        this.requestTransformers = requestTransformers;
     }
 
     /**
-     * Executes the Retrieval-Augmented Generation (RAG) process by retrieving relevant Contexts using a list of
-     * Retrievers, augmenting these Contexts using a list of Augmenters, and generating a Response using a streaming
-     * Generator.
+     * Executes the Retrieval-Augmented Generation (RAG) process in a streaming manner by:
+     * <ul>
+     *     <li>
+     *         Transforming the initial {@link RagRequest} using the provided {@link StreamingRequestTransformer}
+     *         instances.
+     *     </li>
+     *     <li>Retrieving relevant {@link RagContext} from the {@link Retriever} instances.</li>
+     *     <li>Augmenting the retrieved Contexts using the provided {@link Augmenter} instances.</li>
+     *     <li>Generating a stream of {@link RagResponse} objects using the {@link StreamingGenerator}.</li>
+     * </ul>
      *
-     * @param request the {@link RagRequest} object from the User.
-     * @return a {@link Flux stream} of {@link RagResponse} objects containing the results of the RAG operation.
+     * @param request the {@link RagRequest} to process.
+     * @return a {@link Flux} stream of generated {@link RagResponse} objects.
      */
     @Override
     public Flux<RagResponse> streamRag(final RagRequest request) {
-        return Flux.fromStream(retrievers.parallelStream())
-                .flatMap(retriever -> Mono.fromCallable(() -> retriever.retrieve(request)))
-                .collectList()
-                .flatMap(contexts -> {
-                    for (var augmenter : augmenters) {
-                        contexts = augmenter.augment(request, contexts);
-                    }
-                    return Mono.just(contexts);
-                })
-                .flatMap(this::mergeContexts)
-                .flatMapMany(context -> generator.streamGeneration(request, context));
+        return Flux.fromIterable(requestTransformers)
+                .reduce(
+                        Mono.just(request),
+                        (monoRequest, transformer) -> monoRequest.flatMap(transformer::transformRequest))
+                .flatMap(monoRequest -> monoRequest)
+                .flatMapMany(transformedRequest -> Flux.fromIterable(retrievers)
+                        .flatMap(retriever -> Mono.fromCallable(() -> retriever.retrieve(transformedRequest))
+                                .subscribeOn(Schedulers.boundedElastic()))
+                        .collectList()
+                        .flatMap(contexts -> {
+                            for (var augmenter : augmenters) {
+                                contexts = augmenter.augment(transformedRequest, contexts);
+                            }
+                            return Mono.just(contexts);
+                        })
+                        .flatMap(this::mergeContexts)
+                        .flatMapMany(context -> streamingGenerator.streamGeneration(transformedRequest, context)));
     }
 
     /**
      * Merges the knowledge into a single string. Each piece of knowledge is separated by a point character.
      *
-     * @param contexts the list of {@link RagContext} objects containing knowledge data. Each piece of knowledge is
-     *                 separated by a point character.
-     * @return a {@link Mono<String>} that emits a single string, which is the result of combining all pieces of
-     * knowledge from the provided contexts.
+     * @param contexts the list of {@link RagContext} objects containing knowledge data.
+     * @return a {@link Mono<String>} that emits a single string combining all pieces of knowledge from the provided
+     * contexts.
      */
     protected Mono<String> mergeContexts(final List<RagContext> contexts) {
         return Flux.fromStream(contexts.parallelStream())
