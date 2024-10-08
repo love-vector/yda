@@ -28,6 +28,8 @@ import ai.yda.framework.rag.core.generator.Generator;
 import ai.yda.framework.rag.core.generator.StreamingGenerator;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.model.RagResponse;
+import ai.yda.framework.rag.generator.assistant.openai.service.AzureOpenAiAssistantService;
+import ai.yda.framework.rag.generator.assistant.openai.util.OpenAiAssistantConstant;
 import ai.yda.framework.session.core.ReactiveSessionProvider;
 import ai.yda.framework.session.core.SessionProvider;
 
@@ -44,11 +46,6 @@ import ai.yda.framework.session.core.SessionProvider;
 @Slf4j
 public class OpenAiAssistantGenerator
         implements Generator<RagRequest, RagResponse>, StreamingGenerator<RagRequest, RagResponse> {
-
-    /**
-     * The constant representing a "theadId" key to store and fetch thread id from session providers.
-     */
-    private static final String THREAD_ID_KEY = "threadId";
 
     /**
      * Service used to interact with the Azure OpenAI Assistant API.
@@ -71,13 +68,14 @@ public class OpenAiAssistantGenerator
     private final String assistantId;
 
     /**
-     * Constructs a new {@link OpenAiAssistantGenerator} instance with the specified apiKey, assistantId,
-     * sessionProvider and reactiveSessionProvider.
+     * Constructs a new {@link OpenAiAssistantGenerator} instance with the specified {@link AzureOpenAiAssistantService},
+     * assistantId, sessionProvider, and reactiveSessionProvider.
      * <p>
      * At least one of sessionProvider or reactiveSessionProvider must be provided.
      * </p>
      *
-     * @param apiKey                  the API key used to authenticate with the Azure OpenAI Service.
+     * @param assistantService        the {@link AzureOpenAiAssistantService} instance used to interact with the
+     *                                Azure OpenAI Service.
      * @param assistantId             the unique identifier for the Assistant that will be used to interact with the
      *                                Azure OpenAI Service. This ID specifies which Assistant to use when making
      *                                requests.
@@ -88,18 +86,18 @@ public class OpenAiAssistantGenerator
      * @throws IllegalArgumentException if both sessionProvider and reactiveSessionProvider are null.
      */
     public OpenAiAssistantGenerator(
-            final String apiKey,
-            final String assistantId,
+            final AzureOpenAiAssistantService assistantService,
             final SessionProvider sessionProvider,
-            final ReactiveSessionProvider reactiveSessionProvider) {
+            final ReactiveSessionProvider reactiveSessionProvider,
+            final String assistantId) {
         if (sessionProvider == null && reactiveSessionProvider == null) {
             throw new IllegalArgumentException(
                     "At least one of SessionProvider or ReactiveSessionProvider must be provided.");
         }
-        this.assistantService = new AzureOpenAiAssistantService(apiKey);
-        this.assistantId = assistantId;
+        this.assistantService = assistantService;
         this.sessionProvider = sessionProvider;
         this.reactiveSessionProvider = reactiveSessionProvider;
+        this.assistantId = assistantId;
     }
 
     /**
@@ -117,7 +115,7 @@ public class OpenAiAssistantGenerator
             throw new IllegalStateException("SessionProvider is required to use this method.");
         }
         var threadId = sessionProvider
-                .get(THREAD_ID_KEY)
+                .get(OpenAiAssistantConstant.THREAD_ID_KEY)
                 .map(Object::toString)
                 .map(id -> assistantService
                         .addMessageToThread(id, request.getQuery())
@@ -125,7 +123,7 @@ public class OpenAiAssistantGenerator
                 .orElseGet(() -> {
                     var newThreadId =
                             assistantService.createThread(request.getQuery()).getId();
-                    sessionProvider.put(THREAD_ID_KEY, newThreadId);
+                    sessionProvider.put(OpenAiAssistantConstant.THREAD_ID_KEY, newThreadId);
                     return newThreadId;
                 });
         logThread(threadId);
@@ -149,7 +147,7 @@ public class OpenAiAssistantGenerator
             throw new IllegalStateException("ReactiveSessionProvider is required to use this method.");
         }
         return reactiveSessionProvider
-                .get(THREAD_ID_KEY)
+                .get(OpenAiAssistantConstant.THREAD_ID_KEY)
                 .map(Object::toString)
                 .flatMap(threadId -> Mono.fromCallable(() -> assistantService
                                 .addMessageToThread(threadId, request.getQuery())
@@ -160,7 +158,7 @@ public class OpenAiAssistantGenerator
                                 .getId())
                         .subscribeOn(Schedulers.boundedElastic())
                         .flatMap(threadId -> reactiveSessionProvider
-                                .put(THREAD_ID_KEY, threadId)
+                                .put(OpenAiAssistantConstant.THREAD_ID_KEY, threadId)
                                 .thenReturn(threadId))))
                 .doOnNext(this::logThread)
                 .flatMapMany(threadId -> assistantService.createRunStream(threadId, assistantId, context))

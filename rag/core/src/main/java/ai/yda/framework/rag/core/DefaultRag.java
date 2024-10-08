@@ -24,12 +24,16 @@ import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
 import lombok.Getter;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import ai.yda.framework.rag.core.augmenter.Augmenter;
 import ai.yda.framework.rag.core.generator.Generator;
+import ai.yda.framework.rag.core.generator.StreamingGenerator;
 import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.model.RagResponse;
+import ai.yda.framework.rag.core.model.RequestTransformer;
 import ai.yda.framework.rag.core.retriever.Retriever;
 import ai.yda.framework.rag.core.util.ContentUtil;
 
@@ -44,17 +48,20 @@ import ai.yda.framework.rag.core.util.ContentUtil;
  * @see Retriever
  * @see Augmenter
  * @see Generator
- * @see DefaultStreamingRag
  * @since 0.1.0
  */
 @Getter(AccessLevel.PROTECTED)
-public class DefaultRag implements Rag<RagRequest, RagResponse> {
+public class DefaultRag implements Rag<RagRequest, RagResponse>, StreamingRag<RagRequest, RagResponse> {
 
     private final List<Retriever<RagRequest, RagContext>> retrievers;
 
     private final List<Augmenter<RagRequest, RagContext>> augmenters;
 
     private final Generator<RagRequest, RagResponse> generator;
+
+    private final StreamingGenerator<RagRequest, RagResponse> streamingGenerator;
+
+    private final List<RequestTransformer<RagRequest>> requestTransformers;
 
     /**
      * Constructs a new {@link DefaultRag} instance with the specified Retrievers, Augmenters and Generator.
@@ -69,10 +76,17 @@ public class DefaultRag implements Rag<RagRequest, RagResponse> {
     public DefaultRag(
             final List<Retriever<RagRequest, RagContext>> retrievers,
             final List<Augmenter<RagRequest, RagContext>> augmenters,
-            final Generator<RagRequest, RagResponse> generator) {
+            final Generator<RagRequest, RagResponse> generator,
+            final StreamingGenerator<RagRequest, RagResponse> streamingGenerator,
+            final List<RequestTransformer<RagRequest>> requestTransformers) {
+        if (generator == null && streamingGenerator == null) {
+            throw new IllegalArgumentException("At least one of Generator or StreamingGenerator must be provided.");
+        }
         this.retrievers = retrievers;
         this.augmenters = augmenters;
         this.generator = generator;
+        this.streamingGenerator = streamingGenerator;
+        this.requestTransformers = requestTransformers;
     }
 
     /**
@@ -84,13 +98,55 @@ public class DefaultRag implements Rag<RagRequest, RagResponse> {
      */
     @Override
     public RagResponse doRag(final RagRequest request) {
+        if (generator == null) {
+            throw new IllegalStateException("Generator is required to use this method.");
+        }
+        var transformingRequest = request;
+        for (RequestTransformer<RagRequest> requestTransformer : requestTransformers) {
+            transformingRequest = requestTransformer.transformRequest(transformingRequest);
+        }
+        var transformedRequest = transformingRequest;
         var contexts = retrievers.parallelStream()
-                .map(retriever -> retriever.retrieve(request))
+                .map(retriever -> retriever.retrieve(transformedRequest))
                 .collect(Collectors.toUnmodifiableList());
         for (var augmenter : augmenters) {
-            contexts = augmenter.augment(request, contexts);
+            contexts = augmenter.augment(transformedRequest, contexts);
         }
-        return generator.generate(request, mergeContexts(contexts));
+        return generator.generate(transformedRequest, mergeContexts(contexts));
+    }
+
+    /**
+     * Executes the Retrieval-Augmented Generation (RAG) process by retrieving relevant Contexts using a list of
+     * Retrievers, augmenting these Contexts using a list of Augmenters, and generating a Response using a streaming
+     * Generator.
+     *
+     * @param request the {@link RagRequest} object from the User.
+     * @return a {@link Flux stream} of {@link RagResponse} objects containing the results of the RAG operation.
+     */
+    @Override
+    public Flux<RagResponse> streamRag(final RagRequest request) {
+        if (streamingGenerator == null) {
+            throw new IllegalStateException("StreamingGenerator is required to use this method.");
+        }
+        return Flux.just(requestTransformers)
+                .flatMap(transformers -> {
+                    var transformingRequest = request;
+                    for (var requestTransformer : transformers) {
+                        transformingRequest = requestTransformer.transformRequest(transformingRequest);
+                    }
+                    return Mono.just(transformingRequest);
+                })
+                .flatMap(transformedRequest -> Flux.fromStream(retrievers.parallelStream())
+                        .flatMap(retriever -> Mono.fromCallable(() -> retriever.retrieve(transformedRequest)))
+                        .collectList()
+                        .flatMap(contexts -> {
+                            for (var augmenter : augmenters) {
+                                contexts = augmenter.augment(transformedRequest, contexts);
+                            }
+                            return Mono.just(contexts);
+                        })
+                        .flatMap(this::mergeReactiveContexts)
+                        .flatMapMany(context -> streamingGenerator.streamGeneration(transformedRequest, context)));
     }
 
     /**
@@ -102,6 +158,20 @@ public class DefaultRag implements Rag<RagRequest, RagResponse> {
      */
     protected String mergeContexts(final List<RagContext> contexts) {
         return contexts.parallelStream()
+                .map(ragContext -> String.join(ContentUtil.SENTENCE_SEPARATOR, ragContext.getKnowledge()))
+                .collect(Collectors.joining(ContentUtil.SENTENCE_SEPARATOR));
+    }
+
+    /**
+     * Merges the knowledge into a single string. Each piece of knowledge is separated by a point character.
+     *
+     * @param contexts the list of {@link RagContext} objects containing knowledge data. Each piece of knowledge is
+     *                 separated by a point character.
+     * @return a {@link Mono<String>} that emits a single string, which is the result of combining all pieces of
+     * knowledge from the provided contexts.
+     */
+    protected Mono<String> mergeReactiveContexts(final List<RagContext> contexts) {
+        return Flux.fromStream(contexts.parallelStream())
                 .map(ragContext -> String.join(ContentUtil.SENTENCE_SEPARATOR, ragContext.getKnowledge()))
                 .collect(Collectors.joining(ContentUtil.SENTENCE_SEPARATOR));
     }

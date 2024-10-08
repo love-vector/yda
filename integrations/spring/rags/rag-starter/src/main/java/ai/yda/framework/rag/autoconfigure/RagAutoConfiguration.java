@@ -21,15 +21,18 @@ package ai.yda.framework.rag.autoconfigure;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
 
 import ai.yda.framework.rag.core.DefaultRag;
 import ai.yda.framework.rag.core.augmenter.Augmenter;
 import ai.yda.framework.rag.core.generator.Generator;
+import ai.yda.framework.rag.core.generator.StreamingGenerator;
 import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.model.RagResponse;
+import ai.yda.framework.rag.core.model.RequestTransformer;
 import ai.yda.framework.rag.core.retriever.Retriever;
 
 /**
@@ -66,7 +69,9 @@ public class RagAutoConfiguration {
     public DefaultRag defaultRag(
             final List<Retriever<RagRequest, RagContext>> retrievers,
             final List<Augmenter<RagRequest, RagContext>> augmenters,
-            final Generator<RagRequest, RagResponse> generator) {
-        return new DefaultRag(retrievers, augmenters, generator);
+            @Autowired(required = false) final Generator<RagRequest, RagResponse> generator,
+            @Autowired(required = false) final StreamingGenerator<RagRequest, RagResponse> streamingGenerator,
+            final List<RequestTransformer<RagRequest>> requestTransformers) {
+        return new DefaultRag(retrievers, augmenters, generator, streamingGenerator, requestTransformers);
     }
 }

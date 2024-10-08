@@ -3,9 +3,8 @@ dependencies {
 
     api 'org.springframework.ai:spring-ai-core:1.0.0-M1'
 
-    implementation 'us.codecraft:webmagic-core:1.0.0'
-    implementation 'us.codecraft:webmagic-selenium:1.0.0'
+    api 'us.codecraft:webmagic-core:1.0.0'
+    api 'us.codecraft:webmagic-selenium:1.0.0'
 
-    implementation 'org.seleniumhq.selenium:selenium-java:4.25.0'
-    implementation 'io.github.bonigarcia:webdrivermanager:5.9.2'
+    api 'io.github.bonigarcia:webdrivermanager:5.9.2'
 }

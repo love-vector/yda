@@ -17,24 +17,22 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.core.assistant;
+package ai.yda.framework.rag.core.model;
 
 /**
- * Represents an Assistant that processes User Requests and provides appropriate Responses.
+ * Defines a contract for transforming a {@link RagRequest}.
  *
- * @param <REQUEST>  the generic type of the Request from the User.
- * @param <RESPONSE> the generic type of the Response that will be generated based on the given Request.
+ * @param <REQUEST> the type of the request that extends {@link RagRequest}.
  * @author Nikita Litvinov
- * @see StreamingAssistant
- * @since 0.1.0
+ * @since 0.2.0
  */
-public interface Assistant<REQUEST, RESPONSE> {
+public interface RequestTransformer<REQUEST extends RagRequest> {
 
     /**
-     * Processes the given Request and returns a corresponding Response.
+     * Transforms the given {@link REQUEST} and returns the transformed version.
      *
-     * @param request the Request to be processed.
-     * @return the Response generated from processing the Request.
+     * @param request the request to transform.
+     * @return the transformed request.
      */
-    RESPONSE assist(REQUEST request);
+    REQUEST transformRequest(REQUEST request);
 }

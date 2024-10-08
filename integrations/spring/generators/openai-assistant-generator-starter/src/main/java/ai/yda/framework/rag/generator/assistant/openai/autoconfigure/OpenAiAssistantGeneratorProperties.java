@@ -61,6 +61,8 @@ public class OpenAiAssistantGeneratorProperties {
 
     private String assistantId;
 
+    private String contextResolverAssistantId;
+
     /**
      * Default constructor for {@link OpenAiAssistantGeneratorProperties}.
      */

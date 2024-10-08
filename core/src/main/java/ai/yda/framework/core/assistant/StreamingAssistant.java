@@ -32,7 +32,6 @@ import reactor.core.publisher.Flux;
  * @param <RESPONSE> the generic type of the Response that will be generated based on the given Request.
  * @author Nikita Litvinov
  * @see Assistant
- * @see StreamingRagAssistant
  * @since 0.1.0
  */
 public interface StreamingAssistant<REQUEST, RESPONSE> {
