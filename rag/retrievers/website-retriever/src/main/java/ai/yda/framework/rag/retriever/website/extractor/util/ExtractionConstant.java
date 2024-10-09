@@ -48,6 +48,11 @@ public final class ExtractionConstant {
     public static final Integer SIMPLE_PAGE_MIN_DEPTH = 1;
 
     /**
+     * The default maximum number of threads the crawler can use for parallel webpage processing.
+     */
+    public static final Integer CRAWLER_DEFAULT_MAX_THREADS = 3;
+
+    /**
      * Default number of retries for the crawler when fetching a page fails.
      */
     public static final Integer CRAWLER_DEFAULT_RETRY_TIMES = 3;
@@ -70,7 +75,7 @@ public final class ExtractionConstant {
     /**
      * Default number of browser instances in the pool for web extraction.
      */
-    public static final Integer BROWSER_DEFAULT_POOL_SIZE = 3;
+    public static final Integer BROWSER_DEFAULT_POOL_SIZE = 2;
 
     /**
      * Private constructor to prevent instantiation.
