@@ -88,6 +88,11 @@ public class WebExtractorProperties {
     private Integer crawlerMaxDepth = ExtractionConstant.CRAWLER_DEFAULT_MAX_DEPTH;
 
     /**
+     * Indicates whether browser support is enabled for extracting dynamic content.
+     */
+    private Boolean browserSupportEnabled = ExtractionConstant.BROWSER_SUPPORT_ENABLED;
+
+    /**
      * The amount of time in milliseconds the browser sleeps between actions during the extraction process.
      */
     private Integer browserSleepTime = ExtractionConstant.BROWSER_DEFAULT_SLEEP_TIME;
