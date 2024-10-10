@@ -101,7 +101,12 @@ public class RetrieverWebsiteAutoConfiguration {
      * <p>
      * The {@link WebExtractor} is configured using the provided {@link WebExtractorProperties},
      * which defines the crawler's behavior, such as the maximum number of threads, retry times,
-     * sleep times, and depth limits.
+     * sleep times, depth limits, and browser support.
+     * </p>
+     * <p>
+     * If browser support is enabled, the {@link WebExtractor} will be configured to use browser-based crawling for
+     * extracting dynamic content with a specified pool size and sleep times for the browser. Otherwise, it will be
+     * configured for non-browser crawling.
      * </p>
      *
      * @param crawlerProperties the properties used to configure the {@link WebExtractor}.
@@ -110,12 +115,19 @@ public class RetrieverWebsiteAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public WebExtractor webExtractor(final WebExtractorProperties crawlerProperties) {
+        if (crawlerProperties.getBrowserSupportEnabled()) {
+            return new WebExtractor(
+                    crawlerProperties.getCrawlerMaxThreads(),
+                    crawlerProperties.getCrawlerRetryTimes(),
+                    crawlerProperties.getCrawlerSleepTime(),
+                    crawlerProperties.getCrawlerMaxDepth(),
+                    crawlerProperties.getBrowserSleepTime(),
+                    crawlerProperties.getBrowserPoolSize());
+        }
         return new WebExtractor(
                 crawlerProperties.getCrawlerMaxThreads(),
                 crawlerProperties.getCrawlerRetryTimes(),
                 crawlerProperties.getCrawlerSleepTime(),
-                crawlerProperties.getCrawlerMaxDepth(),
-                crawlerProperties.getBrowserSleepTime(),
-                crawlerProperties.getBrowserPoolSize());
+                crawlerProperties.getCrawlerMaxDepth());
     }
 }

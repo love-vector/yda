@@ -68,6 +68,11 @@ public final class ExtractionConstant {
     public static final Integer CRAWLER_DEFAULT_MAX_DEPTH = 1;
 
     /**
+     * Indicates whether browser support is enabled for extracting dynamic content.
+     */
+    public static final Boolean BROWSER_SUPPORT_ENABLED = Boolean.FALSE;
+
+    /**
      * Default sleep time (in milliseconds) between browser actions.
      */
     public static final Integer BROWSER_DEFAULT_SLEEP_TIME = 500;
