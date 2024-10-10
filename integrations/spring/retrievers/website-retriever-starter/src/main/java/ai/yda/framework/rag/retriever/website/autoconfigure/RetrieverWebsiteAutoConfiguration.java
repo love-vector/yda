@@ -19,6 +19,7 @@
 */
 package ai.yda.framework.rag.retriever.website.autoconfigure;
 
+import ai.yda.framework.rag.retriever.website.retriver.WebsiteRetriever;
 import org.springframework.ai.autoconfigure.openai.OpenAiConnectionProperties;
 import org.springframework.ai.autoconfigure.openai.OpenAiEmbeddingProperties;
 import org.springframework.ai.autoconfigure.vectorstore.milvus.MilvusServiceClientProperties;
@@ -29,8 +30,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 
 import ai.yda.framework.rag.retriever.shared.MilvusVectorStoreUtil;
+
 import ai.yda.framework.rag.retriever.website.extractor.WebExtractor;
-import ai.yda.framework.rag.retriever.website.retriver.WebsiteRetriever;
 
 /**
  * Autoconfiguration class for creating and configuring all necessary components for Web Retrieving.
@@ -101,7 +102,12 @@ public class RetrieverWebsiteAutoConfiguration {
      * <p>
      * The {@link WebExtractor} is configured using the provided {@link WebExtractorProperties},
      * which defines the crawler's behavior, such as the maximum number of threads, retry times,
-     * sleep times, and depth limits.
+     * sleep times, depth limits, and browser support.
+     * </p>
+     * <p>
+     * If browser support is enabled, the {@link WebExtractor} will be configured to use browser-based crawling for
+     * extracting dynamic content with a specified pool size and sleep times for the browser. Otherwise, it will be
+     * configured for non-browser crawling.
      * </p>
      *
      * @param crawlerProperties the properties used to configure the {@link WebExtractor}.
@@ -110,12 +116,19 @@ public class RetrieverWebsiteAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public WebExtractor webExtractor(final WebExtractorProperties crawlerProperties) {
+        if (crawlerProperties.getBrowserSupportEnabled()) {
+            return new WebExtractor(
+                    crawlerProperties.getCrawlerMaxThreads(),
+                    crawlerProperties.getCrawlerRetryTimes(),
+                    crawlerProperties.getCrawlerSleepTime(),
+                    crawlerProperties.getCrawlerMaxDepth(),
+                    crawlerProperties.getBrowserSleepTime(),
+                    crawlerProperties.getBrowserPoolSize());
+        }
         return new WebExtractor(
                 crawlerProperties.getCrawlerMaxThreads(),
                 crawlerProperties.getCrawlerRetryTimes(),
                 crawlerProperties.getCrawlerSleepTime(),
-                crawlerProperties.getCrawlerMaxDepth(),
-                crawlerProperties.getBrowserSleepTime(),
-                crawlerProperties.getBrowserPoolSize());
+                crawlerProperties.getCrawlerMaxDepth());
     }
 }

@@ -31,6 +31,7 @@ import ai.yda.framework.rag.core.retriever.DataExtractor;
 import ai.yda.framework.rag.retriever.website.extractor.model.ExtractionResult;
 import ai.yda.framework.rag.retriever.website.extractor.pipeline.ResultingPipeline;
 import ai.yda.framework.rag.retriever.website.extractor.processor.GeneralProcessor;
+import ai.yda.framework.rag.retriever.website.extractor.util.ExtractionConstant;
 import ai.yda.framework.rag.retriever.website.extractor.webmagic.ChromeSeleniumDownloader;
 
 /**
@@ -57,11 +58,52 @@ public class WebExtractor implements DataExtractor<Set<ExtractionResult>> {
      * The downloader responsible for downloading web pages during the crawling process.
      * <p> Currently, using Selenium Downloader for dynamic content download. </p>
      */
-    private final Downloader downloader;
+    private Downloader downloader;
+
+    /**
+     * Default constructor for {@link WebExtractor} with default crawler configuration.
+     * <p>
+     * This constructor initializes the extractor with default values for thread count, retry times, sleep times,
+     * and crawling depth, as specified in {@link ExtractionConstant}.
+     * </p>
+     */
+    public WebExtractor() {
+        this(
+                ExtractionConstant.CRAWLER_DEFAULT_MAX_THREADS,
+                ExtractionConstant.CRAWLER_DEFAULT_RETRY_TIMES,
+                ExtractionConstant.CRAWLER_DEFAULT_SLEEP_TIME,
+                ExtractionConstant.CRAWLER_DEFAULT_MAX_DEPTH);
+    }
+
+    /**
+     * Constructs a new {@link WebExtractor} instance with the specified configuration for the crawler.
+     * <p>
+     * This constructor is used when browser support is not required. It configures the crawler with the specified
+     * thread count, retry times, sleep times, and crawling depth, and uses a default HTTP downloader.
+     * </p>
+     *
+     * @param crawlerMaxThreads the maximum number of threads for the crawler.
+     * @param crawlerRetryTimes the number of retries allowed for the crawler in case of failure.
+     * @param crawlerSleepTime  the amount of time (in milliseconds) the crawler sleeps between requests.
+     * @param crawlerMaxDepth   the maximum depth the crawler will follow links from the start page.
+     */
+    public WebExtractor(
+            final Integer crawlerMaxThreads,
+            final Integer crawlerRetryTimes,
+            final Integer crawlerSleepTime,
+            final Integer crawlerMaxDepth) {
+        this.crawlerMaxThreads = crawlerMaxThreads;
+        this.processor = new GeneralProcessor(crawlerRetryTimes, crawlerSleepTime, crawlerMaxDepth);
+    }
 
     /**
      * Constructs a new {@link WebExtractor} instance with the specified configuration for the crawler
      * and browser settings.
+     * <p>
+     * This constructor is used when browser support is required for extracting dynamic content rendered by
+     * JavaScript. It configures both the crawler and browser, allowing for multi-threaded extraction with
+     * browser-based interactions.
+     * </p>
      *
      * @param crawlerMaxThreads the maximum number of threads for the crawler.
      * @param crawlerRetryTimes the number of retries allowed for the crawler in case of failure.
@@ -93,11 +135,13 @@ public class WebExtractor implements DataExtractor<Set<ExtractionResult>> {
         var resultingPipeline = new ResultingPipeline();
         var spider = Spider.create(processor)
                 .addUrl(source)
-                .setDownloader(downloader)
                 .addPipeline(resultingPipeline)
                 .thread(crawlerMaxThreads);
         if (log.isDebugEnabled()) {
             spider.addPipeline(new ConsolePipeline());
+        }
+        if (downloader != null) {
+            spider.setDownloader(downloader);
         }
         spider.run();
         return resultingPipeline.getResults();
