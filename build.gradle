@@ -8,6 +8,7 @@ plugins {
 
 allprojects {
     repositories {
+        mavenLocal()
         mavenCentral()
         maven { url 'https://repo.spring.io/milestone' }
     }

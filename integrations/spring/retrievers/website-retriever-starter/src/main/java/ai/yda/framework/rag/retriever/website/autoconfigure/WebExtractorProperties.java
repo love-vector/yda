@@ -69,9 +69,8 @@ public class WebExtractorProperties {
 
     /**
      * Maximum number of threads that the crawler can use for parallel webpages processing.
-     * <p> Defaults to twice the number of available processors. </p>
      */
-    private Integer crawlerMaxThreads = Runtime.getRuntime().availableProcessors() * 2;
+    private Integer crawlerMaxThreads = ExtractionConstant.CRAWLER_DEFAULT_MAX_THREADS;
 
     /**
      * The number of times the crawler will retry fetching a page upon failure.
