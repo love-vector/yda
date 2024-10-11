@@ -23,7 +23,7 @@ import java.util.List;
 
 import org.springframework.ai.document.Document;
 
-import ai.yda.framework.rag.core.model.Chunk;
+import ai.yda.framework.rag.core.retriever.entity.Chunk;
 
 public interface ChunkStrategy {
     List<Chunk> splitChunks(List<Document> documents);

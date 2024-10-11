@@ -25,6 +25,7 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import ai.yda.framework.rag.retriever.shared.RetrieverProperties;
+import ai.yda.framework.rag.retriever.website.chunking.factory.ChunkingAlgorithm;
 
 /**
  * Provides configuration properties for website Retriever. These properties can be customized through the
@@ -67,6 +68,8 @@ public class RetrieverWebsiteProperties extends RetrieverProperties {
      * Operational URL of website or sitemap.
      */
     private String url;
+
+    private ChunkingAlgorithm chunkingAlgorithm;
 
     /**
      * Default constructor for {@link RetrieverWebsiteProperties}.

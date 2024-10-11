@@ -23,9 +23,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.springframework.ai.document.Document;
 
-import ai.yda.framework.rag.core.model.Chunk;
+import ai.yda.framework.rag.core.retriever.ChunkStrategy;
+import ai.yda.framework.rag.core.retriever.entity.DocumentData;
+
+
+import ai.yda.framework.rag.core.retriever.entity.Chunk;
 
 public class RegexChunking implements ChunkStrategy {
     private final List<String> patterns;
@@ -39,7 +42,7 @@ public class RegexChunking implements ChunkStrategy {
     }
 
     @Override
-    public List<Chunk> splitChunks(final List<Document> documents) {
+    public List<Chunk> splitChunks(final List<DocumentData> documents) {
         List<Chunk> chunks = new ArrayList<>();
         final int[] chunkIndex = {0};
 

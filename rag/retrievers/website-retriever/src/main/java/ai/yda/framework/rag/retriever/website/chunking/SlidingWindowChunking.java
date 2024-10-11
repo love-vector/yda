@@ -16,15 +16,17 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.rag.retriever.website.chunking;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import ai.yda.framework.rag.core.retriever.ChunkStrategy;
+import ai.yda.framework.rag.core.retriever.entity.DocumentData;
 import org.springframework.ai.document.Document;
 
-import ai.yda.framework.rag.core.model.Chunk;
+import ai.yda.framework.rag.core.retriever.entity.Chunk;
 
 public class SlidingWindowChunking implements ChunkStrategy {
     private final int windowSize;
@@ -36,13 +38,12 @@ public class SlidingWindowChunking implements ChunkStrategy {
     }
 
     @Override
-    public List<Chunk> splitChunks(final List<Document> documents) {
+    public List<Chunk> splitChunks(final List<DocumentData> documents) {
         List<Chunk> chunks = new ArrayList<>();
         final int[] chunkIndex = {0};
         documents.forEach(document -> {
             var text = document.getContent();
             var documentId = document.getMetadata().get("documentId").toString();
-            document.getMetadata();
 
             String[] words = text.split("\\s+");
 

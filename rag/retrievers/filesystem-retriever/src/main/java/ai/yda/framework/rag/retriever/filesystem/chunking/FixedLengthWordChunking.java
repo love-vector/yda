@@ -24,7 +24,7 @@ import java.util.List;
 
 import org.springframework.ai.document.Document;
 
-import ai.yda.framework.rag.core.model.Chunk;
+import ai.yda.framework.rag.core.retriever.entity.Chunk;
 
 public class FixedLengthWordChunking implements ChunkStrategy {
     private final int chunkSize;

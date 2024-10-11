@@ -17,14 +17,24 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.rag.retriever.website.chunking;
+package ai.yda.framework.rag.core.retriever.entity;
 
-import java.util.List;
+import lombok.Getter;
 
-import org.springframework.ai.document.Document;
+@Getter
+public class Chunk {
+    private final String text;
+    private final int index;
+    private final String documentId;
 
-import ai.yda.framework.rag.core.model.Chunk;
+    public Chunk(String text, int index, String documentId) {
+        this.text = text;
+        this.index = index;
+        this.documentId = documentId;
+    }
 
-public interface ChunkStrategy {
-    List<Chunk> splitChunks(List<Document> documents);
+    @Override
+    public String toString() {
+        return "Chunk{" + "text='" + text + '\'' + ", index=" + index + ", documentId='" + documentId + '\'' + '}';
+    }
 }

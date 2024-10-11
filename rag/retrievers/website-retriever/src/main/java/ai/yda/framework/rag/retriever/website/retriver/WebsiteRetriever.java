@@ -16,27 +16,26 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.rag.retriever.website.retriver;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.ai.document.Document;
-import org.springframework.ai.vectorstore.SearchRequest;
-import org.springframework.ai.vectorstore.VectorStore;
-import org.springframework.lang.NonNull;
 
 import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.retriever.Indexer;
 import ai.yda.framework.rag.core.retriever.Retriever;
-import ai.yda.framework.rag.retriever.website.chunking.ChunkStrategy;
-import ai.yda.framework.rag.retriever.website.chunking.FixedLengthWordChunking;
+import ai.yda.framework.rag.core.retriever.entity.DocumentData;
+import ai.yda.framework.rag.retriever.website.chunking.factory.ChunkingAlgorithm;
+import ai.yda.framework.rag.retriever.website.chunking.factory.PatternBasedChunking;
 import ai.yda.framework.rag.retriever.website.extractor.WebExtractor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.document.Document;
+import org.springframework.ai.vectorstore.SearchRequest;
+import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.lang.NonNull;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Retrieves website Context data from a Vector Store based on a User Request. It processes website or sitemap and uses
@@ -49,7 +48,7 @@ import ai.yda.framework.rag.retriever.website.extractor.WebExtractor;
  * @since 0.1.0
  */
 @Slf4j
-public class WebsiteRetriever implements Retriever<RagRequest, RagContext>, Indexer<Document> {
+public class WebsiteRetriever implements Retriever<RagRequest, RagContext>, Indexer<DocumentData> {
     /**
      * The Vector Store used to retrieve Context data for user Request through similarity search.
      */
@@ -59,6 +58,8 @@ public class WebsiteRetriever implements Retriever<RagRequest, RagContext>, Inde
      * The website or sitemap url.
      */
     private final String url;
+
+    private final ChunkingAlgorithm chunkingAlgorithm;
 
     /**
      * The number of top results to retrieve from the Vector Store.
@@ -91,15 +92,16 @@ public class WebsiteRetriever implements Retriever<RagRequest, RagContext>, Inde
             final @NonNull VectorStore vectorStore,
             final @NonNull String url,
             final @NonNull Integer topK,
-            final @NonNull Boolean isProcessingEnabled) {
+            final @NonNull Boolean isProcessingEnabled,
+            final @NonNull ChunkingAlgorithm chunkingAlgorithm) {
         if (topK <= 0) {
             throw new IllegalArgumentException("TopK must be a positive number.");
         }
+        this.chunkingAlgorithm = chunkingAlgorithm;
         this.webExtractor = webExtractor;
         this.vectorStore = vectorStore;
         this.url = url;
         this.topK = topK;
-
         if (isProcessingEnabled) {
             index();
         }
@@ -108,26 +110,27 @@ public class WebsiteRetriever implements Retriever<RagRequest, RagContext>, Inde
     @Override
     public void index() {
         var pageDocuments = webExtractor.extract(url);
-        List<Document> documentsForChunking = new ArrayList<>();
+        List<DocumentData> documentsForChunking = new ArrayList<>();
         pageDocuments.forEach(crawlResult -> documentsForChunking.add(
-                new Document(crawlResult.getContent(), Map.of("documentId", crawlResult.getUrl()))));
+                new DocumentData(crawlResult.getContent(), Map.of("documentId", crawlResult.getUrl()))));
         var documents = process(documentsForChunking);
         save(documents);
     }
 
     @Override
-    public List<Document> process(List<Document> documents) {
-        ChunkStrategy chunkStrategy = new FixedLengthWordChunking(1000);
-        var chunks = chunkStrategy.splitChunks(documents);
-        return chunks.parallelStream()
-                .map(chunk -> new Document(
+    public List<DocumentData> process(List<DocumentData> documents) {
+        PatternBasedChunking patternBasedChunking = new PatternBasedChunking();
+        return patternBasedChunking.chunkList(chunkingAlgorithm, documents).parallelStream()
+                .map(chunk -> new DocumentData(
                         chunk.getText(),
                         Map.of("documentId", chunk.getDocumentId(), "chunkIndex", String.valueOf(chunk.getIndex()))))
                 .toList();
     }
 
     @Override
-    public void save(List<Document> documents) {
+    public void save(List<DocumentData> documentDataList) {
+        List<Document> documents = new ArrayList<>();
+        documentDataList.parallelStream().forEach(documentData -> documents.add(new Document(documentData.getContent(), documentData.getMetadata())));
         vectorStore.add(documents);
     }
 

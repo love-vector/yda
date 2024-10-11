@@ -93,7 +93,8 @@ public class RetrieverWebsiteAutoConfiguration {
                 milvusVectorStore,
                 websiteProperties.getUrl(),
                 websiteProperties.getTopK(),
-                websiteProperties.getIsProcessingEnabled());
+                websiteProperties.getIsProcessingEnabled(),
+                websiteProperties.getChunkingAlgorithm());
     }
 
     /**
