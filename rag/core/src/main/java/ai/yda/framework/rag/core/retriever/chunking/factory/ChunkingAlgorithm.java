@@ -17,9 +17,10 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.rag.retriever.website.chunking.factory;
+package ai.yda.framework.rag.core.retriever.chunking.factory;
 
 public enum ChunkingAlgorithm {
     FIXED,
-    REGEX
+    REGEX,
+    WINDOW
 }

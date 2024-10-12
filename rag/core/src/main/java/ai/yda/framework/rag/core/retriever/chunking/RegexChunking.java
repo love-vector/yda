@@ -17,28 +17,22 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.rag.retriever.website.chunking;
+package ai.yda.framework.rag.core.retriever.chunking;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-
-import ai.yda.framework.rag.core.retriever.ChunkStrategy;
-import ai.yda.framework.rag.core.retriever.entity.DocumentData;
-
-
-import ai.yda.framework.rag.core.retriever.entity.Chunk;
+import ai.yda.framework.rag.core.retriever.chunking.entity.Chunk;
+import ai.yda.framework.rag.core.retriever.chunking.entity.DocumentData;
 
 public class RegexChunking implements ChunkStrategy {
-    private final List<String> patterns;
+    private final List<Pattern> patterns;
 
     public RegexChunking(final List<String> patterns) {
-        if (patterns.isEmpty()) {
-            this.patterns = List.of("\\n\\n");
-        } else {
-            this.patterns = patterns;
-        }
+        this.patterns = new ArrayList<>();
+        patterns.parallelStream().forEach(regex -> this.patterns.add(Pattern.compile(regex)));
     }
 
     @Override
@@ -46,22 +40,24 @@ public class RegexChunking implements ChunkStrategy {
         List<Chunk> chunks = new ArrayList<>();
         final int[] chunkIndex = {0};
 
-        documents.forEach(document -> {
+        documents.parallelStream().forEach(document -> {
             var text = document.getContent();
             var documentId = document.getMetadata().get("documentId").toString();
-
-            List<String> paragraphs = new ArrayList<>();
-            paragraphs.add(text);
-
-            for (String pattern : patterns) {
-                List<String> newParagraphs = new ArrayList<>();
-                for (String paragraph : paragraphs) {
-                    var splitParagraphs = paragraph.split(pattern);
-                    newParagraphs.addAll(Arrays.asList(splitParagraphs));
+            patterns.parallelStream().forEach(pattern -> {
+                Matcher matcher = pattern.matcher(text);
+                int lastMatchEnd = 0;
+                while (matcher.find()) {
+                    String chunkText =
+                            text.substring(lastMatchEnd, matcher.start()).trim();
+                    if (!chunkText.isEmpty()) {
+                        chunks.add(new Chunk(chunkText, chunkIndex[0]++, documentId));
+                    }
+                    lastMatchEnd = matcher.end();
                 }
-                paragraphs = newParagraphs;
-            }
-            paragraphs.forEach(paragraph -> chunks.add(new Chunk(paragraph.trim(), chunkIndex[0]++, documentId)));
+                if (lastMatchEnd < text.length()) {
+                    chunks.add(new Chunk(text.substring(lastMatchEnd).trim(), chunkIndex[0]++, documentId));
+                }
+            });
         });
 
         return chunks;

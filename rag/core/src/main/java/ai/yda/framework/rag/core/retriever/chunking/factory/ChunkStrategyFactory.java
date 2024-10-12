@@ -1,0 +1,42 @@
+/*
+ * YDA - Open-Source Java AI Assistant.
+ * Copyright (C) 2024 Love Vector OÜ <https://vector-inc.dev/>
+
+ * This file is part of YDA.
+
+ * YDA is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+
+ * YDA is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
+*/
+package ai.yda.framework.rag.core.retriever.chunking.factory;
+
+import java.util.List;
+
+import ai.yda.framework.rag.core.retriever.chunking.ChunkStrategy;
+import ai.yda.framework.rag.core.retriever.chunking.FixedLengthWordChunking;
+import ai.yda.framework.rag.core.retriever.chunking.RegexChunking;
+import ai.yda.framework.rag.core.retriever.chunking.SlidingWindowChunking;
+
+public class ChunkStrategyFactory {
+    public ChunkStrategy getStrategy(final ChunkingAlgorithm chunkingAlgorithm) {
+        switch (chunkingAlgorithm) {
+            case FIXED:
+                return new FixedLengthWordChunking(1000);
+            case REGEX:
+                return new RegexChunking(List.of("[.!?]\\s+"));
+            case WINDOW:
+                return new SlidingWindowChunking(10, 1);
+            default:
+                throw new RuntimeException("Unknown chunking algorithm: " + chunkingAlgorithm);
+        }
+    }
+}

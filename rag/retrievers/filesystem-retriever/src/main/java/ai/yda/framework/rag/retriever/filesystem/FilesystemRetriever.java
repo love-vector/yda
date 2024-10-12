@@ -39,8 +39,9 @@ import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.retriever.Indexer;
 import ai.yda.framework.rag.core.retriever.Retriever;
-import ai.yda.framework.rag.retriever.filesystem.chunking.ChunkStrategy;
-import ai.yda.framework.rag.retriever.filesystem.chunking.FixedLengthWordChunking;
+import ai.yda.framework.rag.core.retriever.chunking.entity.DocumentData;
+import ai.yda.framework.rag.core.retriever.chunking.factory.ChunkingAlgorithm;
+import ai.yda.framework.rag.core.retriever.chunking.factory.PatternBasedChunking;
 import ai.yda.framework.rag.retriever.filesystem.exception.FileReadException;
 import ai.yda.framework.rag.retriever.filesystem.service.FilesystemService;
 
@@ -56,7 +57,7 @@ import ai.yda.framework.rag.retriever.filesystem.service.FilesystemService;
  * @since 0.1.0
  */
 @Slf4j
-public class FilesystemRetriever implements Retriever<RagRequest, RagContext>, Indexer<Document> {
+public class FilesystemRetriever implements Retriever<RagRequest, RagContext>, Indexer<DocumentData> {
     /**
      * The Vector Store used to retrieve Context data for User Request through similarity search.
      */
@@ -66,6 +67,8 @@ public class FilesystemRetriever implements Retriever<RagRequest, RagContext>, I
      * The path to the directory where files are stored.
      */
     private final Path fileStoragePath;
+
+    private final ChunkingAlgorithm chunkingAlgorithm;
 
     /**
      * The number of top results to retrieve from the Vector Store.
@@ -93,15 +96,17 @@ public class FilesystemRetriever implements Retriever<RagRequest, RagContext>, I
             final @NonNull VectorStore vectorStore,
             final @NonNull String fileStoragePath,
             final @NonNull Integer topK,
-            final @NonNull Boolean isProcessingEnabled) {
+            final @NonNull Boolean isProcessingEnabled,
+            final @NonNull ChunkingAlgorithm chunkingAlgorithm) {
         if (topK <= 0) {
             throw new IllegalArgumentException("TopK must be a positive number.");
         }
         this.vectorStore = vectorStore;
         this.fileStoragePath = Paths.get(fileStoragePath);
         this.topK = topK;
+        this.chunkingAlgorithm = chunkingAlgorithm;
 
-        if (isProcessingEnabled) {
+        if (Boolean.TRUE.equals(isProcessingEnabled)) {
             index();
         }
     }
@@ -142,8 +147,12 @@ public class FilesystemRetriever implements Retriever<RagRequest, RagContext>, I
                 log.debug("No files to process in directory: {}", fileStoragePath);
                 return;
             }
-            var fileReadingResult = filesystemService.createDocumentsFromFiles(fileList);
-            var documents = process(fileReadingResult);
+            List<DocumentData> documentDataList = new ArrayList<>();
+            filesystemService.createDocumentsFromFiles(fileList).parallelStream()
+                    .forEach(document ->
+                            documentDataList.add(new DocumentData(document.getContent(), document.getMetadata())));
+
+            var documents = process(documentDataList);
             moveFilesToProcessedFolder(fileList);
             save(documents);
         } catch (IOException e) {
@@ -152,18 +161,22 @@ public class FilesystemRetriever implements Retriever<RagRequest, RagContext>, I
     }
 
     @Override
-    public List<Document> process(final List<Document> fileReadingResult) {
-        List<Document> result = new ArrayList<>();
-        ChunkStrategy chunkStrategy = new FixedLengthWordChunking(1000);
-        var chunkList = chunkStrategy.splitChunks(fileReadingResult);
-        chunkList.forEach(chunkIterator -> result.add(new Document(
+    public List<DocumentData> process(final List<DocumentData> fileReadingResult) {
+        List<DocumentData> documentDataList = new ArrayList<>();
+        PatternBasedChunking patternBasedChunking = new PatternBasedChunking();
+        var chunkList = patternBasedChunking.chunkList(chunkingAlgorithm, fileReadingResult);
+        chunkList.forEach(chunkIterator -> documentDataList.add(new DocumentData(
                 chunkIterator.getText(),
                 Map.of("documentId", chunkIterator.getDocumentId(), "chunkIndex", chunkIterator.getIndex()))));
-        return result;
+        return documentDataList;
     }
 
     @Override
-    public void save(List<Document> documents) {
+    public void save(List<DocumentData> documentDataList) {
+        List<Document> documents = new ArrayList<>();
+        documentDataList.parallelStream()
+                .forEach(documentData ->
+                        documents.add(new Document(documentData.getContent(), documentData.getMetadata())));
         vectorStore.add(documents);
     }
 

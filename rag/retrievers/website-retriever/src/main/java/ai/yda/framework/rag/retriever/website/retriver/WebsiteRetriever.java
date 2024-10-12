@@ -16,26 +16,28 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.rag.retriever.website.retriver;
 
-import ai.yda.framework.rag.core.model.RagContext;
-import ai.yda.framework.rag.core.model.RagRequest;
-import ai.yda.framework.rag.core.retriever.Indexer;
-import ai.yda.framework.rag.core.retriever.Retriever;
-import ai.yda.framework.rag.core.retriever.entity.DocumentData;
-import ai.yda.framework.rag.retriever.website.chunking.factory.ChunkingAlgorithm;
-import ai.yda.framework.rag.retriever.website.chunking.factory.PatternBasedChunking;
-import ai.yda.framework.rag.retriever.website.extractor.WebExtractor;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.lang.NonNull;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import ai.yda.framework.rag.core.model.RagContext;
+import ai.yda.framework.rag.core.model.RagRequest;
+import ai.yda.framework.rag.core.retriever.Indexer;
+import ai.yda.framework.rag.core.retriever.Retriever;
+import ai.yda.framework.rag.core.retriever.chunking.entity.DocumentData;
+import ai.yda.framework.rag.core.retriever.chunking.factory.ChunkingAlgorithm;
+import ai.yda.framework.rag.core.retriever.chunking.factory.PatternBasedChunking;
+import ai.yda.framework.rag.retriever.website.extractor.WebExtractor;
 
 /**
  * Retrieves website Context data from a Vector Store based on a User Request. It processes website or sitemap and uses
@@ -102,7 +104,7 @@ public class WebsiteRetriever implements Retriever<RagRequest, RagContext>, Inde
         this.vectorStore = vectorStore;
         this.url = url;
         this.topK = topK;
-        if (isProcessingEnabled) {
+        if (Boolean.TRUE.equals(isProcessingEnabled)) {
             index();
         }
     }
@@ -118,7 +120,7 @@ public class WebsiteRetriever implements Retriever<RagRequest, RagContext>, Inde
     }
 
     @Override
-    public List<DocumentData> process(List<DocumentData> documents) {
+    public List<DocumentData> process(final List<DocumentData> documents) {
         PatternBasedChunking patternBasedChunking = new PatternBasedChunking();
         return patternBasedChunking.chunkList(chunkingAlgorithm, documents).parallelStream()
                 .map(chunk -> new DocumentData(
@@ -128,9 +130,11 @@ public class WebsiteRetriever implements Retriever<RagRequest, RagContext>, Inde
     }
 
     @Override
-    public void save(List<DocumentData> documentDataList) {
+    public void save(final List<DocumentData> documentDataList) {
         List<Document> documents = new ArrayList<>();
-        documentDataList.parallelStream().forEach(documentData -> documents.add(new Document(documentData.getContent(), documentData.getMetadata())));
+        documentDataList.parallelStream()
+                .forEach(documentData ->
+                        documents.add(new Document(documentData.getContent(), documentData.getMetadata())));
         vectorStore.add(documents);
     }
 

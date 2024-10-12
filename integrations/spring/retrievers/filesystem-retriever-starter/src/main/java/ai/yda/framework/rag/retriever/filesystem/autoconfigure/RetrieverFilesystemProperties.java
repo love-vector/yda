@@ -24,6 +24,7 @@ import lombok.Setter;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import ai.yda.framework.rag.core.retriever.chunking.factory.ChunkingAlgorithm;
 import ai.yda.framework.rag.retriever.shared.RetrieverProperties;
 
 /**
@@ -64,6 +65,8 @@ public class RetrieverFilesystemProperties extends RetrieverProperties {
     public static final String CONFIG_PREFIX = "ai.yda.framework.rag.retriever.filesystem";
 
     private String fileStoragePath;
+
+    private ChunkingAlgorithm chunkingAlgorithm;
 
     /**
      * Default constructor for {@link RetrieverFilesystemProperties}.

@@ -24,8 +24,8 @@ import lombok.Setter;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import ai.yda.framework.rag.core.retriever.chunking.factory.ChunkingAlgorithm;
 import ai.yda.framework.rag.retriever.shared.RetrieverProperties;
-import ai.yda.framework.rag.retriever.website.chunking.factory.ChunkingAlgorithm;
 
 /**
  * Provides configuration properties for website Retriever. These properties can be customized through the

@@ -17,14 +17,23 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.rag.retriever.filesystem.chunking;
+package ai.yda.framework.rag.core.retriever.chunking.factory;
 
 import java.util.List;
 
-import org.springframework.ai.document.Document;
+import ai.yda.framework.rag.core.retriever.chunking.ChunkStrategy;
+import ai.yda.framework.rag.core.retriever.chunking.entity.Chunk;
+import ai.yda.framework.rag.core.retriever.chunking.entity.DocumentData;
 
-import ai.yda.framework.rag.core.retriever.entity.Chunk;
+public class PatternBasedChunking {
+    private final ChunkStrategyFactory chunkStrategyFactory;
 
-public interface ChunkStrategy {
-    List<Chunk> splitChunks(List<Document> documents);
+    public PatternBasedChunking() {
+        this.chunkStrategyFactory = new ChunkStrategyFactory();
+    }
+
+    public List<Chunk> chunkList(final ChunkingAlgorithm chunkingAlgorithm,final List<DocumentData> documents) {
+        ChunkStrategy strategy = chunkStrategyFactory.getStrategy(chunkingAlgorithm);
+        return strategy.splitChunks(documents);
+    }
 }

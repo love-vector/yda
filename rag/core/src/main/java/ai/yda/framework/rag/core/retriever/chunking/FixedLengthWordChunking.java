@@ -16,44 +16,39 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
-package ai.yda.framework.rag.retriever.website.chunking;
+*/
+package ai.yda.framework.rag.core.retriever.chunking;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import ai.yda.framework.rag.core.retriever.ChunkStrategy;
-import ai.yda.framework.rag.core.retriever.entity.DocumentData;
-import org.springframework.ai.document.Document;
+import ai.yda.framework.rag.core.retriever.chunking.entity.Chunk;
+import ai.yda.framework.rag.core.retriever.chunking.entity.DocumentData;
 
-import ai.yda.framework.rag.core.retriever.entity.Chunk;
+public class FixedLengthWordChunking implements ChunkStrategy {
+    private final int chunkSize;
 
-public class SlidingWindowChunking implements ChunkStrategy {
-    private final int windowSize;
-    private final int step;
-
-    public SlidingWindowChunking(final int windowSize, final int step) {
-        this.windowSize = windowSize;
-        this.step = step;
+    public FixedLengthWordChunking(final int chunkSize) {
+        this.chunkSize = chunkSize;
     }
 
     @Override
     public List<Chunk> splitChunks(final List<DocumentData> documents) {
         List<Chunk> chunks = new ArrayList<>();
         final int[] chunkIndex = {0};
+
         documents.forEach(document -> {
             var text = document.getContent();
             var documentId = document.getMetadata().get("documentId").toString();
 
-            String[] words = text.split("\\s+");
+            Pattern pattern = Pattern.compile(".{1," + chunkSize + "}");
+            Matcher matcher = pattern.matcher(text);
 
-            for (int i = 0; i < words.length; i += step) {
-                StringBuilder chunkText = new StringBuilder();
-                for (int j = i; j < i + windowSize && j < words.length; j++) {
-                    chunkText.append(words[j]).append(" ");
-                }
-                Chunk chunk = new Chunk(chunkText.toString().trim(), chunkIndex[0]++, documentId);
-                chunks.add(chunk);
+            while (matcher.find()) {
+                var chunkText = matcher.group().trim();
+                chunks.add(new Chunk(chunkText, chunkIndex[0]++, documentId));
             }
         });
         return chunks;
