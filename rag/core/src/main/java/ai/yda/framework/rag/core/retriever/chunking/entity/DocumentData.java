@@ -49,7 +49,7 @@ public class DocumentData {
      * @param content  the content of the document.
      * @param metadata the metadata associated with the document.
      */
-    public DocumentData(final String content,final Map<String,Object> metadata) {
+    public DocumentData(final String content, final Map<String, Object> metadata) {
         this.content = content;
         this.metadata = metadata;
     }

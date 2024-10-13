@@ -21,11 +21,11 @@ package ai.yda.framework.rag.core.retriever.chunking.factory;
 
 import java.util.List;
 
+import ai.yda.framework.rag.core.retriever.chunking.constants.ChunkingConstants;
 import ai.yda.framework.rag.core.retriever.chunking.strategy.ChunkStrategy;
 import ai.yda.framework.rag.core.retriever.chunking.strategy.FixedLengthWordChunking;
 import ai.yda.framework.rag.core.retriever.chunking.strategy.RegexChunking;
 import ai.yda.framework.rag.core.retriever.chunking.strategy.SlidingWindowChunking;
-import ai.yda.framework.rag.core.retriever.chunking.constants.ChunkingConstants;
 
 /**
  * Factory class for creating different types of {@link ChunkStrategy} based on the provided {@link ChunkingAlgorithm}.
