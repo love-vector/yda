@@ -21,7 +21,7 @@ package ai.yda.framework.rag.core.retriever.chunking.factory;
 
 import java.util.List;
 
-import ai.yda.framework.rag.core.retriever.chunking.ChunkStrategy;
+import ai.yda.framework.rag.core.retriever.chunking.strategy.ChunkStrategy;
 import ai.yda.framework.rag.core.retriever.chunking.entity.Chunk;
 import ai.yda.framework.rag.core.retriever.chunking.entity.DocumentData;
 
