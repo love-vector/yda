@@ -161,10 +161,10 @@ public class WebsiteRetriever implements Retriever<RagRequest, RagContext>, Inde
      */
     @Override
     public void save(final List<DocumentData> documentDataList) {
-        documentDataList.parallelStream().forEach(documentData -> {
-            var document = new Document(documentData.getContent(), documentData.getMetadata());
-            vectorStore.add(List.of(document));
-        });
+        List<Document> documents = new ArrayList<>();
+        documentDataList.forEach(
+                documentData -> documents.add(new Document(documentData.getContent(), documentData.getMetadata())));
+        vectorStore.add(documents);
     }
 
     /**
