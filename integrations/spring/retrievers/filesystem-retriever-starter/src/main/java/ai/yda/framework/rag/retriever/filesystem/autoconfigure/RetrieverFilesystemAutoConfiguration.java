@@ -98,6 +98,7 @@ public class RetrieverFilesystemAutoConfiguration {
                 milvusVectorStore,
                 filesystemProperties.getFileStoragePath(),
                 filesystemProperties.getTopK(),
-                filesystemProperties.getIsProcessingEnabled());
+                filesystemProperties.getIsProcessingEnabled(),
+                filesystemProperties.getChunkingAlgorithm());
     }
 }

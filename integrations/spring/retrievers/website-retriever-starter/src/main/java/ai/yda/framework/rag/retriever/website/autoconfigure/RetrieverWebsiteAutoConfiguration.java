@@ -29,8 +29,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 
 import ai.yda.framework.rag.retriever.shared.MilvusVectorStoreUtil;
-import ai.yda.framework.rag.retriever.website.WebsiteRetriever;
 import ai.yda.framework.rag.retriever.website.extractor.WebExtractor;
+import ai.yda.framework.rag.retriever.website.retriver.WebsiteRetriever;
 
 /**
  * Autoconfiguration class for creating and configuring all necessary components for Web Retrieving.
@@ -93,7 +93,8 @@ public class RetrieverWebsiteAutoConfiguration {
                 milvusVectorStore,
                 websiteProperties.getUrl(),
                 websiteProperties.getTopK(),
-                websiteProperties.getIsProcessingEnabled());
+                websiteProperties.getIsProcessingEnabled(),
+                websiteProperties.getChunkingAlgorithm());
     }
 
     /**

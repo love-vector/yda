@@ -17,13 +17,9 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.rag.retriever.filesystem;
+package ai.yda.framework.rag.retriever.website.retriver;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
@@ -42,35 +38,38 @@ import ai.yda.framework.rag.core.retriever.Retriever;
 import ai.yda.framework.rag.core.retriever.chunking.entity.DocumentData;
 import ai.yda.framework.rag.core.retriever.chunking.factory.ChunkingAlgorithm;
 import ai.yda.framework.rag.core.retriever.chunking.factory.PatternBasedChunking;
-import ai.yda.framework.rag.retriever.filesystem.exception.FileReadException;
-import ai.yda.framework.rag.retriever.filesystem.service.FilesystemService;
+import ai.yda.framework.rag.retriever.website.extractor.WebExtractor;
 
 /**
- * Retrieves filesystem Context data from a Vector Store based on a Request. It processes files stored in a specified
- * directory and uses a Vector Store to perform similarity searches. If file processing is enabled, it processes files
- * in the storage folder during initialization.
+ * Retrieves website Context data from a Vector Store based on a User Request.
+ * This class crawls or extracts data from a specified website or sitemap URL,
+ * chunks the content using a provided chunking algorithm, and then stores the chunks
+ * in a Vector Store. It supports both retrieval and indexing functionalities.
  *
- * @author Bogdan Synenko
- * @author Dmitry Marchuk
+ * <p>If processing is enabled, it will also process the website content at initialization,
+ * chunk the data, and store the results in the Vector Store.</p>
+ *
  * @author Iryna Kopchak
- * @see FilesystemService
+ * @author Bogdan Synenko
+ * @author Nikita Litvinov
  * @see VectorStore
+ * @see WebExtractor
  * @since 0.2.0
  */
 @Slf4j
-public class FilesystemRetriever implements Retriever<RagRequest, RagContext>, Indexer<DocumentData> {
+public class WebsiteRetriever implements Retriever<RagRequest, RagContext>, Indexer<DocumentData> {
     /**
-     * The Vector Store used to retrieve Context data for User Request through similarity search.
+     * The Vector Store used to retrieve Context data for user Request through similarity search.
      */
     private final VectorStore vectorStore;
 
     /**
-     * The path to the directory where files are stored.
+     * The website or sitemap url.
      */
-    private final Path fileStoragePath;
+    private final String url;
 
     /**
-     * The algorithm used for chunking the content of the files.
+     * The algorithm used for chunking the content of the extracted website data.
      */
     private final ChunkingAlgorithm chunkingAlgorithm;
 
@@ -79,101 +78,76 @@ public class FilesystemRetriever implements Retriever<RagRequest, RagContext>, I
      */
     private final Integer topK;
 
-    private final FilesystemService filesystemService = new FilesystemService();
+    /**
+     * Extractor used for crawling and extracting web content.
+     */
+    private final WebExtractor webExtractor;
 
     /**
-     * Constructs a new {@link FilesystemRetriever} instance with the specified vectorStore, fileStoragePath, topK and
+     * Constructs a new {@link WebsiteRetriever} instance with the specified vectorStore, url, topK and
      * isProcessingEnabled parameters.
      *
+     * @param webExtractor        the extractor used for crawling and extracting web content.
      * @param vectorStore         the {@link VectorStore} instance used for storing and retrieving vector data.
      *                            This parameter cannot be {@code null} and is used to interact with the Vector Store.
-     * @param fileStoragePath     the path to the directory where files are stored. This parameter cannot be
-     *                            {@code null} and is used to process and store files to the Vector Store.
+     * @param url                 the website or sitemap url. This parameter cannot be {@code null} and is used to
+     *                            process and store data to the Vector Store.
      * @param topK                the number of top results to retrieve from the Vector Store. This value must be a
      *                            positive integer.
-     * @param isProcessingEnabled a {@link Boolean} flag indicating whether file processing should be enabled during
+     * @param isProcessingEnabled a {@link Boolean} flag indicating whether website processing should be enabled during
      *                            initialization. If {@code true}, the method {@link #index()} will
      *                            be called to process the files in the specified storage path.
      * @param chunkingAlgorithm   the algorithm used to split document content into chunks for further processing.
      * @throws IllegalArgumentException if {@code topK} is not a positive number.
      */
-    public FilesystemRetriever(
+    public WebsiteRetriever(
+            final @NonNull WebExtractor webExtractor,
             final @NonNull VectorStore vectorStore,
-            final @NonNull String fileStoragePath,
+            final @NonNull String url,
             final @NonNull Integer topK,
             final @NonNull Boolean isProcessingEnabled,
             final @NonNull ChunkingAlgorithm chunkingAlgorithm) {
         if (topK <= 0) {
             throw new IllegalArgumentException("TopK must be a positive number.");
         }
-        this.vectorStore = vectorStore;
-        this.fileStoragePath = Paths.get(fileStoragePath);
-        this.topK = topK;
         this.chunkingAlgorithm = chunkingAlgorithm;
-
+        this.webExtractor = webExtractor;
+        this.vectorStore = vectorStore;
+        this.url = url;
+        this.topK = topK;
         if (Boolean.TRUE.equals(isProcessingEnabled)) {
             index();
         }
     }
 
     /**
-     * Retrieves Context data based on the given Request by performing a similarity search in the Vector Store.
-     *
-     * @param request the {@link RagRequest} object containing the User query for the similarity search.
-     * @return a {@link RagContext} object containing the Knowledge obtained from the similarity search.
-     */
-    @Override
-    public RagContext retrieve(final RagRequest request) {
-        return RagContext.builder()
-                .knowledge(
-                        vectorStore
-                                .similaritySearch(
-                                        SearchRequest.query(request.getQuery()).withTopK(topK))
-                                .parallelStream()
-                                .map(document -> {
-                                    log.debug("Document metadata: {}", document.getMetadata());
-                                    return document.getContent();
-                                })
-                                .toList())
-                .build();
-    }
-
-    /**
-     * Lists all regular files in the local directory, processes each file to create chunks, and then adds these chunks
-     * to the vector store.
-     *
-     * @throws RuntimeException if an I/O error occurs when processing file storage folder.
+     * Indexes the website content by extracting data from the URL, chunking it, and saving it in the Vector Store.
+     * <p>This method uses the {@link WebExtractor} to crawl or extract the website content, applies a chunking
+     * algorithm to the extracted content, and stores the resulting chunks in the Vector Store.</p>
      */
     @Override
     public void index() {
-        try (var paths = Files.list(fileStoragePath)) {
-            var fileList = paths.filter(Files::isRegularFile).toList();
-            if (fileList.isEmpty()) {
-                log.debug("No files to process in directory: {}", fileStoragePath);
-                return;
-            }
-            var processedFilesList = filesystemService.createDocumentsFromFiles(fileList);
-            var documentDataList = process(processedFilesList);
+        List<DocumentData> processedWebsiteList = new ArrayList<>();
+        var pageDocuments = webExtractor.extract(url);
 
-            moveFilesToProcessedFolder(fileList);
-            save(documentDataList);
-        } catch (IOException e) {
-            log.error("Error processing files in directory {}: {}", fileStoragePath, e.getMessage());
-            throw new FileReadException(e);
-        }
+        pageDocuments.forEach(crawlResult -> processedWebsiteList.add(
+                new DocumentData(crawlResult.getContent(), Map.of("documentId", crawlResult.getUrl()))));
+        var documentDataList = process(processedWebsiteList);
+        save(documentDataList);
     }
 
     /**
-     * Processes a list of {@link DocumentData} objects by splitting their content into chunks based on the chosen
-     * {@link ChunkingAlgorithm}.
+     * Processes the list of {@link DocumentData} by chunking the content using the selected chunking algorithm.
+     * <p>This method applies the chunking algorithm to each document, resulting in smaller content chunks
+     * that are easier to manage for further processing or retrieval.</p>
      *
-     * @param processedFilesList the list of processed files to be split into chunks.
-     * @return a list of processed {@link DocumentData} objects, each representing a chunk of a document.
+     * @param processedWebsiteList the list of processed website content to be chunked.
+     * @return a list of {@link DocumentData} representing the chunked website content.
      */
     @Override
-    public List<DocumentData> process(final List<DocumentData> processedFilesList) {
+    public List<DocumentData> process(final List<DocumentData> processedWebsiteList) {
         PatternBasedChunking patternBasedChunking = new PatternBasedChunking();
-        return patternBasedChunking.chunkList(chunkingAlgorithm, processedFilesList).stream()
+        return patternBasedChunking.chunkList(chunkingAlgorithm, processedWebsiteList).stream()
                 .map(chunk -> new DocumentData(
                         chunk.getText(),
                         Map.of("documentId", chunk.getDocumentId(), "chunkIndex", String.valueOf(chunk.getIndex()))))
@@ -212,23 +186,24 @@ public class FilesystemRetriever implements Retriever<RagRequest, RagContext>, I
     }
 
     /**
-     * Moves all files from the local directory to the "processed" folder.
+     * Retrieves Context data based on the given Request by performing a similarity search in the Vector Store.
      *
-     * @throws IOException if an I/O error occurs when accessing or moving the files.
+     * @param request the Request object containing the User query for the similarity search.
+     * @return a {@link RagContext} object containing the Knowledge obtained from the similarity search.
      */
-    private void moveFilesToProcessedFolder(final List<Path> fileList) throws IOException {
-        var processedDir = fileStoragePath.resolveSibling("processed");
-
-        if (!Files.exists(processedDir)) {
-            Files.createDirectory(processedDir);
-        }
-
-        fileList.parallelStream().forEach(file -> {
-            try {
-                Files.move(file, processedDir.resolve(file.getFileName()), StandardCopyOption.REPLACE_EXISTING);
-            } catch (IOException e) {
-                log.error("Failed to move file {} to processed directory: {}", file, e);
-            }
-        });
+    @Override
+    public RagContext retrieve(final RagRequest request) {
+        return RagContext.builder()
+                .knowledge(
+                        vectorStore
+                                .similaritySearch(
+                                        SearchRequest.query(request.getQuery()).withTopK(topK))
+                                .parallelStream()
+                                .map(document -> {
+                                    log.debug("Document metadata: {}", document.getMetadata());
+                                    return document.getContent();
+                                })
+                                .toList())
+                .build();
     }
 }

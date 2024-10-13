@@ -25,17 +25,17 @@ import java.util.Map;
 
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.ai.document.Document;
-
+import ai.yda.framework.rag.core.retriever.chunking.entity.DocumentData;
 import ai.yda.framework.rag.core.util.ContentUtil;
 import ai.yda.framework.rag.retriever.filesystem.util.FileUtil;
 
 /**
  * Provides methods to process files from the filesystem, specifically for creating chunked documents from files.
- * This class handles the reading, preprocessing, and splitting of files into smaller chunks, which are then
- * converted into {@link Document} objects. It is used to manage and transform file contents to facilitate further
+ * This class handles the reading, preprocessing which are then
+ * converted into {@link DocumentData} objects. It is used to manage and transform file contents to facilitate further
  * processing or retrieval.
  *
+ * @author Bogdan Synenko
  * @author Iryna Kopchak
  * @author Dmitry Marchuk
  * @see FileUtil
@@ -46,44 +46,35 @@ import ai.yda.framework.rag.retriever.filesystem.util.FileUtil;
 public class FilesystemService {
 
     /**
-     * The maximum length of a chunk in characters.
-     */
-    private static final int CHUNK_MAX_LENGTH = 1000;
-
-    /**
      * Default constructor for {@link FilesystemService}.
      */
     public FilesystemService() {}
 
     /**
-     * Processes a list of file paths, reads each file, preprocesses the content, splits it into chunks, and then
-     * converts each chunk into a {@link Document} object.
+     * Creates a list of {@link DocumentData} objects from the provided list of file paths.
+     * Each file is read, preprocessed, and split into chunks.
      *
-     * @param filePathList a list of {@link Path} to the files to be processed.
-     * @return a list of {@link Document} objects created from the chunks of files.
+     * @param filePathList the list of file paths to be processed.
+     * @return a list of {@link DocumentData} objects representing the chunks of each file.
      */
-    public List<Document> createChunkDocumentsFromFiles(final List<Path> filePathList) {
+    public List<DocumentData> createDocumentsFromFiles(final List<Path> filePathList) {
         return filePathList.parallelStream()
-                .map(this::splitFileIntoChunkDocuments)
-                .flatMap(List::stream)
+                .map(this::splitFileIntoDocumentData)
                 .toList();
     }
 
     /**
-     * Preprocesses and split of each file into chunks of a maximum length defined by {@link #CHUNK_MAX_LENGTH}. The
      * method reads the content of a PDF file, preprocesses it to clean and format the text, and then splits the
-     * preprocessed content into smaller chunks based on the maximum length. Each chunk is converted into a
-     * {@link Document} object with associated metadata.
+     * {@link DocumentData} object with associated metadata.
      *
      * @param filePath the {@link Path} of the file to be processed.
-     * @return a list of {@link Document} objects created from the chunks of the file.
+     * @return a list of {@link DocumentData} objects created from the chunks of the file.
      */
-    private List<Document> splitFileIntoChunkDocuments(final Path filePath) {
+    public DocumentData splitFileIntoDocumentData(final Path filePath) {
         var pdfContent = FileUtil.readPdf(filePath.toFile());
         var fileName = filePath.getFileName();
         log.debug("Processing file: {}", fileName);
-        return ContentUtil.preprocessAndSplitContent(pdfContent, CHUNK_MAX_LENGTH).parallelStream()
-                .map(documentChunk -> new Document(documentChunk, Map.of("fileName", fileName)))
-                .toList();
+        ContentUtil.preprocessAndSplitContent(pdfContent);
+        return new DocumentData(pdfContent, Map.of("documentId", fileName));
     }
 }
