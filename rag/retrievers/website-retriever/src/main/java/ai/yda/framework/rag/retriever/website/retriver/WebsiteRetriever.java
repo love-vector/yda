@@ -161,10 +161,31 @@ public class WebsiteRetriever implements Retriever<RagRequest, RagContext>, Inde
      */
     @Override
     public void save(final List<DocumentData> documentDataList) {
-        List<Document> documents = new ArrayList<>();
-        documentDataList.forEach(
-                documentData -> documents.add(new Document(documentData.getContent(), documentData.getMetadata())));
-        vectorStore.add(documents);
+        // Размер батча
+        int batchSize = 100;
+
+        // Получаем количество батчей
+        int totalBatches = (int) Math.ceil((double) documentDataList.size() / batchSize);
+
+        for (int i = 0; i < totalBatches; i++) {
+            // Определяем границы батча
+            int fromIndex = i * batchSize;
+            int toIndex = Math.min(fromIndex + batchSize, documentDataList.size());
+
+            // Получаем подсписок для текущего батча
+            List<DocumentData> batchList = documentDataList.subList(fromIndex, toIndex);
+
+            // Преобразуем batchList в список Document
+            List<Document> documents = batchList.stream()
+                    .map(documentData -> new Document(documentData.getContent(), documentData.getMetadata()))
+                    .toList();
+
+            // Сохраняем документы в VectorStore
+            this.vectorStore.add(documents);
+            log.debug("Processed batch {} of {} with {} documents", i + 1, totalBatches, documents.size());
+        }
+
+        log.debug("All information has been processed");
     }
 
     /**
