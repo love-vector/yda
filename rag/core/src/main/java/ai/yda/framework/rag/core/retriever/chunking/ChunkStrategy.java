@@ -24,6 +24,19 @@ import java.util.List;
 import ai.yda.framework.rag.core.retriever.chunking.entity.Chunk;
 import ai.yda.framework.rag.core.retriever.chunking.entity.DocumentData;
 
+/**
+ * Defines the strategy for chunking documents into smaller, manageable parts based on different criteria.
+ *
+ * @author Bogdan Synenko
+ * @since 0.2.0
+ */
 public interface ChunkStrategy {
+
+    /**
+     * Splits a list of documents into smaller chunks based on the chunking strategy.
+     *
+     * @param documents the list of documents to be split into chunks.
+     * @return a list of chunks created from the input documents.
+     */
     List<Chunk> splitChunks(List<DocumentData> documents);
 }

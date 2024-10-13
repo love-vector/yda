@@ -50,11 +50,12 @@ import ai.yda.framework.rag.retriever.filesystem.service.FilesystemService;
  * directory and uses a Vector Store to perform similarity searches. If file processing is enabled, it processes files
  * in the storage folder during initialization.
  *
+ * @author Bogdan Synenko
  * @author Dmitry Marchuk
  * @author Iryna Kopchak
  * @see FilesystemService
  * @see VectorStore
- * @since 0.1.0
+ * @since 0.2.0
  */
 @Slf4j
 public class FilesystemRetriever implements Retriever<RagRequest, RagContext>, Indexer<DocumentData> {
@@ -68,6 +69,9 @@ public class FilesystemRetriever implements Retriever<RagRequest, RagContext>, I
      */
     private final Path fileStoragePath;
 
+    /**
+     * The algorithm used for chunking the content of the files.
+     */
     private final ChunkingAlgorithm chunkingAlgorithm;
 
     /**
@@ -90,6 +94,7 @@ public class FilesystemRetriever implements Retriever<RagRequest, RagContext>, I
      * @param isProcessingEnabled a {@link Boolean} flag indicating whether file processing should be enabled during
      *                            initialization. If {@code true}, the method {@link #index()} will
      *                            be called to process the files in the specified storage path.
+     * @param chunkingAlgorithm   the algorithm used to split document content into chunks for further processing.
      * @throws IllegalArgumentException if {@code topK} is not a positive number.
      */
     public FilesystemRetriever(
@@ -147,30 +152,39 @@ public class FilesystemRetriever implements Retriever<RagRequest, RagContext>, I
                 log.debug("No files to process in directory: {}", fileStoragePath);
                 return;
             }
-            List<DocumentData> documentDataList = new ArrayList<>();
-            filesystemService.createDocumentsFromFiles(fileList).parallelStream()
-                    .forEach(document ->
-                            documentDataList.add(new DocumentData(document.getContent(), document.getMetadata())));
+            var processedFilesList = filesystemService.createDocumentsFromFiles(fileList);
+            var documentDataList = process(processedFilesList);
 
-            var documents = process(documentDataList);
             moveFilesToProcessedFolder(fileList);
-            save(documents);
+            save(documentDataList);
         } catch (IOException e) {
+            log.error("Error processing files in directory {}: {}", fileStoragePath, e.getMessage());
             throw new FileReadException(e);
         }
     }
 
+    /**
+     * Processes a list of {@link DocumentData} objects by splitting their content into chunks based on the chosen
+     * {@link ChunkingAlgorithm}.
+     *
+     * @param processedFilesList the list of processed files to be split into chunks.
+     * @return a list of processed {@link DocumentData} objects, each representing a chunk of a document.
+     */
     @Override
-    public List<DocumentData> process(final List<DocumentData> fileReadingResult) {
-        List<DocumentData> documentDataList = new ArrayList<>();
+    public List<DocumentData> process(final List<DocumentData> processedFilesList) {
         PatternBasedChunking patternBasedChunking = new PatternBasedChunking();
-        var chunkList = patternBasedChunking.chunkList(chunkingAlgorithm, fileReadingResult);
-        chunkList.forEach(chunkIterator -> documentDataList.add(new DocumentData(
-                chunkIterator.getText(),
-                Map.of("documentId", chunkIterator.getDocumentId(), "chunkIndex", chunkIterator.getIndex()))));
-        return documentDataList;
+        return patternBasedChunking.chunkList(chunkingAlgorithm, processedFilesList).stream()
+                .map(chunk -> new DocumentData(
+                        chunk.getText(),
+                        Map.of("documentId", chunk.getDocumentId(), "chunkIndex", String.valueOf(chunk.getIndex()))))
+                .toList();
     }
 
+    /**
+     * Saves the processed chunks of document data into the Vector Store.
+     *
+     * @param documentDataList the list of {@link DocumentData} objects to be saved into the Vector Store.
+     */
     @Override
     public void save(List<DocumentData> documentDataList) {
         List<Document> documents = new ArrayList<>();

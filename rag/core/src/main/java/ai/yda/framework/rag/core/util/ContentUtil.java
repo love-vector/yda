@@ -16,7 +16,7 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.rag.core.util;
 
 import java.nio.charset.StandardCharsets;
@@ -26,9 +26,10 @@ import org.jsoup.Jsoup;
 /**
  * Provides utility methods to preprocess textual content.
  *
+ * @author Bogdan Synenko
  * @author Iryna Kopchak
  * @author Nikita Litvinov
- * @since 0.1.0
+ * @since 0.2.0
  */
 public final class ContentUtil {
 
@@ -39,10 +40,10 @@ public final class ContentUtil {
 
     /**
      * Preprocesses the provided content by converting it to UTF-8, formatting it to lowercase, normalizing whitespaces,
-     * removing HTML tags and splitting it into chunks of a specified maximum length.
+     * removing HTML tags
      *
      * @param content the textual content to be preprocessed.
-     * @return a list of strings where each string is a chunk of the processed content. The list is unmodifiable.
+     * @return a string with the processed content ready for further use.
      */
     public static String preprocessAndSplitContent(final String content) {
         var preprocessedContent = new String(content.getBytes(), StandardCharsets.UTF_8).toLowerCase();
@@ -73,5 +74,6 @@ public final class ContentUtil {
         return document.text();
     }
 
-    private ContentUtil() {}
+    private ContentUtil() {
+    }
 }

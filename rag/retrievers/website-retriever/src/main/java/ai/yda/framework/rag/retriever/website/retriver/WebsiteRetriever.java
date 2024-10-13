@@ -16,7 +16,7 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.rag.retriever.website.retriver;
 
 import java.util.ArrayList;
@@ -40,14 +40,20 @@ import ai.yda.framework.rag.core.retriever.chunking.factory.PatternBasedChunking
 import ai.yda.framework.rag.retriever.website.extractor.WebExtractor;
 
 /**
- * Retrieves website Context data from a Vector Store based on a User Request. It processes website or sitemap and uses
- * a Vector Store to perform similarity searches. If website processing is enabled, it processes website urls during
- * initialization.
+ * Retrieves website Context data from a Vector Store based on a User Request.
+ * This class crawls or extracts data from a specified website or sitemap URL,
+ * chunks the content using a provided chunking algorithm, and then stores the chunks
+ * in a Vector Store. It supports both retrieval and indexing functionalities.
+ *
+ * <p>If processing is enabled, it will also process the website content at initialization,
+ * chunk the data, and store the results in the Vector Store.</p>
  *
  * @author Iryna Kopchak
  * @author Bogdan Synenko
+ * @author Nikita Litvinov
  * @see VectorStore
- * @since 0.1.0
+ * @see WebExtractor
+ * @since 0.2.0
  */
 @Slf4j
 public class WebsiteRetriever implements Retriever<RagRequest, RagContext>, Indexer<DocumentData> {
@@ -61,6 +67,9 @@ public class WebsiteRetriever implements Retriever<RagRequest, RagContext>, Inde
      */
     private final String url;
 
+    /**
+     * The algorithm used for chunking the content of the extracted website data.
+     */
     private final ChunkingAlgorithm chunkingAlgorithm;
 
     /**
@@ -87,6 +96,7 @@ public class WebsiteRetriever implements Retriever<RagRequest, RagContext>, Inde
      * @param isProcessingEnabled a {@link Boolean} flag indicating whether website processing should be enabled during
      *                            initialization. If {@code true}, the method {@link #index()} will
      *                            be called to process the files in the specified storage path.
+     * @param chunkingAlgorithm   the algorithm used to split document content into chunks for further processing.
      * @throws IllegalArgumentException if {@code topK} is not a positive number.
      */
     public WebsiteRetriever(
@@ -109,33 +119,52 @@ public class WebsiteRetriever implements Retriever<RagRequest, RagContext>, Inde
         }
     }
 
+    /**
+     * Indexes the website content by extracting data from the URL, chunking it, and saving it in the Vector Store.
+     * <p>This method uses the {@link WebExtractor} to crawl or extract the website content, applies a chunking
+     * algorithm to the extracted content, and stores the resulting chunks in the Vector Store.</p>
+     */
     @Override
     public void index() {
+        List<DocumentData> processedWebsiteList = new ArrayList<>();
         var pageDocuments = webExtractor.extract(url);
-        List<DocumentData> documentsForChunking = new ArrayList<>();
-        pageDocuments.forEach(crawlResult -> documentsForChunking.add(
+
+        pageDocuments.forEach(crawlResult -> processedWebsiteList.add(
                 new DocumentData(crawlResult.getContent(), Map.of("documentId", crawlResult.getUrl()))));
-        var documents = process(documentsForChunking);
-        save(documents);
+        var documentDataList = process(processedWebsiteList);
+        save(documentDataList);
     }
 
+    /**
+     * Processes the list of {@link DocumentData} by chunking the content using the selected chunking algorithm.
+     * <p>This method applies the chunking algorithm to each document, resulting in smaller content chunks
+     * that are easier to manage for further processing or retrieval.</p>
+     *
+     * @param processedWebsiteList the list of processed website content to be chunked.
+     * @return a list of {@link DocumentData} representing the chunked website content.
+     */
     @Override
-    public List<DocumentData> process(final List<DocumentData> documents) {
+    public List<DocumentData> process(final List<DocumentData> processedWebsiteList) {
         PatternBasedChunking patternBasedChunking = new PatternBasedChunking();
-        return patternBasedChunking.chunkList(chunkingAlgorithm, documents).parallelStream()
+        return patternBasedChunking.chunkList(chunkingAlgorithm, processedWebsiteList).stream()
                 .map(chunk -> new DocumentData(
                         chunk.getText(),
                         Map.of("documentId", chunk.getDocumentId(), "chunkIndex", String.valueOf(chunk.getIndex()))))
                 .toList();
     }
 
+    /**
+     * Saves the processed chunks of website data into the Vector Store.
+     * <p>This method converts each chunk of document data into a {@link Document} and stores it in the Vector Store.</p>
+     *
+     * @param documentDataList the list of chunked website content to be saved into the Vector Store.
+     */
     @Override
     public void save(final List<DocumentData> documentDataList) {
-        List<Document> documents = new ArrayList<>();
-        documentDataList.parallelStream()
-                .forEach(documentData ->
-                        documents.add(new Document(documentData.getContent(), documentData.getMetadata())));
-        vectorStore.add(documents);
+        documentDataList.parallelStream().forEach(documentData -> {
+            var document = new Document(documentData.getContent(), documentData.getMetadata());
+            vectorStore.add(List.of(document));
+        });
     }
 
     /**

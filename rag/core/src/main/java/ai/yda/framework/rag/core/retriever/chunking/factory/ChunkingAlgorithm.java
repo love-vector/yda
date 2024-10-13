@@ -19,8 +19,21 @@
 */
 package ai.yda.framework.rag.core.retriever.chunking.factory;
 
+/**
+ * Enum representing the different chunking algorithms that can be applied to split document content.
+ * Each algorithm defines a specific strategy for dividing text into chunks.
+ *
+ * <ul>
+ *   <li>{@code FIXED} - splits content into fixed-length chunks.</li>
+ *   <li>{@code SENTENCES} - splits content into chunks based on sentence boundaries.</li>
+ *   <li>{@code WINDOW} - uses a sliding window mechanism to split content into overlapping chunks.</li>
+ * </ul>
+ *
+ * @author Bogdan Synenko
+ * @since 0.2.0
+ */
 public enum ChunkingAlgorithm {
     FIXED,
-    REGEX,
+    SENTENCES,
     WINDOW
 }

@@ -21,10 +21,32 @@ package ai.yda.framework.rag.core.retriever;
 
 import java.util.List;
 
+/**
+ * Defines the contract for indexing and processing documents to be stored and retrieved from a data store.
+ *
+ * @param <DOCUMENT> the type of document to be processed and indexed.
+ * @author Bogdan Synenko
+ * @since 0.2.0
+ */
 public interface Indexer<DOCUMENT> {
+    /**
+     * Indexes documents by processing and saving them into the data store.
+     * Typically used for initial setup or periodic updates.
+     */
     void index();
 
-    List<DOCUMENT> process(List<DOCUMENT> crawlResult);
+    /**
+     * Processes a list of documents and returns the processed list.
+     *
+     * @param chunkingResult the generic type of the DOCUMENT.
+     * @return the processed list of documents.
+     */
+    List<DOCUMENT> process(List<DOCUMENT> chunkingResult);
 
+    /**
+     * Saves the list of processed documents into the data store.
+     *
+     * @param documents the list of documents to be saved.
+     */
     void save(List<DOCUMENT> documents);
 }

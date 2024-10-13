@@ -27,21 +27,43 @@ import java.util.regex.Pattern;
 import ai.yda.framework.rag.core.retriever.chunking.entity.Chunk;
 import ai.yda.framework.rag.core.retriever.chunking.entity.DocumentData;
 
+/**
+ * A chunking strategy that splits document content into fixed-length chunks based on word count.
+ * Each chunk is limited to a certain number of characters.
+ *
+ * @author Bogdan Synenko
+ * @since 0.2.0
+ */
 public class FixedLengthWordChunking implements ChunkStrategy {
+
+    /**
+     * The maximum number of characters allowed per chunk.
+     */
     private final int chunkSize;
 
+    /**
+     * Constructs a new {@link FixedLengthWordChunking} instance with the specified chunk size.
+     *
+     * @param chunkSize the maximum number of characters for each chunk.
+     */
     public FixedLengthWordChunking(final int chunkSize) {
         this.chunkSize = chunkSize;
     }
 
+    /**
+     * Splits the provided list of documents into chunks of fixed length.
+     *
+     * @param documentDataList the list of documents to be chunked.
+     * @return a list of chunks, each containing a portion of the document content.
+     */
     @Override
-    public List<Chunk> splitChunks(final List<DocumentData> documents) {
+    public List<Chunk> splitChunks(final List<DocumentData> documentDataList) {
         List<Chunk> chunks = new ArrayList<>();
         final int[] chunkIndex = {0};
 
-        documents.forEach(document -> {
-            var text = document.getContent();
-            var documentId = document.getMetadata().get("documentId").toString();
+        documentDataList.forEach(documentData -> {
+            var text = documentData.getContent();
+            var documentId = documentData.getMetadata().get("documentId").toString();
 
             Pattern pattern = Pattern.compile(".{1," + chunkSize + "}");
             Matcher matcher = pattern.matcher(text);

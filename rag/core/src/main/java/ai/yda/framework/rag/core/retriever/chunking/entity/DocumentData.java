@@ -23,12 +23,34 @@ import java.util.Map;
 
 import lombok.Getter;
 
+/**
+ * Represents a document's content and associated metadata.
+ * Used for processing and chunking documents into smaller parts.
+ *
+ * @author Bogdan Synenko
+ * @since 0.2.0
+ */
 @Getter
 public class DocumentData {
+
+
+    /**
+     * The content of the document.
+     */
     private final String content;
 
+    /**
+     * The metadata associated with the document, such as document identifiers or other properties.
+     */
     private final Map<String, Object> metadata;
 
+
+    /**
+     * Constructs a new {@link DocumentData} instance.
+     *
+     * @param content  the content of the document.
+     * @param metadata the metadata associated with the document.
+     */
     public DocumentData(String content, Map<String, Object> metadata) {
         this.content = content;
         this.metadata = metadata;

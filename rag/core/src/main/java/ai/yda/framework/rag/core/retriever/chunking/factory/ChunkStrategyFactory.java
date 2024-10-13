@@ -26,12 +26,26 @@ import ai.yda.framework.rag.core.retriever.chunking.FixedLengthWordChunking;
 import ai.yda.framework.rag.core.retriever.chunking.RegexChunking;
 import ai.yda.framework.rag.core.retriever.chunking.SlidingWindowChunking;
 
+/**
+ * Factory class for creating different types of {@link ChunkStrategy} based on the provided {@link ChunkingAlgorithm}.
+ * The factory supports fixed-length, sentence-based, and sliding window chunking strategies.
+ *
+ * @author Bogdan Synenko
+ * @since 0.2.0
+ */
 public class ChunkStrategyFactory {
+
+    /**
+     * Returns the appropriate chunking strategy based on the provided algorithm.
+     *
+     * @param chunkingAlgorithm the algorithm type used to determine the chunking strategy.
+     * @return the {@link ChunkStrategy} that corresponds to the selected chunking algorithm.
+     */
     public ChunkStrategy getStrategy(final ChunkingAlgorithm chunkingAlgorithm) {
         switch (chunkingAlgorithm) {
             case FIXED:
                 return new FixedLengthWordChunking(1000);
-            case REGEX:
+            case SENTENCES:
                 return new RegexChunking(List.of("[.!?]\\s+"));
             case WINDOW:
                 return new SlidingWindowChunking(10, 1);

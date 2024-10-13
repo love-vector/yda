@@ -19,23 +19,22 @@
 */
 package ai.yda.framework.rag.retriever.filesystem.service;
 
+import ai.yda.framework.rag.core.retriever.chunking.entity.DocumentData;
+import ai.yda.framework.rag.core.util.ContentUtil;
+import ai.yda.framework.rag.retriever.filesystem.util.FileUtil;
+import lombok.extern.slf4j.Slf4j;
+
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
-import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.ai.document.Document;
-
-import ai.yda.framework.rag.core.util.ContentUtil;
-import ai.yda.framework.rag.retriever.filesystem.util.FileUtil;
-
 /**
  * Provides methods to process files from the filesystem, specifically for creating chunked documents from files.
- * This class handles the reading, preprocessing, and splitting of files into smaller chunks, which are then
- * converted into {@link Document} objects. It is used to manage and transform file contents to facilitate further
+ * This class handles the reading, preprocessing which are then
+ * converted into {@link DocumentData} objects. It is used to manage and transform file contents to facilitate further
  * processing or retrieval.
  *
+ * @author Bogdan Synenko
  * @author Iryna Kopchak
  * @author Dmitry Marchuk
  * @see FileUtil
@@ -50,24 +49,22 @@ public class FilesystemService {
      */
     public FilesystemService() {}
 
-    public List<Document> createDocumentsFromFiles(final List<Path> filePathList) {
-        return filePathList.parallelStream().map(this::splitFileIntoDocument).toList();
+    public List<DocumentData> createDocumentsFromFiles(final List<Path> filePathList) {
+        return filePathList.parallelStream().map(this::splitFileIntoDocumentData).toList();
     }
 
     /**
-     * Preprocesses and split of each file into chunks of a maximum length defined by {@link }. The
      * method reads the content of a PDF file, preprocesses it to clean and format the text, and then splits the
-     * preprocessed content into smaller chunks based on the maximum length. Each chunk is converted into a
-     * {@link Document} object with associated metadata.
+     * {@link DocumentData} object with associated metadata.
      *
      * @param filePath the {@link Path} of the file to be processed.
-     * @return a list of {@link Document} objects created from the chunks of the file.
+     * @return a list of {@link DocumentData} objects created from the chunks of the file.
      */
-    public Document splitFileIntoDocument(final Path filePath) {
+    public DocumentData splitFileIntoDocumentData(final Path filePath) {
         var pdfContent = FileUtil.readPdf(filePath.toFile());
         var fileName = filePath.getFileName();
         log.debug("Processing file: {}", fileName);
         ContentUtil.preprocessAndSplitContent(pdfContent);
-        return new Document(pdfContent, Map.of("documentId", fileName));
+        return new DocumentData(pdfContent, Map.of("documentId", fileName));
     }
 }
