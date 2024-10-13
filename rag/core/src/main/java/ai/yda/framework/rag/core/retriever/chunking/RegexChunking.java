@@ -71,7 +71,8 @@ public class RegexChunking implements ChunkStrategy {
                 int lastMatchEnd = 0;
 
                 while (matcher.find()) {
-                    String chunkText = text.substring(lastMatchEnd, matcher.start()).trim();
+                    String chunkText =
+                            text.substring(lastMatchEnd, matcher.start()).trim();
                     if (!chunkText.isEmpty()) {
                         chunks.add(new Chunk(chunkText, chunkIndex[0]++, documentId));
                     }

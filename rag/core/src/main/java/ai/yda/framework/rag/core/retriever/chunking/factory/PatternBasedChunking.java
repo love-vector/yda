@@ -54,7 +54,7 @@ public class PatternBasedChunking {
      * @param documents         the list of documents to be chunked.
      * @return a list of {@link Chunk} objects that represent the split document data.
      */
-    public List<Chunk> chunkList(final ChunkingAlgorithm chunkingAlgorithm,final List<DocumentData> documents) {
+    public List<Chunk> chunkList(final ChunkingAlgorithm chunkingAlgorithm, final List<DocumentData> documents) {
         ChunkStrategy strategy = chunkStrategyFactory.getStrategy(chunkingAlgorithm);
         return strategy.splitChunks(documents);
     }

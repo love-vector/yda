@@ -53,7 +53,7 @@ public class Chunk {
      * @param index      the index of the chunk in the original document.
      * @param documentId the ID of the document from which the chunk is extracted.
      */
-    public Chunk(String text, int index, String documentId) {
+    public Chunk(final String text,final int index,final String documentId) {
         this.text = text;
         this.index = index;
         this.documentId = documentId;

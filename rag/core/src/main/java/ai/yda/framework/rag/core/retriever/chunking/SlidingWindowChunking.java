@@ -55,7 +55,6 @@ public class SlidingWindowChunking implements ChunkStrategy {
         this.step = step;
     }
 
-
     /**
      * Splits the provided list of documents into overlapping chunks based on a sliding window mechanism.
      *

@@ -33,7 +33,6 @@ import lombok.Getter;
 @Getter
 public class DocumentData {
 
-
     /**
      * The content of the document.
      */
@@ -44,14 +43,13 @@ public class DocumentData {
      */
     private final Map<String, Object> metadata;
 
-
     /**
      * Constructs a new {@link DocumentData} instance.
      *
      * @param content  the content of the document.
      * @param metadata the metadata associated with the document.
      */
-    public DocumentData(String content, Map<String, Object> metadata) {
+    public DocumentData(final String content,final Map<String,Object> metadata) {
         this.content = content;
         this.metadata = metadata;
     }

@@ -19,14 +19,15 @@
 */
 package ai.yda.framework.rag.retriever.filesystem.service;
 
-import ai.yda.framework.rag.core.retriever.chunking.entity.DocumentData;
-import ai.yda.framework.rag.core.util.ContentUtil;
-import ai.yda.framework.rag.retriever.filesystem.util.FileUtil;
-import lombok.extern.slf4j.Slf4j;
-
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+
+import lombok.extern.slf4j.Slf4j;
+
+import ai.yda.framework.rag.core.retriever.chunking.entity.DocumentData;
+import ai.yda.framework.rag.core.util.ContentUtil;
+import ai.yda.framework.rag.retriever.filesystem.util.FileUtil;
 
 /**
  * Provides methods to process files from the filesystem, specifically for creating chunked documents from files.
@@ -49,8 +50,17 @@ public class FilesystemService {
      */
     public FilesystemService() {}
 
+    /**
+     * Creates a list of {@link DocumentData} objects from the provided list of file paths.
+     * Each file is read, preprocessed, and split into chunks.
+     *
+     * @param filePathList the list of file paths to be processed.
+     * @return a list of {@link DocumentData} objects representing the chunks of each file.
+     */
     public List<DocumentData> createDocumentsFromFiles(final List<Path> filePathList) {
-        return filePathList.parallelStream().map(this::splitFileIntoDocumentData).toList();
+        return filePathList.parallelStream()
+                .map(this::splitFileIntoDocumentData)
+                .toList();
     }
 
     /**

@@ -16,7 +16,7 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.rag.core.util;
 
 import java.nio.charset.StandardCharsets;
@@ -74,6 +74,5 @@ public final class ContentUtil {
         return document.text();
     }
 
-    private ContentUtil() {
-    }
+    private ContentUtil() {}
 }

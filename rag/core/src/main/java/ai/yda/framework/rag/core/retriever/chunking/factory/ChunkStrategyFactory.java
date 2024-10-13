@@ -25,6 +25,7 @@ import ai.yda.framework.rag.core.retriever.chunking.ChunkStrategy;
 import ai.yda.framework.rag.core.retriever.chunking.FixedLengthWordChunking;
 import ai.yda.framework.rag.core.retriever.chunking.RegexChunking;
 import ai.yda.framework.rag.core.retriever.chunking.SlidingWindowChunking;
+import ai.yda.framework.rag.core.retriever.chunking.constants.ChunkingConstants;
 
 /**
  * Factory class for creating different types of {@link ChunkStrategy} based on the provided {@link ChunkingAlgorithm}.
@@ -44,11 +45,11 @@ public class ChunkStrategyFactory {
     public ChunkStrategy getStrategy(final ChunkingAlgorithm chunkingAlgorithm) {
         switch (chunkingAlgorithm) {
             case FIXED:
-                return new FixedLengthWordChunking(1000);
+                return new FixedLengthWordChunking(ChunkingConstants.CHUNK_MAX_LENGTH);
             case SENTENCES:
-                return new RegexChunking(List.of("[.!?]\\s+"));
+                return new RegexChunking(List.of(ChunkingConstants.REGEX_PATTERN));
             case WINDOW:
-                return new SlidingWindowChunking(10, 1);
+                return new SlidingWindowChunking(ChunkingConstants.WINDOW_SIZE, ChunkingConstants.WINDOW_STEP);
             default:
                 throw new RuntimeException("Unknown chunking algorithm: " + chunkingAlgorithm);
         }

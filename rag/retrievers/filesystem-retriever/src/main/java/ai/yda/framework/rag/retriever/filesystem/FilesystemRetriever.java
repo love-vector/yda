@@ -186,7 +186,7 @@ public class FilesystemRetriever implements Retriever<RagRequest, RagContext>, I
      * @param documentDataList the list of {@link DocumentData} objects to be saved into the Vector Store.
      */
     @Override
-    public void save(List<DocumentData> documentDataList) {
+    public void save(final List<DocumentData> documentDataList) {
         List<Document> documents = new ArrayList<>();
         documentDataList.parallelStream()
                 .forEach(documentData ->
