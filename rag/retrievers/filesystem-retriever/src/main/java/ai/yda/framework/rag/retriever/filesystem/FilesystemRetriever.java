@@ -27,6 +27,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -181,17 +182,34 @@ public class FilesystemRetriever implements Retriever<RagRequest, RagContext>, I
     }
 
     /**
-     * Saves the processed chunks of document data into the Vector Store.
+     * Saves the processed chunks of website data into the Vector Store.
+     * <p>This method processes the list of document data in batches. Each batch contains up to a specified number
+     * of documents (currently set to 1000). The method converts each batch of {@link DocumentData} into a list of
+     * {@link Document}, and stores the entire batch in the Vector Store at once.</p>
      *
-     * @param documentDataList the list of {@link DocumentData} objects to be saved into the Vector Store.
+     * <p>This approach improves performance by reducing the overhead associated with storing individual documents,
+     * instead processing them in larger groups (batches).</p>
+     *
+     * @param documentDataList the list of chunked website content to be saved into the Vector Store.
      */
     @Override
     public void save(final List<DocumentData> documentDataList) {
-        List<Document> documents = new ArrayList<>();
-        documentDataList.parallelStream()
-                .forEach(documentData ->
-                        documents.add(new Document(documentData.getContent(), documentData.getMetadata())));
-        vectorStore.add(documents);
+        var batchSize = 1000;
+        var totalBatches = (int) Math.ceil((double) documentDataList.size() / batchSize);
+
+        IntStream.range(0, totalBatches).forEach(i -> {
+            var fromIndex = i * batchSize;
+            var toIndex = Math.min(fromIndex + batchSize, documentDataList.size());
+            List<DocumentData> batchList = documentDataList.subList(fromIndex, toIndex);
+            List<Document> documents = batchList.stream()
+                    .map(documentData -> new Document(documentData.getContent(), documentData.getMetadata()))
+                    .toList();
+
+            vectorStore.add(documents);
+            log.debug("Processed batch {} of {} with {} documents", i + 1, totalBatches, documents.size());
+        });
+
+        log.debug("All information has been processed");
     }
 
     /**
