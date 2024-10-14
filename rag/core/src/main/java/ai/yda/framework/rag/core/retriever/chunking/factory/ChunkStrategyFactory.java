@@ -16,12 +16,12 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.rag.core.retriever.chunking.factory;
 
 import java.util.List;
 
-import ai.yda.framework.rag.core.retriever.chunking.constants.ChunkingConstants;
+import ai.yda.framework.rag.core.retriever.chunking.constants.ChunkingConstant;
 import ai.yda.framework.rag.core.retriever.chunking.strategy.ChunkStrategy;
 import ai.yda.framework.rag.core.retriever.chunking.strategy.FixedLengthWordChunking;
 import ai.yda.framework.rag.core.retriever.chunking.strategy.RegexChunking;
@@ -43,13 +43,17 @@ public class ChunkStrategyFactory {
      * @return the {@link ChunkStrategy} that corresponds to the selected chunking algorithm.
      */
     public ChunkStrategy getStrategy(final ChunkingAlgorithm chunkingAlgorithm) {
+        if (chunkingAlgorithm == null) {
+            return new FixedLengthWordChunking(ChunkingConstant.CHUNK_MAX_LENGTH);
+        }
+
         switch (chunkingAlgorithm) {
             case FIXED:
-                return new FixedLengthWordChunking(ChunkingConstants.CHUNK_MAX_LENGTH);
+                return new FixedLengthWordChunking(ChunkingConstant.CHUNK_MAX_LENGTH);
             case SENTENCES:
-                return new RegexChunking(List.of(ChunkingConstants.REGEX_PATTERN));
+                return new RegexChunking(List.of(ChunkingConstant.REGEX_PATTERN));
             case WINDOW:
-                return new SlidingWindowChunking(ChunkingConstants.WINDOW_SIZE, ChunkingConstants.WINDOW_STEP);
+                return new SlidingWindowChunking(ChunkingConstant.WINDOW_SIZE, ChunkingConstant.WINDOW_STEP);
             default:
                 throw new RuntimeException("Unknown chunking algorithm: " + chunkingAlgorithm);
         }

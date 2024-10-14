@@ -22,6 +22,7 @@ package ai.yda.framework.rag.retriever.website.retriver;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +36,7 @@ import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.retriever.Indexer;
 import ai.yda.framework.rag.core.retriever.Retriever;
-import ai.yda.framework.rag.core.retriever.chunking.entity.DocumentData;
+import ai.yda.framework.rag.core.retriever.chunking.model.DocumentData;
 import ai.yda.framework.rag.core.retriever.chunking.factory.ChunkingAlgorithm;
 import ai.yda.framework.rag.core.retriever.chunking.factory.PatternBasedChunking;
 import ai.yda.framework.rag.retriever.website.extractor.WebExtractor;
@@ -57,7 +58,7 @@ import ai.yda.framework.rag.retriever.website.extractor.WebExtractor;
  * @since 0.2.0
  */
 @Slf4j
-public class WebsiteRetriever implements Retriever<RagRequest, RagContext>, Indexer<DocumentData> {
+public class WebsiteRetriever extends Indexer<DocumentData> implements Retriever<RagRequest, RagContext> {
     /**
      * The Vector Store used to retrieve Context data for user Request through similarity search.
      */
@@ -85,7 +86,7 @@ public class WebsiteRetriever implements Retriever<RagRequest, RagContext>, Inde
 
     /**
      * Constructs a new {@link WebsiteRetriever} instance with the specified vectorStore, url, topK and
-     * isProcessingEnabled parameters.
+     * isIndexingEnabled parameters.
      *
      * @param webExtractor        the extractor used for crawling and extracting web content.
      * @param vectorStore         the {@link VectorStore} instance used for storing and retrieving vector data.
@@ -94,8 +95,8 @@ public class WebsiteRetriever implements Retriever<RagRequest, RagContext>, Inde
      *                            process and store data to the Vector Store.
      * @param topK                the number of top results to retrieve from the Vector Store. This value must be a
      *                            positive integer.
-     * @param isProcessingEnabled a {@link Boolean} flag indicating whether website processing should be enabled during
-     *                            initialization. If {@code true}, the method {@link #index()} will
+     * @param isIndexingEnabled a {@link Boolean} flag indicating whether website processing should be enabled during
+     *                            initialization. If {@code true}, the method {@link #index(List)} will
      *                            be called to process the files in the specified storage path.
      * @param chunkingAlgorithm   the algorithm used to split document content into chunks for further processing.
      * @throws IllegalArgumentException if {@code topK} is not a positive number.
@@ -105,7 +106,7 @@ public class WebsiteRetriever implements Retriever<RagRequest, RagContext>, Inde
             final @NonNull VectorStore vectorStore,
             final @NonNull String url,
             final @NonNull Integer topK,
-            final @NonNull Boolean isProcessingEnabled,
+            final @NonNull Boolean isIndexingEnabled,
             final @NonNull ChunkingAlgorithm chunkingAlgorithm) {
         if (topK <= 0) {
             throw new IllegalArgumentException("TopK must be a positive number.");
@@ -115,8 +116,12 @@ public class WebsiteRetriever implements Retriever<RagRequest, RagContext>, Inde
         this.vectorStore = vectorStore;
         this.url = url;
         this.topK = topK;
-        if (Boolean.TRUE.equals(isProcessingEnabled)) {
-            index();
+        if (Boolean.TRUE.equals(isIndexingEnabled)) {
+            index(webExtractor.extract(url)
+                    .stream()
+                    .map(crawlResult ->
+                            new DocumentData(crawlResult.getContent(), Map.of("documentId", crawlResult.getUrl())))
+                    .collect(Collectors.toList()));
         }
     }
 
@@ -125,15 +130,10 @@ public class WebsiteRetriever implements Retriever<RagRequest, RagContext>, Inde
      * <p>This method uses the {@link WebExtractor} to crawl or extract the website content, applies a chunking
      * algorithm to the extracted content, and stores the resulting chunks in the Vector Store.</p>
      */
-    @Override
-    public void index() {
-        List<DocumentData> processedWebsiteList = new ArrayList<>();
-        var pageDocuments = webExtractor.extract(url);
 
-        pageDocuments.forEach(crawlResult -> processedWebsiteList.add(
-                new DocumentData(crawlResult.getContent(), Map.of("documentId", crawlResult.getUrl()))));
-        var documentDataList = process(processedWebsiteList);
-        save(documentDataList);
+    @Override
+    public void index(List<DocumentData> chunkingResult) {
+        super.index(chunkingResult);
     }
 
     /**

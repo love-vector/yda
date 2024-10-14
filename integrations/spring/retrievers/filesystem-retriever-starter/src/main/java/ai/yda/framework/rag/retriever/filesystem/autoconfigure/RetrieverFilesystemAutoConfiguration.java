@@ -69,7 +69,7 @@ public class RetrieverFilesystemAutoConfiguration {
      * </ul>
      *
      * @param filesystemProperties       properties for configuring the {@link FilesystemRetriever}, including
-     *                                   collectionName, topK, isProcessingEnabled, clearCollectionOnStartup and
+     *                                   collectionName, topK, isIndexingEnabled, clearCollectionOnStartup and
      *                                   fileStoragePath settings.
      * @param milvusProperties           properties for configuring the Milvus Vector Store.
      * @param milvusClientProperties     properties for configuring the Milvus Service Client.
@@ -98,7 +98,7 @@ public class RetrieverFilesystemAutoConfiguration {
                 milvusVectorStore,
                 filesystemProperties.getFileStoragePath(),
                 filesystemProperties.getTopK(),
-                filesystemProperties.getIsProcessingEnabled(),
+                filesystemProperties.getIsIndexingEnabled(),
                 filesystemProperties.getChunkingAlgorithm());
     }
 }

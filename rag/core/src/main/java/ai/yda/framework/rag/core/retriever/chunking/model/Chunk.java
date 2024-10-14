@@ -17,13 +17,12 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.rag.core.retriever.chunking.entity;
+package ai.yda.framework.rag.core.retriever.chunking.model;
 
 import lombok.Getter;
 
 /**
- * Represents a chunk of data extracted from a document. Each chunk contains a segment of text,
- * its index in the original document, and the document's identifier.
+ * Represents a chunk of data extracted from a source.
  *
  * @author Bogdan Synenko
  * @since 0.2.0

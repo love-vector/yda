@@ -25,7 +25,7 @@ import java.util.Map;
 
 import lombok.extern.slf4j.Slf4j;
 
-import ai.yda.framework.rag.core.retriever.chunking.entity.DocumentData;
+import ai.yda.framework.rag.core.retriever.chunking.model.DocumentData;
 import ai.yda.framework.rag.core.util.ContentUtil;
 import ai.yda.framework.rag.retriever.filesystem.util.FileUtil;
 

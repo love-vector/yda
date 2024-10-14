@@ -19,6 +19,7 @@
 */
 package ai.yda.framework.rag.retriever.shared;
 
+import ai.yda.framework.rag.core.retriever.chunking.factory.ChunkingAlgorithm;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -37,9 +38,11 @@ public class RetrieverProperties {
 
     private Integer topK = SearchRequest.DEFAULT_TOP_K;
 
-    private Boolean isProcessingEnabled = Boolean.FALSE;
+    private Boolean isIndexingEnabled = Boolean.FALSE;
 
     private Boolean clearCollectionOnStartup = Boolean.FALSE;
+
+    private ChunkingAlgorithm chunkingAlgorithm = ChunkingAlgorithm.FIXED;
 
     /**
      * Default constructor for {@link RetrieverProperties}.

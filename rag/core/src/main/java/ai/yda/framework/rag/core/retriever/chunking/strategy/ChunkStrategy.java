@@ -21,8 +21,8 @@ package ai.yda.framework.rag.core.retriever.chunking.strategy;
 
 import java.util.List;
 
-import ai.yda.framework.rag.core.retriever.chunking.entity.Chunk;
-import ai.yda.framework.rag.core.retriever.chunking.entity.DocumentData;
+import ai.yda.framework.rag.core.retriever.chunking.model.Chunk;
+import ai.yda.framework.rag.core.retriever.chunking.model.DocumentData;
 
 /**
  * Defines the strategy for chunking documents into smaller, manageable parts based on different criteria.

@@ -16,7 +16,7 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.rag.retriever.filesystem;
 
 import java.io.IOException;
@@ -39,11 +39,12 @@ import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.retriever.Indexer;
 import ai.yda.framework.rag.core.retriever.Retriever;
-import ai.yda.framework.rag.core.retriever.chunking.entity.DocumentData;
+import ai.yda.framework.rag.core.retriever.chunking.model.DocumentData;
 import ai.yda.framework.rag.core.retriever.chunking.factory.ChunkingAlgorithm;
 import ai.yda.framework.rag.core.retriever.chunking.factory.PatternBasedChunking;
 import ai.yda.framework.rag.retriever.filesystem.exception.FileReadException;
 import ai.yda.framework.rag.retriever.filesystem.service.FilesystemService;
+
 
 /**
  * Retrieves filesystem Context data from a Vector Store based on a Request. It processes files stored in a specified
@@ -58,7 +59,7 @@ import ai.yda.framework.rag.retriever.filesystem.service.FilesystemService;
  * @since 0.2.0
  */
 @Slf4j
-public class FilesystemRetriever implements Retriever<RagRequest, RagContext>, Indexer<DocumentData> {
+public class FilesystemRetriever extends Indexer<DocumentData> implements Retriever<RagRequest, RagContext> {
     /**
      * The Vector Store used to retrieve Context data for User Request through similarity search.
      */
@@ -83,7 +84,7 @@ public class FilesystemRetriever implements Retriever<RagRequest, RagContext>, I
 
     /**
      * Constructs a new {@link FilesystemRetriever} instance with the specified vectorStore, fileStoragePath, topK and
-     * isProcessingEnabled parameters.
+     * isIndexingEnabled parameters.
      *
      * @param vectorStore         the {@link VectorStore} instance used for storing and retrieving vector data.
      *                            This parameter cannot be {@code null} and is used to interact with the Vector Store.
@@ -91,7 +92,7 @@ public class FilesystemRetriever implements Retriever<RagRequest, RagContext>, I
      *                            {@code null} and is used to process and store files to the Vector Store.
      * @param topK                the number of top results to retrieve from the Vector Store. This value must be a
      *                            positive integer.
-     * @param isProcessingEnabled a {@link Boolean} flag indicating whether file processing should be enabled during
+     * @param isIndexingEnabled a {@link Boolean} flag indicating whether file processing should be enabled during
      *                            initialization. If {@code true}, the method {@link #index()} will
      *                            be called to process the files in the specified storage path.
      * @param chunkingAlgorithm   the algorithm used to split document content into chunks for further processing.
@@ -101,7 +102,7 @@ public class FilesystemRetriever implements Retriever<RagRequest, RagContext>, I
             final @NonNull VectorStore vectorStore,
             final @NonNull String fileStoragePath,
             final @NonNull Integer topK,
-            final @NonNull Boolean isProcessingEnabled,
+            final @NonNull Boolean isIndexingEnabled,
             final @NonNull ChunkingAlgorithm chunkingAlgorithm) {
         if (topK <= 0) {
             throw new IllegalArgumentException("TopK must be a positive number.");
@@ -111,7 +112,7 @@ public class FilesystemRetriever implements Retriever<RagRequest, RagContext>, I
         this.topK = topK;
         this.chunkingAlgorithm = chunkingAlgorithm;
 
-        if (Boolean.TRUE.equals(isProcessingEnabled)) {
+        if (Boolean.TRUE.equals(isIndexingEnabled)) {
             index();
         }
     }
@@ -144,7 +145,7 @@ public class FilesystemRetriever implements Retriever<RagRequest, RagContext>, I
      *
      * @throws RuntimeException if an I/O error occurs when processing file storage folder.
      */
-    @Override
+
     public void index() {
         try (var paths = Files.list(fileStoragePath)) {
             var fileList = paths.filter(Files::isRegularFile).toList();

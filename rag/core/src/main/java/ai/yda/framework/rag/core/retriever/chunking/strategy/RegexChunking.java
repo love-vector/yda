@@ -24,8 +24,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import ai.yda.framework.rag.core.retriever.chunking.entity.Chunk;
-import ai.yda.framework.rag.core.retriever.chunking.entity.DocumentData;
+import ai.yda.framework.rag.core.retriever.chunking.model.Chunk;
+import ai.yda.framework.rag.core.retriever.chunking.model.DocumentData;
 
 /**
  * A chunking strategy that splits document content based on regular expression patterns.

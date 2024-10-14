@@ -30,7 +30,7 @@ package ai.yda.framework.rag.core.retriever.chunking.constants;
  * @author Bogdan Synenko
  * @since 0.2.0
  */
-public class ChunkingConstants {
+public class ChunkingConstant {
 
     /**
      * The maximum length of a chunk in terms of characters.

@@ -30,7 +30,7 @@ import ai.yda.framework.rag.retriever.shared.RetrieverProperties;
 /**
  * Provides configuration properties for filesystem Retriever. These properties can be customized through the
  * application’s external configuration, such as a properties file, YAML file, or environment variables. The
- * properties include collectionName, topK, isProcessingEnabled, clearCollectionOnStartup and fileStoragePath settings.
+ * properties include collectionName, topK, isIndexingEnabled, clearCollectionOnStartup and fileStoragePath settings.
  * <p>
  * The properties are prefixed with {@link #CONFIG_PREFIX} and can be customized by defining values under this prefix
  * in the external configuration.
@@ -44,7 +44,7 @@ import ai.yda.framework.rag.retriever.shared.RetrieverProperties;
  *                filesystem:
  *                    collectionName: your-collection-name
  *                    topK: your-top-k
- *                    isProcessingEnabled: true/false
+ *                    isIndexingEnabled: true/false
  *                    clearCollectionOnStartup: true/false
  *                    fileStoragePath: your-file-storage-path
  * </pre>
@@ -65,8 +65,6 @@ public class RetrieverFilesystemProperties extends RetrieverProperties {
     public static final String CONFIG_PREFIX = "ai.yda.framework.rag.retriever.filesystem";
 
     private String fileStoragePath;
-
-    private ChunkingAlgorithm chunkingAlgorithm;
 
     /**
      * Default constructor for {@link RetrieverFilesystemProperties}.
