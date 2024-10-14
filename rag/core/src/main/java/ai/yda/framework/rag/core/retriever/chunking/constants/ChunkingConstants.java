@@ -59,5 +59,5 @@ public class ChunkingConstants {
      * This value defines how much the window moves forward with each iteration.
      * A smaller step will result in more overlap between chunks, while a larger step will reduce overlap.
      */
-    public static final int WINDOW_STEP = 10;
+    public static final int WINDOW_STEP = 50;
 }
