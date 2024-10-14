@@ -1,1 +1,3 @@
+ai.yda.framework.rag.generator.assistant.openai.autoconfigure.OpenAiAssistantAutoConfiguration
 ai.yda.framework.rag.generator.assistant.openai.autoconfigure.OpenAiAssistantGeneratorAutoConfiguration
+ai.yda.framework.rag.generator.assistant.openai.autoconfigure.OpenAiAssistantStreamingGeneratorAutoConfiguration

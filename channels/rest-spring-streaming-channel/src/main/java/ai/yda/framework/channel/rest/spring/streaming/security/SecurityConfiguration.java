@@ -85,13 +85,14 @@ public class SecurityConfiguration {
     }
 
     /**
-     * This Channel security configuration is used when 'security-token' property is not configured.
+     * This Channel security configuration is used when the 'security-token' property is not configured.
      * <p>
      * This configuration disables CSRF protection and CORS, and sets up authorization rules such that all HTTP requests
      * are permitted without authentication.
      * </p>
      *
-     * @param http the {@link ServerHttpSecurity} to configure.
+     * @param http       the {@link ServerHttpSecurity} to configure.
+     * @param properties the {@link RestSpringStreamingProperties} containing CORS and session management configuration.
      * @return a {@link SecurityWebFilterChain} instance configured with the specified HTTP security settings.
      */
     @Bean

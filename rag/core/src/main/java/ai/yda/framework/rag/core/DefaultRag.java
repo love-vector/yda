@@ -32,65 +32,85 @@ import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.model.RagResponse;
 import ai.yda.framework.rag.core.retriever.Retriever;
 import ai.yda.framework.rag.core.util.ContentUtil;
+import ai.yda.framework.rag.core.util.RequestTransformer;
 
 /**
- * Provides a default mechanism for executing a Retrieval-Augmented Generation (RAG) process.
- * <p>
- * The RAG process is executed by retrieving relevant Contexts using a list of Retrievers, augmenting these Contexts
- * using a list of Augmenters, and generating a Response using a Generator.
- * </p>
+ * Default implementation of the Retrieval-Augmented Generation (RAG) process.
  *
  * @author Nikita Litvinov
- * @see Retriever
- * @see Augmenter
- * @see Generator
- * @see DefaultStreamingRag
  * @since 0.1.0
  */
 @Getter(AccessLevel.PROTECTED)
 public class DefaultRag implements Rag<RagRequest, RagResponse> {
 
+    /**
+     * The list of {@link Retriever} instances used to retrieve {@link RagContext} based on the {@link RagRequest}.
+     */
     private final List<Retriever<RagRequest, RagContext>> retrievers;
 
+    /**
+     * The list of {@link Augmenter} instances used to modify or enhance the retrieved {@link RagContext}.
+     */
     private final List<Augmenter<RagRequest, RagContext>> augmenters;
 
+    /**
+     * The {@link Generator} instance responsible for generating the final {@link RagResponse}.
+     */
     private final Generator<RagRequest, RagResponse> generator;
 
     /**
-     * Constructs a new {@link DefaultRag} instance with the specified Retrievers, Augmenters and Generator.
+     * The list of {@link RequestTransformer} instances used to transform the incoming {@link RagRequest}.
+     */
+    private final List<RequestTransformer<RagRequest>> requestTransformers;
+
+    /**
+     * Constructs a new {@link DefaultRag} instance.
      *
-     * @param retrievers the list of {@link Retriever} objects used to retrieve {@link RagContext} data based on the
-     *                   {@link RagRequest}.
-     * @param augmenters the list of {@link Augmenter} objects used to augment or modify the list {@link RagContext}
-     *                   based on the {@link RagRequest}.
-     * @param generator  the {@link Generator} object that generates the {@link RagResponse} based on the
-     *                   {@link RagRequest}.
+     * @param retrievers          the list of {@link Retriever} objects to retrieve {@link RagContext} data.
+     * @param augmenters          the list of {@link Augmenter} objects to augment the retrieved Contexts.
+     * @param generator           the {@link Generator} used to generate the {@link RagResponse}.
+     * @param requestTransformers the list of {@link RequestTransformer} objects for transforming the
+     *                            {@link RagRequest}.
      */
     public DefaultRag(
             final List<Retriever<RagRequest, RagContext>> retrievers,
             final List<Augmenter<RagRequest, RagContext>> augmenters,
-            final Generator<RagRequest, RagResponse> generator) {
+            final Generator<RagRequest, RagResponse> generator,
+            final List<RequestTransformer<RagRequest>> requestTransformers) {
         this.retrievers = retrievers;
         this.augmenters = augmenters;
         this.generator = generator;
+        this.requestTransformers = requestTransformers;
     }
 
     /**
-     * Executes the Retrieval-Augmented Generation (RAG) process by retrieving relevant Contexts using a list of
-     * Retrievers, augmenting these Contexts using a list of Augmenters, and generating a Response using a Generator.
+     * Executes the Retrieval-Augmented Generation (RAG) process by:
+     * <ul>
+     *     <li>Transforming the initial {@link RagRequest} using the provided {@link RequestTransformer} instances.</li>
+     *     <li>Retrieving relevant {@link RagContext} from the {@link Retriever} instances.</li>
+     *     <li>Augmenting the retrieved Contexts using the provided {@link Augmenter} instances.</li>
+     *     <li>
+     *         Generating the final {@link RagResponse} using the {@link Generator}, based on the augmented Contexts.
+     *     </li>
+     * </ul>
      *
-     * @param request the {@link RagRequest} object from the User.
-     * @return the {@link RagResponse} object containing the results of the RAG operation.
+     * @param request the {@link RagRequest} to process.
+     * @return the generated {@link RagResponse}.
      */
     @Override
     public RagResponse doRag(final RagRequest request) {
+        var transformingRequest = request;
+        for (RequestTransformer<RagRequest> requestTransformer : requestTransformers) {
+            transformingRequest = requestTransformer.transformRequest(transformingRequest);
+        }
+        var transformedRequest = transformingRequest;
         var contexts = retrievers.parallelStream()
-                .map(retriever -> retriever.retrieve(request))
+                .map(retriever -> retriever.retrieve(transformedRequest))
                 .collect(Collectors.toUnmodifiableList());
         for (var augmenter : augmenters) {
-            contexts = augmenter.augment(request, contexts);
+            contexts = augmenter.augment(transformedRequest, contexts);
         }
-        return generator.generate(request, mergeContexts(contexts));
+        return generator.generate(transformedRequest, mergeContexts(contexts));
     }
 
     /**

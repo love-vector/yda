@@ -20,13 +20,16 @@
 package ai.yda.framework.core.assistant;
 
 /**
- * Represents an Assistant that processes User Requests and provides appropriate Responses.
+ * Represents an Assistant that helps process Requests by utilizing the Retrieval-Augmented Generation (RAG) system.
+ * <p>
+ * This Assistant plays a central role in managing interactions, transmitting information through communication channels
+ * and performing various tasks to assist in the processing of Requests. While it primarily leverages RAG, it is
+ * designed to handle additional tasks and functionalities.
+ * </p>
  *
  * @param <REQUEST>  the generic type of the Request from the User.
  * @param <RESPONSE> the generic type of the Response that will be generated based on the given Request.
  * @author Nikita Litvinov
- * @see StreamingAssistant
- * @see RagAssistant
  * @since 0.1.0
  */
 public interface Assistant<REQUEST, RESPONSE> {
