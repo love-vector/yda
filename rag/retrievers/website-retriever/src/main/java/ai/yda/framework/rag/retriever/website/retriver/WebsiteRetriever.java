@@ -16,30 +16,26 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.rag.retriever.website.retriver;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
-import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.ai.document.Document;
-import org.springframework.ai.vectorstore.SearchRequest;
-import org.springframework.ai.vectorstore.VectorStore;
-import org.springframework.lang.NonNull;
 
 import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.retriever.Indexer;
 import ai.yda.framework.rag.core.retriever.Retriever;
-import ai.yda.framework.rag.core.retriever.chunking.model.DocumentData;
 import ai.yda.framework.rag.core.retriever.chunking.factory.ChunkingAlgorithm;
 import ai.yda.framework.rag.core.retriever.chunking.factory.PatternBasedChunking;
+import ai.yda.framework.rag.core.retriever.chunking.model.DocumentData;
 import ai.yda.framework.rag.retriever.website.extractor.WebExtractor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.document.Document;
+import org.springframework.ai.vectorstore.SearchRequest;
+import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.lang.NonNull;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.IntStream;
 
 /**
  * Retrieves website Context data from a Vector Store based on a User Request.
@@ -88,17 +84,17 @@ public class WebsiteRetriever extends Indexer<DocumentData> implements Retriever
      * Constructs a new {@link WebsiteRetriever} instance with the specified vectorStore, url, topK and
      * isIndexingEnabled parameters.
      *
-     * @param webExtractor        the extractor used for crawling and extracting web content.
-     * @param vectorStore         the {@link VectorStore} instance used for storing and retrieving vector data.
-     *                            This parameter cannot be {@code null} and is used to interact with the Vector Store.
-     * @param url                 the website or sitemap url. This parameter cannot be {@code null} and is used to
-     *                            process and store data to the Vector Store.
-     * @param topK                the number of top results to retrieve from the Vector Store. This value must be a
-     *                            positive integer.
+     * @param webExtractor      the extractor used for crawling and extracting web content.
+     * @param vectorStore       the {@link VectorStore} instance used for storing and retrieving vector data.
+     *                          This parameter cannot be {@code null} and is used to interact with the Vector Store.
+     * @param url               the website or sitemap url. This parameter cannot be {@code null} and is used to
+     *                          process and store data to the Vector Store.
+     * @param topK              the number of top results to retrieve from the Vector Store. This value must be a
+     *                          positive integer.
      * @param isIndexingEnabled a {@link Boolean} flag indicating whether website processing should be enabled during
-     *                            initialization. If {@code true}, the method {@link #index(List)} will
-     *                            be called to process the files in the specified storage path.
-     * @param chunkingAlgorithm   the algorithm used to split document content into chunks for further processing.
+     *                          initialization. If {@code true}, the method {@link #index()} will
+     *                          be called to process the files in the specified storage path.
+     * @param chunkingAlgorithm the algorithm used to split document content into chunks for further processing.
      * @throws IllegalArgumentException if {@code topK} is not a positive number.
      */
     public WebsiteRetriever(
@@ -111,41 +107,29 @@ public class WebsiteRetriever extends Indexer<DocumentData> implements Retriever
         if (topK <= 0) {
             throw new IllegalArgumentException("TopK must be a positive number.");
         }
+        save(process());
+
         this.chunkingAlgorithm = chunkingAlgorithm;
         this.webExtractor = webExtractor;
         this.vectorStore = vectorStore;
         this.url = url;
         this.topK = topK;
         if (Boolean.TRUE.equals(isIndexingEnabled)) {
-            index(webExtractor.extract(url)
-                    .stream()
-                    .map(crawlResult ->
-                            new DocumentData(crawlResult.getContent(), Map.of("documentId", crawlResult.getUrl())))
-                    .collect(Collectors.toList()));
+            index();
         }
     }
 
-    /**
-     * Indexes the website content by extracting data from the URL, chunking it, and saving it in the Vector Store.
-     * <p>This method uses the {@link WebExtractor} to crawl or extract the website content, applies a chunking
-     * algorithm to the extracted content, and stores the resulting chunks in the Vector Store.</p>
-     */
-
-    @Override
-    public void index(List<DocumentData> chunkingResult) {
-        super.index(chunkingResult);
-    }
 
     /**
      * Processes the list of {@link DocumentData} by chunking the content using the selected chunking algorithm.
      * <p>This method applies the chunking algorithm to each document, resulting in smaller content chunks
      * that are easier to manage for further processing or retrieval.</p>
      *
-     * @param processedWebsiteList the list of processed website content to be chunked.
      * @return a list of {@link DocumentData} representing the chunked website content.
      */
     @Override
-    public List<DocumentData> process(final List<DocumentData> processedWebsiteList) {
+    protected List<DocumentData> process() {
+        var processedWebsiteList = webExtractor.extract(url).stream().map(element -> new DocumentData(element.getContent(), Map.of("documentId", element.getUrl()))).toList();
         PatternBasedChunking patternBasedChunking = new PatternBasedChunking();
         return patternBasedChunking.chunkList(chunkingAlgorithm, processedWebsiteList).stream()
                 .map(chunk -> new DocumentData(
@@ -166,7 +150,7 @@ public class WebsiteRetriever extends Indexer<DocumentData> implements Retriever
      * @param documentDataList the list of chunked website content to be saved into the Vector Store.
      */
     @Override
-    public void save(final List<DocumentData> documentDataList) {
+    protected void save(final List<DocumentData> documentDataList) {
         var batchSize = 1000;
         var totalBatches = (int) Math.ceil((double) documentDataList.size() / batchSize);
 

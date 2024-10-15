@@ -43,10 +43,6 @@ public class ChunkStrategyFactory {
      * @return the {@link ChunkStrategy} that corresponds to the selected chunking algorithm.
      */
     public ChunkStrategy getStrategy(final ChunkingAlgorithm chunkingAlgorithm) {
-        if (chunkingAlgorithm == null) {
-            return new FixedLengthWordChunking(ChunkingConstant.CHUNK_MAX_LENGTH);
-        }
-
         switch (chunkingAlgorithm) {
             case FIXED:
                 return new FixedLengthWordChunking(ChunkingConstant.CHUNK_MAX_LENGTH);

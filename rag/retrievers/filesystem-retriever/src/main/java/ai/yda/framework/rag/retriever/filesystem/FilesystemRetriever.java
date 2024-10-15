@@ -86,16 +86,16 @@ public class FilesystemRetriever extends Indexer<DocumentData> implements Retrie
      * Constructs a new {@link FilesystemRetriever} instance with the specified vectorStore, fileStoragePath, topK and
      * isIndexingEnabled parameters.
      *
-     * @param vectorStore         the {@link VectorStore} instance used for storing and retrieving vector data.
-     *                            This parameter cannot be {@code null} and is used to interact with the Vector Store.
-     * @param fileStoragePath     the path to the directory where files are stored. This parameter cannot be
-     *                            {@code null} and is used to process and store files to the Vector Store.
-     * @param topK                the number of top results to retrieve from the Vector Store. This value must be a
-     *                            positive integer.
+     * @param vectorStore       the {@link VectorStore} instance used for storing and retrieving vector data.
+     *                          This parameter cannot be {@code null} and is used to interact with the Vector Store.
+     * @param fileStoragePath   the path to the directory where files are stored. This parameter cannot be
+     *                          {@code null} and is used to process and store files to the Vector Store.
+     * @param topK              the number of top results to retrieve from the Vector Store. This value must be a
+     *                          positive integer.
      * @param isIndexingEnabled a {@link Boolean} flag indicating whether file processing should be enabled during
-     *                            initialization. If {@code true}, the method {@link #index()} will
-     *                            be called to process the files in the specified storage path.
-     * @param chunkingAlgorithm   the algorithm used to split document content into chunks for further processing.
+     *                          initialization. If {@code true}, the method {@link #index()} will
+     *                          be called to process the files in the specified storage path.
+     * @param chunkingAlgorithm the algorithm used to split document content into chunks for further processing.
      * @throws IllegalArgumentException if {@code topK} is not a positive number.
      */
     public FilesystemRetriever(
@@ -140,45 +140,34 @@ public class FilesystemRetriever extends Indexer<DocumentData> implements Retrie
     }
 
     /**
-     * Lists all regular files in the local directory, processes each file to create chunks, and then adds these chunks
-     * to the vector store.
+     * Processes a list of {@link DocumentData} objects by splitting their content into chunks based on the chosen
+     * {@link ChunkingAlgorithm}.
      *
-     * @throws RuntimeException if an I/O error occurs when processing file storage folder.
+     * @return a list of processed {@link DocumentData} objects, each representing a chunk of a document.
      */
-
-    public void index() {
+    @Override
+    protected List<DocumentData> process() {
         try (var paths = Files.list(fileStoragePath)) {
             var fileList = paths.filter(Files::isRegularFile).toList();
+
             if (fileList.isEmpty()) {
                 log.debug("No files to process in directory: {}", fileStoragePath);
-                return;
+                return null;
             }
-            var processedFilesList = filesystemService.createDocumentsFromFiles(fileList);
-            var documentDataList = process(processedFilesList);
 
+            var processedFilesList = filesystemService.createDocumentDataFromFiles(fileList);
             moveFilesToProcessedFolder(fileList);
-            save(documentDataList);
+            PatternBasedChunking patternBasedChunking = new PatternBasedChunking();
+
+            return patternBasedChunking.chunkList(chunkingAlgorithm, processedFilesList).stream()
+                    .map(chunk -> new DocumentData(
+                            chunk.getText(),
+                            Map.of("documentId", chunk.getDocumentId(), "chunkIndex", String.valueOf(chunk.getIndex()))))
+                    .toList();
         } catch (IOException e) {
             log.error("Error processing files in directory {}: {}", fileStoragePath, e.getMessage());
             throw new FileReadException(e);
         }
-    }
-
-    /**
-     * Processes a list of {@link DocumentData} objects by splitting their content into chunks based on the chosen
-     * {@link ChunkingAlgorithm}.
-     *
-     * @param processedFilesList the list of processed files to be split into chunks.
-     * @return a list of processed {@link DocumentData} objects, each representing a chunk of a document.
-     */
-    @Override
-    public List<DocumentData> process(final List<DocumentData> processedFilesList) {
-        PatternBasedChunking patternBasedChunking = new PatternBasedChunking();
-        return patternBasedChunking.chunkList(chunkingAlgorithm, processedFilesList).stream()
-                .map(chunk -> new DocumentData(
-                        chunk.getText(),
-                        Map.of("documentId", chunk.getDocumentId(), "chunkIndex", String.valueOf(chunk.getIndex()))))
-                .toList();
     }
 
     /**
@@ -193,7 +182,7 @@ public class FilesystemRetriever extends Indexer<DocumentData> implements Retrie
      * @param documentDataList the list of chunked website content to be saved into the Vector Store.
      */
     @Override
-    public void save(final List<DocumentData> documentDataList) {
+    protected void save(final List<DocumentData> documentDataList) {
         var batchSize = 1000;
         var totalBatches = (int) Math.ceil((double) documentDataList.size() / batchSize);
 

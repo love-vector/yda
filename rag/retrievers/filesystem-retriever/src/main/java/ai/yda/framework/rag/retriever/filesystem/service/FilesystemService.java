@@ -57,7 +57,7 @@ public class FilesystemService {
      * @param filePathList the list of file paths to be processed.
      * @return a list of {@link DocumentData} objects representing the chunks of each file.
      */
-    public List<DocumentData> createDocumentsFromFiles(final List<Path> filePathList) {
+    public List<DocumentData> createDocumentDataFromFiles(final List<Path> filePathList) {
         return filePathList.parallelStream()
                 .map(this::splitFileIntoDocumentData)
                 .toList();
@@ -74,7 +74,7 @@ public class FilesystemService {
         var pdfContent = FileUtil.readPdf(filePath.toFile());
         var fileName = filePath.getFileName();
         log.debug("Processing file: {}", fileName);
-        ContentUtil.preprocessAndSplitContent(pdfContent);
+        ContentUtil.preprocessContent(pdfContent);
         return new DocumentData(pdfContent, Map.of("documentId", fileName));
     }
 }

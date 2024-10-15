@@ -45,7 +45,7 @@ public final class ContentUtil {
      * @param content the textual content to be preprocessed.
      * @return a string with the processed content ready for further use.
      */
-    public static String preprocessAndSplitContent(final String content) {
+    public static String preprocessContent(final String content) {
         var preprocessedContent = new String(content.getBytes(), StandardCharsets.UTF_8).toLowerCase();
         preprocessedContent = normalizeWhitespaces(preprocessedContent);
         preprocessedContent = removeHtmlTags(preprocessedContent);

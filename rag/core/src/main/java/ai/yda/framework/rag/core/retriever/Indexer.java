@@ -33,18 +33,17 @@ public abstract class Indexer<DOCUMENT> {
      * Indexes documents by processing and saving them into the data store.
      * Typically used for initial setup or periodic updates.
      */
-    public void index(List<DOCUMENT> chunkingResult) {
-        var data = process(chunkingResult);
-        save(data);
+    public void index() {
+        var chunkedData = process();
+        save(chunkedData);
     }
 
     /**
      * Processes a list of documents and returns the processed list.
      *
-     * @param chunkingResult the generic type of the DOCUMENT.
      * @return the processed list of documents.
      */
-    protected abstract List<DOCUMENT> process(List<DOCUMENT> chunkingResult);
+    protected abstract List<DOCUMENT> process();
 
     /**
      * Saves the list of processed documents into the data store.
