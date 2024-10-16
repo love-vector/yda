@@ -19,12 +19,13 @@
 */
 package ai.yda.framework.rag.retriever.shared;
 
-import ai.yda.framework.rag.core.retriever.chunking.factory.ChunkingAlgorithm;
 import lombok.Getter;
 import lombok.Setter;
 
 import org.springframework.ai.vectorstore.MilvusVectorStore;
 import org.springframework.ai.vectorstore.SearchRequest;
+
+import ai.yda.framework.rag.retriever.shared.chunking.factory.ChunkingAlgorithm;
 
 /**
  * Serves as the parent class for properties related to the Retriever configuration. It provides common settings such as

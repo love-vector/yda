@@ -16,7 +16,7 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.rag.retriever.filesystem;
 
 import java.io.IOException;
@@ -35,16 +35,14 @@ import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.lang.NonNull;
 
+import ai.yda.framework.rag.core.model.DocumentData;
 import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
-import ai.yda.framework.rag.core.retriever.Indexer;
-import ai.yda.framework.rag.core.retriever.Retriever;
-import ai.yda.framework.rag.core.retriever.chunking.model.DocumentData;
-import ai.yda.framework.rag.core.retriever.chunking.factory.ChunkingAlgorithm;
-import ai.yda.framework.rag.core.retriever.chunking.factory.PatternBasedChunking;
+import ai.yda.framework.rag.core.retriever.AbstractQueryEngine;
 import ai.yda.framework.rag.retriever.filesystem.exception.FileReadException;
 import ai.yda.framework.rag.retriever.filesystem.service.FilesystemService;
-
+import ai.yda.framework.rag.retriever.shared.chunking.factory.ChunkingAlgorithm;
+import ai.yda.framework.rag.retriever.shared.chunking.factory.PatternBasedChunking;
 
 /**
  * Retrieves filesystem Context data from a Vector Store based on a Request. It processes files stored in a specified
@@ -59,7 +57,7 @@ import ai.yda.framework.rag.retriever.filesystem.service.FilesystemService;
  * @since 0.2.0
  */
 @Slf4j
-public class FilesystemRetriever extends Indexer<DocumentData> implements Retriever<RagRequest, RagContext> {
+public class FilesystemRetriever extends AbstractQueryEngine {
     /**
      * The Vector Store used to retrieve Context data for User Request through similarity search.
      */
@@ -93,7 +91,7 @@ public class FilesystemRetriever extends Indexer<DocumentData> implements Retrie
      * @param topK              the number of top results to retrieve from the Vector Store. This value must be a
      *                          positive integer.
      * @param isIndexingEnabled a {@link Boolean} flag indicating whether file processing should be enabled during
-     *                          initialization. If {@code true}, the method {@link #index()} will
+     *                          initialization. If {@code true}, the method will
      *                          be called to process the files in the specified storage path.
      * @param chunkingAlgorithm the algorithm used to split document content into chunks for further processing.
      * @throws IllegalArgumentException if {@code topK} is not a positive number.
@@ -113,7 +111,7 @@ public class FilesystemRetriever extends Indexer<DocumentData> implements Retrie
         this.chunkingAlgorithm = chunkingAlgorithm;
 
         if (Boolean.TRUE.equals(isIndexingEnabled)) {
-            index();
+            index(extractData(fileStoragePath));
         }
     }
 
@@ -146,28 +144,13 @@ public class FilesystemRetriever extends Indexer<DocumentData> implements Retrie
      * @return a list of processed {@link DocumentData} objects, each representing a chunk of a document.
      */
     @Override
-    protected List<DocumentData> process() {
-        try (var paths = Files.list(fileStoragePath)) {
-            var fileList = paths.filter(Files::isRegularFile).toList();
-
-            if (fileList.isEmpty()) {
-                log.debug("No files to process in directory: {}", fileStoragePath);
-                return null;
-            }
-
-            var processedFilesList = filesystemService.createDocumentDataFromFiles(fileList);
-            moveFilesToProcessedFolder(fileList);
-            PatternBasedChunking patternBasedChunking = new PatternBasedChunking();
-
-            return patternBasedChunking.chunkList(chunkingAlgorithm, processedFilesList).stream()
-                    .map(chunk -> new DocumentData(
-                            chunk.getText(),
-                            Map.of("documentId", chunk.getDocumentId(), "chunkIndex", String.valueOf(chunk.getIndex()))))
-                    .toList();
-        } catch (IOException e) {
-            log.error("Error processing files in directory {}: {}", fileStoragePath, e.getMessage());
-            throw new FileReadException(e);
-        }
+    protected List<DocumentData> process(List<DocumentData> extractedData) {
+        PatternBasedChunking patternBasedChunking = new PatternBasedChunking();
+        return patternBasedChunking.chunkList(chunkingAlgorithm, extractedData).stream()
+                .map(chunk -> new DocumentData(
+                        chunk.getText(),
+                        Map.of("documentId", chunk.getDocumentId(), "chunkIndex", String.valueOf(chunk.getIndex()))))
+                .toList();
     }
 
     /**
@@ -220,5 +203,28 @@ public class FilesystemRetriever extends Indexer<DocumentData> implements Retrie
                 log.error("Failed to move file {} to processed directory: {}", file, e);
             }
         });
+    }
+
+    /**
+     * Extracts files content using the filesystemService and returns a list of {@link DocumentData}.
+     *
+     * @param source The data which must be extracted.
+     * @return A list of extracted {@link DocumentData}.
+     */
+    @Override
+    protected List<DocumentData> extractData(String source) {
+        try (var paths = Files.list(Path.of(source))) {
+            var fileList = paths.filter(Files::isRegularFile).toList();
+            if (fileList.isEmpty()) {
+                log.debug("No files to process in directory: {}", source);
+                return null;
+            }
+            var processedFilesList = filesystemService.createDocumentDataFromFiles(fileList);
+            moveFilesToProcessedFolder(fileList);
+            return processedFilesList;
+        } catch (IOException e) {
+            log.error("Error processing files in directory {}: {}", source, e.getMessage());
+            throw new FileReadException(e);
+        }
     }
 }

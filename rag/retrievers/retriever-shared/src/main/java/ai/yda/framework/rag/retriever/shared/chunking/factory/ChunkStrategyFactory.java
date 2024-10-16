@@ -16,16 +16,16 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
-package ai.yda.framework.rag.core.retriever.chunking.factory;
+*/
+package ai.yda.framework.rag.retriever.shared.chunking.factory;
 
 import java.util.List;
 
-import ai.yda.framework.rag.core.retriever.chunking.constants.ChunkingConstant;
-import ai.yda.framework.rag.core.retriever.chunking.strategy.ChunkStrategy;
-import ai.yda.framework.rag.core.retriever.chunking.strategy.FixedLengthWordChunking;
-import ai.yda.framework.rag.core.retriever.chunking.strategy.RegexChunking;
-import ai.yda.framework.rag.core.retriever.chunking.strategy.SlidingWindowChunking;
+import ai.yda.framework.rag.retriever.shared.chunking.constants.ChunkingConstant;
+import ai.yda.framework.rag.retriever.shared.chunking.strategy.ChunkStrategy;
+import ai.yda.framework.rag.retriever.shared.chunking.strategy.FixedLengthWordChunking;
+import ai.yda.framework.rag.retriever.shared.chunking.strategy.RegexChunking;
+import ai.yda.framework.rag.retriever.shared.chunking.strategy.SlidingWindowChunking;
 
 /**
  * Factory class for creating different types of {@link ChunkStrategy} based on the provided {@link ChunkingAlgorithm}.

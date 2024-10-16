@@ -19,10 +19,12 @@
 */
 package ai.yda.framework.rag.retriever.website.autoconfigure;
 
-import ai.yda.framework.rag.retriever.shared.RetrieverProperties;
 import lombok.Getter;
 import lombok.Setter;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
+
+import ai.yda.framework.rag.retriever.shared.RetrieverProperties;
 
 /**
  * Provides configuration properties for website Retriever. These properties can be customized through the

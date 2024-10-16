@@ -17,13 +17,13 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.rag.core.retriever.chunking.factory;
+package ai.yda.framework.rag.retriever.shared.chunking.factory;
 
 import java.util.List;
 
-import ai.yda.framework.rag.core.retriever.chunking.model.Chunk;
-import ai.yda.framework.rag.core.retriever.chunking.model.DocumentData;
-import ai.yda.framework.rag.core.retriever.chunking.strategy.ChunkStrategy;
+import ai.yda.framework.rag.core.model.Chunk;
+import ai.yda.framework.rag.core.model.DocumentData;
+import ai.yda.framework.rag.retriever.shared.chunking.strategy.ChunkStrategy;
 
 /**
  * Provides a pattern-based chunking mechanism that selects the appropriate chunking strategy based on the

@@ -16,7 +16,7 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.rag.core.retriever;
 
 import java.util.List;
@@ -33,8 +33,8 @@ public abstract class Indexer<DOCUMENT> {
      * Indexes documents by processing and saving them into the data store.
      * Typically used for initial setup or periodic updates.
      */
-    public void index() {
-        var chunkedData = process();
+    public void index(List<DOCUMENT> extractedData) {
+        var chunkedData = process(extractedData);
         save(chunkedData);
     }
 
@@ -43,7 +43,7 @@ public abstract class Indexer<DOCUMENT> {
      *
      * @return the processed list of documents.
      */
-    protected abstract List<DOCUMENT> process();
+    protected abstract List<DOCUMENT> process(List<DOCUMENT> extractedData);
 
     /**
      * Saves the list of processed documents into the data store.

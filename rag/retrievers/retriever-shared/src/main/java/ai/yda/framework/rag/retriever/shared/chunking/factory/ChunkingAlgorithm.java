@@ -17,26 +17,23 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.rag.core.retriever.chunking.strategy;
-
-import java.util.List;
-
-import ai.yda.framework.rag.core.retriever.chunking.model.Chunk;
-import ai.yda.framework.rag.core.retriever.chunking.model.DocumentData;
+package ai.yda.framework.rag.retriever.shared.chunking.factory;
 
 /**
- * Defines the strategy for chunking documents into smaller, manageable parts based on different criteria.
+ * Enum representing the different chunking algorithms that can be applied to split document content.
+ * Each algorithm defines a specific strategy for dividing text into chunks.
+ *
+ * <ul>
+ *   <li>{@code FIXED} - splits content into fixed-length chunks.</li>
+ *   <li>{@code SENTENCES} - splits content into chunks based on sentence boundaries.</li>
+ *   <li>{@code WINDOW} - uses a sliding window mechanism to split content into overlapping chunks.</li>
+ * </ul>
  *
  * @author Bogdan Synenko
  * @since 0.2.0
  */
-public interface ChunkStrategy {
-
-    /**
-     * Splits a list of documents into smaller chunks based on the chunking strategy.
-     *
-     * @param documents the list of documents to be split into chunks.
-     * @return a list of chunks created from the input documents.
-     */
-    List<Chunk> splitChunks(List<DocumentData> documents);
+public enum ChunkingAlgorithm {
+    FIXED,
+    SENTENCES,
+    WINDOW
 }

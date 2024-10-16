@@ -1,5 +1,6 @@
 dependencies {
     api project(":rag-core")
+    api project(":retriever-shared")
 
     api 'org.springframework.ai:spring-ai-core:1.0.0-M1'
 

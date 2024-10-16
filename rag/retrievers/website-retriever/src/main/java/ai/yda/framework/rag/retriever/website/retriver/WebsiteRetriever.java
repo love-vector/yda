@@ -16,16 +16,15 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.rag.retriever.website.retriver;
 
+import ai.yda.framework.rag.core.model.DocumentData;
 import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
-import ai.yda.framework.rag.core.retriever.Indexer;
-import ai.yda.framework.rag.core.retriever.Retriever;
-import ai.yda.framework.rag.core.retriever.chunking.factory.ChunkingAlgorithm;
-import ai.yda.framework.rag.core.retriever.chunking.factory.PatternBasedChunking;
-import ai.yda.framework.rag.core.retriever.chunking.model.DocumentData;
+import ai.yda.framework.rag.core.retriever.AbstractQueryEngine;
+import ai.yda.framework.rag.retriever.shared.chunking.factory.ChunkingAlgorithm;
+import ai.yda.framework.rag.retriever.shared.chunking.factory.PatternBasedChunking;
 import ai.yda.framework.rag.retriever.website.extractor.WebExtractor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.document.Document;
@@ -54,7 +53,7 @@ import java.util.stream.IntStream;
  * @since 0.2.0
  */
 @Slf4j
-public class WebsiteRetriever extends Indexer<DocumentData> implements Retriever<RagRequest, RagContext> {
+public class WebsiteRetriever extends AbstractQueryEngine {
     /**
      * The Vector Store used to retrieve Context data for user Request through similarity search.
      */
@@ -92,7 +91,7 @@ public class WebsiteRetriever extends Indexer<DocumentData> implements Retriever
      * @param topK              the number of top results to retrieve from the Vector Store. This value must be a
      *                          positive integer.
      * @param isIndexingEnabled a {@link Boolean} flag indicating whether website processing should be enabled during
-     *                          initialization. If {@code true}, the method {@link #index()} will
+     *                          initialization. If {@code true}, the method  will
      *                          be called to process the files in the specified storage path.
      * @param chunkingAlgorithm the algorithm used to split document content into chunks for further processing.
      * @throws IllegalArgumentException if {@code topK} is not a positive number.
@@ -107,7 +106,6 @@ public class WebsiteRetriever extends Indexer<DocumentData> implements Retriever
         if (topK <= 0) {
             throw new IllegalArgumentException("TopK must be a positive number.");
         }
-        save(process());
 
         this.chunkingAlgorithm = chunkingAlgorithm;
         this.webExtractor = webExtractor;
@@ -115,10 +113,9 @@ public class WebsiteRetriever extends Indexer<DocumentData> implements Retriever
         this.url = url;
         this.topK = topK;
         if (Boolean.TRUE.equals(isIndexingEnabled)) {
-            index();
+            index(extractData(url));
         }
     }
-
 
     /**
      * Processes the list of {@link DocumentData} by chunking the content using the selected chunking algorithm.
@@ -128,8 +125,10 @@ public class WebsiteRetriever extends Indexer<DocumentData> implements Retriever
      * @return a list of {@link DocumentData} representing the chunked website content.
      */
     @Override
-    protected List<DocumentData> process() {
-        var processedWebsiteList = webExtractor.extract(url).stream().map(element -> new DocumentData(element.getContent(), Map.of("documentId", element.getUrl()))).toList();
+    protected List<DocumentData> process(List<DocumentData> extractData) {
+        var processedWebsiteList = webExtractor.extract(url).stream()
+                .map(element -> new DocumentData(element.getContent(), Map.of("documentId", element.getUrl())))
+                .toList();
         PatternBasedChunking patternBasedChunking = new PatternBasedChunking();
         return patternBasedChunking.chunkList(chunkingAlgorithm, processedWebsiteList).stream()
                 .map(chunk -> new DocumentData(
@@ -189,5 +188,18 @@ public class WebsiteRetriever extends Indexer<DocumentData> implements Retriever
                                 })
                                 .toList())
                 .build();
+    }
+
+    /**
+     * Extracts website content using the WebExtractor and returns a list of {@link DocumentData}.
+     *
+     * @param source The data which must be extracted.
+     * @return A list of extracted {@link DocumentData}.
+     */
+    @Override
+    protected List<DocumentData> extractData(String source) {
+        return webExtractor.extract(source).stream()
+                .map(element -> new DocumentData(element.getContent(), Map.of("documentId", element.getUrl())))
+                .toList();
     }
 }

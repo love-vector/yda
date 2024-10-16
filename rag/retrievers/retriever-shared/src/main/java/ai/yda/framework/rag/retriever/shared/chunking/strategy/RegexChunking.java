@@ -17,15 +17,15 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.rag.core.retriever.chunking.strategy;
+package ai.yda.framework.rag.retriever.shared.chunking.strategy;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import ai.yda.framework.rag.core.retriever.chunking.model.Chunk;
-import ai.yda.framework.rag.core.retriever.chunking.model.DocumentData;
+import ai.yda.framework.rag.core.model.Chunk;
+import ai.yda.framework.rag.core.model.DocumentData;
 
 /**
  * A chunking strategy that splits document content based on regular expression patterns.
