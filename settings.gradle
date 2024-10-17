@@ -35,6 +35,9 @@ project(':rag-core').projectDir = file('rag/core')
 include 'filesystem-retriever'
 project(':filesystem-retriever').projectDir = file('rag/retrievers/filesystem-retriever')
 
+include 'retriever-shared'
+project(":retriever-shared").projectDir = file("rag/retrievers/retriever-shared")
+
 include 'website-retriever'
 project(':website-retriever').projectDir = file('rag/retrievers/website-retriever')
 
@@ -75,7 +78,7 @@ project(':retriever-shared-starter').projectDir = file('integrations/spring/retr
 include 'filesystem-retriever-starter'
 project(':filesystem-retriever-starter').projectDir = file('integrations/spring/retrievers/filesystem-retriever-starter')
 
-include'website-retriever-starter'
+include 'website-retriever-starter'
 project(':website-retriever-starter').projectDir = file('integrations/spring/retrievers/website-retriever-starter')
 
 // RAG - Generators

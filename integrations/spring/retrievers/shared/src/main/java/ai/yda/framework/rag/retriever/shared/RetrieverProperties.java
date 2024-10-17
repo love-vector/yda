@@ -25,6 +25,8 @@ import lombok.Setter;
 import org.springframework.ai.vectorstore.MilvusVectorStore;
 import org.springframework.ai.vectorstore.SearchRequest;
 
+import ai.yda.framework.rag.retriever.shared.chunking.factory.ChunkingAlgorithm;
+
 /**
  * Serves as the parent class for properties related to the Retriever configuration. It provides common settings such as
  * collection name, top K search results, processing enablement, and whether to clear the collection on startup.
@@ -37,9 +39,11 @@ public class RetrieverProperties {
 
     private Integer topK = SearchRequest.DEFAULT_TOP_K;
 
-    private Boolean isProcessingEnabled = Boolean.FALSE;
+    private Boolean isIndexingEnabled = Boolean.FALSE;
 
     private Boolean clearCollectionOnStartup = Boolean.FALSE;
+
+    private ChunkingAlgorithm chunkingAlgorithm = ChunkingAlgorithm.FIXED;
 
     /**
      * Default constructor for {@link RetrieverProperties}.
