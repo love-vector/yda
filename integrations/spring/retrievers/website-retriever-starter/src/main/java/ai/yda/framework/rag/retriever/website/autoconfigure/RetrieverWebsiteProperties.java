@@ -57,17 +57,7 @@ import ai.yda.framework.rag.retriever.shared.RetrieverProperties;
 @ConfigurationProperties(RetrieverWebsiteProperties.CONFIG_PREFIX)
 public class RetrieverWebsiteProperties extends RetrieverProperties {
 
-    /**
-     * The configuration prefix used to reference properties related to the website Retriever in application
-     * configurations. This prefix is used for binding properties within the particular namespace.
-     */
     public static final String CONFIG_PREFIX = "ai.yda.framework.rag.retriever.website";
-
-    /**
-     * Operational URL of website or sitemap.
-     */
-    private String url;
-
     /**
      * Default constructor for {@link RetrieverWebsiteProperties}.
      */

@@ -16,12 +16,12 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.rag.retriever.shared;
 
+import ai.yda.framework.rag.core.retriever.spliting.factory.ChunkingAlgorithm;
 import lombok.Getter;
 import lombok.Setter;
-
 import org.springframework.ai.vectorstore.MilvusVectorStore;
 import org.springframework.ai.vectorstore.SearchRequest;
 
@@ -41,8 +41,13 @@ public class RetrieverProperties {
 
     private Boolean clearCollectionOnStartup = Boolean.FALSE;
 
+    private PipelineAlgorithm pipelineAlgorithm = PipelineAlgorithm.AUTO_MERGE;
+
+    private ChunkingAlgorithm chunkingAlgorithm = ChunkingAlgorithm.FIXED;
+
     /**
      * Default constructor for {@link RetrieverProperties}.
      */
-    public RetrieverProperties() {}
+    public RetrieverProperties() {
+    }
 }

@@ -16,14 +16,8 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.rag.core;
-
-import java.util.List;
-import java.util.stream.Collectors;
-
-import lombok.AccessLevel;
-import lombok.Getter;
 
 import ai.yda.framework.rag.core.augmenter.Augmenter;
 import ai.yda.framework.rag.core.generator.Generator;
@@ -31,8 +25,15 @@ import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.model.RagResponse;
 import ai.yda.framework.rag.core.retriever.Retriever;
+import ai.yda.framework.rag.core.transformators.factory.NodePostProcessorFactory;
+import ai.yda.framework.rag.core.transformators.pipline.PipelineAlgorithm;
 import ai.yda.framework.rag.core.util.ContentUtil;
 import ai.yda.framework.rag.core.util.RequestTransformer;
+import lombok.AccessLevel;
+import lombok.Getter;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Default implementation of the Retrieval-Augmented Generation (RAG) process.
@@ -41,7 +42,7 @@ import ai.yda.framework.rag.core.util.RequestTransformer;
  * @since 0.1.0
  */
 @Getter(AccessLevel.PROTECTED)
-public class DefaultRag implements Rag<RagRequest, RagResponse> {
+public class QueryEngine implements Rag<RagRequest, RagResponse> {
 
     /**
      * The list of {@link Retriever} instances used to retrieve {@link RagContext} based on the {@link RagRequest}.
@@ -63,8 +64,10 @@ public class DefaultRag implements Rag<RagRequest, RagResponse> {
      */
     private final List<RequestTransformer<RagRequest>> requestTransformers;
 
+    private final PipelineAlgorithm pipelineAlgorithm;
+
     /**
-     * Constructs a new {@link DefaultRag} instance.
+     * Constructs a new {@link QueryEngine} instance.
      *
      * @param retrievers          the list of {@link Retriever} objects to retrieve {@link RagContext} data.
      * @param augmenters          the list of {@link Augmenter} objects to augment the retrieved Contexts.
@@ -72,11 +75,13 @@ public class DefaultRag implements Rag<RagRequest, RagResponse> {
      * @param requestTransformers the list of {@link RequestTransformer} objects for transforming the
      *                            {@link RagRequest}.
      */
-    public DefaultRag(
+    public QueryEngine(
             final List<Retriever<RagRequest, RagContext>> retrievers,
             final List<Augmenter<RagRequest, RagContext>> augmenters,
             final Generator<RagRequest, RagResponse> generator,
-            final List<RequestTransformer<RagRequest>> requestTransformers) {
+            final List<RequestTransformer<RagRequest>> requestTransformers,
+            final PipelineAlgorithm pipelineAlgorithm) {
+        this.pipelineAlgorithm = pipelineAlgorithm;
         this.retrievers = retrievers;
         this.augmenters = augmenters;
         this.generator = generator;
@@ -100,6 +105,8 @@ public class DefaultRag implements Rag<RagRequest, RagResponse> {
     @Override
     public RagResponse doRag(final RagRequest request) {
         var transformingRequest = request;
+        var nodePostProcessorFactory = new NodePostProcessorFactory();
+        var strategy = nodePostProcessorFactory.getStrategy(pipelineAlgorithm);
         for (RequestTransformer<RagRequest> requestTransformer : requestTransformers) {
             transformingRequest = requestTransformer.transformRequest(transformingRequest);
         }
@@ -107,10 +114,11 @@ public class DefaultRag implements Rag<RagRequest, RagResponse> {
         var contexts = retrievers.parallelStream()
                 .map(retriever -> retriever.retrieve(transformedRequest))
                 .collect(Collectors.toUnmodifiableList());
+        var processedContext = strategy.retrieveRagContext(contexts);
         for (var augmenter : augmenters) {
             contexts = augmenter.augment(transformedRequest, contexts);
         }
-        return generator.generate(transformedRequest, mergeContexts(contexts));
+        return generator.generate(transformedRequest, mergeContexts(processedContext));
     }
 
     /**
@@ -126,3 +134,8 @@ public class DefaultRag implements Rag<RagRequest, RagResponse> {
                 .collect(Collectors.joining(ContentUtil.SENTENCE_SEPARATOR));
     }
 }
+
+//TODO
+// 8. добавить ко всем новым классам документацию / -
+// 3. Переписать пайплайны для ретривенга и чанкирования , разработать их самостоятельно /  -
+// 6. Обновить FileSytstem ретривер согласно новой логике / -

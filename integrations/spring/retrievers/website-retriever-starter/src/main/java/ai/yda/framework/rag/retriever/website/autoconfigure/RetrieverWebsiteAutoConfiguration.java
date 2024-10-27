@@ -16,9 +16,14 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.rag.retriever.website.autoconfigure;
 
+import ai.yda.framework.rag.retriever.shared.MilvusVectorStoreUtil;
+import ai.yda.framework.rag.retriever.website.DataFlowCoordinator;
+import ai.yda.framework.rag.retriever.website.extractor.WebExtractor;
+import ai.yda.framework.rag.retriever.website.indexing.WebsiteIndexing;
+import ai.yda.framework.rag.retriever.website.retriever.WebsiteRetriever;
 import org.springframework.ai.autoconfigure.openai.OpenAiConnectionProperties;
 import org.springframework.ai.autoconfigure.openai.OpenAiEmbeddingProperties;
 import org.springframework.ai.autoconfigure.vectorstore.milvus.MilvusServiceClientProperties;
@@ -27,10 +32,6 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-
-import ai.yda.framework.rag.retriever.shared.MilvusVectorStoreUtil;
-import ai.yda.framework.rag.retriever.website.WebsiteRetriever;
-import ai.yda.framework.rag.retriever.website.extractor.WebExtractor;
 
 /**
  * Autoconfiguration class for creating and configuring all necessary components for Web Retrieving.
@@ -43,37 +44,14 @@ import ai.yda.framework.rag.retriever.website.extractor.WebExtractor;
  * @since 1.0.0
  */
 @AutoConfiguration
-@EnableConfigurationProperties({RetrieverWebsiteProperties.class, WebExtractorProperties.class})
+@EnableConfigurationProperties({RetrieverWebsiteProperties.class, WebExtractorProperties.class, DataFlowCoordinatorProperties.class, WebsiteIndexingProperties.class})
 public class RetrieverWebsiteAutoConfiguration {
 
-    /**
-     * Default constructor for {@link RetrieverWebsiteAutoConfiguration}.
-     */
-    public RetrieverWebsiteAutoConfiguration() {}
+    public RetrieverWebsiteAutoConfiguration() {
+    }
 
-    /**
-     * Creates and configures an instance of {@link WebsiteRetriever} using the provided properties and services.
-     *
-     * <p>This method performs the following steps:</p>
-     * <ul>
-     *     <li>Creates a {@code MilvusVectorStore} instance using the provided properties and services.</li>
-     *     <li>Initializes the {@code MilvusVectorStore} instance by calling {@code afterPropertiesSet()}.</li>
-     *     <li>Creates and returns a {@link WebsiteRetriever} instance with the initialized parameters</li>
-     * </ul>
-     *
-     * @param webExtractor               the extractor used for crawling and extracting web content.
-     * @param websiteProperties          properties for configuring the {@link RetrieverWebsiteProperties}, including
-     *                                   file storage path, topK value, and processing enablement.
-     * @param milvusProperties           properties for configuring the Milvus Vector Store.
-     * @param milvusClientProperties     properties for configuring the Milvus Service Client.
-     * @param openAiConnectionProperties properties for configuring the OpenAI connection.
-     * @param openAiEmbeddingProperties  properties for configuring the OpenAI Embeddings.
-     * @return a fully configured {@link WebsiteRetriever} instance.
-     * @throws Exception if an error occurs during initialization.
-     */
     @Bean
     public WebsiteRetriever websiteRetriever(
-            final WebExtractor webExtractor,
             final RetrieverWebsiteProperties websiteProperties,
             final MilvusVectorStoreProperties milvusProperties,
             final MilvusServiceClientProperties milvusClientProperties,
@@ -89,33 +67,46 @@ public class RetrieverWebsiteAutoConfiguration {
                 openAiEmbeddingProperties);
         milvusVectorStore.afterPropertiesSet();
         return new WebsiteRetriever(
-                webExtractor,
                 milvusVectorStore,
-                websiteProperties.getUrl(),
-                websiteProperties.getTopK(),
-                websiteProperties.getIsProcessingEnabled());
+                websiteProperties.getTopK());
     }
 
-    /**
-     * Creates a {@link WebExtractor} bean with the specified properties.
-     * <p>
-     * The {@link WebExtractor} is configured using the provided {@link WebExtractorProperties},
-     * which defines the crawler's behavior, such as the maximum number of threads, retry times,
-     * sleep times, depth limits, and browser support.
-     * </p>
-     * <p>
-     * If browser support is enabled, the {@link WebExtractor} will be configured to use browser-based crawling for
-     * extracting dynamic content with a specified pool size and sleep times for the browser. Otherwise, it will be
-     * configured for non-browser crawling.
-     * </p>
-     *
-     * @param crawlerProperties the properties used to configure the {@link WebExtractor}.
-     * @return a configured {@link WebExtractor} instance.
-     */
+    @Bean
+    public WebsiteIndexing websiteIndexing(final WebsiteIndexingProperties websiteIndexingProperties,
+                                           final MilvusVectorStoreProperties milvusProperties,
+                                           final MilvusServiceClientProperties milvusClientProperties,
+                                           final OpenAiConnectionProperties openAiConnectionProperties,
+                                           final OpenAiEmbeddingProperties openAiEmbeddingProperties) throws Exception {
+        var milvusVectorStore = MilvusVectorStoreUtil.createMilvusVectorStore(
+                websiteIndexingProperties,
+                milvusProperties,
+                milvusClientProperties,
+                openAiConnectionProperties,
+                openAiEmbeddingProperties);
+        milvusVectorStore.afterPropertiesSet();
+        return new WebsiteIndexing(milvusVectorStore);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    DataFlowCoordinator dataFlowCoordinator(
+            final DataFlowCoordinatorProperties dataFlowCoordinatorProperties,
+            final WebExtractor webExtractor,
+            final WebsiteIndexing websiteIndexing
+    ) {
+        return new DataFlowCoordinator(
+                dataFlowCoordinatorProperties.getUrl(),
+                websiteIndexing,
+                webExtractor,
+                dataFlowCoordinatorProperties.getIsProcessingEnabled(),
+                dataFlowCoordinatorProperties.getPipelineAlgorithm(),
+                dataFlowCoordinatorProperties.getChunkingAlgorithm());
+    }
+
     @Bean
     @ConditionalOnMissingBean
     public WebExtractor webExtractor(final WebExtractorProperties crawlerProperties) {
-        if (crawlerProperties.getBrowserSupportEnabled()) {
+        if (Boolean.TRUE.equals(crawlerProperties.getBrowserSupportEnabled())) {
             return new WebExtractor(
                     crawlerProperties.getCrawlerMaxThreads(),
                     crawlerProperties.getCrawlerRetryTimes(),

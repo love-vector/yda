@@ -16,24 +16,16 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
-package ai.yda.framework.rag.retriever.website;
-
-import java.util.List;
-import java.util.Map;
-
-import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.ai.document.Document;
-import org.springframework.ai.vectorstore.SearchRequest;
-import org.springframework.ai.vectorstore.VectorStore;
-import org.springframework.lang.NonNull;
+ */
+package ai.yda.framework.rag.retriever.website.retriever;
 
 import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.retriever.Retriever;
-import ai.yda.framework.rag.core.util.ContentUtil;
-import ai.yda.framework.rag.retriever.website.extractor.WebExtractor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.vectorstore.SearchRequest;
+import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.lang.NonNull;
 
 /**
  * Retrieves website Context data from a Vector Store based on a User Request. It processes website or sitemap and uses
@@ -49,19 +41,9 @@ import ai.yda.framework.rag.retriever.website.extractor.WebExtractor;
 public class WebsiteRetriever implements Retriever<RagRequest, RagContext> {
 
     /**
-     * The maximum length of a chunk in characters.
-     */
-    public static final int CHUNK_MAX_LENGTH = 1000;
-
-    /**
      * The Vector Store used to retrieve Context data for user Request through similarity search.
      */
     private final VectorStore vectorStore;
-
-    /**
-     * The website or sitemap url.
-     */
-    private final String url;
 
     /**
      * The number of top results to retrieve from the Vector Store.
@@ -69,44 +51,27 @@ public class WebsiteRetriever implements Retriever<RagRequest, RagContext> {
     private final Integer topK;
 
     /**
-     * Extractor used for crawling and extracting web content.
-     */
-    private final WebExtractor webExtractor;
-
-    /**
      * Constructs a new {@link WebsiteRetriever} instance with the specified vectorStore, url, topK and
      * isProcessingEnabled parameters.
      *
-     * @param webExtractor        the extractor used for crawling and extracting web content.
-     * @param vectorStore         the {@link VectorStore} instance used for storing and retrieving vector data.
-     *                            This parameter cannot be {@code null} and is used to interact with the Vector Store.
-     * @param url                 the website or sitemap url. This parameter cannot be {@code null} and is used to
-     *                            process and store data to the Vector Store.
-     * @param topK                the number of top results to retrieve from the Vector Store. This value must be a
-     *                            positive integer.
-     * @param isProcessingEnabled a {@link Boolean} flag indicating whether website processing should be enabled during
-     *                            initialization. If {@code true}, the method {@link #processUrl()} will
-     *                            be called to process the files in the specified storage path.
+     * @param vectorStore the {@link VectorStore} instance used for storing and retrieving vector data.
+     *                    This parameter cannot be {@code null} and is used to interact with the Vector Store.
+     *                    process and store data to the Vector Store.
+     * @param topK        the number of top results to retrieve from the Vector Store. This value must be a
+     *                    positive integer.
+     *                    be called to process the files in the specified storage path.
      * @throws IllegalArgumentException if {@code topK} is not a positive number.
      */
     public WebsiteRetriever(
-            final @NonNull WebExtractor webExtractor,
             final @NonNull VectorStore vectorStore,
-            final @NonNull String url,
-            final @NonNull Integer topK,
-            final @NonNull Boolean isProcessingEnabled) {
+            final @NonNull Integer topK) {
         if (topK <= 0) {
             throw new IllegalArgumentException("TopK must be a positive number.");
         }
-        this.webExtractor = webExtractor;
         this.vectorStore = vectorStore;
-        this.url = url;
         this.topK = topK;
-
-        if (isProcessingEnabled) {
-            processUrl();
-        }
     }
+
 
     /**
      * Retrieves Context data based on the given Request by performing a similarity search in the Vector Store.
@@ -128,19 +93,6 @@ public class WebsiteRetriever implements Retriever<RagRequest, RagContext> {
                                 })
                                 .toList())
                 .build();
-    }
 
-    /**
-     * Extracts data from url and processes by creating document chunks and adding them to the Vector Store.
-     */
-    private void processUrl() {
-        var pageDocuments = webExtractor.extract(url).parallelStream()
-                .map(result ->
-                        ContentUtil.preprocessAndSplitContent(result.getContent(), CHUNK_MAX_LENGTH).parallelStream()
-                                .map(chunkContent -> new Document(chunkContent, Map.of("url", result.getUrl())))
-                                .toList())
-                .flatMap(List::stream)
-                .toList();
-        vectorStore.add(pageDocuments);
     }
 }
