@@ -19,12 +19,12 @@
 */
 package ai.yda.framework.rag.retriever.filesystem;
 
+import ai.yda.framework.rag.retriever.filesystem.extractor.service.FilesystemService;
 import org.springframework.lang.NonNull;
 
 import ai.yda.framework.rag.core.transformators.factory.ChunkingAlgorithm;
 import ai.yda.framework.rag.core.transformators.factory.NodeTransformerFactory;
 import ai.yda.framework.rag.core.transformators.pipline.PipelineAlgorithm;
-import ai.yda.framework.rag.retriever.filesystem.extractor.service.FilesystemService;
 import ai.yda.framework.rag.retriever.filesystem.indexing.FilesystemIndexing;
 
 public class DataFlowCoordinator {

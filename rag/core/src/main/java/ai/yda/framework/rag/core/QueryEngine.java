@@ -16,14 +16,8 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.rag.core;
-
-import java.util.List;
-import java.util.stream.Collectors;
-
-import lombok.AccessLevel;
-import lombok.Getter;
 
 import ai.yda.framework.rag.core.augmenter.Augmenter;
 import ai.yda.framework.rag.core.generator.Generator;
@@ -35,6 +29,11 @@ import ai.yda.framework.rag.core.transformators.factory.NodePostProcessorFactory
 import ai.yda.framework.rag.core.transformators.pipline.PipelineAlgorithm;
 import ai.yda.framework.rag.core.util.ContentUtil;
 import ai.yda.framework.rag.core.util.RequestTransformer;
+import lombok.AccessLevel;
+import lombok.Getter;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Default implementation of the Retrieval-Augmented Generation (RAG) process.
@@ -65,8 +64,6 @@ public class QueryEngine implements Rag<RagRequest, RagResponse> {
      */
     private final List<RequestTransformer<RagRequest>> requestTransformers;
 
-    private final PipelineAlgorithm pipelineAlgorithm;
-
     /**
      * Constructs a new {@link QueryEngine} instance.
      *
@@ -80,9 +77,7 @@ public class QueryEngine implements Rag<RagRequest, RagResponse> {
             final List<Retriever<RagRequest, RagContext>> retrievers,
             final List<Augmenter<RagRequest, RagContext>> augmenters,
             final Generator<RagRequest, RagResponse> generator,
-            final List<RequestTransformer<RagRequest>> requestTransformers,
-            final PipelineAlgorithm pipelineAlgorithm) {
-        this.pipelineAlgorithm = pipelineAlgorithm;
+            final List<RequestTransformer<RagRequest>> requestTransformers) {
         this.retrievers = retrievers;
         this.augmenters = augmenters;
         this.generator = generator;
@@ -107,7 +102,7 @@ public class QueryEngine implements Rag<RagRequest, RagResponse> {
     public RagResponse doRag(final RagRequest request) {
         var transformingRequest = request;
         var nodePostProcessorFactory = new NodePostProcessorFactory();
-        var strategy = nodePostProcessorFactory.getStrategy(pipelineAlgorithm);
+        var strategy = nodePostProcessorFactory.getStrategy(PipelineAlgorithm.AUTO_MERGE);
 
         for (RequestTransformer<RagRequest> requestTransformer : requestTransformers) {
             transformingRequest = requestTransformer.transformRequest(transformingRequest);
@@ -140,8 +135,7 @@ public class QueryEngine implements Rag<RagRequest, RagResponse> {
     }
 }
 
-// TODO
-// 8. добавить ко всем новым классам документацию / -
+//TODO
 // 3. Переписать пайплайны для ретривенга и чанкирования , разработать их самостоятельно /  -
-// 6. Обновить FileSytstem ретривер согласно новой логике / -
-// 9. Разобраться куда лучше пристроить pipelineAlgorithm и с чем
+// 10. Закончить конфигурацию начать первые тесты текущей логики / -
+// 11. Создать аугументатор вместе с postProcess()

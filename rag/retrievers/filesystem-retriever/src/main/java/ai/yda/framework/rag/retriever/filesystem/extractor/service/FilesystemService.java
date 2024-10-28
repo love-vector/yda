@@ -78,13 +78,13 @@ public class FilesystemService implements DataExtractor<List<DocumentData>> {
         }
     }
 
-    public List<DocumentData> createDocumentDataFromFiles(final List<Path> filePathList) {
+    private List<DocumentData> createDocumentDataFromFiles(final List<Path> filePathList) {
         return filePathList.parallelStream()
                 .map(this::splitFileIntoDocumentData)
                 .toList();
     }
 
-    public DocumentData splitFileIntoDocumentData(final Path filePath) {
+    private DocumentData splitFileIntoDocumentData(final Path filePath) {
         var pdfContent = FileUtil.readPdf(filePath.toFile());
         var fileName = filePath.getFileName();
         log.debug("Processing file: {}", fileName);
