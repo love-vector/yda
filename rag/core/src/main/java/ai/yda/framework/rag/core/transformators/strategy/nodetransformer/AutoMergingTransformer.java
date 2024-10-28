@@ -34,7 +34,7 @@ import ai.yda.framework.rag.core.transformators.strategy.NodeTransformerStrategy
 public class AutoMergingTransformer implements NodeTransformerStrategy<DocumentData> {
 
     @Override
-    public List<DocumentData> processDataList(List<DocumentData> dataList, ChunkingAlgorithm chunkingAlgorithm) {
+    public List<DocumentData> processDataList(final List<DocumentData> dataList,final ChunkingAlgorithm chunkingAlgorithm) {
         PatternBasedChunking patternBasedChunking = new PatternBasedChunking();
 
         var nodeList = patternBasedChunking.nodeList(chunkingAlgorithm, dataList);
@@ -44,7 +44,7 @@ public class AutoMergingTransformer implements NodeTransformerStrategy<DocumentD
         return transformToDocumentData(autoMergeNodes);
     }
 
-    private List<Node> enrichContext(List<Node> nodes) {
+    private List<Node> enrichContext(final List<Node> nodes) {
         return nodes.stream()
                 .map(node -> {
                     var updatedMetadata = new HashMap<>(node.getMetadata());
@@ -57,7 +57,7 @@ public class AutoMergingTransformer implements NodeTransformerStrategy<DocumentD
                 .collect(Collectors.toList());
     }
 
-    private List<Node> autoMergeNodes(List<Node> enrichedNodes) {
+    private List<Node> autoMergeNodes(final List<Node> enrichedNodes) {
         List<Node> mergedNodes = new ArrayList<>();
         var parentNodeMap = enrichedNodes.stream().collect(Collectors.groupingBy(node ->
                 (String) node.getMetadata().get("documentId")));
@@ -87,7 +87,7 @@ public class AutoMergingTransformer implements NodeTransformerStrategy<DocumentD
         return mergedNodes;
     }
 
-    private List<DocumentData> transformToDocumentData(List<Node> autoMergeNodes) {
+    private List<DocumentData> transformToDocumentData(final List<Node> autoMergeNodes) {
         Map<String, List<Node>> documentNodesMap = autoMergeNodes.stream().collect(Collectors.groupingBy(node ->
                 (String) node.getMetadata().get("documentId")));
         List<DocumentData> documentDataList = new ArrayList<>();

@@ -27,7 +27,7 @@ import ai.yda.framework.rag.core.transformators.strategy.NodePostProcessorStrate
 public class HierarchicalPostProcessor implements NodePostProcessorStrategy {
     // TODO write second PostProcessor
     @Override
-    public List<RagContext> retrieveRagContext(List<RagContext> ragContext) {
+    public List<RagContext> retrieveRagContext(final List<RagContext> ragContext) {
         return null;
     }
 }

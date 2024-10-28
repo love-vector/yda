@@ -32,10 +32,7 @@ public class PatternBasedNodeTransformer {
         this.nodeTransformerFactory = new NodeTransformerFactory();
     }
 
-    public List<DocumentData> nodeList(
-            final List<DocumentData> documentDataList,
-            ChunkingAlgorithm chunkingAlgorithm,
-            PipelineAlgorithm pipelineAlgorithm) {
+    public List<DocumentData> nodeList(final List<DocumentData> documentDataList, final ChunkingAlgorithm chunkingAlgorithm, final PipelineAlgorithm pipelineAlgorithm) {
         var nodeTransformerStrategy = nodeTransformerFactory.getStrategy(pipelineAlgorithm);
         return nodeTransformerStrategy.processDataList(documentDataList, chunkingAlgorithm);
     }

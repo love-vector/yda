@@ -30,12 +30,12 @@ import ai.yda.framework.rag.core.transformators.strategy.NodePostProcessorStrate
 
 public class AutoMergingPostProcessor implements NodePostProcessorStrategy {
     @Override
-    public List<RagContext> retrieveRagContext(List<RagContext> ragContext) {
+    public List<RagContext> retrieveRagContext(final List<RagContext> ragContext) {
         var mergedData = mergeData(ragContext);
         return filterRelevantContexts(mergedData);
     }
 
-    private List<RagContext> mergeData(List<RagContext> retrievedDocuments) {
+    private List<RagContext> mergeData(final List<RagContext> retrievedDocuments) {
         Map<String, RagContext> mergedResults = new HashMap<>();
 
         retrievedDocuments.forEach(document -> {
@@ -57,11 +57,11 @@ public class AutoMergingPostProcessor implements NodePostProcessorStrategy {
         return new ArrayList<>(mergedResults.values());
     }
 
-    private List<RagContext> filterRelevantContexts(List<RagContext> mergedData) {
+    private List<RagContext> filterRelevantContexts(final List<RagContext> mergedData) {
         return mergedData.stream().filter(this::isRelevant).collect(Collectors.toList());
     }
 
-    private boolean isRelevant(RagContext context) {
+    private boolean isRelevant(final RagContext context) {
         return !context.getKnowledge().isEmpty();
     }
 }
