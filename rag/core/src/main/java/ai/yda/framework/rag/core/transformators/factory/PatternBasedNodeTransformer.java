@@ -1,7 +1,6 @@
 package ai.yda.framework.rag.core.transformators.factory;
 
 import ai.yda.framework.rag.core.model.DocumentData;
-import ai.yda.framework.rag.core.retriever.spliting.factory.ChunkingAlgorithm;
 import ai.yda.framework.rag.core.transformators.pipline.PipelineAlgorithm;
 
 import java.util.List;

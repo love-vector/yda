@@ -16,24 +16,27 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
-package ai.yda.framework.rag.core.retriever.spliting.strategy;
+ */
+package ai.yda.framework.rag.core.transformators.strategy.nodetransformer.spliting.strategy;
+
+import ai.yda.framework.rag.core.model.DocumentData;
+import ai.yda.framework.rag.core.model.Node;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
-import ai.yda.framework.rag.core.model.DocumentData;
-import ai.yda.framework.rag.core.model.Node;
+public class SlidingWindowChunking implements ChunkStrategy {
 
-public class FixedLengthWordChunking implements ChunkStrategy {
+    private final int windowSize;
+    private final int step;
 
-    private final int nodeSize;
-
-    public FixedLengthWordChunking(final int nodeSize) {
-        this.nodeSize = nodeSize;
+    public SlidingWindowChunking(final int windowSize, final int step) {
+        this.windowSize = windowSize;
+        this.step = step;
     }
 
     @Override
@@ -44,13 +47,15 @@ public class FixedLengthWordChunking implements ChunkStrategy {
                 .flatMap(document -> {
                     var documentContent = document.getContent();
                     var documentId = document.getMetadata().get("documentId").toString();
-                    var parts = (documentContent.length() + nodeSize - 1) / nodeSize;
+                    String[] words = documentContent.split("\\s+");
+                    int parts = (words.length - windowSize + step) / step;
 
                     return IntStream.range(0, parts).mapToObj(node -> {
-                        var start = node * nodeSize;
-                        var nodeContent = documentContent
-                                .substring(start, Math.min(start + nodeSize, documentContent.length()))
-                                .trim();
+                        var start = node * step;
+                        var nodeContent = Stream.of(words)
+                                .skip(start)
+                                .limit(windowSize)
+                                .collect(Collectors.joining(" ")).trim();
                         var nodeMetadata = new HashMap<>(document.getMetadata());
                         nodeMetadata.put("index", nodeIndex.getAndIncrement());
                         nodeMetadata.put("documentId", documentId);

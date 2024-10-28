@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.rag.core.retriever.spliting.factory;
+package ai.yda.framework.rag.core.transformators.factory;
 
 /**
  * Enum representing the different chunking algorithms that can be applied to split document content.

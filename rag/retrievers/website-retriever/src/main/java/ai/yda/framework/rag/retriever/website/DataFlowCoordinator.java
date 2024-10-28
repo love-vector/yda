@@ -1,7 +1,7 @@
 package ai.yda.framework.rag.retriever.website;
 
 import ai.yda.framework.rag.core.model.DocumentData;
-import ai.yda.framework.rag.core.retriever.spliting.factory.ChunkingAlgorithm;
+import ai.yda.framework.rag.core.transformators.factory.ChunkingAlgorithm;
 import ai.yda.framework.rag.core.transformators.factory.NodeTransformerFactory;
 import ai.yda.framework.rag.core.transformators.pipline.PipelineAlgorithm;
 import ai.yda.framework.rag.retriever.website.extractor.WebExtractor;

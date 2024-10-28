@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.rag.core.retriever.spliting.strategy;
+package ai.yda.framework.rag.core.transformators.strategy.nodetransformer.spliting.strategy;
 
 import java.util.List;
 

@@ -17,13 +17,13 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.rag.core.retriever.spliting.factory;
+package ai.yda.framework.rag.core.transformators.factory;
 
 import java.util.List;
 
 import ai.yda.framework.rag.core.model.DocumentData;
 import ai.yda.framework.rag.core.model.Node;
-import ai.yda.framework.rag.core.retriever.spliting.strategy.ChunkStrategy;
+import ai.yda.framework.rag.core.transformators.strategy.nodetransformer.spliting.strategy.ChunkStrategy;
 
 /**
  * Provides a pattern-based chunking mechanism that selects the appropriate chunking strategy based on the

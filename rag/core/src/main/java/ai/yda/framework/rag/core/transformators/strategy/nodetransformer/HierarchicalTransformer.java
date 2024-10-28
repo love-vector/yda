@@ -1,7 +1,7 @@
 package ai.yda.framework.rag.core.transformators.strategy.nodetransformer;
 
 import ai.yda.framework.rag.core.model.DocumentData;
-import ai.yda.framework.rag.core.retriever.spliting.factory.ChunkingAlgorithm;
+import ai.yda.framework.rag.core.transformators.factory.ChunkingAlgorithm;
 import ai.yda.framework.rag.core.transformators.strategy.NodeTransformerStrategy;
 
 import java.util.List;

@@ -19,7 +19,8 @@
  */
 package ai.yda.framework.rag.retriever.shared;
 
-import ai.yda.framework.rag.core.retriever.spliting.factory.ChunkingAlgorithm;
+import ai.yda.framework.rag.core.transformators.factory.ChunkingAlgorithm;
+import ai.yda.framework.rag.core.transformators.pipline.PipelineAlgorithm;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.ai.vectorstore.MilvusVectorStore;
