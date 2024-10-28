@@ -23,11 +23,15 @@ import org.springframework.ai.autoconfigure.openai.OpenAiConnectionProperties;
 import org.springframework.ai.autoconfigure.openai.OpenAiEmbeddingProperties;
 import org.springframework.ai.autoconfigure.vectorstore.milvus.MilvusServiceClientProperties;
 import org.springframework.ai.autoconfigure.vectorstore.milvus.MilvusVectorStoreProperties;
+import org.springframework.ai.vectorstore.MilvusVectorStore;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
-import ai.yda.framework.rag.retriever.filesystem.FilesystemRetriever;
+import ai.yda.framework.rag.retriever.filesystem.DataFlowCoordinator;
+import ai.yda.framework.rag.retriever.filesystem.indexing.FilesystemIndexing;
+import ai.yda.framework.rag.retriever.filesystem.retriever.FilesystemRetriever;
 import ai.yda.framework.rag.retriever.shared.MilvusVectorStoreUtil;
 
 /**
@@ -50,7 +54,7 @@ import ai.yda.framework.rag.retriever.shared.MilvusVectorStoreUtil;
  * @since 1.0.0
  */
 @AutoConfiguration
-@EnableConfigurationProperties(RetrieverFilesystemProperties.class)
+@EnableConfigurationProperties({RetrieverFilesystemProperties.class, DataFlowCoordinatorProperties.class})
 public class RetrieverFilesystemAutoConfiguration {
 
     /**
@@ -58,28 +62,8 @@ public class RetrieverFilesystemAutoConfiguration {
      */
     public RetrieverFilesystemAutoConfiguration() {}
 
-    /**
-     * Creates and configures an instance of {@link FilesystemRetriever} using the provided properties and services.
-     *
-     * <p>This method performs the following steps:</p>
-     * <ul>
-     *     <li>Creates a {@code MilvusVectorStore} instance using the provided properties and services.</li>
-     *     <li>Initializes the {@code MilvusVectorStore} instance by calling {@code afterPropertiesSet()}.</li>
-     *     <li>Creates and returns a {@link FilesystemRetriever} instance with the initialized parameters</li>
-     * </ul>
-     *
-     * @param filesystemProperties       properties for configuring the {@link FilesystemRetriever}, including
-     *                                   collectionName, topK, isProcessingEnabled, clearCollectionOnStartup and
-     *                                   fileStoragePath settings.
-     * @param milvusProperties           properties for configuring the Milvus Vector Store.
-     * @param milvusClientProperties     properties for configuring the Milvus Service Client.
-     * @param openAiConnectionProperties properties for configuring the OpenAI connection.
-     * @param openAiEmbeddingProperties  properties for configuring the OpenAI Embeddings.
-     * @return a fully configured {@link FilesystemRetriever} instance.
-     * @throws Exception if an error occurs during initialization.
-     */
     @Bean
-    public FilesystemRetriever filesystemRetriever(
+    public MilvusVectorStore milvusVectorStore(
             final RetrieverFilesystemProperties filesystemProperties,
             final MilvusVectorStoreProperties milvusProperties,
             final MilvusServiceClientProperties milvusClientProperties,
@@ -94,10 +78,30 @@ public class RetrieverFilesystemAutoConfiguration {
                 openAiConnectionProperties,
                 openAiEmbeddingProperties);
         milvusVectorStore.afterPropertiesSet();
-        return new FilesystemRetriever(
-                milvusVectorStore,
-                filesystemProperties.getFileStoragePath(),
-                filesystemProperties.getTopK(),
-                filesystemProperties.getIsProcessingEnabled());
+        return milvusVectorStore;
+    }
+
+    @Bean
+    public FilesystemRetriever filesystemRetriever(
+            final RetrieverFilesystemProperties filesystemProperties, final MilvusVectorStore milvusVectorStore) {
+        return new FilesystemRetriever(milvusVectorStore, filesystemProperties.getTopK());
+    }
+
+    @Bean
+    public FilesystemIndexing filesystemIndexing(final MilvusVectorStore milvusVectorStore) {
+        return new FilesystemIndexing(milvusVectorStore);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public DataFlowCoordinator dataFlowCoordinator(
+            final FilesystemIndexing filesystemIndexing,
+            final DataFlowCoordinatorProperties flowCoordinatorProperties) {
+        return new DataFlowCoordinator(
+                flowCoordinatorProperties.getDatasource(),
+                filesystemIndexing,
+                flowCoordinatorProperties.getIsProcessingEnabled(),
+                flowCoordinatorProperties.getPipelineAlgorithm(),
+                flowCoordinatorProperties.getChunkingAlgorithm());
     }
 }

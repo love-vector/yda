@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.rag.retriever.website.autoconfigure;
+package ai.yda.framework.rag.retriever.filesystem.autoconfigure;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -28,10 +28,19 @@ import ai.yda.framework.rag.retriever.shared.RetrieverProperties;
 
 @Getter
 @Setter
-@ConfigurationProperties(WebsiteIndexingProperties.CONFIG_PREFIX)
-public class WebsiteIndexingProperties extends RetrieverProperties {
+@ConfigurationProperties(DataFlowCoordinatorProperties.CONFIG_PREFIX)
+public class DataFlowCoordinatorProperties extends RetrieverProperties {
 
-    public static final String CONFIG_PREFIX = RetrieverWebsiteProperties.CONFIG_PREFIX + ".node.indexing";
+    /**
+     * The configuration prefix used to reference properties related to the website Retriever in application
+     * configurations. This prefix is used for binding properties within the particular namespace.
+     */
+    public static final String CONFIG_PREFIX = "ai.yda.framework.rag.retriever.filesystem" + ".data.coordinator";
 
-    public WebsiteIndexingProperties() {}
+    /**
+     * Operational URL of website or sitemap.
+     */
+    private String datasource;
+
+    public DataFlowCoordinatorProperties() {}
 }

@@ -16,22 +16,24 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.rag.retriever.website.autoconfigure;
+
+import org.springframework.ai.autoconfigure.openai.OpenAiConnectionProperties;
+import org.springframework.ai.autoconfigure.openai.OpenAiEmbeddingProperties;
+import org.springframework.ai.autoconfigure.vectorstore.milvus.MilvusServiceClientProperties;
+import org.springframework.ai.autoconfigure.vectorstore.milvus.MilvusVectorStoreProperties;
+import org.springframework.ai.vectorstore.MilvusVectorStore;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 
 import ai.yda.framework.rag.retriever.shared.MilvusVectorStoreUtil;
 import ai.yda.framework.rag.retriever.website.DataFlowCoordinator;
 import ai.yda.framework.rag.retriever.website.extractor.WebExtractor;
 import ai.yda.framework.rag.retriever.website.indexing.WebsiteIndexing;
 import ai.yda.framework.rag.retriever.website.retriever.WebsiteRetriever;
-import org.springframework.ai.autoconfigure.openai.OpenAiConnectionProperties;
-import org.springframework.ai.autoconfigure.openai.OpenAiEmbeddingProperties;
-import org.springframework.ai.autoconfigure.vectorstore.milvus.MilvusServiceClientProperties;
-import org.springframework.ai.autoconfigure.vectorstore.milvus.MilvusVectorStoreProperties;
-import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Bean;
 
 /**
  * Autoconfiguration class for creating and configuring all necessary components for Web Retrieving.
@@ -44,14 +46,18 @@ import org.springframework.context.annotation.Bean;
  * @since 1.0.0
  */
 @AutoConfiguration
-@EnableConfigurationProperties({RetrieverWebsiteProperties.class, WebExtractorProperties.class, DataFlowCoordinatorProperties.class, WebsiteIndexingProperties.class})
+@EnableConfigurationProperties({
+    RetrieverWebsiteProperties.class,
+    WebExtractorProperties.class,
+    DataFlowCoordinatorProperties.class,
+    WebsiteIndexingProperties.class
+})
 public class RetrieverWebsiteAutoConfiguration {
 
-    public RetrieverWebsiteAutoConfiguration() {
-    }
+    public RetrieverWebsiteAutoConfiguration() {}
 
     @Bean
-    public WebsiteRetriever websiteRetriever(
+    public MilvusVectorStore milvusVectorStore(
             final RetrieverWebsiteProperties websiteProperties,
             final MilvusVectorStoreProperties milvusProperties,
             final MilvusServiceClientProperties milvusClientProperties,
@@ -66,36 +72,28 @@ public class RetrieverWebsiteAutoConfiguration {
                 openAiConnectionProperties,
                 openAiEmbeddingProperties);
         milvusVectorStore.afterPropertiesSet();
-        return new WebsiteRetriever(
-                milvusVectorStore,
-                websiteProperties.getTopK());
+        return milvusVectorStore;
     }
 
     @Bean
-    public WebsiteIndexing websiteIndexing(final WebsiteIndexingProperties websiteIndexingProperties,
-                                           final MilvusVectorStoreProperties milvusProperties,
-                                           final MilvusServiceClientProperties milvusClientProperties,
-                                           final OpenAiConnectionProperties openAiConnectionProperties,
-                                           final OpenAiEmbeddingProperties openAiEmbeddingProperties) throws Exception {
-        var milvusVectorStore = MilvusVectorStoreUtil.createMilvusVectorStore(
-                websiteIndexingProperties,
-                milvusProperties,
-                milvusClientProperties,
-                openAiConnectionProperties,
-                openAiEmbeddingProperties);
-        milvusVectorStore.afterPropertiesSet();
+    public WebsiteRetriever websiteRetriever(
+            final RetrieverWebsiteProperties websiteProperties, final MilvusVectorStore milvusVectorStore) {
+        return new WebsiteRetriever(milvusVectorStore, websiteProperties.getTopK());
+    }
+
+    @Bean
+    public WebsiteIndexing websiteIndexing(final MilvusVectorStore milvusVectorStore) {
         return new WebsiteIndexing(milvusVectorStore);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    DataFlowCoordinator dataFlowCoordinator(
+    public DataFlowCoordinator dataFlowCoordinator(
             final DataFlowCoordinatorProperties dataFlowCoordinatorProperties,
             final WebExtractor webExtractor,
-            final WebsiteIndexing websiteIndexing
-    ) {
+            final WebsiteIndexing websiteIndexing) {
         return new DataFlowCoordinator(
-                dataFlowCoordinatorProperties.getUrl(),
+                dataFlowCoordinatorProperties.getDatasource(),
                 websiteIndexing,
                 webExtractor,
                 dataFlowCoordinatorProperties.getIsProcessingEnabled(),

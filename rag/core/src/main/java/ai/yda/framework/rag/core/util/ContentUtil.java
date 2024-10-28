@@ -20,8 +20,6 @@
 package ai.yda.framework.rag.core.util;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.jsoup.Jsoup;
 
@@ -30,7 +28,7 @@ import org.jsoup.Jsoup;
  *
  * @author Iryna Kopchak
  * @author Nikita Litvinov
- * @since 0.1.0
+ * @since 0.2.0
  */
 public final class ContentUtil {
 
@@ -41,23 +39,16 @@ public final class ContentUtil {
 
     /**
      * Preprocesses the provided content by converting it to UTF-8, formatting it to lowercase, normalizing whitespaces,
-     * removing HTML tags and splitting it into chunks of a specified maximum length.
+     * removing HTML tags
      *
-     * @param content       the textual content to be preprocessed.
-     * @param maxCharacters the maximum number of characters per chunk.
-     * @return a list of strings where each string is a chunk of the processed content. The list is unmodifiable.
+     * @param content the textual content to be preprocessed.
+     * @return a string with the processed content ready for further use.
      */
-    public static List<String> preprocessAndSplitContent(final String content, final Integer maxCharacters) {
+    public static String preprocessContent(final String content) {
         var preprocessedContent = new String(content.getBytes(), StandardCharsets.UTF_8).toLowerCase();
         preprocessedContent = normalizeWhitespaces(preprocessedContent);
         preprocessedContent = removeHtmlTags(preprocessedContent);
-
-        var contentChunks = new ArrayList<String>();
-        for (int i = 0; i < preprocessedContent.length(); i += maxCharacters) {
-            contentChunks.add(
-                    preprocessedContent.substring(i, Math.min(preprocessedContent.length(), i + maxCharacters)));
-        }
-        return contentChunks;
+        return preprocessedContent;
     }
 
     /**

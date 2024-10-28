@@ -16,15 +16,17 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.rag.retriever.shared;
+
+import lombok.Getter;
+import lombok.Setter;
+
+import org.springframework.ai.vectorstore.MilvusVectorStore;
+import org.springframework.ai.vectorstore.SearchRequest;
 
 import ai.yda.framework.rag.core.transformators.factory.ChunkingAlgorithm;
 import ai.yda.framework.rag.core.transformators.pipline.PipelineAlgorithm;
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.ai.vectorstore.MilvusVectorStore;
-import org.springframework.ai.vectorstore.SearchRequest;
 
 /**
  * Serves as the parent class for properties related to the Retriever configuration. It provides common settings such as
@@ -49,6 +51,5 @@ public class RetrieverProperties {
     /**
      * Default constructor for {@link RetrieverProperties}.
      */
-    public RetrieverProperties() {
-    }
+    public RetrieverProperties() {}
 }

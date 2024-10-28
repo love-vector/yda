@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.rag.retriever.website.retriever;
+package ai.yda.framework.rag.retriever.filesystem.retriever;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,43 +28,25 @@ import org.springframework.lang.NonNull;
 import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.retriever.Retriever;
+import ai.yda.framework.rag.retriever.filesystem.extractor.service.FilesystemService;
 
 /**
- * Retrieves website Context data from a Vector Store based on a User Request. It processes website or sitemap and uses
- * a Vector Store to perform similarity searches. If website processing is enabled, it processes website urls during
- * initialization.
+ * Retrieves filesystem Context data from a Vector Store based on a Request. It processes files stored in a specified
+ * directory and uses a Vector Store to perform similarity searches. If file processing is enabled, it processes files
+ * in the storage folder during initialization.
  *
+ * @author Dmitry Marchuk
  * @author Iryna Kopchak
- * @author Bogdan Synenko
+ * @see FilesystemService
  * @see VectorStore
  * @since 0.1.0
  */
 @Slf4j
-public class WebsiteRetriever implements Retriever<RagRequest, RagContext> {
-
-    /**
-     * The Vector Store used to retrieve Context data for user Request through similarity search.
-     */
+public class FilesystemRetriever implements Retriever<RagRequest, RagContext> {
     private final VectorStore vectorStore;
-
-    /**
-     * The number of top results to retrieve from the Vector Store.
-     */
     private final Integer topK;
 
-    /**
-     * Constructs a new {@link WebsiteRetriever} instance with the specified vectorStore, url, topK and
-     * isProcessingEnabled parameters.
-     *
-     * @param vectorStore the {@link VectorStore} instance used for storing and retrieving vector data.
-     *                    This parameter cannot be {@code null} and is used to interact with the Vector Store.
-     *                    process and store data to the Vector Store.
-     * @param topK        the number of top results to retrieve from the Vector Store. This value must be a
-     *                    positive integer.
-     *                    be called to process the files in the specified storage path.
-     * @throws IllegalArgumentException if {@code topK} is not a positive number.
-     */
-    public WebsiteRetriever(final @NonNull VectorStore vectorStore, final @NonNull Integer topK) {
+    public FilesystemRetriever(final @NonNull VectorStore vectorStore, final @NonNull Integer topK) {
         if (topK <= 0) {
             throw new IllegalArgumentException("TopK must be a positive number.");
         }
@@ -75,7 +57,7 @@ public class WebsiteRetriever implements Retriever<RagRequest, RagContext> {
     /**
      * Retrieves Context data based on the given Request by performing a similarity search in the Vector Store.
      *
-     * @param request the Request object containing the User query for the similarity search.
+     * @param request the {@link RagRequest} object containing the User query for the similarity search.
      * @return a {@link RagContext} object containing the Knowledge obtained from the similarity search.
      */
     @Override

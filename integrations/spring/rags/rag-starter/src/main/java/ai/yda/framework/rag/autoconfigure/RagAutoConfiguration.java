@@ -21,6 +21,7 @@ package ai.yda.framework.rag.autoconfigure;
 
 import java.util.List;
 
+import ai.yda.framework.rag.core.transformators.pipline.PipelineAlgorithm;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
@@ -65,6 +66,6 @@ public class RagAutoConfiguration {
             final List<Augmenter<RagRequest, RagContext>> augmenters,
             final Generator<RagRequest, RagResponse> generator,
             final List<RequestTransformer<RagRequest>> requestTransformers) {
-        return new QueryEngine(retrievers, augmenters, generator, requestTransformers);
+        return new QueryEngine(retrievers, augmenters, generator, requestTransformers, PipelineAlgorithm.AUTO_MERGE);
     }
 }

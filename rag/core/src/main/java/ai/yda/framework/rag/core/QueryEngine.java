@@ -16,8 +16,14 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.rag.core;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import lombok.AccessLevel;
+import lombok.Getter;
 
 import ai.yda.framework.rag.core.augmenter.Augmenter;
 import ai.yda.framework.rag.core.generator.Generator;
@@ -29,11 +35,6 @@ import ai.yda.framework.rag.core.transformators.factory.NodePostProcessorFactory
 import ai.yda.framework.rag.core.transformators.pipline.PipelineAlgorithm;
 import ai.yda.framework.rag.core.util.ContentUtil;
 import ai.yda.framework.rag.core.util.RequestTransformer;
-import lombok.AccessLevel;
-import lombok.Getter;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Default implementation of the Retrieval-Augmented Generation (RAG) process.
@@ -107,17 +108,21 @@ public class QueryEngine implements Rag<RagRequest, RagResponse> {
         var transformingRequest = request;
         var nodePostProcessorFactory = new NodePostProcessorFactory();
         var strategy = nodePostProcessorFactory.getStrategy(pipelineAlgorithm);
+
         for (RequestTransformer<RagRequest> requestTransformer : requestTransformers) {
             transformingRequest = requestTransformer.transformRequest(transformingRequest);
         }
+
         var transformedRequest = transformingRequest;
         var contexts = retrievers.parallelStream()
                 .map(retriever -> retriever.retrieve(transformedRequest))
                 .collect(Collectors.toUnmodifiableList());
         var processedContext = strategy.retrieveRagContext(contexts);
+
         for (var augmenter : augmenters) {
             contexts = augmenter.augment(transformedRequest, contexts);
         }
+
         return generator.generate(transformedRequest, mergeContexts(processedContext));
     }
 
@@ -135,7 +140,8 @@ public class QueryEngine implements Rag<RagRequest, RagResponse> {
     }
 }
 
-//TODO
+// TODO
 // 8. добавить ко всем новым классам документацию / -
 // 3. Переписать пайплайны для ретривенга и чанкирования , разработать их самостоятельно /  -
 // 6. Обновить FileSytstem ретривер согласно новой логике / -
+// 9. Разобраться куда лучше пристроить pipelineAlgorithm и с чем

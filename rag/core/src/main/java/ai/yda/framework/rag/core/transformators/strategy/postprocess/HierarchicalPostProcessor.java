@@ -19,10 +19,10 @@
 */
 package ai.yda.framework.rag.core.transformators.strategy.postprocess;
 
+import java.util.List;
+
 import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.transformators.strategy.NodePostProcessorStrategy;
-
-import java.util.List;
 
 public class HierarchicalPostProcessor implements NodePostProcessorStrategy {
     // TODO write second PostProcessor
@@ -30,5 +30,4 @@ public class HierarchicalPostProcessor implements NodePostProcessorStrategy {
     public List<RagContext> retrieveRagContext(List<RagContext> ragContext) {
         return null;
     }
-
 }

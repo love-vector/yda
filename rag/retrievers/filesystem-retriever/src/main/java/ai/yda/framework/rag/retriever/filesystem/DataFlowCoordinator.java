@@ -17,34 +17,28 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.rag.retriever.website;
-
-import java.util.Map;
+package ai.yda.framework.rag.retriever.filesystem;
 
 import org.springframework.lang.NonNull;
 
-import ai.yda.framework.rag.core.model.DocumentData;
 import ai.yda.framework.rag.core.transformators.factory.ChunkingAlgorithm;
 import ai.yda.framework.rag.core.transformators.factory.NodeTransformerFactory;
 import ai.yda.framework.rag.core.transformators.pipline.PipelineAlgorithm;
-import ai.yda.framework.rag.retriever.website.extractor.WebExtractor;
-import ai.yda.framework.rag.retriever.website.indexing.WebsiteIndexing;
+import ai.yda.framework.rag.retriever.filesystem.extractor.service.FilesystemService;
+import ai.yda.framework.rag.retriever.filesystem.indexing.FilesystemIndexing;
 
 public class DataFlowCoordinator {
     private final String datasource;
-    private final WebsiteIndexing indexer;
-    private final WebExtractor extractor;
+    private final FilesystemIndexing indexer;
 
     public DataFlowCoordinator(
             final @NonNull String datasource,
-            final @NonNull WebsiteIndexing indexer,
-            final @NonNull WebExtractor extractor,
+            final @NonNull FilesystemIndexing indexer,
             final @NonNull Boolean isProcessingEnabled,
             final @NonNull PipelineAlgorithm pipelineAlgorithm,
             final @NonNull ChunkingAlgorithm chunkingAlgorithm) {
         this.datasource = datasource;
         this.indexer = indexer;
-        this.extractor = extractor;
 
         if (Boolean.TRUE.equals(isProcessingEnabled)) {
             processAndIndexData(pipelineAlgorithm, chunkingAlgorithm);
@@ -55,10 +49,9 @@ public class DataFlowCoordinator {
             final PipelineAlgorithm pipelineAlgorithm, final ChunkingAlgorithm chunkingAlgorithm) {
         var nodeTransformerFactory = new NodeTransformerFactory();
         var nodeTransformerStrategy = nodeTransformerFactory.getStrategy(pipelineAlgorithm);
-        var documentDataList = extractor.extract(datasource).stream()
-                .map(extractionResult -> new DocumentData(
-                        extractionResult.getContent(), Map.of("documentId", extractionResult.getUrl())))
-                .toList();
-        indexer.saveDocuments(nodeTransformerStrategy.processDataList(documentDataList, chunkingAlgorithm));
+        var documentDataList = new FilesystemService().extract(datasource);
+        var processedDocumentDataList = nodeTransformerStrategy.processDataList(documentDataList, chunkingAlgorithm);
+
+        indexer.saveDocuments(processedDocumentDataList);
     }
 }

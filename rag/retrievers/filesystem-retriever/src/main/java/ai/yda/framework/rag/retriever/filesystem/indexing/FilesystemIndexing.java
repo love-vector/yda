@@ -17,13 +17,30 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.rag.core.transformators.strategy;
+package ai.yda.framework.rag.retriever.filesystem.indexing;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.springframework.ai.document.Document;
+import org.springframework.ai.vectorstore.VectorStore;
+
+import ai.yda.framework.rag.core.indexing.Index;
 import ai.yda.framework.rag.core.model.DocumentData;
-import ai.yda.framework.rag.core.transformators.factory.ChunkingAlgorithm;
 
-public interface NodeTransformerStrategy<NODES extends DocumentData> {
-    List<NODES> processDataList(List<NODES> dataList, ChunkingAlgorithm chunkingAlgorithm);
+public class FilesystemIndexing implements Index<DocumentData> {
+
+    private final VectorStore vectorStore;
+
+    public FilesystemIndexing(VectorStore vectorStore) {
+        this.vectorStore = vectorStore;
+    }
+
+    @Override
+    public void saveDocuments(List<DocumentData> nodeList) {
+        var documents = nodeList.stream()
+                .map(documentData -> new Document(documentData.getContent(), documentData.getMetadata()))
+                .collect(Collectors.toList());
+        vectorStore.add(documents);
+    }
 }

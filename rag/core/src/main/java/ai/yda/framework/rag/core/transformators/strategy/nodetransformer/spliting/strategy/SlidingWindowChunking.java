@@ -16,11 +16,8 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.rag.core.transformators.strategy.nodetransformer.spliting.strategy;
-
-import ai.yda.framework.rag.core.model.DocumentData;
-import ai.yda.framework.rag.core.model.Node;
 
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +25,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import ai.yda.framework.rag.core.model.DocumentData;
+import ai.yda.framework.rag.core.model.Node;
 
 public class SlidingWindowChunking implements ChunkStrategy {
 
@@ -55,7 +55,8 @@ public class SlidingWindowChunking implements ChunkStrategy {
                         var nodeContent = Stream.of(words)
                                 .skip(start)
                                 .limit(windowSize)
-                                .collect(Collectors.joining(" ")).trim();
+                                .collect(Collectors.joining(" "))
+                                .trim();
                         var nodeMetadata = new HashMap<>(document.getMetadata());
                         nodeMetadata.put("index", nodeIndex.getAndIncrement());
                         nodeMetadata.put("documentId", documentId);

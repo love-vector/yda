@@ -16,17 +16,17 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.rag.core.transformators.strategy.postprocess;
-
-import ai.yda.framework.rag.core.model.RagContext;
-import ai.yda.framework.rag.core.transformators.strategy.NodePostProcessorStrategy;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import ai.yda.framework.rag.core.model.RagContext;
+import ai.yda.framework.rag.core.transformators.strategy.NodePostProcessorStrategy;
 
 public class AutoMergingPostProcessor implements NodePostProcessorStrategy {
     @Override
@@ -64,5 +64,4 @@ public class AutoMergingPostProcessor implements NodePostProcessorStrategy {
     private boolean isRelevant(RagContext context) {
         return !context.getKnowledge().isEmpty();
     }
-
 }
