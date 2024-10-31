@@ -20,15 +20,13 @@
 package ai.yda.framework.rag.retriever.filesystem.indexing;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.VectorStore;
 
 import ai.yda.framework.rag.core.indexing.Index;
-import ai.yda.framework.rag.core.model.DocumentData;
 
-public class FilesystemIndexing implements Index<DocumentData> {
+public class FilesystemIndexing implements Index<Document> {
 
     private final VectorStore vectorStore;
 
@@ -37,10 +35,7 @@ public class FilesystemIndexing implements Index<DocumentData> {
     }
 
     @Override
-    public void saveDocuments(List<DocumentData> nodeList) {
-        var documents = nodeList.stream()
-                .map(documentData -> new Document(documentData.getContent(), documentData.getMetadata()))
-                .collect(Collectors.toList());
-        vectorStore.add(documents);
+    public void index(List<Document> nodeList) {
+        vectorStore.add(nodeList);
     }
 }

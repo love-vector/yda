@@ -16,24 +16,27 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.rag.core;
-
-import java.util.List;
-import java.util.stream.Collectors;
-
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 import ai.yda.framework.rag.core.augmenter.Augmenter;
 import ai.yda.framework.rag.core.generator.StreamingGenerator;
+import ai.yda.framework.rag.core.model.DocumentData;
 import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.model.RagResponse;
 import ai.yda.framework.rag.core.retriever.Retriever;
+import ai.yda.framework.rag.core.retriever.RetrieverCoordinator;
+import ai.yda.framework.rag.core.transformators.factory.NodePostProcessorFactory;
+import ai.yda.framework.rag.core.transformators.pipline.PipelineAlgorithm;
 import ai.yda.framework.rag.core.util.ContentUtil;
 import ai.yda.framework.rag.core.util.StreamingRequestTransformer;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Default implementation of the Retrieval-Augmented Generation (RAG) process in a streaming manner.
@@ -46,7 +49,7 @@ public class DefaultStreamingRag implements StreamingRag<RagRequest, RagResponse
     /**
      * The list of {@link Retriever} instances used to retrieving {@link RagContext} based on the {@link RagRequest}.
      */
-    private final List<Retriever<RagRequest, RagContext>> retrievers;
+    private final List<RetrieverCoordinator<DocumentData>> retrieverCoordinators;
 
     /**
      * The list of {@link Augmenter} instances used to modify or enhance the retrieved {@link RagContext}.
@@ -66,19 +69,19 @@ public class DefaultStreamingRag implements StreamingRag<RagRequest, RagResponse
     /**
      * Constructs a new {@link DefaultStreamingRag} instance.
      *
-     * @param retrievers          the list of {@link Retriever} objects used to retrieve {@link RagContext} data.
-     * @param augmenters          the list of {@link Augmenter} objects used to augment the retrieved Contexts.
-     * @param streamingGenerator  the {@link StreamingGenerator} used to generate {@link RagResponse} objects in a
-     *                            streaming manner.
-     * @param requestTransformers the list of {@link StreamingRequestTransformer} objects used to transform the
-     *                            {@link RagRequest}.
+     * @param retrieverCoordinators the list of {@link Retriever} objects used to retrieve {@link RagContext} data.
+     * @param augmenters            the list of {@link Augmenter} objects used to augment the retrieved Contexts.
+     * @param streamingGenerator    the {@link StreamingGenerator} used to generate {@link RagResponse} objects in a
+     *                              streaming manner.
+     * @param requestTransformers   the list of {@link StreamingRequestTransformer} objects used to transform the
+     *                              {@link RagRequest}.
      */
     public DefaultStreamingRag(
-            final List<Retriever<RagRequest, RagContext>> retrievers,
+            final List<RetrieverCoordinator<DocumentData>> retrieverCoordinators,
             final List<Augmenter<RagRequest, RagContext>> augmenters,
             final StreamingGenerator<RagRequest, RagResponse> streamingGenerator,
             final List<StreamingRequestTransformer<RagRequest>> requestTransformers) {
-        this.retrievers = retrievers;
+        this.retrieverCoordinators = retrieverCoordinators;
         this.augmenters = augmenters;
         this.streamingGenerator = streamingGenerator;
         this.requestTransformers = requestTransformers;
@@ -106,15 +109,25 @@ public class DefaultStreamingRag implements StreamingRag<RagRequest, RagResponse
                         Mono.just(request),
                         (monoRequest, transformer) -> monoRequest.flatMap(transformer::transformRequest))
                 .flatMap(monoRequest -> monoRequest)
-                .flatMapMany(transformedRequest -> Flux.fromIterable(retrievers)
+                .flatMapMany(transformedRequest -> Flux.fromIterable(retrieverCoordinators)
                         .flatMap(retriever -> Mono.fromCallable(() -> retriever.retrieve(transformedRequest))
                                 .subscribeOn(Schedulers.boundedElastic()))
                         .collectList()
-                        .flatMap(contexts -> {
+                        .flatMap(retrievedContextsLists  -> {
+                            List<RagContext> contexts = retrievedContextsLists.stream()
+                                    .flatMap(List::stream)
+                                    .collect(Collectors.toList());
+
+                            var nodePostProcessorFactory = new NodePostProcessorFactory();
+                            var strategy = nodePostProcessorFactory.getStrategy(PipelineAlgorithm.AUTO_MERGE);
+
                             for (var augmenter : augmenters) {
                                 contexts = augmenter.augment(transformedRequest, contexts);
                             }
-                            return Mono.just(contexts);
+
+                            var processedContexts = strategy.retrieveRagContext(contexts);
+
+                            return Mono.just(processedContexts);
                         })
                         .flatMap(this::mergeContexts)
                         .flatMapMany(context -> streamingGenerator.streamGeneration(transformedRequest, context)));
@@ -129,7 +142,7 @@ public class DefaultStreamingRag implements StreamingRag<RagRequest, RagResponse
      */
     protected Mono<String> mergeContexts(final List<RagContext> contexts) {
         return Flux.fromStream(contexts.parallelStream())
-                .map(ragContext -> String.join(ContentUtil.SENTENCE_SEPARATOR, ragContext.getKnowledge()))
+                .map(ragContext -> String.join(ContentUtil.SENTENCE_SEPARATOR, ragContext.getContent()))
                 .collect(Collectors.joining(ContentUtil.SENTENCE_SEPARATOR));
     }
 }

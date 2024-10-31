@@ -19,6 +19,8 @@
 */
 package ai.yda.framework.rag.core.retriever;
 
+import java.util.List;
+
 import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
 
@@ -42,5 +44,5 @@ public interface Retriever<REQUEST extends RagRequest, CONTEXT extends RagContex
      * @param request the Request object that contains query data from the User.
      * @return the Context object generated that contains additional information based on the User Request.
      */
-    CONTEXT retrieve(REQUEST request);
+    List<CONTEXT> retrieve(REQUEST request);
 }

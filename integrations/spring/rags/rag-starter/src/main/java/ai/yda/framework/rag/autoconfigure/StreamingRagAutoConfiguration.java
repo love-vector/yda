@@ -28,10 +28,12 @@ import org.springframework.context.annotation.Bean;
 import ai.yda.framework.rag.core.DefaultStreamingRag;
 import ai.yda.framework.rag.core.augmenter.Augmenter;
 import ai.yda.framework.rag.core.generator.StreamingGenerator;
+import ai.yda.framework.rag.core.model.DocumentData;
 import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.model.RagResponse;
 import ai.yda.framework.rag.core.retriever.Retriever;
+import ai.yda.framework.rag.core.retriever.RetrieverCoordinator;
 import ai.yda.framework.rag.core.util.StreamingRequestTransformer;
 
 /**
@@ -52,7 +54,7 @@ public class StreamingRagAutoConfiguration {
     /**
      * Creates and configures a {@link DefaultStreamingRag} bean.
      *
-     * @param retrievers                   the list of {@link Retriever} beans for retrieving Context based on the
+     * @param retrieverCoordinators                   the list of {@link Retriever} beans for retrieving Context based on the
      *                                     Request.
      * @param augmenters                   the list of {@link Augmenter} beans for enhancing the retrieved Context.
      * @param streamingGenerator           the {@link StreamingGenerator} bean for generating Responses in a streaming
@@ -63,10 +65,11 @@ public class StreamingRagAutoConfiguration {
      */
     @Bean
     public DefaultStreamingRag defaultStreamingRag(
-            final List<Retriever<RagRequest, RagContext>> retrievers,
+            final List<RetrieverCoordinator<DocumentData>> retrieverCoordinators,
             final List<Augmenter<RagRequest, RagContext>> augmenters,
             final StreamingGenerator<RagRequest, RagResponse> streamingGenerator,
             final List<StreamingRequestTransformer<RagRequest>> streamingRequestTransformers) {
-        return new DefaultStreamingRag(retrievers, augmenters, streamingGenerator, streamingRequestTransformers);
+        return new DefaultStreamingRag(
+                retrieverCoordinators, augmenters, streamingGenerator, streamingRequestTransformers);
     }
 }

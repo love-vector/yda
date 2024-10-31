@@ -34,7 +34,8 @@ import ai.yda.framework.rag.core.transformators.strategy.NodeTransformerStrategy
 public class AutoMergingTransformer implements NodeTransformerStrategy<DocumentData> {
 
     @Override
-    public List<DocumentData> processDataList(final List<DocumentData> dataList,final ChunkingAlgorithm chunkingAlgorithm) {
+    public List<DocumentData> processDataList(
+            final List<DocumentData> dataList, final ChunkingAlgorithm chunkingAlgorithm) {
         PatternBasedChunking patternBasedChunking = new PatternBasedChunking();
 
         var nodeList = patternBasedChunking.nodeList(chunkingAlgorithm, dataList);

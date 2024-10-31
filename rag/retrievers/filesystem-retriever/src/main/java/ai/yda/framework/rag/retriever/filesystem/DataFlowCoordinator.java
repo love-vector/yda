@@ -19,39 +19,69 @@
 */
 package ai.yda.framework.rag.retriever.filesystem;
 
-import ai.yda.framework.rag.retriever.filesystem.extractor.service.FilesystemService;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.ai.document.Document;
 import org.springframework.lang.NonNull;
 
+import ai.yda.framework.rag.core.model.DocumentData;
+import ai.yda.framework.rag.core.model.RagContext;
+import ai.yda.framework.rag.core.model.RagRequest;
+import ai.yda.framework.rag.core.retriever.RetrieverCoordinator;
 import ai.yda.framework.rag.core.transformators.factory.ChunkingAlgorithm;
 import ai.yda.framework.rag.core.transformators.factory.NodeTransformerFactory;
 import ai.yda.framework.rag.core.transformators.pipline.PipelineAlgorithm;
+import ai.yda.framework.rag.retriever.filesystem.extractor.service.FilesystemService;
 import ai.yda.framework.rag.retriever.filesystem.indexing.FilesystemIndexing;
+import ai.yda.framework.rag.retriever.filesystem.retriever.FilesystemRetriever;
 
-public class DataFlowCoordinator {
+public class DataFlowCoordinator implements RetrieverCoordinator<DocumentData> {
     private final String datasource;
     private final FilesystemIndexing indexer;
+
+    private final PipelineAlgorithm pipelineAlgorithm;
+    private final ChunkingAlgorithm chunkingAlgorithm;
+
+    private final FilesystemRetriever filesystemRetriever;
 
     public DataFlowCoordinator(
             final @NonNull String datasource,
             final @NonNull FilesystemIndexing indexer,
             final @NonNull Boolean isProcessingEnabled,
             final @NonNull PipelineAlgorithm pipelineAlgorithm,
-            final @NonNull ChunkingAlgorithm chunkingAlgorithm) {
+            final @NonNull ChunkingAlgorithm chunkingAlgorithm,
+            final @NonNull FilesystemRetriever filesystemRetriever) {
         this.datasource = datasource;
         this.indexer = indexer;
+        this.pipelineAlgorithm = pipelineAlgorithm;
+        this.chunkingAlgorithm = chunkingAlgorithm;
+        this.filesystemRetriever = filesystemRetriever;
 
         if (Boolean.TRUE.equals(isProcessingEnabled)) {
-            processAndIndexData(pipelineAlgorithm, chunkingAlgorithm);
+            index(process());
         }
     }
 
-    public void processAndIndexData(
-            final PipelineAlgorithm pipelineAlgorithm, final ChunkingAlgorithm chunkingAlgorithm) {
+    @Override
+    public List<DocumentData> process() {
         var nodeTransformerFactory = new NodeTransformerFactory();
         var nodeTransformerStrategy = nodeTransformerFactory.getStrategy(pipelineAlgorithm);
-        var documentDataList = new FilesystemService().extract(datasource);
-        var processedDocumentDataList = nodeTransformerStrategy.processDataList(documentDataList, chunkingAlgorithm);
+        var extractedData = new FilesystemService().extract(datasource);
 
-        indexer.saveDocuments(processedDocumentDataList);
+        return nodeTransformerStrategy.processDataList(extractedData, chunkingAlgorithm);
+    }
+
+    @Override
+    public void index(List<DocumentData> nodeList) {
+        var documents = nodeList.stream()
+                .map(documentData -> new Document(documentData.getContent(), documentData.getMetadata()))
+                .collect(Collectors.toList());
+        indexer.index(documents);
+    }
+
+    @Override
+    public List<RagContext> retrieve(RagRequest request) {
+        return filesystemRetriever.retrieve(request);
     }
 }

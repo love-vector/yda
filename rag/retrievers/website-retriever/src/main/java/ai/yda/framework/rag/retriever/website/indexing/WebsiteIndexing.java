@@ -27,10 +27,9 @@ import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.VectorStore;
 
 import ai.yda.framework.rag.core.indexing.Index;
-import ai.yda.framework.rag.core.model.DocumentData;
 
 @Slf4j
-public class WebsiteIndexing implements Index<DocumentData> {
+public class WebsiteIndexing implements Index<Document> {
     private final VectorStore vectorStore;
 
     public WebsiteIndexing(VectorStore vectorStore) {
@@ -38,10 +37,7 @@ public class WebsiteIndexing implements Index<DocumentData> {
     }
 
     @Override
-    public void saveDocuments(List<DocumentData> documentDataList) {
-        var documents = documentDataList.parallelStream()
-                .map(documentData -> new Document(documentData.getContent(), documentData.getMetadata()))
-                .toList();
-        vectorStore.add(documents);
+    public void index(List<Document> nodeList) {
+        vectorStore.add(nodeList);
     }
 }

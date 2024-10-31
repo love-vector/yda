@@ -16,13 +16,9 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.rag.retriever.filesystem.autoconfigure;
 
-import ai.yda.framework.rag.retriever.filesystem.DataFlowCoordinator;
-import ai.yda.framework.rag.retriever.filesystem.indexing.FilesystemIndexing;
-import ai.yda.framework.rag.retriever.filesystem.retriever.FilesystemRetriever;
-import ai.yda.framework.rag.retriever.shared.MilvusVectorStoreUtil;
 import org.springframework.ai.autoconfigure.openai.OpenAiConnectionProperties;
 import org.springframework.ai.autoconfigure.openai.OpenAiEmbeddingProperties;
 import org.springframework.ai.autoconfigure.vectorstore.milvus.MilvusServiceClientProperties;
@@ -32,6 +28,11 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+
+import ai.yda.framework.rag.retriever.filesystem.DataFlowCoordinator;
+import ai.yda.framework.rag.retriever.filesystem.indexing.FilesystemIndexing;
+import ai.yda.framework.rag.retriever.filesystem.retriever.FilesystemRetriever;
+import ai.yda.framework.rag.retriever.shared.MilvusVectorStoreUtil;
 
 /**
  * Autoconfiguration class for setting up the {@link FilesystemRetriever} bean with the necessary properties and
@@ -59,8 +60,7 @@ public class RetrieverFilesystemAutoConfiguration {
     /**
      * Default constructor for {@link RetrieverFilesystemAutoConfiguration}.
      */
-    public RetrieverFilesystemAutoConfiguration() {
-    }
+    public RetrieverFilesystemAutoConfiguration() {}
 
     @Bean
     public MilvusVectorStore milvusVectorStore(
@@ -96,12 +96,14 @@ public class RetrieverFilesystemAutoConfiguration {
     @ConditionalOnMissingBean
     public DataFlowCoordinator dataFlowCoordinator(
             final FilesystemIndexing filesystemIndexing,
-            final DataFlowCoordinatorProperties flowCoordinatorProperties) {
+            final DataFlowCoordinatorProperties flowCoordinatorProperties,
+            final FilesystemRetriever filesystemRetriever) {
         return new DataFlowCoordinator(
                 flowCoordinatorProperties.getDatasource(),
                 filesystemIndexing,
                 flowCoordinatorProperties.getIsProcessingEnabled(),
                 flowCoordinatorProperties.getPipelineAlgorithm(),
-                flowCoordinatorProperties.getChunkingAlgorithm());
+                flowCoordinatorProperties.getChunkingAlgorithm(),
+                filesystemRetriever);
     }
 }

@@ -16,24 +16,27 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.rag.core;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import lombok.AccessLevel;
+import lombok.Getter;
 
 import ai.yda.framework.rag.core.augmenter.Augmenter;
 import ai.yda.framework.rag.core.generator.Generator;
+import ai.yda.framework.rag.core.model.DocumentData;
 import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.model.RagResponse;
 import ai.yda.framework.rag.core.retriever.Retriever;
+import ai.yda.framework.rag.core.retriever.RetrieverCoordinator;
 import ai.yda.framework.rag.core.transformators.factory.NodePostProcessorFactory;
 import ai.yda.framework.rag.core.transformators.pipline.PipelineAlgorithm;
 import ai.yda.framework.rag.core.util.ContentUtil;
 import ai.yda.framework.rag.core.util.RequestTransformer;
-import lombok.AccessLevel;
-import lombok.Getter;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Default implementation of the Retrieval-Augmented Generation (RAG) process.
@@ -47,7 +50,7 @@ public class QueryEngine implements Rag<RagRequest, RagResponse> {
     /**
      * The list of {@link Retriever} instances used to retrieve {@link RagContext} based on the {@link RagRequest}.
      */
-    private final List<Retriever<RagRequest, RagContext>> retrievers;
+    private final List<RetrieverCoordinator<DocumentData>> retrieverCoordinators;
 
     /**
      * The list of {@link Augmenter} instances used to modify or enhance the retrieved {@link RagContext}.
@@ -67,18 +70,18 @@ public class QueryEngine implements Rag<RagRequest, RagResponse> {
     /**
      * Constructs a new {@link QueryEngine} instance.
      *
-     * @param retrievers          the list of {@link Retriever} objects to retrieve {@link RagContext} data.
+     * @param retrieverCoordinators          the list of {@link Retriever} objects to retrieve {@link RagContext} data.
      * @param augmenters          the list of {@link Augmenter} objects to augment the retrieved Contexts.
      * @param generator           the {@link Generator} used to generate the {@link RagResponse}.
      * @param requestTransformers the list of {@link RequestTransformer} objects for transforming the
      *                            {@link RagRequest}.
      */
     public QueryEngine(
-            final List<Retriever<RagRequest, RagContext>> retrievers,
+            final List<RetrieverCoordinator<DocumentData>> retrieverCoordinators,
             final List<Augmenter<RagRequest, RagContext>> augmenters,
             final Generator<RagRequest, RagResponse> generator,
             final List<RequestTransformer<RagRequest>> requestTransformers) {
-        this.retrievers = retrievers;
+        this.retrieverCoordinators = retrieverCoordinators;
         this.augmenters = augmenters;
         this.generator = generator;
         this.requestTransformers = requestTransformers;
@@ -100,6 +103,7 @@ public class QueryEngine implements Rag<RagRequest, RagResponse> {
      */
     @Override
     public RagResponse doRag(final RagRequest request) {
+
         var transformingRequest = request;
         var nodePostProcessorFactory = new NodePostProcessorFactory();
         var strategy = nodePostProcessorFactory.getStrategy(PipelineAlgorithm.AUTO_MERGE);
@@ -109,16 +113,18 @@ public class QueryEngine implements Rag<RagRequest, RagResponse> {
         }
 
         var transformedRequest = transformingRequest;
-        var contexts = retrievers.parallelStream()
-                .map(retriever -> retriever.retrieve(transformedRequest))
+
+        List<RagContext> contexts = retrieverCoordinators.parallelStream()
+                .flatMap(retriever -> retriever.retrieve(transformedRequest).stream())
                 .collect(Collectors.toUnmodifiableList());
-        var processedContext = strategy.retrieveRagContext(contexts);
+
+        var processedContexts = strategy.retrieveRagContext(contexts);
 
         for (var augmenter : augmenters) {
             contexts = augmenter.augment(transformedRequest, contexts);
         }
 
-        return generator.generate(transformedRequest, mergeContexts(processedContext));
+        return generator.generate(transformedRequest, mergeContexts(processedContexts));
     }
 
     /**
@@ -130,12 +136,7 @@ public class QueryEngine implements Rag<RagRequest, RagResponse> {
      */
     protected String mergeContexts(final List<RagContext> contexts) {
         return contexts.parallelStream()
-                .map(ragContext -> String.join(ContentUtil.SENTENCE_SEPARATOR, ragContext.getKnowledge()))
+                .map(ragContext -> String.join(ContentUtil.SENTENCE_SEPARATOR, ragContext.getContent()))
                 .collect(Collectors.joining(ContentUtil.SENTENCE_SEPARATOR));
     }
 }
-
-//TODO
-// 3. Переписать пайплайны для ретривенга и чанкирования , разработать их самостоятельно /  -
-// 10. Закончить конфигурацию начать первые тесты текущей логики / -
-// 11. Создать аугументатор вместе с postProcess()

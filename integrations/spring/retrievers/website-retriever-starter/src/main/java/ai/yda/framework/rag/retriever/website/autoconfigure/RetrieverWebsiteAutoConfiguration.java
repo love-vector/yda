@@ -91,12 +91,14 @@ public class RetrieverWebsiteAutoConfiguration {
     public DataFlowCoordinator dataFlowCoordinator(
             final DataFlowCoordinatorProperties dataFlowCoordinatorProperties,
             final WebExtractor webExtractor,
-            final WebsiteIndexing websiteIndexing) {
+            final WebsiteIndexing websiteIndexing,
+            final WebsiteRetriever websiteRetriever) {
         return new DataFlowCoordinator(
                 dataFlowCoordinatorProperties.getDatasource(),
                 websiteIndexing,
                 webExtractor,
                 dataFlowCoordinatorProperties.getIsProcessingEnabled(),
+                websiteRetriever,
                 dataFlowCoordinatorProperties.getPipelineAlgorithm(),
                 dataFlowCoordinatorProperties.getChunkingAlgorithm());
     }

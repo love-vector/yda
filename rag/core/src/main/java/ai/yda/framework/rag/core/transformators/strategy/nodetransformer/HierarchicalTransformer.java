@@ -30,7 +30,8 @@ import ai.yda.framework.rag.core.transformators.strategy.NodeTransformerStrategy
 
 public class HierarchicalTransformer implements NodeTransformerStrategy<DocumentData> {
     @Override
-    public List<DocumentData> processDataList(final List<DocumentData> dataList,final ChunkingAlgorithm chunkingAlgorithm) {
+    public List<DocumentData> processDataList(
+            final List<DocumentData> dataList, final ChunkingAlgorithm chunkingAlgorithm) {
         var nodeList = new PatternBasedChunking().nodeList(chunkingAlgorithm, dataList);
         var hierarchNodes = processNodeHierarchy(nodeList);
         return null;

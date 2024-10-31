@@ -19,21 +19,21 @@
 */
 package ai.yda.framework.rag.autoconfigure;
 
-import java.util.List;
-
-import ai.yda.framework.rag.core.transformators.pipline.PipelineAlgorithm;
-import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
-import org.springframework.context.annotation.Bean;
-
 import ai.yda.framework.rag.core.QueryEngine;
 import ai.yda.framework.rag.core.augmenter.Augmenter;
 import ai.yda.framework.rag.core.generator.Generator;
+import ai.yda.framework.rag.core.model.DocumentData;
 import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.model.RagResponse;
 import ai.yda.framework.rag.core.retriever.Retriever;
+import ai.yda.framework.rag.core.retriever.RetrieverCoordinator;
 import ai.yda.framework.rag.core.util.RequestTransformer;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.context.annotation.Bean;
+
+import java.util.List;
 
 /**
  * Autoconfiguration class for setting up a {@link QueryEngine} bean in the RAG framework.
@@ -53,7 +53,7 @@ public class RagAutoConfiguration {
     /**
      * Creates and configures a {@link QueryEngine} bean.
      *
-     * @param retrievers          the list of {@link Retriever} beans for retrieving Context based on the Request.
+     * @param retrieverCoordinators          the list of {@link Retriever} beans for retrieving Context based on the Request.
      * @param augmenters          the list of {@link Augmenter} beans for enhancing the retrieved Context.
      * @param generator           the {@link Generator} bean for generating Responses based on the augmented Context.
      * @param requestTransformers the list of {@link RequestTransformer} beans for transforming Requests before
@@ -62,10 +62,10 @@ public class RagAutoConfiguration {
      */
     @Bean
     public QueryEngine defaultRag(
-            final List<Retriever<RagRequest, RagContext>> retrievers,
+            final List<RetrieverCoordinator<DocumentData>> retrieverCoordinators,
             final List<Augmenter<RagRequest, RagContext>> augmenters,
             final Generator<RagRequest, RagResponse> generator,
             final List<RequestTransformer<RagRequest>> requestTransformers) {
-        return new QueryEngine(retrievers, augmenters, generator, requestTransformers, PipelineAlgorithm.AUTO_MERGE);
+        return new QueryEngine(retrieverCoordinators, augmenters, generator, requestTransformers);
     }
 }

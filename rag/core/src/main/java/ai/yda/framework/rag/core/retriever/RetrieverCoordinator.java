@@ -17,26 +17,15 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.rag.core.transformators.factory;
+package ai.yda.framework.rag.core.retriever;
 
 import java.util.List;
 
+import ai.yda.framework.rag.core.indexing.Index;
 import ai.yda.framework.rag.core.model.DocumentData;
-import ai.yda.framework.rag.core.transformators.pipline.PipelineAlgorithm;
+import ai.yda.framework.rag.core.model.RagContext;
+import ai.yda.framework.rag.core.model.RagRequest;
 
-// TODO rename this class
-public class PatternBasedNodeTransformer {
-    private final NodeTransformerFactory nodeTransformerFactory;
-
-    public PatternBasedNodeTransformer() {
-        this.nodeTransformerFactory = new NodeTransformerFactory();
-    }
-
-    public List<DocumentData> nodeList(
-            final List<DocumentData> documentDataList,
-            final ChunkingAlgorithm chunkingAlgorithm,
-            final PipelineAlgorithm pipelineAlgorithm) {
-        var nodeTransformerStrategy = nodeTransformerFactory.getStrategy(pipelineAlgorithm);
-        return nodeTransformerStrategy.processDataList(documentDataList, chunkingAlgorithm);
-    }
+public interface RetrieverCoordinator<DOCUMENT> extends Retriever<RagRequest, RagContext>, Index<DocumentData> {
+    List<DOCUMENT> process();
 }

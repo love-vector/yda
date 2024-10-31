@@ -22,5 +22,5 @@ package ai.yda.framework.rag.core.indexing;
 import java.util.List;
 
 public interface Index<Doocument> {
-    void saveDocuments(List<Doocument> nodeList);
+    void index(List<Doocument> nodeList);
 }

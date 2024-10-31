@@ -19,7 +19,6 @@
 */
 package ai.yda.framework.rag.core.model;
 
-import java.util.List;
 import java.util.Map;
 
 import lombok.Builder;
@@ -41,7 +40,7 @@ public class RagContext {
     /**
      * A list of strings representing the retrieved Knowledge or information relevant to the User's query.
      */
-    private final List<String> knowledge;
+    private final String content;
 
     /**
      * A map containing metadata related to the Context. The keys are strings, and the values can be of any object type,
@@ -52,11 +51,11 @@ public class RagContext {
     /**
      * Constructs a new {@link RagContext} instance with the specified Knowledge and metadata.
      *
-     * @param knowledge the list of strings representing the retrieved information relevant to the User's query.
+     * @param content the list of strings representing the retrieved information relevant to the User's query.
      * @param metadata  the map containing metadata related to the Context.
      */
-    public RagContext(final List<String> knowledge, final Map<String, Object> metadata) {
-        this.knowledge = knowledge;
+    public RagContext(final String content, final Map<String, Object> metadata) {
+        this.content = content;
         this.metadata = metadata;
     }
 }

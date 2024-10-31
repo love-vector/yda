@@ -32,7 +32,8 @@ public class PatternBasedNodePostProcessor {
         this.nodePostProcessorFactory = new NodePostProcessorFactory();
     }
 
-    public List<RagContext> ragContextList(final List<RagContext> ragContext, final PipelineAlgorithm pipelineAlgorithm) {
+    public List<RagContext> ragContextList(
+            final List<RagContext> ragContext, final PipelineAlgorithm pipelineAlgorithm) {
         NodePostProcessorStrategy nodePostProcessorStrategy = nodePostProcessorFactory.getStrategy(pipelineAlgorithm);
         return nodePostProcessorStrategy.retrieveRagContext(ragContext);
     }

@@ -19,6 +19,9 @@
 */
 package ai.yda.framework.rag.retriever.website.retriever;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.ai.vectorstore.SearchRequest;
@@ -79,18 +82,11 @@ public class WebsiteRetriever implements Retriever<RagRequest, RagContext> {
      * @return a {@link RagContext} object containing the Knowledge obtained from the similarity search.
      */
     @Override
-    public RagContext retrieve(final RagRequest request) {
-        return RagContext.builder()
-                .knowledge(
-                        vectorStore
-                                .similaritySearch(
-                                        SearchRequest.query(request.getQuery()).withTopK(topK))
-                                .parallelStream()
-                                .map(document -> {
-                                    log.debug("Document metadata: {}", document.getMetadata());
-                                    return document.getContent();
-                                })
-                                .toList())
-                .build();
+    public List<RagContext> retrieve(final RagRequest request) {
+        var documentList = vectorStore.similaritySearch(
+                SearchRequest.query(request.getQuery()).withTopK(topK));
+        return documentList.stream()
+                .map(document -> new RagContext(document.getContent(), document.getMetadata()))
+                .collect(Collectors.toList());
     }
 }
