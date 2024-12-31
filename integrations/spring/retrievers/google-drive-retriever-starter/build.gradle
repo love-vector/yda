@@ -2,5 +2,7 @@ dependencies {
     api project(':google-drive-retriever')
     api project(':retriever-shared-starter')
 
+    implementation 'org.liquibase:liquibase-core:4.30.0'
+
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor:3.3.2'
 }
