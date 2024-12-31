@@ -21,7 +21,7 @@ subprojects {
     apply plugin: 'org.jreleaser'
 
     group = 'ai.yda-framework'
-    version = '0.2.0-SNAPSHOT'
+    version = '0.2.0-YDAL-108-google-drive-retriever'
 
     java {
         withJavadocJar()

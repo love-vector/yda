@@ -38,6 +38,9 @@ project(':filesystem-retriever').projectDir = file('rag/retrievers/filesystem-re
 include 'website-retriever'
 project(':website-retriever').projectDir = file('rag/retrievers/website-retriever')
 
+include 'google-drive-retriever'
+project(':google-drive-retriever').projectDir = file('rag/retrievers/google-drive-retriever')
+
 // RAG - Generators
 
 include 'openai-assistant-generator'
@@ -77,6 +80,9 @@ project(':filesystem-retriever-starter').projectDir = file('integrations/spring/
 
 include'website-retriever-starter'
 project(':website-retriever-starter').projectDir = file('integrations/spring/retrievers/website-retriever-starter')
+
+include'google-drive-retriever-starter'
+project(':google-drive-retriever-starter').projectDir = file('integrations/spring/retrievers/google-drive-retriever-starter')
 
 // RAG - Generators
 
