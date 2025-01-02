@@ -1,0 +1,63 @@
+databaseChangeLog:
+  - changeSet:
+      id: YDAL-121
+      created: 02.01.2025
+      author: Iryna Kopchak
+      changes:
+        - createTable:
+            tableName: document_metadata
+            columns:
+              - column:
+                  name: document_id
+                  type: varchar(16)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: text
+              - column:
+                  name: uri
+                  type: varchar(2048)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp
+                  constraints:
+                    nullable: false
+              - column:
+                  name: modified_at
+                  type: timestamp
+                  constraints:
+                    nullable: false
+        - createTable:
+            tableName: document_content
+            columns:
+              - column:
+                  name: content_id
+                  type: int
+                  autoIncrement:  true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: chunk_name
+                  type: varchar(255)
+              - column:
+                  name: chunk_content
+                  type: text
+                  constraints:
+                      nullable: false
+              - column:
+                  name: document_id
+                  type: varchar(16)
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_document_content_to_metadata
+                    references: document_metadata(document_id)

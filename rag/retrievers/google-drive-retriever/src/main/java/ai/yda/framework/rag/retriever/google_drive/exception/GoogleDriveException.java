@@ -27,6 +27,11 @@ package ai.yda.framework.rag.retriever.google_drive.exception;
  */
 public class GoogleDriveException extends RuntimeException {
 
+    /**
+     * Constructs a new {@link GoogleDriveException} instance with the specified error message.
+     *
+     * @param message the error message providing details about the exception.
+     */
     public GoogleDriveException(final String message) {
         super(message);
     }

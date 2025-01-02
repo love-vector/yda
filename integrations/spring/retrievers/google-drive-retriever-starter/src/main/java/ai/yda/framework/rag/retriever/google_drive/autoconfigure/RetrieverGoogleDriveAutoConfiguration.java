@@ -22,8 +22,12 @@ package ai.yda.framework.rag.retriever.google_drive.autoconfigure;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
+import com.zaxxer.hikari.HikariDataSource;
+
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.ResourceLoader;
 
@@ -50,6 +54,7 @@ import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
  * - The auto-configuration will provide a fully initialized {@link GoogleDriveRetriever} bean.
  *
  * @author dmmrch
+ * @author Iryna Kopchak
  * @since 0.2.0
  */
 @AutoConfiguration
@@ -60,6 +65,18 @@ public class RetrieverGoogleDriveAutoConfiguration {
      * Default constructor for {@link RetrieverGoogleDriveAutoConfiguration}.
      */
     public RetrieverGoogleDriveAutoConfiguration() {}
+
+    /**
+     * Creates a {@link HikariDataSource} bean using properties defined under the prefix
+     * "ai.yda.framework.rag.retriever.google-drive.database".
+     *
+     * @return a configured {@link HikariDataSource} instance.
+     */
+    @Bean
+    @ConfigurationProperties("ai.yda.framework.rag.retriever.google-drive.database")
+    public HikariDataSource dataSource() {
+        return DataSourceBuilder.create().type(HikariDataSource.class).build();
+    }
 
     @Bean
     public GoogleDriveRetriever googleDriveRetriever(
