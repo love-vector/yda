@@ -17,26 +17,17 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.rag.retriever.google_drive.autoconfigure;
+package ai.yda.framework.rag.retriever.google_drive.exception;
 
-import lombok.Getter;
-import lombok.Setter;
+/**
+ * Thrown to indicate that Google Drive operation has failed.
+ *
+ * @author Dmitry Marchuk
+ * @since 0.2.0
+ */
+public class GoogleDriveException extends RuntimeException {
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
-import ai.yda.framework.rag.retriever.shared.RetrieverProperties;
-
-@Setter
-@Getter
-@ConfigurationProperties(RetrieverGoogleDriveProperties.CONFIG_PREFIX)
-public class RetrieverGoogleDriveProperties extends RetrieverProperties {
-
-    public static final String CONFIG_PREFIX = "ai.yda.framework.rag.retriever.google-drive";
-
-    private String serviceAccountKeyFilePath;
-
-    /**
-     * Default constructor for {@link RetrieverGoogleDriveProperties}.
-     */
-    public RetrieverGoogleDriveProperties() {}
+    public GoogleDriveException(final String message) {
+        super(message);
+    }
 }
