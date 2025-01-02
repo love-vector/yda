@@ -1,8 +1,6 @@
 dependencies {
     api project(":rag-core")
 
-    implementation 'com.google.api-client:google-api-client:2.7.1'
-    implementation 'com.google.oauth-client:google-oauth-client:1.37.0'
     implementation 'com.google.apis:google-api-services-drive:v3-rev20241206-2.0.0'
 
     api 'org.springframework.ai:spring-ai-core:1.0.0-M1'

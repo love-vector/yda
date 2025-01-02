@@ -28,8 +28,30 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.ResourceLoader;
 
 import ai.yda.framework.rag.retriever.google_drive.GoogleDriveRetriever;
+import ai.yda.framework.rag.retriever.google_drive.exception.GoogleDriveException;
 import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
 
+/**
+ * Auto-configuration class for setting up the Google Drive retriever in a Spring Boot application.
+ * This configuration automatically wires the necessary beans to enable the functionality
+ * of retrieving data from Google Drive using the {@link GoogleDriveRetriever}.
+ *
+ * <p>The configuration is activated when the application includes the relevant starter
+ * and the necessary properties are defined in the application configuration file.
+ *
+ * <p>Dependencies:
+ * - Requires the {@link RetrieverGoogleDriveProperties} for configuration details such as
+ *   the Service Account JSON file path, the `topK` retrieval parameter, and the processing flag.
+ * - Requires a valid {@link ResourceLoader} to load the Service Account key file.
+ *
+ * <p>Usage:
+ * - Ensure the application includes a properly configured `application.yml` or `application.properties` file
+ *   with the required `google.drive.service-account-key-path`.
+ * - The auto-configuration will provide a fully initialized {@link GoogleDriveRetriever} bean.
+ *
+ * @author dmmrch
+ * @since 0.2.0
+ */
 @AutoConfiguration
 @EnableConfigurationProperties(RetrieverGoogleDriveProperties.class)
 public class RetrieverGoogleDriveAutoConfiguration {
@@ -44,9 +66,16 @@ public class RetrieverGoogleDriveAutoConfiguration {
             final RetrieverGoogleDriveProperties googleDriveProperties, final ResourceLoader resourceLoader)
             throws IOException, GeneralSecurityException {
 
+        var resource = resourceLoader.getResource(googleDriveProperties.getServiceAccountKeyFilePath());
+
+        if (!resource.exists()) {
+            throw new GoogleDriveException(String.format(
+                    "Service Account key not found at: %s", googleDriveProperties.getServiceAccountKeyFilePath()));
+        }
+
         return new GoogleDriveRetriever(
                 googleDriveProperties.getTopK(),
                 googleDriveProperties.getIsProcessingEnabled(),
-                new GoogleDriveService(googleDriveProperties.getServiceAccountKeyFilePath(), resourceLoader));
+                new GoogleDriveService(resource.getInputStream()));
     }
 }

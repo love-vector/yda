@@ -20,6 +20,7 @@
 package ai.yda.framework.rag.retriever.google_drive.service;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 
@@ -28,54 +29,60 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import com.google.auth.http.HttpCredentialsAdapter;
-import com.google.auth.oauth2.ServiceAccountCredentials;
+import com.google.auth.oauth2.GoogleCredentials;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.lang.NonNull;
 
+/**
+ * Service class for interacting with Google Drive using a Service Account.
+ * This service initializes using a Service Account JSON key provided as an {@link InputStream}.
+ *
+ * @author dmmrch
+ * @since 0.2.0
+ */
 @Slf4j
 public class GoogleDriveService {
+
+    private static final String GOOGLE_DRIVE_APP_NAME = "YDA Google Drive Retriever";
 
     private final Drive driveService;
 
     /**
-     * Default constructor for {@link GoogleDriveService}.
+     * Constructs a new instance of {@link GoogleDriveService}.
+     * Initializes the Google Drive API client using the provided Service Account JSON InputStream.
+     *
+     * @param credentialsStream the InputStream containing the Service Account JSON key file.
+     * @throws IOException if an I/O error occurs while reading the Service Account key file.
+     * @throws GeneralSecurityException if a security error occurs during Google API client initialization.
      */
-    public GoogleDriveService(
-            final @NonNull String serviceAccountKeyFilePath, final @NonNull ResourceLoader resourceLoader)
+    public GoogleDriveService(final @NonNull InputStream credentialsStream)
             throws IOException, GeneralSecurityException {
 
-        var keyFile = resourceLoader.getResource(serviceAccountKeyFilePath);
-
-        if (!keyFile.exists()) {
-            throw new RuntimeException("Service Account JSON file not found at: " + serviceAccountKeyFilePath);
-        }
-
-        var credentials = ServiceAccountCredentials.fromStream(keyFile.getInputStream())
-                .createScoped(Collections.singleton(DriveScopes.DRIVE));
+        var credentials =
+                GoogleCredentials.fromStream(credentialsStream).createScoped(Collections.singleton(DriveScopes.DRIVE));
 
         driveService = new Drive.Builder(
                         GoogleNetHttpTransport.newTrustedTransport(),
                         GsonFactory.getDefaultInstance(),
                         new HttpCredentialsAdapter(credentials))
-                .setApplicationName("GoogleDriveTest")
+                .setApplicationName(GOOGLE_DRIVE_APP_NAME)
                 .build();
 
         listFiles();
+        log.info("Google Drive service initialized successfully.");
     }
 
     public void listFiles() throws IOException {
-        // List files from Google Drive
         var result = driveService.files().list().setPageSize(10).execute();
         var files = result.getFiles();
 
         if (files == null || files.isEmpty()) {
-            System.out.println("No files found.");
+            log.info("No files found.");
         } else {
-            System.out.println("Files:");
+            log.info("Files:");
             for (var file : files) {
-                System.out.printf("%s (%s)\n", file.getName(), file.getId());
+                log.info("{} ({})", file.getName(), file.getId());
             }
         }
     }

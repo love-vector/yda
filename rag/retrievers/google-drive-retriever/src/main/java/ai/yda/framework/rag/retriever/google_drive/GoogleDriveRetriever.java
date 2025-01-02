@@ -30,6 +30,25 @@ import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.retriever.Retriever;
 import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
 
+/**
+ * The {@code GoogleDriveRetriever} class is a Retriever implementation that interacts with Google Drive
+ * to retrieve contextual data for a given {@link RagRequest}. It uses the {@link GoogleDriveService}
+ * to perform operations on Google Drive.
+ *
+ * <p>This retriever is designed to process and fetch documents or data stored in Google Drive
+ * based on the provided configuration and request context.
+ *
+ * <p>Usage:
+ * - Instantiate this class with the desired `topK` (number of results to retrieve) and a
+ *   configured {@link GoogleDriveService}.
+ * - Use the {@link #retrieve(RagRequest)} method to perform the data retrieval operation.
+ *
+ * <p>Dependencies:
+ * - Requires a properly configured {@link GoogleDriveService} instance.
+ *
+ * @author dmmrch
+ * @since 0.2.0
+ */
 @Slf4j
 public class GoogleDriveRetriever implements Retriever<RagRequest, RagContext> {
 
@@ -38,6 +57,9 @@ public class GoogleDriveRetriever implements Retriever<RagRequest, RagContext> {
      */
     private final Integer topK;
 
+    /**
+     * The service used to interact with Google Drive.
+     */
     private final GoogleDriveService googleDriveService;
 
     public GoogleDriveRetriever(
