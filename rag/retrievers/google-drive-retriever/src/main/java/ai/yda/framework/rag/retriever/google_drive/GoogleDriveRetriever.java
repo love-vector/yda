@@ -28,6 +28,7 @@ import org.springframework.lang.NonNull;
 import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.retriever.Retriever;
+import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
 
 @Slf4j
 public class GoogleDriveRetriever implements Retriever<RagRequest, RagContext> {
@@ -37,7 +38,14 @@ public class GoogleDriveRetriever implements Retriever<RagRequest, RagContext> {
      */
     private final Integer topK;
 
-    public GoogleDriveRetriever(final @NonNull Integer topK, final @NonNull Boolean isProcessingEnabled) {
+    private final GoogleDriveService googleDriveService;
+
+    public GoogleDriveRetriever(
+            final @NonNull Integer topK,
+            final @NonNull Boolean isProcessingEnabled,
+            final @NonNull GoogleDriveService googleDriveService) {
+
+        this.googleDriveService = googleDriveService;
 
         if (topK <= 0) {
             throw new IllegalArgumentException("TopK must be a positive number.");

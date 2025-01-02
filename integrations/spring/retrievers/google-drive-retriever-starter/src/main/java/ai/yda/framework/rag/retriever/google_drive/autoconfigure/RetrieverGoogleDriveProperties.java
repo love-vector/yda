@@ -33,6 +33,8 @@ public class RetrieverGoogleDriveProperties extends RetrieverProperties {
 
     public static final String CONFIG_PREFIX = "ai.yda.framework.rag.retriever.google-drive";
 
+    private String serviceAccountKeyFilePath;
+
     /**
      * Default constructor for {@link RetrieverGoogleDriveProperties}.
      */

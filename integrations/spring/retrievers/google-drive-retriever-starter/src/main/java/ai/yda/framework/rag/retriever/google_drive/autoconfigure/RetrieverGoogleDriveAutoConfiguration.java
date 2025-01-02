@@ -19,11 +19,16 @@
 */
 package ai.yda.framework.rag.retriever.google_drive.autoconfigure;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.io.ResourceLoader;
 
 import ai.yda.framework.rag.retriever.google_drive.GoogleDriveRetriever;
+import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
 
 @AutoConfiguration
 @EnableConfigurationProperties(RetrieverGoogleDriveProperties.class)
@@ -35,9 +40,13 @@ public class RetrieverGoogleDriveAutoConfiguration {
     public RetrieverGoogleDriveAutoConfiguration() {}
 
     @Bean
-    public GoogleDriveRetriever googleDriveRetriever(final RetrieverGoogleDriveProperties googleDriveProperties) {
+    public GoogleDriveRetriever googleDriveRetriever(
+            final RetrieverGoogleDriveProperties googleDriveProperties, final ResourceLoader resourceLoader)
+            throws IOException, GeneralSecurityException {
 
         return new GoogleDriveRetriever(
-                googleDriveProperties.getTopK(), googleDriveProperties.getIsProcessingEnabled());
+                googleDriveProperties.getTopK(),
+                googleDriveProperties.getIsProcessingEnabled(),
+                new GoogleDriveService(googleDriveProperties.getServiceAccountKeyFilePath(), resourceLoader));
     }
 }
