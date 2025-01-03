@@ -21,8 +21,6 @@ package ai.yda.framework.rag.retriever.shared;
 
 import io.milvus.client.MilvusServiceClient;
 import io.milvus.param.ConnectParam;
-import io.milvus.param.IndexType;
-import io.milvus.param.MetricType;
 
 import org.springframework.ai.autoconfigure.openai.OpenAiConnectionProperties;
 import org.springframework.ai.autoconfigure.openai.OpenAiEmbeddingProperties;
@@ -34,7 +32,7 @@ import org.springframework.ai.openai.OpenAiEmbeddingModel;
 import org.springframework.ai.openai.OpenAiEmbeddingOptions;
 import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.ai.retry.RetryUtils;
-import org.springframework.ai.vectorstore.MilvusVectorStore;
+import org.springframework.ai.vectorstore.milvus.MilvusVectorStore;
 
 /**
  * Utility class for creating and configuring instances of {@link MilvusVectorStore}. This class provides static methods
@@ -74,19 +72,9 @@ public final class MilvusVectorStoreUtil {
         var collectionName = retrieverProperties.getCollectionName();
         var databaseName = milvusProperties.getDatabaseName();
 
-        var config = MilvusVectorStore.MilvusVectorStoreConfig.builder()
-                .withCollectionName(collectionName)
-                .withDatabaseName(databaseName)
-                .withIndexType(IndexType.valueOf(milvusProperties.getIndexType().name()))
-                .withMetricType(
-                        MetricType.valueOf(milvusProperties.getMetricType().name()))
-                .withEmbeddingDimension(milvusProperties.getEmbeddingDimension())
-                .build();
-
         return new OptimizedMilvusVectorStore(
                 milvusClient,
                 embeddingModel,
-                config,
                 milvusProperties.isInitializeSchema(),
                 collectionName,
                 databaseName,
@@ -108,8 +96,8 @@ public final class MilvusVectorStoreUtil {
                 openAiApi,
                 MetadataMode.EMBED,
                 OpenAiEmbeddingOptions.builder()
-                        .withModel(openAiEmbeddingProperties.getOptions().getModel())
-                        .withUser("user")
+                        .model(openAiEmbeddingProperties.getOptions().getModel())
+                        .user("user")
                         .build(),
                 RetryUtils.DEFAULT_RETRY_TEMPLATE);
     }

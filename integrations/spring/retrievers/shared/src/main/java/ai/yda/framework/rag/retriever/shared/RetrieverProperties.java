@@ -22,8 +22,8 @@ package ai.yda.framework.rag.retriever.shared;
 import lombok.Getter;
 import lombok.Setter;
 
-import org.springframework.ai.vectorstore.MilvusVectorStore;
 import org.springframework.ai.vectorstore.SearchRequest;
+import org.springframework.ai.vectorstore.milvus.MilvusVectorStore;
 
 /**
  * Serves as the parent class for properties related to the Retriever configuration. It provides common settings such as
