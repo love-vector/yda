@@ -3,6 +3,6 @@ dependencies {
 
     implementation 'com.google.apis:google-api-services-drive:v3-rev20241206-2.0.0'
 
-    api 'org.springframework.ai:spring-ai-core:1.0.0-M1'
+    api 'org.springframework.ai:spring-ai-core'
     api 'org.springframework.boot:spring-boot-starter-data-jpa:3.3.2'
 }
