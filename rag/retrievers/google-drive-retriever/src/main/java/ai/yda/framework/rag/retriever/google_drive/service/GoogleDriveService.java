@@ -22,17 +22,24 @@ package ai.yda.framework.rag.retriever.google_drive.service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
+import com.google.api.services.drive.model.File;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.lang.NonNull;
+
+import ai.yda.framework.rag.retriever.google_drive.entity.DocumentMetadataEntity;
+import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentMetadataMapper;
+import ai.yda.framework.rag.retriever.google_drive.processor.DocumentProcessorProvider;
 
 /**
  * Service class for interacting with Google Drive using a Service Account.
@@ -48,42 +55,78 @@ public class GoogleDriveService {
 
     private final Drive driveService;
 
+    private final DocumentProcessorProvider documentProcessor;
+
+    private final DocumentMetadataMapper documentMetadataMapper;
+
     /**
      * Constructs a new instance of {@link GoogleDriveService}.
      * Initializes the Google Drive API client using the provided Service Account JSON InputStream.
      *
      * @param credentialsStream the InputStream containing the Service Account JSON key file.
-     * @throws IOException if an I/O error occurs while reading the Service Account key file.
+     * @throws IOException              if an I/O error occurs while reading the Service Account key file.
      * @throws GeneralSecurityException if a security error occurs during Google API client initialization.
      */
-    public GoogleDriveService(final @NonNull InputStream credentialsStream)
+    public GoogleDriveService(
+            final @NonNull InputStream credentialsStream,
+            final DocumentProcessorProvider documentProcessor,
+            final DocumentMetadataMapper documentMetadataMapper)
             throws IOException, GeneralSecurityException {
 
         var credentials =
                 GoogleCredentials.fromStream(credentialsStream).createScoped(Collections.singleton(DriveScopes.DRIVE));
 
-        driveService = new Drive.Builder(
+        this.driveService = new Drive.Builder(
                         GoogleNetHttpTransport.newTrustedTransport(),
                         GsonFactory.getDefaultInstance(),
                         new HttpCredentialsAdapter(credentials))
                 .setApplicationName(GOOGLE_DRIVE_APP_NAME)
                 .build();
+        this.documentProcessor = documentProcessor;
+        this.documentMetadataMapper = documentMetadataMapper;
 
-        listFiles();
         log.info("Google Drive service initialized successfully.");
     }
 
-    public void listFiles() throws IOException {
-        var result = driveService.files().list().setPageSize(10).execute();
+    public List<DocumentMetadataEntity> processFiles() throws IOException {
+        var documentMetadataEntities = new ArrayList<DocumentMetadataEntity>();
+        for (File file : listFiles()) {
+            try (InputStream inputStream =
+                    driveService.files().get(file.getId()).executeMediaAsInputStream()) {
+                var documentMetadata = documentMetadataMapper.toEntity(file);
+                var contentEntities =
+                        documentProcessor.processDocument(file.getFileExtension(), inputStream, documentMetadata);
+                documentMetadata.setDocumentContents(contentEntities);
+                documentMetadataEntities.add(documentMetadata);
+            }
+        }
+        return documentMetadataEntities;
+    }
+
+    // TODO: add drive id configuration
+    private List<File> listFiles() throws IOException {
+        var result = driveService
+                .files()
+                .list()
+                .setSupportsAllDrives(true)
+                .setIncludeItemsFromAllDrives(true)
+                .setCorpora("drive")
+                .setDriveId("0APYbhkVOryubUk9PVA")
+                .setFields("files(id,name,description,webViewLink,createdTime,modifiedTime,mimeType,fileExtension)")
+                .setPageSize(10)
+                .setQ("mimeType != 'application/vnd.google-apps.folder'")
+                .execute();
+
         var files = result.getFiles();
 
         if (files == null || files.isEmpty()) {
-            log.info("No files found.");
+            log.debug("No files found.");
+            return new ArrayList<>();
         } else {
-            log.info("Files:");
             for (var file : files) {
-                log.info("{} ({})", file.getName(), file.getId());
+                log.debug("Processing file: {}", file.getName());
             }
+            return files;
         }
     }
 }

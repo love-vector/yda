@@ -19,6 +19,7 @@
 */
 package ai.yda.framework.rag.retriever.google_drive;
 
+import java.io.IOException;
 import java.util.Collections;
 
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +29,8 @@ import org.springframework.lang.NonNull;
 import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.retriever.Retriever;
+import ai.yda.framework.rag.retriever.google_drive.exception.UnsupportedExtensionException;
+import ai.yda.framework.rag.retriever.google_drive.repository.DocumentMetadataRepository;
 import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
 
 /**
@@ -40,7 +43,7 @@ import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
  *
  * <p>Usage:
  * - Instantiate this class with the desired `topK` (number of results to retrieve) and a
- *   configured {@link GoogleDriveService}.
+ * configured {@link GoogleDriveService}.
  * - Use the {@link #retrieve(RagRequest)} method to perform the data retrieval operation.
  *
  * <p>Dependencies:
@@ -62,10 +65,13 @@ public class GoogleDriveRetriever implements Retriever<RagRequest, RagContext> {
      */
     private final GoogleDriveService googleDriveService;
 
+    private final DocumentMetadataRepository documentMetadataRepository;
+
     public GoogleDriveRetriever(
             final @NonNull Integer topK,
             final @NonNull Boolean isProcessingEnabled,
-            final @NonNull GoogleDriveService googleDriveService) {
+            final @NonNull GoogleDriveService googleDriveService,
+            DocumentMetadataRepository documentMetadataRepository) {
 
         this.googleDriveService = googleDriveService;
 
@@ -73,8 +79,10 @@ public class GoogleDriveRetriever implements Retriever<RagRequest, RagContext> {
             throw new IllegalArgumentException("TopK must be a positive number.");
         }
         this.topK = topK;
+        this.documentMetadataRepository = documentMetadataRepository;
 
         if (isProcessingEnabled) {
+            processGoogleDriveStorage();
             log.info("Starting Google Drive retriever...");
         }
     }
@@ -82,5 +90,22 @@ public class GoogleDriveRetriever implements Retriever<RagRequest, RagContext> {
     @Override
     public RagContext retrieve(final RagRequest request) {
         return RagContext.builder().knowledge(Collections.emptyList()).build();
+    }
+
+    /**
+     * Lists all regular files in the local directory, processes each file to create chunks, and then adds these chunks
+     * to the vector store.
+     *
+     * @throws RuntimeException if an I/O error occurs when processing file storage folder.
+     */
+    private void processGoogleDriveStorage() {
+        try {
+            var documents = googleDriveService.processFiles();
+            documentMetadataRepository.saveAll(documents);
+        } catch (UnsupportedExtensionException e) {
+            log.error(e.getMessage());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

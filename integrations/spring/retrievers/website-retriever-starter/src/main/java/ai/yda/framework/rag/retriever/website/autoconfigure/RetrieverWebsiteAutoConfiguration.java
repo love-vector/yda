@@ -16,7 +16,7 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.rag.retriever.website.autoconfigure;
 
 import org.springframework.ai.autoconfigure.openai.OpenAiConnectionProperties;
@@ -49,8 +49,7 @@ public class RetrieverWebsiteAutoConfiguration {
     /**
      * Default constructor for {@link RetrieverWebsiteAutoConfiguration}.
      */
-    public RetrieverWebsiteAutoConfiguration() {
-    }
+    public RetrieverWebsiteAutoConfiguration() {}
 
     /**
      * Creates and configures a {@link WebsiteRetriever} bean.

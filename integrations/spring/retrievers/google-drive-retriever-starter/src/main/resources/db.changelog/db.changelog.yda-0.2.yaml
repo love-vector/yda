@@ -9,7 +9,7 @@ databaseChangeLog:
             columns:
               - column:
                   name: document_id
-                  type: varchar(16)
+                  type: varchar(120)
                   constraints:
                     primaryKey: true
                     nullable: false
@@ -56,7 +56,7 @@ databaseChangeLog:
                       nullable: false
               - column:
                   name: document_id
-                  type: varchar(16)
+                  type: varchar(120)
                   constraints:
                     nullable: false
                     foreignKeyName: fk_document_content_to_metadata
