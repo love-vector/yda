@@ -43,7 +43,7 @@ import ai.yda.framework.rag.retriever.shared.RetrieverProperties;
  *                    collectionName: your-collection-name
  *                    topK: your-top-k
  *                    isProcessingEnabled: true/false
- *                    cropCollectionOnStartup: true/false
+ *                    dropCollectionOnStartup: true/false
  *                    serviceAccountKeyFilePath: your-service-account-key-file-path
  * </pre>
  *
