@@ -58,6 +58,22 @@ public class RetrieverFilesystemAutoConfiguration {
      */
     public RetrieverFilesystemAutoConfiguration() {}
 
+    /**
+     * Auto-configuration class for setting up the {@link FilesystemRetriever} bean and its dependencies.
+     *
+     * <p>This configuration class automatically sets up the {@link FilesystemRetriever} using properties defined
+     * in external configuration files (e.g., {@code application.properties} or {@code application.yml}). It uses
+     * property namespaces such as:</p>
+     * <ul>
+     *     <li>{@link RetrieverFilesystemProperties#CONFIG_PREFIX} - Properties specific to the Filesystem Retriever.</li>
+     *     <li>{@link MilvusVectorStoreProperties#CONFIG_PREFIX} - Properties for the Milvus Vector Store.</li>
+     *     <li>{@link OpenAiConnectionProperties#CONFIG_PREFIX} - Properties for the OpenAI API connection.</li>
+     * </ul>
+     *
+     * <p>Combining these properties, the configuration ensures that a fully initialized {@link FilesystemRetriever}
+     * is available in the Spring context.</p>
+     *
+     */
     @Bean
     public FilesystemRetriever filesystemRetriever(
             final RetrieverFilesystemProperties filesystemProperties,
