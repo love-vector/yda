@@ -16,7 +16,7 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.rag.retriever.website.autoconfigure;
 
 import org.springframework.ai.autoconfigure.openai.OpenAiConnectionProperties;
@@ -49,8 +49,27 @@ public class RetrieverWebsiteAutoConfiguration {
     /**
      * Default constructor for {@link RetrieverWebsiteAutoConfiguration}.
      */
-    public RetrieverWebsiteAutoConfiguration() {}
+    public RetrieverWebsiteAutoConfiguration() {
+    }
 
+    /**
+     * Creates and configures a {@link WebsiteRetriever} bean.
+     *
+     * <p>This method integrates with various components to set up the {@link WebsiteRetriever},
+     * which facilitates web crawling and data retrieval. It combines configuration properties and
+     * dependencies into a single retriever instance that can fetch and process content from specified URLs.</p>
+     *
+     * <p>The {@link WebsiteRetriever} depends on the following:</p>
+     * <ul>
+     *   <li>{@link WebExtractor}: Extracts content from web pages based on configured crawling behavior.</li>
+     *   <li>{@link RetrieverWebsiteProperties}: Provides configuration options specific to the website retriever,
+     *       such as the target URL, retrieval parameters, and processing flags.</li>
+     *   <li>{@link MilvusVectorStoreProperties}: Defines properties for managing Milvus Vector Store collections.</li>
+     *   <li>{@link MilvusServiceClientProperties}: Specifies connection settings for the Milvus service client.</li>
+     *   <li>{@link OpenAiConnectionProperties}: Manages API key and connection details for OpenAI.</li>
+     *   <li>{@link OpenAiEmbeddingProperties}: Configures the OpenAI embedding model used for content embedding.</li>
+     * </ul>
+     **/
     @Bean
     public WebsiteRetriever websiteRetriever(
             final WebExtractor webExtractor,
