@@ -39,7 +39,7 @@ public class RetrieverProperties {
 
     private Boolean isProcessingEnabled = Boolean.FALSE;
 
-    private Boolean clearCollectionOnStartup = Boolean.FALSE;
+    private Boolean dropCollectionOnStartup = Boolean.FALSE;
 
     /**
      * Default constructor for {@link RetrieverProperties}.

@@ -29,7 +29,7 @@ import ai.yda.framework.rag.retriever.shared.RetrieverProperties;
 /**
  * Provides configuration properties for website Retriever. These properties can be customized through the
  * application’s external configuration, such as a properties file, YAML file, or environment variables. The
- * properties include collectionName, topK, isProcessingEnabled, clearCollectionOnStartup and sitemapUrl settings.
+ * properties include collectionName, topK, isProcessingEnabled, dropCollectionOnStartup and sitemapUrl settings.
  * <p>
  * The properties are prefixed with {@link #CONFIG_PREFIX} and can be customized by defining values under this prefix
  * in the external configuration.
@@ -44,7 +44,7 @@ import ai.yda.framework.rag.retriever.shared.RetrieverProperties;
  *                    collectionName: your-collection-name
  *                    topK: your-top-k
  *                    isProcessingEnabled: true/false
- *                    clearCollectionOnStartup: true/false
+ *                    dropCollectionOnStartup: true/false
  *                    url: website-or-sitemap-url
  * </pre>
  *

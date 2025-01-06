@@ -28,7 +28,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
-import ai.yda.framework.rag.retriever.shared.MilvusVectorStoreUtil;
+import ai.yda.framework.rag.retriever.shared.factory.MilvusVectorStoreFactory;
 import ai.yda.framework.rag.retriever.website.WebsiteRetriever;
 import ai.yda.framework.rag.retriever.website.extractor.WebExtractor;
 
@@ -51,26 +51,6 @@ public class RetrieverWebsiteAutoConfiguration {
      */
     public RetrieverWebsiteAutoConfiguration() {}
 
-    /**
-     * Creates and configures an instance of {@link WebsiteRetriever} using the provided properties and services.
-     *
-     * <p>This method performs the following steps:</p>
-     * <ul>
-     *     <li>Creates a {@code MilvusVectorStore} instance using the provided properties and services.</li>
-     *     <li>Initializes the {@code MilvusVectorStore} instance by calling {@code afterPropertiesSet()}.</li>
-     *     <li>Creates and returns a {@link WebsiteRetriever} instance with the initialized parameters</li>
-     * </ul>
-     *
-     * @param webExtractor               the extractor used for crawling and extracting web content.
-     * @param websiteProperties          properties for configuring the {@link RetrieverWebsiteProperties}, including
-     *                                   file storage path, topK value, and processing enablement.
-     * @param milvusProperties           properties for configuring the Milvus Vector Store.
-     * @param milvusClientProperties     properties for configuring the Milvus Service Client.
-     * @param openAiConnectionProperties properties for configuring the OpenAI connection.
-     * @param openAiEmbeddingProperties  properties for configuring the OpenAI Embeddings.
-     * @return a fully configured {@link WebsiteRetriever} instance.
-     * @throws Exception if an error occurs during initialization.
-     */
     @Bean
     public WebsiteRetriever websiteRetriever(
             final WebExtractor webExtractor,
@@ -78,19 +58,16 @@ public class RetrieverWebsiteAutoConfiguration {
             final MilvusVectorStoreProperties milvusProperties,
             final MilvusServiceClientProperties milvusClientProperties,
             final OpenAiConnectionProperties openAiConnectionProperties,
-            final OpenAiEmbeddingProperties openAiEmbeddingProperties)
-            throws Exception {
+            final OpenAiEmbeddingProperties openAiEmbeddingProperties) {
 
-        var milvusVectorStore = MilvusVectorStoreUtil.createMilvusVectorStore(
-                websiteProperties,
-                milvusProperties,
-                milvusClientProperties,
-                openAiConnectionProperties,
-                openAiEmbeddingProperties);
-        milvusVectorStore.afterPropertiesSet();
         return new WebsiteRetriever(
                 webExtractor,
-                milvusVectorStore,
+                MilvusVectorStoreFactory.createInstance(
+                        websiteProperties,
+                        milvusProperties,
+                        milvusClientProperties,
+                        openAiConnectionProperties,
+                        openAiEmbeddingProperties),
                 websiteProperties.getUrl(),
                 websiteProperties.getTopK(),
                 websiteProperties.getIsProcessingEnabled());

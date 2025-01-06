@@ -19,50 +19,51 @@
 */
 package ai.yda.framework.rag.retriever.shared;
 
-import java.util.List;
-import java.util.Optional;
-
 import io.milvus.client.MilvusServiceClient;
+import io.milvus.param.collection.DropCollectionParam;
 import io.milvus.param.collection.HasCollectionParam;
-import io.milvus.param.dml.QueryParam;
-import io.milvus.response.QueryResultsWrapper;
 
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.vectorstore.milvus.MilvusVectorStore;
 
 /**
- * The implementation of the {@link MilvusVectorStore} class that provides methods for optimized adding documents to the
- * vector storage and clearing collection on startup.
+ * An extended implementation of {@link MilvusVectorStore} that provides additional functionality
+ * for managing Milvus collections dynamically, including clearing or dropping collections
+ * during startup based on configuration.
+ *
+ * <p>This class is specifically designed for use cases where retrievers require fine-grained
+ * control over Milvus collections, such as removing stale data or resetting the collection
+ * state upon initialization.</p>
  *
  * @author Iryna Kopchak
- * @see EmbeddingModel
+ * @see MilvusVectorStore
  * @see MilvusServiceClient
  * @since 0.1.0
  */
-public class OptimizedMilvusVectorStore extends MilvusVectorStore {
+public class RetrieverMilvusVectorStore extends MilvusVectorStore {
 
     private final MilvusServiceClient milvusClient;
     private final String databaseName;
     private final String collectionName;
-    private final boolean clearCollectionOnStartup;
+    private final boolean dropCollectionOnStartup;
 
     /**
-     * Constructs a new {@link  OptimizedMilvusVectorStore} instance with the specified parameters.
+     * Constructs a new {@link  RetrieverMilvusVectorStore} instance with the specified parameters.
      *
-     * @param milvusClient             the Client for interacting with the Milvus Service.
-     * @param embeddingModel           the Model used for Embedding document content.
+     * @param milvusClient             the client for interacting with the Milvus service.
+     * @param embeddingModel           the model used for embedding document content.
      * @param initializeSchema         whether to initialize the schema in the database.
      * @param collectionName           the name of the collection in the Milvus database.
      * @param databaseName             the name of the database in Milvus.
-     * @param clearCollectionOnStartup whether to clear the collection on startup.
+     * @param dropCollectionOnStartup  whether to drop the collection entirely on startup.
      */
-    public OptimizedMilvusVectorStore(
+    public RetrieverMilvusVectorStore(
             final MilvusServiceClient milvusClient,
             final EmbeddingModel embeddingModel,
             final boolean initializeSchema,
             final String collectionName,
             final String databaseName,
-            final boolean clearCollectionOnStartup) {
+            final boolean dropCollectionOnStartup) {
 
         super(MilvusVectorStore.builder(milvusClient, embeddingModel)
                 .initializeSchema(initializeSchema)
@@ -71,30 +72,36 @@ public class OptimizedMilvusVectorStore extends MilvusVectorStore {
         this.milvusClient = milvusClient;
         this.collectionName = collectionName;
         this.databaseName = databaseName;
-        this.clearCollectionOnStartup = clearCollectionOnStartup;
+        this.dropCollectionOnStartup = dropCollectionOnStartup;
     }
 
     /**
-     * Initializes the Vector Store after properties are set. Optionally clears the collection on startup if configured
-     * to do so.
+     * Initializes the vector store after all properties have been set.
+     *
+     * <p>If {@code dropCollectionOnStartup} is enabled, the collection will be dropped
+     * during initialization. This method also ensures the parent class lifecycle method is invoked.</p>
      *
      * @throws Exception if an error occurs during initialization.
      */
     @Override
     public void afterPropertiesSet() throws Exception {
-        if (this.clearCollectionOnStartup) {
-            clearCollection();
+        if (this.dropCollectionOnStartup) {
+            dropCollection();
         }
         super.afterPropertiesSet();
     }
 
     /**
-     * Clears the Milvus collection if it exists. This method deletes all entities from the collection.
+     * Drops the specified Milvus collection if it exists in the database.
+     *
+     * @throws RuntimeException if the operation fails.
      */
-    private void clearCollection() {
+    private void dropCollection() {
         if (isDatabaseCollectionExists()) {
-            var allEntitiesIds = getAllEntitiesIds();
-            delete(allEntitiesIds);
+            this.milvusClient.dropCollection(DropCollectionParam.newBuilder()
+                    .withDatabaseName(databaseName)
+                    .withCollectionName(collectionName)
+                    .build());
         }
     }
 
@@ -114,30 +121,5 @@ public class OptimizedMilvusVectorStore extends MilvusVectorStore {
                     "Failed to check if database collection exists", collectionExistsResult.getException());
         }
         return collectionExistsResult.getData();
-    }
-
-    /**
-     * Retrieves all entity IDs from the Milvus collection.
-     *
-     * @return a list of entity IDs.
-     * @throws RuntimeException if the query fails.
-     */
-    private List<String> getAllEntitiesIds() {
-        var getAllIdsQueryResult = milvusClient.query(QueryParam.newBuilder()
-                .withCollectionName(this.collectionName)
-                .withExpr(DOC_ID_FIELD_NAME + " >= \"\"")
-                .withOutFields(List.of(DOC_ID_FIELD_NAME))
-                .build());
-
-        if (getAllIdsQueryResult.getException() != null) {
-            throw new RuntimeException("Failed to retrieve all entities ids", getAllIdsQueryResult.getException());
-        }
-
-        return Optional.ofNullable(getAllIdsQueryResult.getData())
-                .map(data -> new QueryResultsWrapper(data)
-                        .getFieldWrapper(DOC_ID_FIELD_NAME).getFieldData().parallelStream()
-                                .map(Object::toString)
-                                .toList())
-                .orElse(List.of());
     }
 }

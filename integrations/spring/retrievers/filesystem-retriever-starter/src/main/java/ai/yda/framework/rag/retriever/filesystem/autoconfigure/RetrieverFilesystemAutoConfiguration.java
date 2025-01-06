@@ -28,7 +28,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 
 import ai.yda.framework.rag.retriever.filesystem.FilesystemRetriever;
-import ai.yda.framework.rag.retriever.shared.MilvusVectorStoreUtil;
+import ai.yda.framework.rag.retriever.shared.factory.MilvusVectorStoreFactory;
 
 /**
  * Autoconfiguration class for setting up the {@link FilesystemRetriever} bean with the necessary properties and
@@ -58,44 +58,21 @@ public class RetrieverFilesystemAutoConfiguration {
      */
     public RetrieverFilesystemAutoConfiguration() {}
 
-    /**
-     * Creates and configures an instance of {@link FilesystemRetriever} using the provided properties and services.
-     *
-     * <p>This method performs the following steps:</p>
-     * <ul>
-     *     <li>Creates a {@code MilvusVectorStore} instance using the provided properties and services.</li>
-     *     <li>Initializes the {@code MilvusVectorStore} instance by calling {@code afterPropertiesSet()}.</li>
-     *     <li>Creates and returns a {@link FilesystemRetriever} instance with the initialized parameters</li>
-     * </ul>
-     *
-     * @param filesystemProperties       properties for configuring the {@link FilesystemRetriever}, including
-     *                                   collectionName, topK, isProcessingEnabled, clearCollectionOnStartup and
-     *                                   fileStoragePath settings.
-     * @param milvusProperties           properties for configuring the Milvus Vector Store.
-     * @param milvusClientProperties     properties for configuring the Milvus Service Client.
-     * @param openAiConnectionProperties properties for configuring the OpenAI connection.
-     * @param openAiEmbeddingProperties  properties for configuring the OpenAI Embeddings.
-     * @return a fully configured {@link FilesystemRetriever} instance.
-     * @throws Exception if an error occurs during initialization.
-     */
     @Bean
     public FilesystemRetriever filesystemRetriever(
             final RetrieverFilesystemProperties filesystemProperties,
             final MilvusVectorStoreProperties milvusProperties,
             final MilvusServiceClientProperties milvusClientProperties,
             final OpenAiConnectionProperties openAiConnectionProperties,
-            final OpenAiEmbeddingProperties openAiEmbeddingProperties)
-            throws Exception {
+            final OpenAiEmbeddingProperties openAiEmbeddingProperties) {
 
-        var milvusVectorStore = MilvusVectorStoreUtil.createMilvusVectorStore(
-                filesystemProperties,
-                milvusProperties,
-                milvusClientProperties,
-                openAiConnectionProperties,
-                openAiEmbeddingProperties);
-        milvusVectorStore.afterPropertiesSet();
         return new FilesystemRetriever(
-                milvusVectorStore,
+                MilvusVectorStoreFactory.createInstance(
+                        filesystemProperties,
+                        milvusProperties,
+                        milvusClientProperties,
+                        openAiConnectionProperties,
+                        openAiEmbeddingProperties),
                 filesystemProperties.getFileStoragePath(),
                 filesystemProperties.getTopK(),
                 filesystemProperties.getIsProcessingEnabled());
