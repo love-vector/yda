@@ -74,8 +74,8 @@ public class GoogleDriveService {
             final @NonNull InputStream credentialsStream,
             final @NonNull String driveId,
             final @NonNull DocumentMetadataPort documentMetadataPort,
-            final DocumentProcessorProvider documentProcessor,
-            final DocumentMetadataMapper documentMetadataMapper)
+            final @NonNull DocumentProcessorProvider documentProcessor,
+            final @NonNull DocumentMetadataMapper documentMetadataMapper)
             throws IOException, GeneralSecurityException {
 
         this.documentMetadataPort = documentMetadataPort;
