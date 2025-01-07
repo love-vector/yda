@@ -21,12 +21,11 @@ package ai.yda.framework.rag.retriever.google_drive.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingConstants;
 
 import ai.yda.framework.rag.retriever.google_drive.entity.DocumentContentEntity;
 import ai.yda.framework.rag.retriever.google_drive.entity.DocumentMetadataEntity;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+@Mapper
 public interface DocumentContentMapper {
 
     @Mapping(target = "contentId", ignore = true)

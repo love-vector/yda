@@ -24,24 +24,25 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.json.JSONArray;
 
-import org.springframework.stereotype.Component;
+import org.springframework.lang.NonNull;
 
 import ai.yda.framework.rag.retriever.google_drive.entity.DocumentContentEntity;
 import ai.yda.framework.rag.retriever.google_drive.entity.DocumentMetadataEntity;
 import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentContentMapper;
 
-@Component
-@RequiredArgsConstructor
 public class ExelDocumentProcessor implements DocumentProcessor {
 
     private final DocumentContentMapper documentContentMapper;
+
+    public ExelDocumentProcessor(final @NonNull DocumentContentMapper documentContentMapper) {
+        this.documentContentMapper = documentContentMapper;
+    }
 
     @Override
     public List<DocumentContentEntity> processDocument(
@@ -49,7 +50,7 @@ public class ExelDocumentProcessor implements DocumentProcessor {
         var workbook = new XSSFWorkbook(inputStream);
         var documentContents = new ArrayList<DocumentContentEntity>();
 
-        for (Sheet sheet : workbook) {
+        for (var sheet : workbook) {
             var sheetContent = processSheet(sheet);
             documentContents.add(documentContentMapper.toEntity(sheet.getSheetName(), sheetContent, documentMetadata));
         }

@@ -27,6 +27,6 @@ import ai.yda.framework.rag.retriever.google_drive.entity.DocumentContentEntity;
 import ai.yda.framework.rag.retriever.google_drive.entity.DocumentMetadataEntity;
 
 public interface DocumentProcessor {
-    List<DocumentContentEntity> processDocument(InputStream inputStream, DocumentMetadataEntity documentMetadata)
-            throws IOException;
+    List<DocumentContentEntity> processDocument(
+            final InputStream inputStream, final DocumentMetadataEntity documentMetadata) throws IOException;
 }

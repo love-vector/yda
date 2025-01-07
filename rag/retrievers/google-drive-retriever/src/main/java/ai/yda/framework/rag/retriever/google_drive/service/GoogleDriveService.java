@@ -40,7 +40,6 @@ import org.springframework.lang.NonNull;
 import ai.yda.framework.rag.retriever.google_drive.entity.DocumentMetadataEntity;
 import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentMetadataMapper;
 import ai.yda.framework.rag.retriever.google_drive.port.DocumentMetadataPort;
-import ai.yda.framework.rag.retriever.google_drive.service.processor.DocumentProcessorProvider;
 
 /**
  * Service class for interacting with Google Drive using a Service Account.
@@ -97,21 +96,6 @@ public class GoogleDriveService {
         log.info("Google Drive service initialized successfully.");
     }
 
-    private List<DocumentMetadataEntity> processFiles() throws IOException {
-        var documentMetadataEntities = new ArrayList<DocumentMetadataEntity>();
-        for (File file : listFiles()) {
-            try (InputStream inputStream =
-                    driveService.files().get(file.getId()).executeMediaAsInputStream()) {
-                var documentMetadata = documentMetadataMapper.toEntity(file);
-                var contentEntities =
-                        documentProcessor.processDocument(file.getFileExtension(), inputStream, documentMetadata);
-                documentMetadata.setDocumentContents(contentEntities);
-                documentMetadataEntities.add(documentMetadata);
-            }
-        }
-        return documentMetadataEntities;
-    }
-
     public List<DocumentMetadataEntity> syncDriveAndProcessDocuments() throws IOException {
         var files = listFiles();
         var documentMetadataEntities = new ArrayList<DocumentMetadataEntity>();
@@ -121,8 +105,8 @@ public class GoogleDriveService {
             var mappedEntity = documentMetadataMapper.toEntity(file);
 
             // Check if entity already exists in DB; otherwise use the newly mapped entity
-            var entity = documentMetadataPort.findById(mappedEntity.getDocumentId())
-                    .orElse(mappedEntity);
+            var entity =
+                    documentMetadataPort.findById(mappedEntity.getDocumentId()).orElse(mappedEntity);
 
             // Update or set all relevant fields from the mapped entity
             entity.setName(mappedEntity.getName());
@@ -160,13 +144,12 @@ public class GoogleDriveService {
         var parents = file.getParents();
         if (parents != null && !parents.isEmpty()) {
             var parentId = parents.get(0); // typically one parent for standard Drive structure
-            return documentMetadataPort.findById(parentId)
-                    .orElseGet(() -> {
-                        var newParent = new DocumentMetadataEntity();
-                        newParent.setDocumentId(parentId);
-                        // Optionally set default fields for the parent here
-                        return documentMetadataPort.save(newParent);
-                    });
+            return documentMetadataPort.findById(parentId).orElseGet(() -> {
+                var newParent = new DocumentMetadataEntity();
+                newParent.setDocumentId(parentId);
+                // Optionally set default fields for the parent here
+                return documentMetadataPort.save(newParent);
+            });
         }
         // No parent
         return null;

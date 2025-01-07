@@ -17,24 +17,30 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.rag.retriever.google_drive.service.processor;
+package ai.yda.framework.rag.retriever.google_drive.service;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import lombok.RequiredArgsConstructor;
-
-import org.springframework.stereotype.Component;
+import org.springframework.lang.NonNull;
 
 import ai.yda.framework.rag.retriever.google_drive.entity.DocumentContentEntity;
 import ai.yda.framework.rag.retriever.google_drive.entity.DocumentMetadataEntity;
+import ai.yda.framework.rag.retriever.google_drive.service.processor.DocumentProcessor;
+import ai.yda.framework.rag.retriever.google_drive.service.processor.DocumentType;
+import ai.yda.framework.rag.retriever.google_drive.service.processor.ExelDocumentProcessor;
+import ai.yda.framework.rag.retriever.google_drive.service.processor.TikaDocumentProcessor;
 
-@Component
-@RequiredArgsConstructor
 public class DocumentProcessorProvider {
     private final ExelDocumentProcessor excelProcessor;
     private final TikaDocumentProcessor tikaProcessor;
+
+    public DocumentProcessorProvider(
+            final @NonNull ExelDocumentProcessor excelProcessor, final @NonNull TikaDocumentProcessor tikaProcessor) {
+        this.excelProcessor = excelProcessor;
+        this.tikaProcessor = tikaProcessor;
+    }
 
     public List<DocumentContentEntity> processDocument(
             final String extension, final InputStream inputStream, final DocumentMetadataEntity documentMetadata)
