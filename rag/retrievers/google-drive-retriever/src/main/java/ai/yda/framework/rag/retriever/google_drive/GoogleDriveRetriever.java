@@ -70,8 +70,8 @@ public class GoogleDriveRetriever implements Retriever<RagRequest, RagContext> {
     public GoogleDriveRetriever(
             final @NonNull Integer topK,
             final @NonNull Boolean isProcessingEnabled,
-            final @NonNull GoogleDriveService googleDriveService,
-            DocumentMetadataRepository documentMetadataRepository) {
+            final @NonNull GoogleDriveService googleDriveService)
+            throws IOException {
 
         this.googleDriveService = googleDriveService;
 
@@ -84,6 +84,7 @@ public class GoogleDriveRetriever implements Retriever<RagRequest, RagContext> {
         if (isProcessingEnabled) {
             processGoogleDriveStorage();
             log.info("Starting Google Drive retriever...");
+            googleDriveService.listFilesInDirectory();
         }
     }
 
