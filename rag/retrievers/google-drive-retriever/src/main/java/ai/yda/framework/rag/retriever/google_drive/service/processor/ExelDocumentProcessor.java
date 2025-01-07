@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.rag.retriever.google_drive.processor;
+package ai.yda.framework.rag.retriever.google_drive.service.processor;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -91,7 +91,7 @@ public class ExelDocumentProcessor implements DocumentProcessor {
         return maxCell;
     }
 
-    //TODO: process sheet formulas
+    // TODO: process sheet formulas
     private List<String> processRow(final Row row, final int maxCell) {
         var rowData = new ArrayList<String>();
 

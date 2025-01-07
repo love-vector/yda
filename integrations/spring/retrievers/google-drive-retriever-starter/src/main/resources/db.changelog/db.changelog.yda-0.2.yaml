@@ -24,8 +24,6 @@ databaseChangeLog:
               - column:
                   name: uri
                   type: varchar(2048)
-                  constraints:
-                    nullable: false
               - column:
                   name: created_at
                   type: timestamp
@@ -36,13 +34,23 @@ databaseChangeLog:
                   type: timestamp
                   constraints:
                     nullable: false
+              - column:
+                  name: mime_type
+                  type: varchar(255)
+              - column:
+                  name: drive_id
+                  type: varchar(120)
+              - column:
+                  name: parent_document_id
+                  type: varchar(120)
+
         - createTable:
             tableName: document_content
             columns:
               - column:
                   name: content_id
                   type: int
-                  autoIncrement:  true
+                  autoIncrement: true
                   constraints:
                     primaryKey: true
                     nullable: false
@@ -53,11 +61,25 @@ databaseChangeLog:
                   name: chunk_content
                   type: text
                   constraints:
-                      nullable: false
+                    nullable: false
               - column:
                   name: document_id
                   type: varchar(120)
                   constraints:
                     nullable: false
-                    foreignKeyName: fk_document_content_to_metadata
-                    references: document_metadata(document_id)
+
+        # Foreign key from document_content to document_metadata
+        - addForeignKeyConstraint:
+            constraintName: fk_document_content_to_metadata
+            baseTableName: document_content
+            baseColumnNames: document_id
+            referencedTableName: document_metadata
+            referencedColumnNames: document_id
+
+        # Self-referential foreign key for parent_document_id
+        - addForeignKeyConstraint:
+            constraintName: fk_document_metadata_parent
+            baseTableName: document_metadata
+            baseColumnNames: parent_document_id
+            referencedTableName: document_metadata
+            referencedColumnNames: document_id

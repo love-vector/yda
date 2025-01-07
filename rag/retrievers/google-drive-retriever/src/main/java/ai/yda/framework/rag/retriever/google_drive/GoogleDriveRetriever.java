@@ -29,8 +29,6 @@ import org.springframework.lang.NonNull;
 import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.retriever.Retriever;
-import ai.yda.framework.rag.retriever.google_drive.exception.UnsupportedExtensionException;
-import ai.yda.framework.rag.retriever.google_drive.repository.DocumentMetadataRepository;
 import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
 
 /**
@@ -65,8 +63,6 @@ public class GoogleDriveRetriever implements Retriever<RagRequest, RagContext> {
      */
     private final GoogleDriveService googleDriveService;
 
-    private final DocumentMetadataRepository documentMetadataRepository;
-
     public GoogleDriveRetriever(
             final @NonNull Integer topK,
             final @NonNull Boolean isProcessingEnabled,
@@ -79,34 +75,15 @@ public class GoogleDriveRetriever implements Retriever<RagRequest, RagContext> {
             throw new IllegalArgumentException("TopK must be a positive number.");
         }
         this.topK = topK;
-        this.documentMetadataRepository = documentMetadataRepository;
 
         if (isProcessingEnabled) {
-            processGoogleDriveStorage();
             log.info("Starting Google Drive retriever...");
-            googleDriveService.listFilesInDirectory();
+            googleDriveService.syncDriveAndProcessDocuments();
         }
     }
 
     @Override
     public RagContext retrieve(final RagRequest request) {
         return RagContext.builder().knowledge(Collections.emptyList()).build();
-    }
-
-    /**
-     * Lists all regular files in the local directory, processes each file to create chunks, and then adds these chunks
-     * to the vector store.
-     *
-     * @throws RuntimeException if an I/O error occurs when processing file storage folder.
-     */
-    private void processGoogleDriveStorage() {
-        try {
-            var documents = googleDriveService.processFiles();
-            documentMetadataRepository.saveAll(documents);
-        } catch (UnsupportedExtensionException e) {
-            log.error(e.getMessage());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 }
