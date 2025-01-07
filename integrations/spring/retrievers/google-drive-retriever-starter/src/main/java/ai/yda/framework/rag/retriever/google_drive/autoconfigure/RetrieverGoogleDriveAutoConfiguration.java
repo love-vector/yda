@@ -25,14 +25,20 @@ import java.security.GeneralSecurityException;
 import com.zaxxer.hikari.HikariDataSource;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import ai.yda.framework.rag.retriever.google_drive.GoogleDriveRetriever;
 import ai.yda.framework.rag.retriever.google_drive.exception.GoogleDriveException;
+import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentMetadataMapper;
+import ai.yda.framework.rag.retriever.google_drive.processor.DocumentProcessorProvider;
+import ai.yda.framework.rag.retriever.google_drive.repository.DocumentMetadataRepository;
 import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
 
 /**
@@ -45,12 +51,12 @@ import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
  *
  * <p>Dependencies:
  * - Requires the {@link RetrieverGoogleDriveProperties} for configuration details such as
- *   the Service Account JSON file path, the `topK` retrieval parameter, and the processing flag.
+ * the Service Account JSON file path, the `topK` retrieval parameter, and the processing flag.
  * - Requires a valid {@link ResourceLoader} to load the Service Account key file.
  *
  * <p>Usage:
  * - Ensure the application includes a properly configured `application.yml` or `application.properties` file
- *   with the required `google.drive.service-account-key-path`.
+ * with the required `google.drive.service-account-key-path`.
  * - The auto-configuration will provide a fully initialized {@link GoogleDriveRetriever} bean.
  *
  * @author dmmrch
@@ -59,6 +65,9 @@ import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
  */
 @AutoConfiguration
 @EnableConfigurationProperties(RetrieverGoogleDriveProperties.class)
+@ComponentScan("ai.yda.framework.rag.retriever.google_drive")
+@EnableJpaRepositories("ai.yda.framework.rag.retriever.google_drive.repository")
+@EntityScan("ai.yda.framework.rag.retriever.google_drive.entity")
 public class RetrieverGoogleDriveAutoConfiguration {
 
     /**
@@ -80,7 +89,11 @@ public class RetrieverGoogleDriveAutoConfiguration {
 
     @Bean
     public GoogleDriveRetriever googleDriveRetriever(
-            final RetrieverGoogleDriveProperties googleDriveProperties, final ResourceLoader resourceLoader)
+            final RetrieverGoogleDriveProperties googleDriveProperties,
+            final ResourceLoader resourceLoader,
+            final DocumentProcessorProvider documentProcessorProvider,
+            final DocumentMetadataMapper documentMetadataMapper,
+            final DocumentMetadataRepository documentMetadataRepository)
             throws IOException, GeneralSecurityException {
 
         var resource = resourceLoader.getResource(googleDriveProperties.getServiceAccountKeyFilePath());
@@ -93,6 +106,7 @@ public class RetrieverGoogleDriveAutoConfiguration {
         return new GoogleDriveRetriever(
                 googleDriveProperties.getTopK(),
                 googleDriveProperties.getIsProcessingEnabled(),
-                new GoogleDriveService(resource.getInputStream()));
+                new GoogleDriveService(resource.getInputStream(), documentProcessorProvider, documentMetadataMapper),
+                documentMetadataRepository);
     }
 }

@@ -19,15 +19,9 @@
 */
 package ai.yda.framework.rag.retriever.google_drive.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 /**
  * Represents the content of a document stored in the Google Drive.
@@ -40,11 +34,13 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "document_content")
 @Getter
+@Setter
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class DocumentContentEntity {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "content_id")
     private Long contentId;
 
@@ -54,6 +50,7 @@ public class DocumentContentEntity {
     @Column(name = "chunk_content")
     private String chunkContent;
 
-    @Column(name = "document_id")
-    private String document_id;
+    @ManyToOne
+    @JoinColumn(name = "document_id")
+    private DocumentMetadataEntity documentMetadata;
 }

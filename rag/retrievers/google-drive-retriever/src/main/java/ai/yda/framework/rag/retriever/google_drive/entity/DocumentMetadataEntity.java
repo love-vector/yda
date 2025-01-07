@@ -20,16 +20,11 @@
 package ai.yda.framework.rag.retriever.google_drive.entity;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 /**
  * Represents metadata information about a document in the Google Drive.
@@ -43,6 +38,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "document_metadata")
 @Getter
+@Setter
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
@@ -65,4 +61,7 @@ public class DocumentMetadataEntity {
 
     @Column(name = "modified_at")
     private OffsetDateTime modifiedAt;
+
+    @OneToMany(mappedBy = "documentMetadata", cascade = CascadeType.ALL)
+    private List<DocumentContentEntity> documentContents;
 }
