@@ -20,10 +20,12 @@
 package ai.yda.framework.rag.retriever.google_drive;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.util.Objects;
 
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.ai.vectorstore.SearchRequest;
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.lang.NonNull;
 
 import ai.yda.framework.rag.core.model.RagContext;
@@ -54,6 +56,11 @@ import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
 public class GoogleDriveRetriever implements Retriever<RagRequest, RagContext> {
 
     /**
+     * The Vector Store used to retrieve Context data for User Request through similarity search.
+     */
+    private final VectorStore vectorStore;
+
+    /**
      * The number of top results to retrieve from the Vector Store.
      */
     private final Integer topK;
@@ -66,8 +73,10 @@ public class GoogleDriveRetriever implements Retriever<RagRequest, RagContext> {
     public GoogleDriveRetriever(
             final @NonNull Integer topK,
             final @NonNull Boolean isProcessingEnabled,
+            final @NonNull VectorStore vectorStore,
             final @NonNull GoogleDriveService googleDriveService)
             throws IOException {
+        this.vectorStore = vectorStore;
 
         this.googleDriveService = googleDriveService;
 
@@ -84,6 +93,17 @@ public class GoogleDriveRetriever implements Retriever<RagRequest, RagContext> {
 
     @Override
     public RagContext retrieve(final RagRequest request) {
-        return RagContext.builder().knowledge(Collections.emptyList()).build();
+        return RagContext.builder()
+                .knowledge(Objects.requireNonNull(vectorStore.similaritySearch(SearchRequest.builder()
+                                .query(request.getQuery())
+                                .topK(topK)
+                                .build()))
+                        .parallelStream()
+                        .map(document -> {
+                            log.debug("Document metadata: {}", document.getMetadata());
+                            return document.getText();
+                        })
+                        .toList())
+                .build();
     }
 }
