@@ -16,12 +16,13 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.rag.retriever.google_drive.autoconfigure;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
+import ai.yda.framework.rag.retriever.google_drive.service.DocumentSummaryService;
 import com.zaxxer.hikari.HikariDataSource;
 
 import org.springframework.ai.autoconfigure.openai.OpenAiConnectionProperties;
@@ -109,12 +110,12 @@ public class RetrieverGoogleDriveAutoConfiguration {
     }
 
     @Bean
-    public ExelDocumentProcessor exelDocumentProcessor(final DocumentContentMapper documentContentMapper) {
+    public ExelDocumentProcessor exelDocumentProcessor(DocumentContentMapper documentContentMapper) {
         return new ExelDocumentProcessor(documentContentMapper);
     }
 
     @Bean
-    public TikaDocumentProcessor tikaDocumentProcessor(final DocumentContentMapper documentContentMapper) {
+    public TikaDocumentProcessor tikaDocumentProcessor(DocumentContentMapper documentContentMapper) {
         return new TikaDocumentProcessor(documentContentMapper);
     }
 
@@ -122,6 +123,11 @@ public class RetrieverGoogleDriveAutoConfiguration {
     public DocumentProcessorProvider documentProcessorProvider(
             final ExelDocumentProcessor exelDocumentProcessor, final TikaDocumentProcessor tikaDocumentProcessor) {
         return new DocumentProcessorProvider(exelDocumentProcessor, tikaDocumentProcessor);
+    }
+
+    @Bean
+    public DocumentSummaryService documentSummaryService(final OpenAiChatModel chatModel) {
+        return new DocumentSummaryService(chatModel);
     }
 
     @Bean
@@ -143,6 +149,12 @@ public class RetrieverGoogleDriveAutoConfiguration {
             throw new GoogleDriveException(String.format(
                     "Service Account key not found at: %s", googleDriveProperties.getServiceAccountKeyFilePath()));
         }
+        var vectorStore = MilvusVectorStoreFactory.createInstance(
+                googleDriveProperties,
+                milvusProperties,
+                milvusClientProperties,
+                openAiConnectionProperties,
+                openAiEmbeddingProperties);
 
         return new GoogleDriveRetriever(
                 googleDriveProperties.getTopK(),
@@ -158,6 +170,8 @@ public class RetrieverGoogleDriveAutoConfiguration {
                         googleDriveProperties.getDriveId(),
                         documentMetadataPort,
                         documentProcessorProvider,
-                        documentMetadataMapper));
+                        documentMetadataMapper,
+                        vectorStore,
+                        documentSummaryService(openAiChatModel)));
     }
 }

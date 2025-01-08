@@ -16,16 +16,12 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.rag.retriever.google_drive.service;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.GeneralSecurityException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
+import ai.yda.framework.rag.retriever.google_drive.entity.DocumentMetadataEntity;
+import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentMetadataMapper;
+import ai.yda.framework.rag.retriever.google_drive.port.DocumentMetadataPort;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.drive.Drive;
@@ -34,12 +30,15 @@ import com.google.api.services.drive.model.File;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
 import lombok.extern.slf4j.Slf4j;
-
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.lang.NonNull;
 
-import ai.yda.framework.rag.retriever.google_drive.entity.DocumentMetadataEntity;
-import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentMetadataMapper;
-import ai.yda.framework.rag.retriever.google_drive.port.DocumentMetadataPort;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.GeneralSecurityException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Service class for interacting with Google Drive using a Service Account.
@@ -55,12 +54,15 @@ public class GoogleDriveService {
 
     private final Drive driveService;
     private final String driveId;
+    private final VectorStore vectorStore;
 
     private final DocumentMetadataPort documentMetadataPort;
 
     private final DocumentProcessorProvider documentProcessor;
 
     private final DocumentMetadataMapper documentMetadataMapper;
+
+    private final DocumentSummaryService documentSummaryService;
 
     /**
      * Constructs a new instance of {@link GoogleDriveService}.
@@ -75,21 +77,25 @@ public class GoogleDriveService {
             final @NonNull String driveId,
             final @NonNull DocumentMetadataPort documentMetadataPort,
             final @NonNull DocumentProcessorProvider documentProcessor,
-            final @NonNull DocumentMetadataMapper documentMetadataMapper)
+            final @NonNull DocumentMetadataMapper documentMetadataMapper,
+            final @NonNull VectorStore vectorStore,
+            final @NonNull DocumentSummaryService documentSummaryService)
             throws IOException, GeneralSecurityException {
 
         this.documentMetadataPort = documentMetadataPort;
         this.documentProcessor = documentProcessor;
         this.documentMetadataMapper = documentMetadataMapper;
         this.driveId = driveId;
+        this.vectorStore = vectorStore;
+        this.documentSummaryService = documentSummaryService;
 
         var credentials =
                 GoogleCredentials.fromStream(credentialsStream).createScoped(Collections.singleton(DriveScopes.DRIVE));
 
         this.driveService = new Drive.Builder(
-                        GoogleNetHttpTransport.newTrustedTransport(),
-                        GsonFactory.getDefaultInstance(),
-                        new HttpCredentialsAdapter(credentials))
+                GoogleNetHttpTransport.newTrustedTransport(),
+                GsonFactory.getDefaultInstance(),
+                new HttpCredentialsAdapter(credentials))
                 .setApplicationName(GOOGLE_DRIVE_APP_NAME)
                 .build();
 
