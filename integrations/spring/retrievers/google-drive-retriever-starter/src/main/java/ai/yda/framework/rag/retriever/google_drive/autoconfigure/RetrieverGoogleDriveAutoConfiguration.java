@@ -24,6 +24,10 @@ import java.security.GeneralSecurityException;
 
 import com.zaxxer.hikari.HikariDataSource;
 
+import org.springframework.ai.autoconfigure.openai.OpenAiConnectionProperties;
+import org.springframework.ai.autoconfigure.openai.OpenAiEmbeddingProperties;
+import org.springframework.ai.autoconfigure.vectorstore.milvus.MilvusServiceClientProperties;
+import org.springframework.ai.autoconfigure.vectorstore.milvus.MilvusVectorStoreProperties;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -46,6 +50,7 @@ import ai.yda.framework.rag.retriever.google_drive.service.DocumentProcessorProv
 import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
 import ai.yda.framework.rag.retriever.google_drive.service.processor.ExelDocumentProcessor;
 import ai.yda.framework.rag.retriever.google_drive.service.processor.TikaDocumentProcessor;
+import ai.yda.framework.rag.retriever.shared.factory.MilvusVectorStoreFactory;
 
 /**
  * Auto-configuration class for setting up the Google Drive retriever in a Spring Boot application.
@@ -104,12 +109,12 @@ public class RetrieverGoogleDriveAutoConfiguration {
     }
 
     @Bean
-    public ExelDocumentProcessor exelDocumentProcessor(DocumentContentMapper documentContentMapper) {
+    public ExelDocumentProcessor exelDocumentProcessor(final DocumentContentMapper documentContentMapper) {
         return new ExelDocumentProcessor(documentContentMapper);
     }
 
     @Bean
-    public TikaDocumentProcessor tikaDocumentProcessor(DocumentContentMapper documentContentMapper) {
+    public TikaDocumentProcessor tikaDocumentProcessor(final DocumentContentMapper documentContentMapper) {
         return new TikaDocumentProcessor(documentContentMapper);
     }
 
@@ -125,7 +130,11 @@ public class RetrieverGoogleDriveAutoConfiguration {
             final ResourceLoader resourceLoader,
             final DocumentMetadataPort documentMetadataPort,
             final DocumentProcessorProvider documentProcessorProvider,
-            final DocumentMetadataMapper documentMetadataMapper)
+            final DocumentMetadataMapper documentMetadataMapper,
+            final MilvusVectorStoreProperties milvusProperties,
+            final MilvusServiceClientProperties milvusClientProperties,
+            final OpenAiConnectionProperties openAiConnectionProperties,
+            final OpenAiEmbeddingProperties openAiEmbeddingProperties)
             throws IOException, GeneralSecurityException {
 
         var resource = resourceLoader.getResource(googleDriveProperties.getServiceAccountKeyFilePath());
@@ -138,6 +147,12 @@ public class RetrieverGoogleDriveAutoConfiguration {
         return new GoogleDriveRetriever(
                 googleDriveProperties.getTopK(),
                 googleDriveProperties.getIsProcessingEnabled(),
+                MilvusVectorStoreFactory.createInstance(
+                        googleDriveProperties,
+                        milvusProperties,
+                        milvusClientProperties,
+                        openAiConnectionProperties,
+                        openAiEmbeddingProperties),
                 new GoogleDriveService(
                         resource.getInputStream(),
                         googleDriveProperties.getDriveId(),
