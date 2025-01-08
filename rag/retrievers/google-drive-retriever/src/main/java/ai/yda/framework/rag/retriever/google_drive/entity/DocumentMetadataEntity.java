@@ -73,8 +73,8 @@ public class DocumentMetadataEntity {
      * Parent folder relationship:
      * This references another entity in the same table.
      */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_document_id")
+    @ManyToOne
+    @JoinColumn(name = "parent_id")
     private DocumentMetadataEntity parent;
 
     /**
@@ -82,7 +82,7 @@ public class DocumentMetadataEntity {
      * Mapped by the 'parent' field.
      * This will contain a list of documents/folders for which this entity is the parent.
      */
-    @OneToMany(mappedBy = "documentMetadata", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "documentMetadata", cascade = CascadeType.ALL)
     private List<DocumentContentEntity> documentContents;
 
     /**

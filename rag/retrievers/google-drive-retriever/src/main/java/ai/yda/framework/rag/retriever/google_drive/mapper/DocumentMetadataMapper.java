@@ -20,9 +20,7 @@
 package ai.yda.framework.rag.retriever.google_drive.mapper;
 
 import com.google.api.services.drive.model.File;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingConstants;
+import org.mapstruct.*;
 
 import ai.yda.framework.rag.retriever.google_drive.entity.DocumentMetadataEntity;
 
@@ -44,4 +42,7 @@ public interface DocumentMetadataMapper {
                     + "java.time.ZoneOffset.ofTotalSeconds(file.getModifiedTime().getTimeZoneShift() * 60)) : "
                     + "java.time.OffsetDateTime.now())")
     DocumentMetadataEntity toEntity(File file);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    DocumentMetadataEntity updateEntity(DocumentMetadataEntity source, @MappingTarget DocumentMetadataEntity target);
 }

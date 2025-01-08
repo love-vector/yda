@@ -97,40 +97,31 @@ public class GoogleDriveService {
     }
 
     public List<DocumentMetadataEntity> syncDriveAndProcessDocuments() throws IOException {
-        var files = listFiles();
+
         var documentMetadataEntities = new ArrayList<DocumentMetadataEntity>();
 
-        for (var file : files) {
-            // Map the file to a new (or partially-populated) entity
+        for (var file : listFiles()) {
+
             var mappedEntity = documentMetadataMapper.toEntity(file);
 
-            // Check if entity already exists in DB; otherwise use the newly mapped entity
-            var entity =
-                    documentMetadataPort.findById(mappedEntity.getDocumentId()).orElse(mappedEntity);
+            var documentMetadataEntity = documentMetadataPort
+                    .findById(mappedEntity.getDocumentId())
+                    .map(existing -> documentMetadataMapper.updateEntity(mappedEntity, existing))
+                    .orElse(mappedEntity);
 
-            // Update or set all relevant fields from the mapped entity
-            entity.setName(mappedEntity.getName());
-            entity.setDescription(mappedEntity.getDescription());
-            entity.setUri(mappedEntity.getUri());
-            entity.setCreatedAt(mappedEntity.getCreatedAt());
-            entity.setModifiedAt(mappedEntity.getModifiedAt());
-            entity.setMimeType(mappedEntity.getMimeType());
-            entity.setDriveId(driveId);
+            documentMetadataEntity.setParent(resolveParent(file));
 
-            var parentEntity = resolveParent(file);
-            entity.setParent(parentEntity);
-
-            // Optionally fetch and process file content
+            // Fetch and process file content
             try (var inputStream = driveService.files().get(file.getId()).executeMediaAsInputStream()) {
-                var contentEntities = documentProcessor.processDocument(file.getFileExtension(), inputStream, entity);
-                entity.setDocumentContents(contentEntities);
+                var contentEntities =
+                        documentProcessor.processDocument(file.getFileExtension(), inputStream, documentMetadataEntity);
+                documentMetadataEntity.setDocumentContents(contentEntities);
             } catch (IOException e) {
                 log.error("Failed to retrieve content for file: {}", file.getId(), e);
             }
 
-            // Save final entity
-            documentMetadataPort.save(entity);
-            documentMetadataEntities.add(entity);
+            documentMetadataPort.save(documentMetadataEntity);
+            documentMetadataEntities.add(documentMetadataEntity);
         }
 
         return documentMetadataEntities;

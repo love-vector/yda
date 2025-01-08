@@ -24,6 +24,8 @@ databaseChangeLog:
               - column:
                   name: uri
                   type: varchar(2048)
+                  constraints:
+                    nullable: false
               - column:
                   name: created_at
                   type: timestamp
@@ -41,7 +43,7 @@ databaseChangeLog:
                   name: drive_id
                   type: varchar(120)
               - column:
-                  name: parent_document_id
+                  name: parent_id
                   type: varchar(120)
 
         - createTable:
@@ -76,10 +78,10 @@ databaseChangeLog:
             referencedTableName: document_metadata
             referencedColumnNames: document_id
 
-        # Self-referential foreign key for parent_document_id
+        # Self-referential foreign key for parent_id
         - addForeignKeyConstraint:
             constraintName: fk_document_metadata_parent
             baseTableName: document_metadata
-            baseColumnNames: parent_document_id
+            baseColumnNames: parent_id
             referencedTableName: document_metadata
             referencedColumnNames: document_id
