@@ -13,14 +13,14 @@ import java.util.stream.Collectors;
 public class DocumentSummaryService {
     private final ChatModel chatModel;
 
-    public DocumentSummaryService(ChatModel chatModel) {
+    public DocumentSummaryService(final ChatModel chatModel) {
         this.chatModel = chatModel;
     }
 
     public List<Document> summarizeDocuments(final List<DocumentMetadataEntity> metadataDocuments) {
         var transformDocuments = transformDocument(metadataDocuments);
         var enrichedDocuments = new SummaryMetadataEnricher(chatModel, List.of(SummaryMetadataEnricher.SummaryType.CURRENT));
-        var documentSummary =  enrichedDocuments.apply(transformDocuments);
+        var documentSummary = enrichedDocuments.apply(transformDocuments);
         return prepareDocuments(documentSummary);
     }
 
@@ -38,7 +38,7 @@ public class DocumentSummaryService {
 
     private List<Document> prepareDocuments(final List<Document> documents) {
         return documents.stream().map(document -> document.mutate()
-                .text(document.getMetadata().getOrDefault("section_summary","").toString())
+                .text(document.getMetadata().getOrDefault("section_summary", "").toString())
                 .metadata(Map.of())
                 .build()).toList();
     }

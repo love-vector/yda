@@ -16,20 +16,18 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.rag.retriever.google_drive;
-
-import java.io.IOException;
-import java.util.Collections;
-
-import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.lang.NonNull;
 
 import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.retriever.Retriever;
 import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.lang.NonNull;
+
+import java.io.IOException;
+import java.util.Collections;
 
 /**
  * The {@code GoogleDriveRetriever} class is a Retriever implementation that interacts with Google Drive
@@ -79,8 +77,11 @@ public class GoogleDriveRetriever implements Retriever<RagRequest, RagContext> {
         if (isProcessingEnabled) {
             log.info("Starting Google Drive retriever...");
             googleDriveService.syncDriveAndProcessDocuments();
+            log.info("Done starting Vector Store retriever...");
+
         }
     }
+
 
     @Override
     public RagContext retrieve(final RagRequest request) {
