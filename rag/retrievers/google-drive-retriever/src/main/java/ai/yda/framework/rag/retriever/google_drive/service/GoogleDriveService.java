@@ -30,6 +30,7 @@ import com.google.api.services.drive.model.File;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.lang.NonNull;
 
@@ -39,6 +40,7 @@ import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Service class for interacting with Google Drive using a Service Account.
@@ -100,6 +102,17 @@ public class GoogleDriveService {
                 .build();
 
         log.info("Google Drive service initialized successfully.");
+    }
+
+    public void saveToVectorStore(final List<DocumentMetadataEntity> documents) {
+        var summarizedDocuments = documentSummaryService.summarizeDocuments(documents);
+        var documentIds = summarizedDocuments.stream().map(Document::getId).toList();
+        Objects.requireNonNull(vectorStore.delete(documentIds)).ifPresent(deleted -> {
+            if (!deleted) {
+                throw new RuntimeException("Failed to delete document");
+            }
+        });
+        vectorStore.add(summarizedDocuments);
     }
 
     public List<DocumentMetadataEntity> syncDriveAndProcessDocuments() throws IOException {
