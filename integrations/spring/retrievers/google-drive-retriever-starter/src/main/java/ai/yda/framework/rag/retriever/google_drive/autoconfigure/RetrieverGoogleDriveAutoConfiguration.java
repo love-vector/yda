@@ -31,6 +31,7 @@ import org.springframework.ai.autoconfigure.vectorstore.milvus.MilvusServiceClie
 import org.springframework.ai.autoconfigure.vectorstore.milvus.MilvusVectorStoreProperties;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -87,7 +88,8 @@ public class RetrieverGoogleDriveAutoConfiguration {
     /**
      * Default constructor for {@link RetrieverGoogleDriveAutoConfiguration}.
      */
-    public RetrieverGoogleDriveAutoConfiguration() {}
+    public RetrieverGoogleDriveAutoConfiguration() {
+    }
 
     /**
      * Creates a {@link HikariDataSource} bean using properties defined under the prefix
@@ -112,12 +114,12 @@ public class RetrieverGoogleDriveAutoConfiguration {
     }
 
     @Bean
-    public ExelDocumentProcessor exelDocumentProcessor(DocumentContentMapper documentContentMapper) {
+    public ExelDocumentProcessor exelDocumentProcessor(final DocumentContentMapper documentContentMapper) {
         return new ExelDocumentProcessor(documentContentMapper);
     }
 
     @Bean
-    public TikaDocumentProcessor tikaDocumentProcessor(DocumentContentMapper documentContentMapper) {
+    public TikaDocumentProcessor tikaDocumentProcessor(final DocumentContentMapper documentContentMapper) {
         return new TikaDocumentProcessor(documentContentMapper);
     }
 
@@ -128,7 +130,7 @@ public class RetrieverGoogleDriveAutoConfiguration {
     }
 
     @Bean
-    public DocumentSummaryService documentSummaryService(final ChatModel chatModel) {
+    public DocumentSummaryService documentSummaryService(final OpenAiChatModel chatModel) {
         return new DocumentSummaryService(chatModel);
     }
 
@@ -143,8 +145,7 @@ public class RetrieverGoogleDriveAutoConfiguration {
             final MilvusServiceClientProperties milvusClientProperties,
             final OpenAiConnectionProperties openAiConnectionProperties,
             final OpenAiEmbeddingProperties openAiEmbeddingProperties,
-            final OpenAiChatModel openAiChatModel
-    )
+            final OpenAiChatModel openAiChatModel)
             throws IOException, GeneralSecurityException {
 
         var resource = resourceLoader.getResource(googleDriveProperties.getServiceAccountKeyFilePath());
