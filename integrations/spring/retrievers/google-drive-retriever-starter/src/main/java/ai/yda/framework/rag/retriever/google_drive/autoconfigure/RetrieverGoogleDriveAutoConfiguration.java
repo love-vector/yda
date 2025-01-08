@@ -35,11 +35,17 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import ai.yda.framework.rag.retriever.google_drive.GoogleDriveRetriever;
+import ai.yda.framework.rag.retriever.google_drive.adapter.DocumentMetadataAdapter;
 import ai.yda.framework.rag.retriever.google_drive.exception.GoogleDriveException;
+import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentContentMapper;
+import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentContentMapperImpl;
 import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentMetadataMapper;
-import ai.yda.framework.rag.retriever.google_drive.processor.DocumentProcessorProvider;
+import ai.yda.framework.rag.retriever.google_drive.port.DocumentMetadataPort;
 import ai.yda.framework.rag.retriever.google_drive.repository.DocumentMetadataRepository;
+import ai.yda.framework.rag.retriever.google_drive.service.DocumentProcessorProvider;
 import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
+import ai.yda.framework.rag.retriever.google_drive.service.processor.ExelDocumentProcessor;
+import ai.yda.framework.rag.retriever.google_drive.service.processor.TikaDocumentProcessor;
 
 /**
  * Auto-configuration class for setting up the Google Drive retriever in a Spring Boot application.
@@ -88,12 +94,38 @@ public class RetrieverGoogleDriveAutoConfiguration {
     }
 
     @Bean
+    public DocumentMetadataPort documentMetadataPort(final DocumentMetadataRepository documentMetadataRepository) {
+        return new DocumentMetadataAdapter(documentMetadataRepository);
+    }
+
+    @Bean
+    public DocumentContentMapper documentContentMapper() {
+        return new DocumentContentMapperImpl();
+    }
+
+    @Bean
+    public ExelDocumentProcessor exelDocumentProcessor(DocumentContentMapper documentContentMapper) {
+        return new ExelDocumentProcessor(documentContentMapper);
+    }
+
+    @Bean
+    public TikaDocumentProcessor tikaDocumentProcessor(DocumentContentMapper documentContentMapper) {
+        return new TikaDocumentProcessor(documentContentMapper);
+    }
+
+    @Bean
+    public DocumentProcessorProvider documentProcessorProvider(
+            final ExelDocumentProcessor exelDocumentProcessor, final TikaDocumentProcessor tikaDocumentProcessor) {
+        return new DocumentProcessorProvider(exelDocumentProcessor, tikaDocumentProcessor);
+    }
+
+    @Bean
     public GoogleDriveRetriever googleDriveRetriever(
             final RetrieverGoogleDriveProperties googleDriveProperties,
             final ResourceLoader resourceLoader,
+            final DocumentMetadataPort documentMetadataPort,
             final DocumentProcessorProvider documentProcessorProvider,
-            final DocumentMetadataMapper documentMetadataMapper,
-            final DocumentMetadataRepository documentMetadataRepository)
+            final DocumentMetadataMapper documentMetadataMapper)
             throws IOException, GeneralSecurityException {
 
         var resource = resourceLoader.getResource(googleDriveProperties.getServiceAccountKeyFilePath());
@@ -106,7 +138,11 @@ public class RetrieverGoogleDriveAutoConfiguration {
         return new GoogleDriveRetriever(
                 googleDriveProperties.getTopK(),
                 googleDriveProperties.getIsProcessingEnabled(),
-                new GoogleDriveService(resource.getInputStream(), documentProcessorProvider, documentMetadataMapper),
-                documentMetadataRepository);
+                new GoogleDriveService(
+                        resource.getInputStream(),
+                        googleDriveProperties.getDriveId(),
+                        documentMetadataPort,
+                        documentProcessorProvider,
+                        documentMetadataMapper));
     }
 }

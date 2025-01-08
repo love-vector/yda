@@ -17,16 +17,29 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.rag.retriever.google_drive.processor;
+package ai.yda.framework.rag.retriever.google_drive.adapter;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
+import java.util.Optional;
 
-import ai.yda.framework.rag.retriever.google_drive.entity.DocumentContentEntity;
 import ai.yda.framework.rag.retriever.google_drive.entity.DocumentMetadataEntity;
+import ai.yda.framework.rag.retriever.google_drive.port.DocumentMetadataPort;
+import ai.yda.framework.rag.retriever.google_drive.repository.DocumentMetadataRepository;
 
-public interface DocumentProcessor {
-    List<DocumentContentEntity> processDocument(InputStream inputStream, DocumentMetadataEntity documentMetadata)
-            throws IOException;
+public class DocumentMetadataAdapter implements DocumentMetadataPort {
+
+    private final DocumentMetadataRepository repository;
+
+    public DocumentMetadataAdapter(DocumentMetadataRepository repository) {
+        this.repository = repository;
+    }
+
+    @Override
+    public Optional<DocumentMetadataEntity> findById(String documentId) {
+        return repository.findById(documentId);
+    }
+
+    @Override
+    public DocumentMetadataEntity save(DocumentMetadataEntity entity) {
+        return repository.save(entity);
+    }
 }

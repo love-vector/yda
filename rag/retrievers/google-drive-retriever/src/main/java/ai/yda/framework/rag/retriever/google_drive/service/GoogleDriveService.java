@@ -39,7 +39,7 @@ import org.springframework.lang.NonNull;
 
 import ai.yda.framework.rag.retriever.google_drive.entity.DocumentMetadataEntity;
 import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentMetadataMapper;
-import ai.yda.framework.rag.retriever.google_drive.processor.DocumentProcessorProvider;
+import ai.yda.framework.rag.retriever.google_drive.port.DocumentMetadataPort;
 
 /**
  * Service class for interacting with Google Drive using a Service Account.
@@ -54,6 +54,9 @@ public class GoogleDriveService {
     private static final String GOOGLE_DRIVE_APP_NAME = "YDA Google Drive Retriever";
 
     private final Drive driveService;
+    private final String driveId;
+
+    private final DocumentMetadataPort documentMetadataPort;
 
     private final DocumentProcessorProvider documentProcessor;
 
@@ -69,9 +72,16 @@ public class GoogleDriveService {
      */
     public GoogleDriveService(
             final @NonNull InputStream credentialsStream,
-            final DocumentProcessorProvider documentProcessor,
-            final DocumentMetadataMapper documentMetadataMapper)
+            final @NonNull String driveId,
+            final @NonNull DocumentMetadataPort documentMetadataPort,
+            final @NonNull DocumentProcessorProvider documentProcessor,
+            final @NonNull DocumentMetadataMapper documentMetadataMapper)
             throws IOException, GeneralSecurityException {
+
+        this.documentMetadataPort = documentMetadataPort;
+        this.documentProcessor = documentProcessor;
+        this.documentMetadataMapper = documentMetadataMapper;
+        this.driveId = driveId;
 
         var credentials =
                 GoogleCredentials.fromStream(credentialsStream).createScoped(Collections.singleton(DriveScopes.DRIVE));
@@ -82,28 +92,60 @@ public class GoogleDriveService {
                         new HttpCredentialsAdapter(credentials))
                 .setApplicationName(GOOGLE_DRIVE_APP_NAME)
                 .build();
-        this.documentProcessor = documentProcessor;
-        this.documentMetadataMapper = documentMetadataMapper;
 
         log.info("Google Drive service initialized successfully.");
     }
 
-    public List<DocumentMetadataEntity> processFiles() throws IOException {
+    public List<DocumentMetadataEntity> syncDriveAndProcessDocuments() throws IOException {
+
         var documentMetadataEntities = new ArrayList<DocumentMetadataEntity>();
-        for (File file : listFiles()) {
-            try (InputStream inputStream =
-                    driveService.files().get(file.getId()).executeMediaAsInputStream()) {
-                var documentMetadata = documentMetadataMapper.toEntity(file);
+
+        for (var file : listFiles()) {
+
+            var mappedEntity = documentMetadataMapper.toEntity(file);
+
+            var documentMetadataEntity = documentMetadataPort
+                    .findById(mappedEntity.getDocumentId())
+                    .map(existing -> documentMetadataMapper.updateEntity(mappedEntity, existing))
+                    .orElse(mappedEntity);
+
+            documentMetadataEntity.setParent(resolveParent(file));
+
+            // Fetch and process file content
+            try (var inputStream = driveService.files().get(file.getId()).executeMediaAsInputStream()) {
                 var contentEntities =
-                        documentProcessor.processDocument(file.getFileExtension(), inputStream, documentMetadata);
-                documentMetadata.setDocumentContents(contentEntities);
-                documentMetadataEntities.add(documentMetadata);
+                        documentProcessor.processDocument(file.getFileExtension(), inputStream, documentMetadataEntity);
+                documentMetadataEntity.setDocumentContents(contentEntities);
+            } catch (IOException e) {
+                log.error("Failed to retrieve content for file: {}", file.getId(), e);
             }
+
+            documentMetadataPort.save(documentMetadataEntity);
+            documentMetadataEntities.add(documentMetadataEntity);
         }
+
         return documentMetadataEntities;
     }
 
-    // TODO: add drive id configuration
+    /**
+     * Fetches (or creates) the parent DocumentMetadataEntity for a Google Drive file.
+     * If the file has no parents, returns null.
+     */
+    private DocumentMetadataEntity resolveParent(File file) {
+        var parents = file.getParents();
+        if (parents != null && !parents.isEmpty()) {
+            var parentId = parents.get(0); // typically one parent for standard Drive structure
+            return documentMetadataPort.findById(parentId).orElseGet(() -> {
+                var newParent = new DocumentMetadataEntity();
+                newParent.setDocumentId(parentId);
+                // Optionally set default fields for the parent here
+                return documentMetadataPort.save(newParent);
+            });
+        }
+        // No parent
+        return null;
+    }
+
     private List<File> listFiles() throws IOException {
         var result = driveService
                 .files()
@@ -111,9 +153,9 @@ public class GoogleDriveService {
                 .setSupportsAllDrives(true)
                 .setIncludeItemsFromAllDrives(true)
                 .setCorpora("drive")
-                .setDriveId("0APYbhkVOryubUk9PVA")
+                .setDriveId(driveId)
                 .setFields("files(id,name,description,webViewLink,createdTime,modifiedTime,mimeType,fileExtension)")
-                .setPageSize(10)
+                .setPageSize(100)
                 .setQ("mimeType != 'application/vnd.google-apps.folder'")
                 .execute();
 

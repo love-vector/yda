@@ -43,6 +43,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DocumentMetadataEntity {
+
     @Id
     @Column(name = "document_id")
     private String documentId;
@@ -62,6 +63,33 @@ public class DocumentMetadataEntity {
     @Column(name = "modified_at")
     private OffsetDateTime modifiedAt;
 
+    @Column(name = "mime_type")
+    private String mimeType;
+
+    @Column(name = "drive_id")
+    private String driveId;
+
+    /**
+     * Parent folder relationship:
+     * This references another entity in the same table.
+     */
+    @ManyToOne
+    @JoinColumn(name = "parent_id")
+    private DocumentMetadataEntity parent;
+
+    /**
+     * Children relationship (inverse side):
+     * Mapped by the 'parent' field.
+     * This will contain a list of documents/folders for which this entity is the parent.
+     */
     @OneToMany(mappedBy = "documentMetadata", cascade = CascadeType.ALL)
     private List<DocumentContentEntity> documentContents;
+
+    /**
+     * Convenience method to distinguish folders from files.
+     */
+    @Transient
+    public boolean isFolder() {
+        return "application/vnd.google-apps.folder".equalsIgnoreCase(this.mimeType);
+    }
 }
