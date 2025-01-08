@@ -16,13 +16,12 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.rag.retriever.google_drive.autoconfigure;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
-import ai.yda.framework.rag.retriever.google_drive.service.DocumentSummaryService;
 import com.zaxxer.hikari.HikariDataSource;
 
 import org.springframework.ai.autoconfigure.openai.OpenAiConnectionProperties;
@@ -31,7 +30,6 @@ import org.springframework.ai.autoconfigure.vectorstore.milvus.MilvusServiceClie
 import org.springframework.ai.autoconfigure.vectorstore.milvus.MilvusVectorStoreProperties;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.openai.OpenAiChatModel;
-import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -52,6 +50,7 @@ import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentMetadataMapper
 import ai.yda.framework.rag.retriever.google_drive.port.DocumentMetadataPort;
 import ai.yda.framework.rag.retriever.google_drive.repository.DocumentMetadataRepository;
 import ai.yda.framework.rag.retriever.google_drive.service.DocumentProcessorProvider;
+import ai.yda.framework.rag.retriever.google_drive.service.DocumentSummaryService;
 import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
 import ai.yda.framework.rag.retriever.google_drive.service.processor.ExelDocumentProcessor;
 import ai.yda.framework.rag.retriever.google_drive.service.processor.TikaDocumentProcessor;
@@ -89,8 +88,7 @@ public class RetrieverGoogleDriveAutoConfiguration {
     /**
      * Default constructor for {@link RetrieverGoogleDriveAutoConfiguration}.
      */
-    public RetrieverGoogleDriveAutoConfiguration() {
-    }
+    public RetrieverGoogleDriveAutoConfiguration() {}
 
     /**
      * Creates a {@link HikariDataSource} bean using properties defined under the prefix
@@ -136,7 +134,7 @@ public class RetrieverGoogleDriveAutoConfiguration {
     }
 
     @Bean
-    public DocumentSummaryService documentSummaryService(final OpenAiChatModel chatModel) {
+    public DocumentSummaryService documentSummaryService(final ChatModel chatModel) {
         return new DocumentSummaryService(chatModel);
     }
 

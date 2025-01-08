@@ -91,7 +91,6 @@ public class GoogleDriveRetriever implements Retriever<RagRequest, RagContext> {
         }
     }
 
-
     @Override
     public RagContext retrieve(final RagRequest request) {
         return RagContext.builder()
