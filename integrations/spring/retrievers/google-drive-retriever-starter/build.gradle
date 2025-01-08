@@ -1,6 +1,7 @@
 dependencies {
     api project(':google-drive-retriever')
     api project(':retriever-shared-starter')
+    api project(':openai-chat-generator')
 
     implementation 'org.liquibase:liquibase-core:4.30.0'
 

@@ -87,9 +87,10 @@ public class GoogleDriveRetriever implements Retriever<RagRequest, RagContext> {
 
         if (isProcessingEnabled) {
             log.info("Starting Google Drive retriever...");
-            googleDriveService.syncDriveAndProcessDocuments();
+            googleDriveService.saveToVectorStore(googleDriveService.syncDriveAndProcessDocuments());
         }
     }
+
 
     @Override
     public RagContext retrieve(final RagRequest request) {
