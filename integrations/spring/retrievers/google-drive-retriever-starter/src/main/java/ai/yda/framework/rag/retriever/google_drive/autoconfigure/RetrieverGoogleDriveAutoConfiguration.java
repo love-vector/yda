@@ -29,6 +29,8 @@ import org.springframework.ai.autoconfigure.openai.OpenAiConnectionProperties;
 import org.springframework.ai.autoconfigure.openai.OpenAiEmbeddingProperties;
 import org.springframework.ai.autoconfigure.vectorstore.milvus.MilvusServiceClientProperties;
 import org.springframework.ai.autoconfigure.vectorstore.milvus.MilvusVectorStoreProperties;
+import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -126,7 +128,7 @@ public class RetrieverGoogleDriveAutoConfiguration {
     }
 
     @Bean
-    public DocumentSummaryService documentSummaryService(final OpenAiChatModel chatModel) {
+    public DocumentSummaryService documentSummaryService(final ChatModel chatModel) {
         return new DocumentSummaryService(chatModel);
     }
 
@@ -140,7 +142,9 @@ public class RetrieverGoogleDriveAutoConfiguration {
             final MilvusVectorStoreProperties milvusProperties,
             final MilvusServiceClientProperties milvusClientProperties,
             final OpenAiConnectionProperties openAiConnectionProperties,
-            final OpenAiEmbeddingProperties openAiEmbeddingProperties)
+            final OpenAiEmbeddingProperties openAiEmbeddingProperties,
+            final OpenAiChatModel openAiChatModel
+    )
             throws IOException, GeneralSecurityException {
 
         var resource = resourceLoader.getResource(googleDriveProperties.getServiceAccountKeyFilePath());
@@ -159,12 +163,7 @@ public class RetrieverGoogleDriveAutoConfiguration {
         return new GoogleDriveRetriever(
                 googleDriveProperties.getTopK(),
                 googleDriveProperties.getIsProcessingEnabled(),
-                MilvusVectorStoreFactory.createInstance(
-                        googleDriveProperties,
-                        milvusProperties,
-                        milvusClientProperties,
-                        openAiConnectionProperties,
-                        openAiEmbeddingProperties),
+                vectorStore,
                 new GoogleDriveService(
                         resource.getInputStream(),
                         googleDriveProperties.getDriveId(),
