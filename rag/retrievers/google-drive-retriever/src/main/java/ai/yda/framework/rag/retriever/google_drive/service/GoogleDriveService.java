@@ -50,6 +50,7 @@ import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.lang.NonNull;
 
+import ai.yda.framework.rag.retriever.google_drive.entity.DocumentContentEntity;
 import ai.yda.framework.rag.retriever.google_drive.entity.DocumentMetadataEntity;
 import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentMetadataMapper;
 import ai.yda.framework.rag.retriever.google_drive.port.DocumentMetadataPort;
@@ -125,6 +126,14 @@ public class GoogleDriveService {
             }
         });
         vectorStore.add(summarizedDocuments);
+    }
+
+    public List<DocumentContentEntity> findRetrievedDocuments(final List<String> documentIds) {
+        List<DocumentContentEntity> result = new ArrayList<>();
+        documentIds.forEach(documentId -> documentMetadataPort
+                .findById(documentId)
+                .ifPresent(mappedEntity -> result.addAll(mappedEntity.getDocumentContents())));
+        return result;
     }
 
     public List<DocumentMetadataEntity> syncDriveAndProcessDocuments() throws IOException {
