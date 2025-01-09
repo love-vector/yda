@@ -103,12 +103,14 @@ public class GoogleDriveService {
             documentMetadataEntity.setParent(resolveParent(file));
 
             // Fetch and process file content
-            try (var inputStream = driveService.files().get(file.getId()).executeMediaAsInputStream()) {
-                var contentEntities =
-                        documentProcessor.processDocument(file.getFileExtension(), inputStream, documentMetadataEntity);
-                documentMetadataEntity.setDocumentContents(contentEntities);
-            } catch (IOException e) {
-                log.error("Failed to retrieve content for file: {}", file.getId(), e);
+            if (!mappedEntity.isFolder()) {
+                try (var inputStream = driveService.files().get(file.getId()).executeMediaAsInputStream()) {
+                    var contentEntities = documentProcessor.processDocument(
+                            file.getFileExtension(), inputStream, documentMetadataEntity);
+                    documentMetadataEntity.setDocumentContents(contentEntities);
+                } catch (IOException e) {
+                    log.error("Failed to retrieve content for file: {}", file.getId(), e);
+                }
             }
 
             documentMetadataPort.save(documentMetadataEntity);
@@ -124,10 +126,18 @@ public class GoogleDriveService {
         if (parents != null && !parents.isEmpty()) {
             var parentId = parents.get(0); // typically one parent for standard Drive structure
             return documentMetadataPort.findById(parentId).orElseGet(() -> {
-                var newParent = new DocumentMetadataEntity();
-                newParent.setDocumentId(parentId);
-                // Optionally set default fields for the parent here
-                return documentMetadataPort.save(newParent);
+                try {
+                    return documentMetadataPort.save(documentMetadataMapper.toEntity(driveService
+                            .files()
+                            .get(parentId)
+                            .setSupportsAllDrives(true)
+                            .setFields(
+                                    "id,name,parents,description,webViewLink,createdTime,modifiedTime,mimeType,fileExtension")
+                            .execute()));
+                } catch (IOException e) {
+                    log.error("Failed to fetch parent from Google Drive with ID: {}", parentId, e);
+                    throw new RuntimeException(e);
+                }
             });
         }
         // No parent
@@ -135,28 +145,17 @@ public class GoogleDriveService {
     }
 
     private List<File> listFiles() throws IOException {
-        var result = driveService
+        return driveService
                 .files()
                 .list()
                 .setSupportsAllDrives(true)
                 .setIncludeItemsFromAllDrives(true)
                 .setCorpora("drive")
                 .setDriveId(driveId)
-                .setFields("files(id,name,description,webViewLink,createdTime,modifiedTime,mimeType,fileExtension)")
+                .setFields(
+                        "files(id,name,parents,description,webViewLink,createdTime,modifiedTime,mimeType,fileExtension)")
                 .setPageSize(100)
-                .setQ("mimeType != 'application/vnd.google-apps.folder'")
-                .execute();
-
-        var files = result.getFiles();
-
-        if (files == null || files.isEmpty()) {
-            log.debug("No files found.");
-            return new ArrayList<>();
-        } else {
-            for (var file : files) {
-                log.debug("Processing file: {}", file.getName());
-            }
-            return files;
-        }
+                .execute()
+                .getFiles();
     }
 }
