@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.transformer.SummaryMetadataEnricher;
@@ -30,6 +32,7 @@ import org.springframework.ai.transformer.SummaryMetadataEnricher;
 import ai.yda.framework.rag.retriever.google_drive.entity.DocumentContentEntity;
 import ai.yda.framework.rag.retriever.google_drive.entity.DocumentMetadataEntity;
 
+@Slf4j
 public class DocumentSummaryService {
 
     private final ChatModel chatModel;
@@ -42,8 +45,17 @@ public class DocumentSummaryService {
         var transformDocuments = transformDocument(metadataDocuments);
         var enrichedDocuments =
                 new SummaryMetadataEnricher(chatModel, List.of(SummaryMetadataEnricher.SummaryType.CURRENT));
-        var documentSummary = enrichedDocuments.apply(transformDocuments);
-        return prepareDocuments(documentSummary);
+        return transformDocuments.stream()
+                .map(document -> {
+                    try {
+                        return enrichedDocuments.apply(List.of(document));
+                    } catch (Exception e) {
+                        log.error("Failed to process document");
+                        return List.<Document>of();
+                    }
+                })
+                .flatMap(List::stream)
+                .collect(Collectors.collectingAndThen(Collectors.toList(), this::prepareDocuments));
     }
 
     private List<Document> transformDocument(final List<DocumentMetadataEntity> metadataDocuments) {
