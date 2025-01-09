@@ -31,7 +31,9 @@ import ai.yda.framework.rag.retriever.google_drive.entity.DocumentContentEntity;
 import ai.yda.framework.rag.retriever.google_drive.entity.DocumentMetadataEntity;
 
 public class DocumentSummaryService {
+
     private final ChatModel chatModel;
+
     public DocumentSummaryService(final ChatModel chatModel) {
         this.chatModel = chatModel;
     }
