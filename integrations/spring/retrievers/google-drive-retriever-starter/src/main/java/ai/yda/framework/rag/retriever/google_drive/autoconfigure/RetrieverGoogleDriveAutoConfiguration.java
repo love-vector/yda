@@ -44,6 +44,7 @@ import ai.yda.framework.rag.retriever.google_drive.exception.GoogleDriveExceptio
 import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentContentMapper;
 import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentContentMapperImpl;
 import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentMetadataMapper;
+import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentMetadataMapperImpl;
 import ai.yda.framework.rag.retriever.google_drive.port.DocumentMetadataPort;
 import ai.yda.framework.rag.retriever.google_drive.repository.DocumentMetadataRepository;
 import ai.yda.framework.rag.retriever.google_drive.service.DocumentProcessorProvider;
@@ -106,6 +107,11 @@ public class RetrieverGoogleDriveAutoConfiguration {
     @Bean
     public DocumentContentMapper documentContentMapper() {
         return new DocumentContentMapperImpl();
+    }
+
+    @Bean
+    public DocumentMetadataMapper documentMetadataMapper() {
+        return new DocumentMetadataMapperImpl();
     }
 
     @Bean
