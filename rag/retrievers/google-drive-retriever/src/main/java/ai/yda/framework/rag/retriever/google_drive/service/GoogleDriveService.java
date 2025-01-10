@@ -16,16 +16,13 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.rag.retriever.google_drive.service;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import ai.yda.framework.rag.retriever.google_drive.entity.DocumentMetadataEntity;
 import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentMetadataMapper;
@@ -108,9 +105,9 @@ public class GoogleDriveService {
                 GoogleCredentials.fromStream(credentialsStream).createScoped(Collections.singleton(DriveScopes.DRIVE));
 
         this.driveService = new Drive.Builder(
-                        GoogleNetHttpTransport.newTrustedTransport(),
-                        GsonFactory.getDefaultInstance(),
-                        new HttpCredentialsAdapter(credentials))
+                GoogleNetHttpTransport.newTrustedTransport(),
+                GsonFactory.getDefaultInstance(),
+                new HttpCredentialsAdapter(credentials))
                 .setApplicationName(GOOGLE_DRIVE_APP_NAME)
                 .build();
 
@@ -129,11 +126,11 @@ public class GoogleDriveService {
     }
 
     public List<DocumentContentEntity> findRetrievedDocuments(final List<String> documentIds) {
-        List<DocumentContentEntity> result = new ArrayList<>();
-        documentIds.forEach(documentId -> documentMetadataPort
-                .findById(documentId)
-                .ifPresent(mappedEntity -> result.addAll(mappedEntity.getDocumentContents())));
-        return result;
+        return documentIds.stream()
+                .map(documentMetadataPort::findById)
+                .flatMap(Optional::stream)
+                .flatMap(entity -> entity.getDocumentContents().stream())
+                .toList();
     }
 
     public List<DocumentMetadataEntity> syncDriveAndProcessDocuments() throws IOException {
