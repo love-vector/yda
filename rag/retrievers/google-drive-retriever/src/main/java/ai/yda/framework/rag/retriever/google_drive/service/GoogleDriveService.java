@@ -16,7 +16,7 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.rag.retriever.google_drive.service;
 
 import java.io.IOException;
@@ -105,17 +105,17 @@ public class GoogleDriveService {
                 GoogleCredentials.fromStream(credentialsStream).createScoped(Collections.singleton(DriveScopes.DRIVE));
 
         this.driveService = new Drive.Builder(
-                GoogleNetHttpTransport.newTrustedTransport(),
-                GsonFactory.getDefaultInstance(),
-                new HttpCredentialsAdapter(credentials))
+                        GoogleNetHttpTransport.newTrustedTransport(),
+                        GsonFactory.getDefaultInstance(),
+                        new HttpCredentialsAdapter(credentials))
                 .setApplicationName(GOOGLE_DRIVE_APP_NAME)
                 .build();
 
         log.info("Google Drive service initialized successfully.");
     }
 
-    public void saveToVectorStore(final List<DocumentMetadataEntity> documents) {
-        var summarizedDocuments = documentSummaryService.summarizeDocuments(documents);
+    public void saveToVectorStore() {
+        var summarizedDocuments = documentSummaryService.summarizeDocuments(documentMetadataPort.findAll());
         var documentIds = summarizedDocuments.stream().map(Document::getId).toList();
         Objects.requireNonNull(vectorStore.delete(documentIds)).ifPresent(deleted -> {
             if (!deleted) {
@@ -132,10 +132,6 @@ public class GoogleDriveService {
                 .flatMap(entity -> entity.getDocumentContents().stream())
                 .toList();
     }
-
-    public List<DocumentMetadataEntity> syncDriveAndProcessDocuments() throws IOException {
-
-        var documentMetadataEntities = new ArrayList<DocumentMetadataEntity>();
 
     // TODO: update document metadata and content only if modifiedAt stored in db is not the same as file modifiedTime
     public void syncDriveAndProcessDocuments() throws IOException {
