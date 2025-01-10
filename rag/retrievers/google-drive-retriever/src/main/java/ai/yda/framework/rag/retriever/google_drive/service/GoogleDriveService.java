@@ -104,7 +104,7 @@ public class GoogleDriveService {
             documentMetadataEntity.setParent(resolveParent(file));
 
             // Fetch and process file content
-            if (!mappedEntity.isFolder()) {
+            if (!documentMetadataEntity.isFolder()) {
                 try (var inputStream = driveService.files().get(file.getId()).executeMediaAsInputStream()) {
                     var contentEntities = documentProcessor.processDocument(
                             file.getFileExtension(), inputStream, documentMetadataEntity);
