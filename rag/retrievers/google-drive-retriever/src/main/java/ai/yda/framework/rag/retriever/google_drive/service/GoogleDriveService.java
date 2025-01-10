@@ -22,7 +22,6 @@ package ai.yda.framework.rag.retriever.google_drive.service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -145,8 +144,7 @@ public class GoogleDriveService {
     }
 
     private List<File> listFiles() throws IOException {
-        return Optional.ofNullable(
-                driveService
+        return Optional.ofNullable(driveService
                         .files()
                         .list()
                         .setSupportsAllDrives(true)
@@ -157,6 +155,7 @@ public class GoogleDriveService {
                                 "files(id,name,parents,description,webViewLink,createdTime,modifiedTime,mimeType,fileExtension)")
                         .setPageSize(100)
                         .execute()
-                        .getFiles()
-        ).orElseGet(Collections::emptyList);
-    }}
+                        .getFiles())
+                .orElseGet(Collections::emptyList);
+    }
+}
