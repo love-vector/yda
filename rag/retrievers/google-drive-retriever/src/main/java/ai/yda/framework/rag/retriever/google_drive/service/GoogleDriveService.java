@@ -25,6 +25,7 @@ import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
@@ -121,41 +122,43 @@ public class GoogleDriveService {
      * Fetches (or creates) the parent DocumentMetadataEntity for a Google Drive file.
      * If the file has no parents, returns null.
      */
-    private DocumentMetadataEntity resolveParent(final File file) {
+    private DocumentMetadataEntity resolveParent(final File file) throws IOException {
         var parents = file.getParents();
         if (parents != null && !parents.isEmpty()) {
             var parentId = parents.get(0); // typically one parent for standard Drive structure
-            return documentMetadataPort.findById(parentId).orElseGet(() -> {
-                try {
-                    return documentMetadataPort.save(documentMetadataMapper.toEntity(driveService
-                            .files()
-                            .get(parentId)
-                            .setSupportsAllDrives(true)
-                            .setFields(
-                                    "id,name,parents,description,webViewLink,createdTime,modifiedTime,mimeType,fileExtension")
-                            .execute()));
-                } catch (IOException e) {
-                    log.error("Failed to fetch parent from Google Drive with ID: {}", parentId, e);
-                    throw new RuntimeException(e);
-                }
-            });
+
+            var existingParent = documentMetadataPort.findById(parentId);
+
+            if (existingParent.isPresent()) {
+                return existingParent.get();
+            }
+
+            var parentFile = driveService
+                    .files()
+                    .get(parentId)
+                    .setSupportsAllDrives(true)
+                    .setFields(
+                            "id,name,parents,description,webViewLink,createdTime,modifiedTime,mimeType,fileExtension")
+                    .execute();
+
+            return documentMetadataPort.save(documentMetadataMapper.toEntity(parentFile));
         }
-        // No parent
-        return null;
+        return null; // No parent
     }
 
     private List<File> listFiles() throws IOException {
-        return driveService
-                .files()
-                .list()
-                .setSupportsAllDrives(true)
-                .setIncludeItemsFromAllDrives(true)
-                .setCorpora("drive")
-                .setDriveId(driveId)
-                .setFields(
-                        "files(id,name,parents,description,webViewLink,createdTime,modifiedTime,mimeType,fileExtension)")
-                .setPageSize(100)
-                .execute()
-                .getFiles();
-    }
-}
+        return Optional.ofNullable(
+                driveService
+                        .files()
+                        .list()
+                        .setSupportsAllDrives(true)
+                        .setIncludeItemsFromAllDrives(true)
+                        .setCorpora("drive")
+                        .setDriveId(driveId)
+                        .setFields(
+                                "files(id,name,parents,description,webViewLink,createdTime,modifiedTime,mimeType,fileExtension)")
+                        .setPageSize(100)
+                        .execute()
+                        .getFiles()
+        ).orElseGet(Collections::emptyList);
+    }}
