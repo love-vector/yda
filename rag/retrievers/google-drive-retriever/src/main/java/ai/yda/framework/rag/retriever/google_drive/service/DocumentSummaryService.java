@@ -45,17 +45,8 @@ public class DocumentSummaryService {
         var transformDocuments = transformDocument(metadataDocuments);
         var enrichedDocuments =
                 new SummaryMetadataEnricher(chatModel, List.of(SummaryMetadataEnricher.SummaryType.CURRENT));
-        return transformDocuments.stream()
-                .map(document -> {
-                    try {
-                        return enrichedDocuments.apply(List.of(document));
-                    } catch (Exception e) {
-                        log.error("Failed to process document");
-                        return List.<Document>of();
-                    }
-                })
-                .flatMap(List::stream)
-                .collect(Collectors.collectingAndThen(Collectors.toList(), this::prepareDocuments));
+        var documentSummary = enrichedDocuments.apply(transformDocuments);
+        return prepareDocuments(documentSummary);
     }
 
     private List<Document> transformDocument(final List<DocumentMetadataEntity> metadataDocuments) {
