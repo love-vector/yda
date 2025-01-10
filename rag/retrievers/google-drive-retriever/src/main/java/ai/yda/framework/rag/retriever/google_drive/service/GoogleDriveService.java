@@ -22,16 +22,9 @@ package ai.yda.framework.rag.retriever.google_drive.service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
-import java.util.*;
-
-import ai.yda.framework.rag.retriever.google_drive.entity.DocumentMetadataEntity;
-import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentMetadataMapper;
-import ai.yda.framework.rag.retriever.google_drive.port.DocumentMetadataPort;
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
