@@ -19,6 +19,7 @@
 */
 package ai.yda.framework.rag.retriever.google_drive.adapter;
 
+import java.util.List;
 import java.util.Optional;
 
 import ai.yda.framework.rag.retriever.google_drive.entity.DocumentMetadataEntity;
@@ -41,5 +42,10 @@ public class DocumentMetadataAdapter implements DocumentMetadataPort {
     @Override
     public DocumentMetadataEntity save(DocumentMetadataEntity entity) {
         return repository.save(entity);
+    }
+
+    @Override
+    public List<DocumentMetadataEntity> findAll() {
+        return repository.findAll();
     }
 }

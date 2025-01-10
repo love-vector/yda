@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
@@ -35,8 +36,11 @@ import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.ai.document.Document;
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.lang.NonNull;
 
+import ai.yda.framework.rag.retriever.google_drive.entity.DocumentContentEntity;
 import ai.yda.framework.rag.retriever.google_drive.entity.DocumentMetadataEntity;
 import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentMetadataMapper;
 import ai.yda.framework.rag.retriever.google_drive.port.DocumentMetadataPort;
@@ -55,12 +59,15 @@ public class GoogleDriveService {
 
     private final Drive driveService;
     private final String driveId;
+    private final VectorStore vectorStore;
 
     private final DocumentMetadataPort documentMetadataPort;
 
     private final DocumentProcessorProvider documentProcessor;
 
     private final DocumentMetadataMapper documentMetadataMapper;
+
+    private final DocumentSummaryService documentSummaryService;
 
     /**
      * Constructs a new instance of {@link GoogleDriveService}.
@@ -75,13 +82,17 @@ public class GoogleDriveService {
             final @NonNull String driveId,
             final @NonNull DocumentMetadataPort documentMetadataPort,
             final @NonNull DocumentProcessorProvider documentProcessor,
-            final @NonNull DocumentMetadataMapper documentMetadataMapper)
+            final @NonNull DocumentMetadataMapper documentMetadataMapper,
+            final @NonNull VectorStore vectorStore,
+            final @NonNull DocumentSummaryService documentSummaryService)
             throws IOException, GeneralSecurityException {
 
         this.documentMetadataPort = documentMetadataPort;
         this.documentProcessor = documentProcessor;
         this.documentMetadataMapper = documentMetadataMapper;
         this.driveId = driveId;
+        this.vectorStore = vectorStore;
+        this.documentSummaryService = documentSummaryService;
 
         var credentials =
                 GoogleCredentials.fromStream(credentialsStream).createScoped(Collections.singleton(DriveScopes.DRIVE));
@@ -94,6 +105,25 @@ public class GoogleDriveService {
                 .build();
 
         log.info("Google Drive service initialized successfully.");
+    }
+
+    public void saveToVectorStore() {
+        var summarizedDocuments = documentSummaryService.summarizeDocuments(documentMetadataPort.findAll());
+        var documentIds = summarizedDocuments.stream().map(Document::getId).toList();
+        Objects.requireNonNull(vectorStore.delete(documentIds)).ifPresent(deleted -> {
+            if (!deleted) {
+                throw new RuntimeException("Failed to update document in Vector store");
+            }
+        });
+        vectorStore.add(summarizedDocuments);
+    }
+
+    public List<DocumentContentEntity> findRetrievedDocuments(final List<String> documentIds) {
+        return documentIds.stream()
+                .map(documentMetadataPort::findById)
+                .flatMap(Optional::stream)
+                .flatMap(entity -> entity.getDocumentContents().stream())
+                .toList();
     }
 
     // TODO: update document metadata and content only if modifiedAt stored in db is not the same as file modifiedTime

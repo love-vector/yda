@@ -28,6 +28,8 @@ import org.springframework.ai.autoconfigure.openai.OpenAiConnectionProperties;
 import org.springframework.ai.autoconfigure.openai.OpenAiEmbeddingProperties;
 import org.springframework.ai.autoconfigure.vectorstore.milvus.MilvusServiceClientProperties;
 import org.springframework.ai.autoconfigure.vectorstore.milvus.MilvusVectorStoreProperties;
+import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -48,6 +50,7 @@ import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentMetadataMapper
 import ai.yda.framework.rag.retriever.google_drive.port.DocumentMetadataPort;
 import ai.yda.framework.rag.retriever.google_drive.repository.DocumentMetadataRepository;
 import ai.yda.framework.rag.retriever.google_drive.service.DocumentProcessorProvider;
+import ai.yda.framework.rag.retriever.google_drive.service.DocumentSummaryService;
 import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
 import ai.yda.framework.rag.retriever.google_drive.service.processor.ExelDocumentProcessor;
 import ai.yda.framework.rag.retriever.google_drive.service.processor.TikaDocumentProcessor;
@@ -131,6 +134,11 @@ public class RetrieverGoogleDriveAutoConfiguration {
     }
 
     @Bean
+    public DocumentSummaryService documentSummaryService(final ChatModel chatModel) {
+        return new DocumentSummaryService(chatModel);
+    }
+
+    @Bean
     public GoogleDriveRetriever googleDriveRetriever(
             final RetrieverGoogleDriveProperties googleDriveProperties,
             final ResourceLoader resourceLoader,
@@ -140,7 +148,8 @@ public class RetrieverGoogleDriveAutoConfiguration {
             final MilvusVectorStoreProperties milvusProperties,
             final MilvusServiceClientProperties milvusClientProperties,
             final OpenAiConnectionProperties openAiConnectionProperties,
-            final OpenAiEmbeddingProperties openAiEmbeddingProperties)
+            final OpenAiEmbeddingProperties openAiEmbeddingProperties,
+            final OpenAiChatModel openAiChatModel)
             throws IOException, GeneralSecurityException {
 
         var resource = resourceLoader.getResource(googleDriveProperties.getServiceAccountKeyFilePath());
@@ -149,21 +158,24 @@ public class RetrieverGoogleDriveAutoConfiguration {
             throw new GoogleDriveException(String.format(
                     "Service Account key not found at: %s", googleDriveProperties.getServiceAccountKeyFilePath()));
         }
+        var vectorStore = MilvusVectorStoreFactory.createInstance(
+                googleDriveProperties,
+                milvusProperties,
+                milvusClientProperties,
+                openAiConnectionProperties,
+                openAiEmbeddingProperties);
 
         return new GoogleDriveRetriever(
                 googleDriveProperties.getTopK(),
                 googleDriveProperties.getIsProcessingEnabled(),
-                MilvusVectorStoreFactory.createInstance(
-                        googleDriveProperties,
-                        milvusProperties,
-                        milvusClientProperties,
-                        openAiConnectionProperties,
-                        openAiEmbeddingProperties),
+                vectorStore,
                 new GoogleDriveService(
                         resource.getInputStream(),
                         googleDriveProperties.getDriveId(),
                         documentMetadataPort,
                         documentProcessorProvider,
-                        documentMetadataMapper));
+                        documentMetadataMapper,
+                        vectorStore,
+                        documentSummaryService(openAiChatModel)));
     }
 }

@@ -31,6 +31,7 @@ import org.springframework.lang.NonNull;
 import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.retriever.Retriever;
+import ai.yda.framework.rag.retriever.google_drive.entity.DocumentContentEntity;
 import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
 
 /**
@@ -88,22 +89,25 @@ public class GoogleDriveRetriever implements Retriever<RagRequest, RagContext> {
         if (isProcessingEnabled) {
             log.info("Starting Google Drive retriever...");
             googleDriveService.syncDriveAndProcessDocuments();
+            googleDriveService.saveToVectorStore();
         }
     }
 
     @Override
     public RagContext retrieve(final RagRequest request) {
-        return RagContext.builder()
-                .knowledge(Objects.requireNonNull(vectorStore.similaritySearch(SearchRequest.builder()
-                                .query(request.getQuery())
-                                .topK(topK)
-                                .build()))
-                        .parallelStream()
-                        .map(document -> {
-                            log.debug("Document metadata: {}", document.getMetadata());
-                            return document.getText();
-                        })
-                        .toList())
-                .build();
+        var documentIds = Objects.requireNonNull(vectorStore.similaritySearch(SearchRequest.builder()
+                        .query(request.getQuery())
+                        .topK(topK)
+                        .build()))
+                .parallelStream()
+                .map(document -> {
+                    log.debug("Document metadata: {}", document.getMetadata());
+                    return document.getId();
+                })
+                .toList();
+        var childChunks = googleDriveService.findRetrievedDocuments(documentIds).stream()
+                .map(DocumentContentEntity::getChunkContent)
+                .toList();
+        return RagContext.builder().knowledge(childChunks).build();
     }
 }
