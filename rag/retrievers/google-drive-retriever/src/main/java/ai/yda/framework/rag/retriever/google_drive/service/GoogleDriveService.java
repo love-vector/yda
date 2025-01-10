@@ -109,8 +109,6 @@ public class GoogleDriveService {
                     var contentEntities = documentProcessor.processDocument(
                             file.getFileExtension(), inputStream, documentMetadataEntity);
                     documentMetadataEntity.setDocumentContents(contentEntities);
-                } catch (IOException e) {
-                    log.error("Failed to retrieve content for file: {}", file.getId(), e);
                 }
             }
 
