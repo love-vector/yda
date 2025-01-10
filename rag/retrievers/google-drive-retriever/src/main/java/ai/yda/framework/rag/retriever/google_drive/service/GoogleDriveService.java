@@ -25,6 +25,7 @@ import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
@@ -103,12 +104,12 @@ public class GoogleDriveService {
             documentMetadataEntity.setParent(resolveParent(file));
 
             // Fetch and process file content
-            try (var inputStream = driveService.files().get(file.getId()).executeMediaAsInputStream()) {
-                var contentEntities =
-                        documentProcessor.processDocument(file.getFileExtension(), inputStream, documentMetadataEntity);
-                documentMetadataEntity.setDocumentContents(contentEntities);
-            } catch (IOException e) {
-                log.error("Failed to retrieve content for file: {}", file.getId(), e);
+            if (!documentMetadataEntity.isFolder()) {
+                try (var inputStream = driveService.files().get(file.getId()).executeMediaAsInputStream()) {
+                    var contentEntities = documentProcessor.processDocument(
+                            file.getFileExtension(), inputStream, documentMetadataEntity);
+                    documentMetadataEntity.setDocumentContents(contentEntities);
+                }
             }
 
             documentMetadataPort.save(documentMetadataEntity);
@@ -119,44 +120,43 @@ public class GoogleDriveService {
      * Fetches (or creates) the parent DocumentMetadataEntity for a Google Drive file.
      * If the file has no parents, returns null.
      */
-    private DocumentMetadataEntity resolveParent(final File file) {
+    private DocumentMetadataEntity resolveParent(final File file) throws IOException {
         var parents = file.getParents();
         if (parents != null && !parents.isEmpty()) {
             var parentId = parents.get(0); // typically one parent for standard Drive structure
-            return documentMetadataPort.findById(parentId).orElseGet(() -> {
-                var newParent = new DocumentMetadataEntity();
-                newParent.setDocumentId(parentId);
-                // Optionally set default fields for the parent here
-                return documentMetadataPort.save(newParent);
-            });
+
+            var existingParent = documentMetadataPort.findById(parentId);
+
+            if (existingParent.isPresent()) {
+                return existingParent.get();
+            }
+
+            var parentFile = driveService
+                    .files()
+                    .get(parentId)
+                    .setSupportsAllDrives(true)
+                    .setFields(
+                            "id,name,parents,description,webViewLink,createdTime,modifiedTime,mimeType,fileExtension")
+                    .execute();
+
+            return documentMetadataPort.save(documentMetadataMapper.toEntity(parentFile));
         }
-        // No parent
-        return null;
+        return null; // No parent
     }
 
     private List<File> listFiles() throws IOException {
-        var result = driveService
-                .files()
-                .list()
-                .setSupportsAllDrives(true)
-                .setIncludeItemsFromAllDrives(true)
-                .setCorpora("drive")
-                .setDriveId(driveId)
-                .setFields("files(id,name,description,webViewLink,createdTime,modifiedTime,mimeType,fileExtension)")
-                .setPageSize(100)
-                .setQ("mimeType != 'application/vnd.google-apps.folder'")
-                .execute();
-
-        var files = result.getFiles();
-
-        if (files == null || files.isEmpty()) {
-            log.debug("No files found.");
-            return new ArrayList<>();
-        } else {
-            for (var file : files) {
-                log.debug("Processing file: {}", file.getName());
-            }
-            return files;
-        }
-    }
-}
+        return Optional.ofNullable(
+                driveService
+                        .files()
+                        .list()
+                        .setSupportsAllDrives(true)
+                        .setIncludeItemsFromAllDrives(true)
+                        .setCorpora("drive")
+                        .setDriveId(driveId)
+                        .setFields(
+                                "files(id,name,parents,description,webViewLink,createdTime,modifiedTime,mimeType,fileExtension)")
+                        .setPageSize(100)
+                        .execute()
+                        .getFiles()
+        ).orElseGet(Collections::emptyList);
+    }}
