@@ -96,19 +96,10 @@ public class GoogleDriveService {
         log.info("Google Drive service initialized successfully.");
     }
 
-    public List<DocumentMetadataEntity> syncDriveAndProcessDocuments() throws IOException {
-
-        var documentMetadataEntities = new ArrayList<DocumentMetadataEntity>();
-
+    // TODO: update document metadata and content only if modifiedAt stored in db is not the same as file modifiedTime
+    public void syncDriveAndProcessDocuments() throws IOException {
         for (var file : listFiles()) {
-
-            var mappedEntity = documentMetadataMapper.toEntity(file);
-
-            var documentMetadataEntity = documentMetadataPort
-                    .findById(mappedEntity.getDocumentId())
-                    .map(existing -> documentMetadataMapper.updateEntity(mappedEntity, existing))
-                    .orElse(mappedEntity);
-
+            var documentMetadataEntity = documentMetadataMapper.toEntity(file);
             documentMetadataEntity.setParent(resolveParent(file));
 
             // Fetch and process file content
@@ -121,17 +112,14 @@ public class GoogleDriveService {
             }
 
             documentMetadataPort.save(documentMetadataEntity);
-            documentMetadataEntities.add(documentMetadataEntity);
         }
-
-        return documentMetadataEntities;
     }
 
     /**
      * Fetches (or creates) the parent DocumentMetadataEntity for a Google Drive file.
      * If the file has no parents, returns null.
      */
-    private DocumentMetadataEntity resolveParent(File file) {
+    private DocumentMetadataEntity resolveParent(final File file) {
         var parents = file.getParents();
         if (parents != null && !parents.isEmpty()) {
             var parentId = parents.get(0); // typically one parent for standard Drive structure

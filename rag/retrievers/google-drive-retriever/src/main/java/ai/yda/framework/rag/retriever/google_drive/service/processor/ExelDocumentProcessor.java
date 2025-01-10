@@ -24,7 +24,9 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.poi.ss.usermodel.Cell;
+import org.apache.commons.text.StringEscapeUtils;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -36,12 +38,20 @@ import ai.yda.framework.rag.retriever.google_drive.entity.DocumentContentEntity;
 import ai.yda.framework.rag.retriever.google_drive.entity.DocumentMetadataEntity;
 import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentContentMapper;
 
+/**
+ * <p>
+ * <b>Limitations:</b> This class relies on {@link DataFormatter} for cell value formatting.
+ * For more details on its capabilities and restrictions, refer to the {@link DataFormatter} documentation.
+ * </p>
+ */
 public class ExelDocumentProcessor implements DocumentProcessor {
 
     private final DocumentContentMapper documentContentMapper;
+    private final DataFormatter dataFormatter;
 
     public ExelDocumentProcessor(final @NonNull DocumentContentMapper documentContentMapper) {
         this.documentContentMapper = documentContentMapper;
+        this.dataFormatter = new DataFormatter();
     }
 
     @Override
@@ -49,9 +59,10 @@ public class ExelDocumentProcessor implements DocumentProcessor {
             final InputStream inputStream, final DocumentMetadataEntity documentMetadata) throws IOException {
         var workbook = new XSSFWorkbook(inputStream);
         var documentContents = new ArrayList<DocumentContentEntity>();
+        var evaluator = workbook.getCreationHelper().createFormulaEvaluator();
 
         for (var sheet : workbook) {
-            var sheetContent = processSheet(sheet);
+            var sheetContent = processSheet(sheet, evaluator);
             documentContents.add(documentContentMapper.toEntity(sheet.getSheetName(), sheetContent, documentMetadata));
         }
 
@@ -59,26 +70,26 @@ public class ExelDocumentProcessor implements DocumentProcessor {
         return documentContents;
     }
 
-    private String processSheet(final Sheet sheet) {
+    private String processSheet(final Sheet sheet, final FormulaEvaluator evaluator) {
         var jsonArray = new JSONArray();
 
         var maxCell = calculateMaxCell(sheet);
 
-        for (Row row : sheet) {
+        for (var row : sheet) {
             if (row != null) {
-                var rowData = processRow(row, maxCell);
+                var rowData = processRow(row, maxCell, evaluator);
                 if (!isRowEmpty(rowData)) {
                     jsonArray.put(rowData);
                 }
             }
         }
 
-        return jsonArray.toString();
+        return StringEscapeUtils.unescapeJava(jsonArray.toString());
     }
 
     private int calculateMaxCell(final Sheet sheet) {
         var maxCell = 0;
-        for (Row row : sheet) {
+        for (var row : sheet) {
             if (row != null) {
                 for (int j = row.getLastCellNum() - 1; j >= 0; j--) {
                     var cell = row.getCell(j);
@@ -92,13 +103,12 @@ public class ExelDocumentProcessor implements DocumentProcessor {
         return maxCell;
     }
 
-    // TODO: process sheet formulas
-    private List<String> processRow(final Row row, final int maxCell) {
+    private List<String> processRow(final Row row, final int maxCell, final FormulaEvaluator evaluator) {
         var rowData = new ArrayList<String>();
 
         for (int i = 0; i < maxCell; i++) {
-            Cell cell = row.getCell(i);
-            rowData.add(cell != null ? cell.toString().trim() : "");
+            var cell = row.getCell(i);
+            rowData.add((cell == null) ? "" : dataFormatter.formatCellValue(cell, evaluator));
         }
 
         return rowData;
