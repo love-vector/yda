@@ -29,4 +29,6 @@ public interface DocumentMetadataPort {
     DocumentMetadataDTO save(DocumentMetadataDTO documentMetadataDTO);
 
     void deleteAll();
+
+    List<DocumentMetadataEntity> getAllDocuments();
 }
