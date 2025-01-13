@@ -22,6 +22,9 @@ databaseChangeLog:
                   name: description
                   type: text
               - column:
+                  name: summary
+                  type: text
+              - column:
                   name: uri
                   type: varchar(2048)
                   constraints:

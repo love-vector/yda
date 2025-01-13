@@ -54,6 +54,9 @@ public class DocumentMetadataEntity {
     @Column(name = "description")
     private String description;
 
+    @Column(name = "summary")
+    private String summary;
+
     @Column(name = "uri")
     private String uri;
 
