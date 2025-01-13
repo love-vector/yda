@@ -17,14 +17,13 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.rag.retriever.google_drive.service.processor;
+package ai.yda.framework.rag.retriever.google_drive.port;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentDTO;
 
-public interface DocumentProcessor {
-    List<DocumentContentDTO> processDocument(InputStream inputStream, String documentMetadataId) throws IOException;
+public interface DocumentContentPort {
+
+    List<DocumentContentDTO> getDocumentContents(String documentId);
 }

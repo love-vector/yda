@@ -34,8 +34,7 @@ import org.json.JSONArray;
 
 import org.springframework.lang.NonNull;
 
-import ai.yda.framework.rag.retriever.google_drive.entity.DocumentContentEntity;
-import ai.yda.framework.rag.retriever.google_drive.entity.DocumentMetadataEntity;
+import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentDTO;
 import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentContentMapper;
 
 /**
@@ -55,15 +54,15 @@ public class ExelDocumentProcessor implements DocumentProcessor {
     }
 
     @Override
-    public List<DocumentContentEntity> processDocument(
-            final InputStream inputStream, final DocumentMetadataEntity documentMetadata) throws IOException {
+    public List<DocumentContentDTO> processDocument(final InputStream inputStream, final String documentMetadataId)
+            throws IOException {
         var workbook = new XSSFWorkbook(inputStream);
-        var documentContents = new ArrayList<DocumentContentEntity>();
+        var documentContents = new ArrayList<DocumentContentDTO>();
         var evaluator = workbook.getCreationHelper().createFormulaEvaluator();
 
         for (var sheet : workbook) {
             var sheetContent = processSheet(sheet, evaluator);
-            documentContents.add(documentContentMapper.toEntity(sheet.getSheetName(), sheetContent, documentMetadata));
+            documentContents.add(documentContentMapper.toDTO(sheet.getSheetName(), sheetContent, documentMetadataId));
         }
 
         workbook.close();

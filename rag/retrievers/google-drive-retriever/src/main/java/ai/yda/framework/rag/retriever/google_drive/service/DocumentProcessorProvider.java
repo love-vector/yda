@@ -25,8 +25,7 @@ import java.util.List;
 
 import org.springframework.lang.NonNull;
 
-import ai.yda.framework.rag.retriever.google_drive.entity.DocumentContentEntity;
-import ai.yda.framework.rag.retriever.google_drive.entity.DocumentMetadataEntity;
+import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentDTO;
 import ai.yda.framework.rag.retriever.google_drive.service.processor.DocumentProcessor;
 import ai.yda.framework.rag.retriever.google_drive.service.processor.DocumentType;
 import ai.yda.framework.rag.retriever.google_drive.service.processor.ExelDocumentProcessor;
@@ -42,11 +41,9 @@ public class DocumentProcessorProvider {
         this.tikaProcessor = tikaProcessor;
     }
 
-    public List<DocumentContentEntity> processDocument(
-            final String extension, final InputStream inputStream, final DocumentMetadataEntity documentMetadata)
-            throws IOException {
-        var processor = getProcessor(extension);
-        return processor.processDocument(inputStream, documentMetadata);
+    public List<DocumentContentDTO> processDocument(
+            final String extension, final InputStream inputStream, final String documentMetadataId) throws IOException {
+        return getProcessor(extension).processDocument(inputStream, documentMetadataId);
     }
 
     private DocumentProcessor getProcessor(final String extension) {

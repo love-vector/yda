@@ -25,7 +25,7 @@ databaseChangeLog:
                   name: summary
                   type: text
               - column:
-                  name: uri
+                  name: web_view_link
                   type: varchar(2048)
                   constraints:
                     nullable: false

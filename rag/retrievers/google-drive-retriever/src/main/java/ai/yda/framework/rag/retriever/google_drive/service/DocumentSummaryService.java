@@ -29,11 +29,12 @@ import org.springframework.ai.document.Document;
 import org.springframework.ai.document.MetadataMode;
 import org.springframework.ai.transformer.SummaryMetadataEnricher;
 
-import ai.yda.framework.rag.retriever.google_drive.entity.DocumentContentEntity;
-import ai.yda.framework.rag.retriever.google_drive.entity.DocumentMetadataEntity;
+import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentDTO;
+import ai.yda.framework.rag.retriever.google_drive.dto.DocumentMetadataDTO;
 
 @Slf4j
 public class DocumentSummaryService {
+
 
     private final ChatModel chatModel;
 
@@ -41,8 +42,9 @@ public class DocumentSummaryService {
         this.chatModel = chatModel;
     }
 
-    public String summarizeDocument(final DocumentMetadataEntity metadataDocuments) {
-        var documentSummaryInstruction = """
+    public String summarizeDocument(final DocumentMetadataDTO metadataDocument) {
+        var documentSummaryInstruction =
+                """
         Provide a summary of the attached document by highlighting its key points.
         Focus on the main arguments, supporting evidence, and conclusions drawn within the document.
         The summary should be concise yet comprehensive, capturing the essence of the document's content.
@@ -56,7 +58,7 @@ public class DocumentSummaryService {
         Output Format:
         - Present the summary in paragraph form, using bullet points if necessary to delineate distinct ideas or sections.
         """;
-        var transformDocuments = transformDocument(metadataDocuments);
+        var transformDocuments = transformDocument(metadataDocument);
         var documentsEnricher = new SummaryMetadataEnricher(
                 chatModel,
                 List.of(SummaryMetadataEnricher.SummaryType.CURRENT),
@@ -66,14 +68,14 @@ public class DocumentSummaryService {
         return extractSummary(documentSummary.get(0));
     }
 
-    private Document transformDocument(final DocumentMetadataEntity metadataDocument) {
-        var documentContent = metadataDocument.getDocumentContents().stream()
-                .map(DocumentContentEntity::getChunkContent)
-                .collect(Collectors.joining(""));
+    private Document transformDocument(final DocumentMetadataDTO metadataDocument) {
         return Document.builder()
                 .text("file name: " + metadataDocument.getName()
-                                + "\n document description: " + metadataDocument.getDescription()
-                                + "\ndocument content: " + documentContent)
+                        + "\n document description: " + metadataDocument.getDescription()
+                        + "\ndocument content: "
+                        + metadataDocument.getDocumentContents().stream()
+                                .map(DocumentContentDTO::getChunkContent)
+                                .collect(Collectors.joining("")))
                 .id(metadataDocument.getDocumentId())
                 .build();
     }

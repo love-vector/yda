@@ -19,17 +19,14 @@
 */
 package ai.yda.framework.rag.retriever.google_drive.port;
 
-import java.util.List;
 import java.util.Optional;
 
-import ai.yda.framework.rag.retriever.google_drive.entity.DocumentMetadataEntity;
+import ai.yda.framework.rag.retriever.google_drive.dto.DocumentMetadataDTO;
 
 public interface DocumentMetadataPort {
-    Optional<DocumentMetadataEntity> findById(String documentId);
+    Optional<DocumentMetadataDTO> findById(String documentId);
 
-    DocumentMetadataEntity save(DocumentMetadataEntity entity);
-
-    List<DocumentMetadataEntity> findAll();
+    DocumentMetadataDTO save(DocumentMetadataDTO documentMetadataDTO);
 
     void deleteAll();
 }

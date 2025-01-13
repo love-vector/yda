@@ -17,14 +17,31 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.rag.retriever.google_drive.service.processor;
+package ai.yda.framework.rag.retriever.google_drive.dto;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
+import lombok.*;
 
-import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentDTO;
+/**
+ * DTO for transferring document content information.
+ * Contains only the fields necessary for external usage, without persistence annotations.
+ *
+ * @since 0.2.0
+ */
+@Getter
+@Setter
+@Builder(toBuilder = true)
+@NoArgsConstructor
+@AllArgsConstructor
+public class DocumentContentDTO {
 
-public interface DocumentProcessor {
-    List<DocumentContentDTO> processDocument(InputStream inputStream, String documentMetadataId) throws IOException;
+    private Long contentId;
+
+    private String chunkName;
+
+    private String chunkContent;
+
+    /**
+     * ID of the document this content belongs to.
+     */
+    private String documentMetadataId;
 }

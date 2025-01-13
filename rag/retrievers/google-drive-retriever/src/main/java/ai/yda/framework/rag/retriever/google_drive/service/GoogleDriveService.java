@@ -35,12 +35,12 @@ import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.lang.NonNull;
 
-import ai.yda.framework.rag.retriever.google_drive.entity.DocumentContentEntity;
-import ai.yda.framework.rag.retriever.google_drive.entity.DocumentMetadataEntity;
+import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentDTO;
+import ai.yda.framework.rag.retriever.google_drive.dto.DocumentMetadataDTO;
 import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentMetadataMapper;
+import ai.yda.framework.rag.retriever.google_drive.port.DocumentContentPort;
 import ai.yda.framework.rag.retriever.google_drive.port.DocumentMetadataPort;
 
 /**
@@ -60,6 +60,8 @@ public class GoogleDriveService {
 
     private final DocumentMetadataPort documentMetadataPort;
 
+    private final DocumentContentPort documentContentPort;
+
     private final DocumentProcessorProvider documentProcessor;
 
     private final DocumentMetadataMapper documentMetadataMapper;
@@ -78,12 +80,14 @@ public class GoogleDriveService {
             final @NonNull InputStream credentialsStream,
             final @NonNull String driveId,
             final @NonNull DocumentMetadataPort documentMetadataPort,
+            final @NonNull DocumentContentPort documentContentPort,
             final @NonNull DocumentProcessorProvider documentProcessor,
             final @NonNull DocumentMetadataMapper documentMetadataMapper,
             final @NonNull DocumentSummaryService documentSummaryService)
             throws IOException, GeneralSecurityException {
 
         this.documentMetadataPort = documentMetadataPort;
+        this.documentContentPort = documentContentPort;
         this.documentProcessor = documentProcessor;
         this.documentMetadataMapper = documentMetadataMapper;
         this.driveId = driveId;
@@ -102,11 +106,11 @@ public class GoogleDriveService {
         log.info("Google Drive service initialized successfully.");
     }
 
-    public List<DocumentContentEntity> findRetrievedDocuments(final List<String> documentIds) {
+    public List<DocumentContentDTO> findRetrievedDocuments(final List<String> documentIds) {
         return documentIds.stream()
                 .map(documentMetadataPort::findById)
                 .flatMap(Optional::stream)
-                .flatMap(entity -> entity.getDocumentContents().stream())
+                .flatMap(dto -> documentContentPort.getDocumentContents(dto.getDocumentId()).stream())
                 .toList();
     }
 
@@ -115,19 +119,24 @@ public class GoogleDriveService {
         documentMetadataPort.deleteAll();
 
         for (var file : listFiles()) {
-            var documentMetadataEntity = documentMetadataMapper.toEntity(file);
-            documentMetadataEntity.setParent(resolveParent(file));
+            var documentMetadataDTO = documentMetadataMapper.toDTO(file);
 
-            // Fetch and process file content
-            if (!documentMetadataEntity.isFolder()) {
+            var parent = resolveParent(file);
+            if (parent != null) {
+                documentMetadataDTO.setParentId(parent.getDocumentId());
+            }
+
+            if (!documentMetadataDTO.isFolder()) {
                 try (var inputStream = driveService.files().get(file.getId()).executeMediaAsInputStream()) {
+
                     var contentEntities = documentProcessor.processDocument(
-                            file.getFileExtension(), inputStream, documentMetadataEntity);
-                    documentMetadataEntity.setDocumentContents(contentEntities);
-                    documentMetadataEntity.setSummary(documentSummaryService.summarizeDocument(documentMetadataEntity));
+                            file.getFileExtension(), inputStream, documentMetadataDTO.getDocumentId());
+
+                    documentMetadataDTO.setDocumentContents(contentEntities);
+                    documentMetadataDTO.setSummary(documentSummaryService.summarizeDocument(documentMetadataDTO));
                 }
             }
-            documentMetadataPort.save(documentMetadataEntity);
+            documentMetadataPort.save(documentMetadataDTO);
         }
     }
 
@@ -135,7 +144,7 @@ public class GoogleDriveService {
      * Fetches (or creates) the parent DocumentMetadataEntity for a Google Drive file.
      * If the file has no parents, returns null.
      */
-    private DocumentMetadataEntity resolveParent(final File file) throws IOException {
+    private DocumentMetadataDTO resolveParent(final File file) throws IOException {
         var parents = file.getParents();
         if (parents != null && !parents.isEmpty()) {
             var parentId = parents.get(0); // typically one parent for standard Drive structure
@@ -151,10 +160,10 @@ public class GoogleDriveService {
                     .get(parentId)
                     .setSupportsAllDrives(true)
                     .setFields(
-                            "id,name,parents,description,webViewLink,createdTime,modifiedTime,mimeType,fileExtension")
+                            "id,name,parents,description,driveId,webViewLink,createdTime,modifiedTime,mimeType,fileExtension")
                     .execute();
 
-            return documentMetadataPort.save(documentMetadataMapper.toEntity(parentFile));
+            return documentMetadataPort.save(documentMetadataMapper.toDTO(parentFile));
         }
         return null; // No parent
     }
@@ -167,7 +176,7 @@ public class GoogleDriveService {
                         .setIncludeItemsFromAllDrives(true)
                         .setCorpora("drive")
                         .setDriveId(driveId)
-                        .setFields("files(id,name,parents,description,webViewLink,createdTime,modifiedTime,"
+                        .setFields("files(id,name,parents,description,driveId,webViewLink,createdTime,modifiedTime,"
                                 + "mimeType,fileExtension)")
                         .setPageSize(100)
                         .execute()
