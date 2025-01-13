@@ -30,4 +30,6 @@ public interface DocumentMetadataPort {
     DocumentMetadataEntity save(DocumentMetadataEntity entity);
 
     List<DocumentMetadataEntity> findAll();
+
+    void deleteAll();
 }

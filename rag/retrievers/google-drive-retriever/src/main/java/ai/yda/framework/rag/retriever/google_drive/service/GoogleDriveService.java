@@ -128,6 +128,8 @@ public class GoogleDriveService {
 
     // TODO: update document metadata and content only if modifiedAt stored in db is not the same as file modifiedTime
     public void syncDriveAndProcessDocuments() throws IOException {
+        documentMetadataPort.deleteAll();
+
         for (var file : listFiles()) {
             var documentMetadataEntity = documentMetadataMapper.toEntity(file);
             documentMetadataEntity.setParent(resolveParent(file));
@@ -181,8 +183,8 @@ public class GoogleDriveService {
                         .setIncludeItemsFromAllDrives(true)
                         .setCorpora("drive")
                         .setDriveId(driveId)
-                        .setFields(
-                                "files(id,name,parents,description,webViewLink,createdTime,modifiedTime,mimeType,fileExtension)")
+                        .setFields("files(id,name,parents,description,webViewLink,createdTime,modifiedTime,"
+                                + "mimeType,fileExtension)")
                         .setPageSize(100)
                         .execute()
                         .getFiles())
