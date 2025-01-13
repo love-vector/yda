@@ -48,4 +48,9 @@ public class DocumentMetadataAdapter implements DocumentMetadataPort {
     public List<DocumentMetadataEntity> findAll() {
         return repository.findAll();
     }
+
+    @Override
+    public void deleteAll() {
+        repository.deleteAll();
+    }
 }

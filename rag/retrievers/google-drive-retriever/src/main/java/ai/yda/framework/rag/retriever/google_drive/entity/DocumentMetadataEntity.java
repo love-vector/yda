@@ -82,6 +82,7 @@ public class DocumentMetadataEntity {
      * Mapped by the 'parent' field.
      * This will contain a list of documents/folders for which this entity is the parent.
      */
+    @Singular
     @OneToMany(mappedBy = "documentMetadata", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<DocumentContentEntity> documentContents;
 
