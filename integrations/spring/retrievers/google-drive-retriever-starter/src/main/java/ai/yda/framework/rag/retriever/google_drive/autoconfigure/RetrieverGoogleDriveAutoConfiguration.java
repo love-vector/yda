@@ -134,8 +134,9 @@ public class RetrieverGoogleDriveAutoConfiguration {
     }
 
     @Bean
-    public DocumentSummaryService documentSummaryService(final ChatModel chatModel) {
-        return new DocumentSummaryService(chatModel);
+    public DocumentSummaryService documentSummaryService(
+            final ChatModel chatModel, final RetrieverGoogleDriveProperties retrieverGoogleDriveProperties) {
+        return new DocumentSummaryService(chatModel, retrieverGoogleDriveProperties.getDocumentSummaryInstruction());
     }
 
     @Bean
@@ -175,6 +176,7 @@ public class RetrieverGoogleDriveAutoConfiguration {
                         documentMetadataPort,
                         documentProcessorProvider,
                         documentMetadataMapper,
-                        documentSummaryService(openAiChatModel)));
+                        vectorStore,
+                        documentSummaryService(openAiChatModel, googleDriveProperties)));
     }
 }
