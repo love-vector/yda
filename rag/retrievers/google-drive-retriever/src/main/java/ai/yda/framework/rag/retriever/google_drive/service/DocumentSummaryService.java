@@ -34,7 +34,7 @@ public class DocumentSummaryService {
 
     private final ChatModel chatModel;
 
-    public DocumentSummaryService(final ChatModel chatModel, final String documentSummaryInstruction) {
+    public DocumentSummaryService(final ChatModel chatModel) {
         this.chatModel = chatModel;
     }
 
