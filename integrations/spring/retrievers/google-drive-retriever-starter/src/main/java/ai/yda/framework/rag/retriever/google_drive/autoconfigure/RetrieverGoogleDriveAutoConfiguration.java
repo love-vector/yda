@@ -194,7 +194,6 @@ public class RetrieverGoogleDriveAutoConfiguration {
                         documentMetadataPort,
                         documentProcessorProvider,
                         documentMetadataMapper,
-                        vectorStore,
                         documentSummaryService(openAiConnectionProperties)));
     }
 }
