@@ -67,7 +67,9 @@ public class DocumentSummaryService {
                 .map(DocumentContentEntity::getChunkContent)
                 .collect(Collectors.joining(""));
         return Document.builder()
-                .text(documentContent + metadataDocument.getDescription() + metadataDocument.getName())
+                .text("file name: " + metadataDocument.getName()
+                                + "\n document description: " + metadataDocument.getDescription()
+                                + "\ndocument content: " + documentContent)
                 .id(metadataDocument.getDocumentId())
                 .build();
     }
