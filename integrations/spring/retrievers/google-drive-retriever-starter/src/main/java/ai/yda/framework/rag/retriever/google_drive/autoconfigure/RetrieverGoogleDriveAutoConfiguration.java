@@ -141,16 +141,16 @@ public class RetrieverGoogleDriveAutoConfiguration {
     @Bean
     public DocumentSummaryService documentSummaryService(
             final OpenAiConnectionProperties openAiConnectionProperties, final WebClient.Builder webClientBuilder) {
-        var restClientBuilder = RestClient.builder()
+        var restClient = RestClient.builder()
                 .requestFactory(ClientHttpRequestFactories.get(ClientHttpRequestFactorySettings.DEFAULTS
                         .withConnectTimeout(Duration.ofMinutes(5))
                         .withReadTimeout(Duration.ofMinutes(10))))
                 .build();
-        //TODO Come up with another way to modify OpenAiChatModel
+        // TODO Come up with another way to modify OpenAiChatModel
         var openAiApi = new OpenAiApi(
                 openAiConnectionProperties.getBaseUrl(),
                 openAiConnectionProperties.getApiKey(),
-                restClientBuilder.mutate(),
+                restClient.mutate(),
                 webClientBuilder);
 
         return new DocumentSummaryService(new OpenAiChatModel(openAiApi));
