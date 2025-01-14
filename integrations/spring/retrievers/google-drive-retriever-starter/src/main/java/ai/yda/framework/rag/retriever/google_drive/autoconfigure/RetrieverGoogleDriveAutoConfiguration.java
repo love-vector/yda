@@ -139,23 +139,21 @@ public class RetrieverGoogleDriveAutoConfiguration {
     }
 
     @Bean
-    public RestClient openAiRestClientForChat() {
-        return RestClient.builder()
+    public DocumentSummaryService documentSummaryService(
+            final OpenAiConnectionProperties openAiConnectionProperties, final WebClient.Builder webClientBuilder) {
+        var restClientBuilder = RestClient.builder()
                 .requestFactory(ClientHttpRequestFactories.get(ClientHttpRequestFactorySettings.DEFAULTS
                         .withConnectTimeout(Duration.ofMinutes(5))
                         .withReadTimeout(Duration.ofMinutes(10))))
                 .build();
-    }
 
-    @Bean
-    public DocumentSummaryService documentSummaryService(final OpenAiConnectionProperties openAiConnectionProperties) {
         var openAiApi = new OpenAiApi(
                 openAiConnectionProperties.getBaseUrl(),
                 openAiConnectionProperties.getApiKey(),
-                openAiRestClientForChat().mutate(),
-                WebClient.builder());
-        var chatModel = new OpenAiChatModel(openAiApi);
-        return new DocumentSummaryService(chatModel);
+                restClientBuilder.mutate(),
+                webClientBuilder);
+
+        return new DocumentSummaryService(new OpenAiChatModel(openAiApi));
     }
 
     @Bean
@@ -168,7 +166,8 @@ public class RetrieverGoogleDriveAutoConfiguration {
             final MilvusVectorStoreProperties milvusProperties,
             final MilvusServiceClientProperties milvusClientProperties,
             final OpenAiConnectionProperties openAiConnectionProperties,
-            final OpenAiEmbeddingProperties openAiEmbeddingProperties)
+            final OpenAiEmbeddingProperties openAiEmbeddingProperties,
+            final WebClient.Builder webClientBuilder)
             throws IOException, GeneralSecurityException {
 
         var resource = resourceLoader.getResource(googleDriveProperties.getServiceAccountKeyFilePath());
@@ -194,6 +193,6 @@ public class RetrieverGoogleDriveAutoConfiguration {
                         documentMetadataPort,
                         documentProcessorProvider,
                         documentMetadataMapper,
-                        documentSummaryService(openAiConnectionProperties)));
+                        documentSummaryService(openAiConnectionProperties, webClientBuilder)));
     }
 }
