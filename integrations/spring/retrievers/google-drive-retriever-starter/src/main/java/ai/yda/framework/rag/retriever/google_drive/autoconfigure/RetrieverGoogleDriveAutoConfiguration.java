@@ -146,7 +146,7 @@ public class RetrieverGoogleDriveAutoConfiguration {
                         .withConnectTimeout(Duration.ofMinutes(5))
                         .withReadTimeout(Duration.ofMinutes(10))))
                 .build();
-
+        //TODO Come up with another way to modify OpenAiChatModel
         var openAiApi = new OpenAiApi(
                 openAiConnectionProperties.getBaseUrl(),
                 openAiConnectionProperties.getApiKey(),
