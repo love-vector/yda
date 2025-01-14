@@ -17,20 +17,6 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.rag.retriever.google_drive.port;
+package ai.yda.framework.rag.retriever.google_drive.dto;
 
-import java.util.List;
-import java.util.Optional;
-
-import ai.yda.framework.rag.retriever.google_drive.dto.DocumentMetadataDTO;
-import ai.yda.framework.rag.retriever.google_drive.dto.DocumentSummaryDTO;
-
-public interface DocumentMetadataPort {
-    Optional<DocumentMetadataDTO> findById(String documentId);
-
-    DocumentMetadataDTO save(DocumentMetadataDTO documentMetadataDTO);
-
-    void deleteAll();
-
-    List<DocumentSummaryDTO> getAllFileSummaries();
-}
+public record DocumentSummaryDTO(String documentId, String summary) {}

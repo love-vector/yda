@@ -26,9 +26,7 @@ import java.time.Duration;
 import com.zaxxer.hikari.HikariDataSource;
 
 import org.springframework.ai.autoconfigure.openai.OpenAiConnectionProperties;
-import org.springframework.ai.autoconfigure.openai.OpenAiEmbeddingProperties;
-import org.springframework.ai.autoconfigure.vectorstore.milvus.MilvusServiceClientProperties;
-import org.springframework.ai.autoconfigure.vectorstore.milvus.MilvusVectorStoreProperties;
+import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -62,7 +60,6 @@ import ai.yda.framework.rag.retriever.google_drive.service.DocumentSummaryServic
 import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
 import ai.yda.framework.rag.retriever.google_drive.service.processor.ExelDocumentProcessor;
 import ai.yda.framework.rag.retriever.google_drive.service.processor.TikaDocumentProcessor;
-import ai.yda.framework.rag.retriever.shared.factory.MilvusVectorStoreFactory;
 
 /**
  * Auto-configuration class for setting up the Google Drive retriever in a Spring Boot application.
@@ -153,8 +150,7 @@ public class RetrieverGoogleDriveAutoConfiguration {
 
     @Bean
     public DocumentSummaryService documentSummaryService(
-            final OpenAiConnectionProperties openAiConnectionProperties,
-            final WebClient.Builder webClientBuilder) {
+            final OpenAiConnectionProperties openAiConnectionProperties, final WebClient.Builder webClientBuilder) {
         var restClientBuilder = RestClient.builder()
                 .requestFactory(ClientHttpRequestFactories.get(ClientHttpRequestFactorySettings.DEFAULTS
                         .withConnectTimeout(Duration.ofMinutes(5))
@@ -177,10 +173,8 @@ public class RetrieverGoogleDriveAutoConfiguration {
             final DocumentContentPort documentContentPort,
             final DocumentProcessorProvider documentProcessorProvider,
             final DocumentMetadataMapper documentMetadataMapper,
-            final MilvusVectorStoreProperties milvusProperties,
-            final MilvusServiceClientProperties milvusClientProperties,
+            final ChatClient.Builder chatClientBuilder,
             final OpenAiConnectionProperties openAiConnectionProperties,
-            final OpenAiEmbeddingProperties openAiEmbeddingProperties,
             final WebClient.Builder webClientBuilder)
             throws IOException, GeneralSecurityException {
 
@@ -190,17 +184,12 @@ public class RetrieverGoogleDriveAutoConfiguration {
             throw new GoogleDriveException(String.format(
                     "Service Account key not found at: %s", googleDriveProperties.getServiceAccountKeyFilePath()));
         }
-        var vectorStore = MilvusVectorStoreFactory.createInstance(
-                googleDriveProperties,
-                milvusProperties,
-                milvusClientProperties,
-                openAiConnectionProperties,
-                openAiEmbeddingProperties);
 
         return new GoogleDriveRetriever(
                 googleDriveProperties.getTopK(),
                 googleDriveProperties.getIsProcessingEnabled(),
-                vectorStore,
+                chatClientBuilder.build(),
+                documentMetadataPort,
                 new GoogleDriveService(
                         resource.getInputStream(),
                         googleDriveProperties.getDriveId(),

@@ -35,7 +35,6 @@ import ai.yda.framework.rag.retriever.google_drive.dto.DocumentMetadataDTO;
 @Slf4j
 public class DocumentSummaryService {
 
-
     private final ChatModel chatModel;
 
     public DocumentSummaryService(final ChatModel chatModel) {

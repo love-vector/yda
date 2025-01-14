@@ -20,18 +20,21 @@
 package ai.yda.framework.rag.retriever.google_drive;
 
 import java.io.IOException;
-import java.util.Objects;
+import java.util.Collections;
+import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.ai.vectorstore.SearchRequest;
-import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.model.function.FunctionCallback;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.lang.NonNull;
 
 import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.retriever.Retriever;
-import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentDTO;
+import ai.yda.framework.rag.retriever.google_drive.dto.DocumentIdDTO;
+import ai.yda.framework.rag.retriever.google_drive.port.DocumentMetadataPort;
 import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
 
 /**
@@ -56,10 +59,17 @@ import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
 @Slf4j
 public class GoogleDriveRetriever implements Retriever<RagRequest, RagContext> {
 
-    /**
-     * The Vector Store used to retrieve Context data for User Request through similarity search.
-     */
-    private final VectorStore vectorStore;
+    private static final String RETRIEVAL_SYSTEM_INSTRUCTION =
+            """
+                    You are an assistant tasked with selecting the documents most relevant to the user's query.
+                    Compare the query with document summaries and return a JSON array of objects in the following format:
+                    [
+                        {
+                            "documentId": "string"
+                        }
+                    ]
+                    Each object should represent a relevant document. If no documents are relevant, return an empty
+                    array ([]). Ensure the output strictly follows this format.""";
 
     /**
      * The number of top results to retrieve from the Vector Store.
@@ -71,13 +81,19 @@ public class GoogleDriveRetriever implements Retriever<RagRequest, RagContext> {
      */
     private final GoogleDriveService googleDriveService;
 
+    private final ChatClient chatClient;
+
+    private final DocumentMetadataPort documentMetadataPort;
+
     public GoogleDriveRetriever(
             final @NonNull Integer topK,
             final @NonNull Boolean isProcessingEnabled,
-            final @NonNull VectorStore vectorStore,
+            final @NonNull ChatClient chatClient,
+            final @NonNull DocumentMetadataPort documentMetadataPort,
             final @NonNull GoogleDriveService googleDriveService)
             throws IOException {
-        this.vectorStore = vectorStore;
+        this.chatClient = chatClient;
+        this.documentMetadataPort = documentMetadataPort;
 
         this.googleDriveService = googleDriveService;
 
@@ -94,22 +110,22 @@ public class GoogleDriveRetriever implements Retriever<RagRequest, RagContext> {
 
     @Override
     public RagContext retrieve(final RagRequest request) {
-        return RagContext.builder()
-                .knowledge(googleDriveService
-                        .findRetrievedDocuments(
-                                Objects.requireNonNull(vectorStore.similaritySearch(SearchRequest.builder()
-                                                .query(request.getQuery())
-                                                .topK(topK)
-                                                .build()))
-                                        .parallelStream()
-                                        .map(document -> {
-                                            log.debug("Document metadata: {}", document.getMetadata());
-                                            return document.getId();
-                                        })
-                                        .toList())
-                        .stream()
-                        .map(DocumentContentDTO::getChunkContent)
-                        .toList())
-                .build();
+        var documentIds = chatClient
+                .prompt()
+                .user(request.getQuery())
+                .system(RETRIEVAL_SYSTEM_INSTRUCTION)
+                .functions(FunctionCallback.builder()
+                        .function("getAllDocuments", documentMetadataPort::getAllFileSummaries)
+                        .description("Retrieve all documents to enable precise filtering based on summaries")
+                        .build())
+                .call()
+                .entity(new ParameterizedTypeReference<List<DocumentIdDTO>>() {});
+
+        if (documentIds != null) {
+            documentIds.forEach(file -> log.debug("Relevant file id: {}", file.documentId()));
+        }
+
+        // TODO: get all relevant chunks
+        return RagContext.builder().knowledge(Collections.emptyList()).build();
     }
 }
