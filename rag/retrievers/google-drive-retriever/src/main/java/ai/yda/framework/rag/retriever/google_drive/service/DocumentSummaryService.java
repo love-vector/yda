@@ -16,21 +16,18 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.rag.retriever.google_drive.service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
+import ai.yda.framework.rag.retriever.google_drive.entity.DocumentContentEntity;
+import ai.yda.framework.rag.retriever.google_drive.entity.DocumentMetadataEntity;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.transformer.SummaryMetadataEnricher;
 
-import ai.yda.framework.rag.retriever.google_drive.entity.DocumentContentEntity;
-import ai.yda.framework.rag.retriever.google_drive.entity.DocumentMetadataEntity;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class DocumentSummaryService {
@@ -41,36 +38,25 @@ public class DocumentSummaryService {
         this.chatModel = chatModel;
     }
 
-    public List<Document> summarizeDocuments(final List<DocumentMetadataEntity> metadataDocuments) {
+    public String summarizeDocument(final DocumentMetadataEntity metadataDocuments) {
         var transformDocuments = transformDocument(metadataDocuments);
-        var enrichedDocuments =
+        var documentsEnricher =
                 new SummaryMetadataEnricher(chatModel, List.of(SummaryMetadataEnricher.SummaryType.CURRENT));
-        var documentSummary = enrichedDocuments.apply(transformDocuments);
-        return prepareDocuments(documentSummary);
+        var documentSummary = documentsEnricher.apply(List.of(transformDocuments));
+        return extractSummary(documentSummary.get(0));
     }
 
-    private List<Document> transformDocument(final List<DocumentMetadataEntity> metadataDocuments) {
-        return metadataDocuments.stream()
-                .map(metadataDocument -> {
-                    var documentContent = metadataDocument.getDocumentContents().stream()
-                            .map(DocumentContentEntity::getChunkContent)
-                            .collect(Collectors.joining(""));
-                    return Document.builder()
-                            .text(documentContent + metadataDocument.getDescription() + metadataDocument.getName())
-                            .id(metadataDocument.getDocumentId())
-                            .build();
-                })
-                .collect(Collectors.toList());
+    private Document transformDocument(final DocumentMetadataEntity metadataDocument) {
+        var documentContent = metadataDocument.getDocumentContents().stream()
+                .map(DocumentContentEntity::getChunkContent)
+                .collect(Collectors.joining(""));
+        return Document.builder()
+                .text(documentContent + metadataDocument.getDescription() + metadataDocument.getName())
+                .id(metadataDocument.getDocumentId())
+                .build();
     }
 
-    private List<Document> prepareDocuments(final List<Document> documents) {
-        return documents.stream()
-                .map(document -> document.mutate()
-                        .text(document.getMetadata()
-                                .getOrDefault("section_summary", "")
-                                .toString())
-                        .metadata(Map.of())
-                        .build())
-                .toList();
+    private String extractSummary(final Document document) {
+        return document.getMetadata().getOrDefault("section_summary", "").toString();
     }
 }
