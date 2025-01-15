@@ -21,12 +21,15 @@ package ai.yda.framework.rag.retriever.google_drive.adapter;
 
 import java.util.Optional;
 
+import jakarta.transaction.Transactional;
+
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentMetadataDTO;
 import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentContentMapper;
 import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentMetadataMapper;
 import ai.yda.framework.rag.retriever.google_drive.port.DocumentMetadataPort;
 import ai.yda.framework.rag.retriever.google_drive.repository.DocumentMetadataRepository;
 
+@Transactional
 public class DocumentMetadataAdapter implements DocumentMetadataPort {
 
     private final DocumentMetadataRepository repository;
