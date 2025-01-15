@@ -21,6 +21,7 @@ package ai.yda.framework.rag.retriever.google_drive.autoconfigure;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.time.Duration;
 
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -28,17 +29,21 @@ import org.springframework.ai.autoconfigure.openai.OpenAiConnectionProperties;
 import org.springframework.ai.autoconfigure.openai.OpenAiEmbeddingProperties;
 import org.springframework.ai.autoconfigure.vectorstore.milvus.MilvusServiceClientProperties;
 import org.springframework.ai.autoconfigure.vectorstore.milvus.MilvusVectorStoreProperties;
-import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
+import org.springframework.boot.web.client.ClientHttpRequestFactories;
+import org.springframework.boot.web.client.ClientHttpRequestFactorySettings;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import ai.yda.framework.rag.retriever.google_drive.GoogleDriveRetriever;
 import ai.yda.framework.rag.retriever.google_drive.adapter.DocumentMetadataAdapter;
@@ -134,8 +139,20 @@ public class RetrieverGoogleDriveAutoConfiguration {
     }
 
     @Bean
-    public DocumentSummaryService documentSummaryService(final ChatModel chatModel) {
-        return new DocumentSummaryService(chatModel);
+    public DocumentSummaryService documentSummaryService(
+            final OpenAiConnectionProperties openAiConnectionProperties, final WebClient.Builder webClientBuilder) {
+        var restClientBuilder = RestClient.builder()
+                .requestFactory(ClientHttpRequestFactories.get(ClientHttpRequestFactorySettings.DEFAULTS
+                        .withConnectTimeout(Duration.ofMinutes(5))
+                        .withReadTimeout(Duration.ofMinutes(10))));
+        // TODO Come up with another way to modify OpenAiChatModel
+        var openAiApi = new OpenAiApi(
+                openAiConnectionProperties.getBaseUrl(),
+                openAiConnectionProperties.getApiKey(),
+                restClientBuilder,
+                webClientBuilder);
+
+        return new DocumentSummaryService(new OpenAiChatModel(openAiApi));
     }
 
     @Bean
@@ -149,7 +166,7 @@ public class RetrieverGoogleDriveAutoConfiguration {
             final MilvusServiceClientProperties milvusClientProperties,
             final OpenAiConnectionProperties openAiConnectionProperties,
             final OpenAiEmbeddingProperties openAiEmbeddingProperties,
-            final OpenAiChatModel openAiChatModel)
+            final WebClient.Builder webClientBuilder)
             throws IOException, GeneralSecurityException {
 
         var resource = resourceLoader.getResource(googleDriveProperties.getServiceAccountKeyFilePath());
@@ -175,6 +192,6 @@ public class RetrieverGoogleDriveAutoConfiguration {
                         documentMetadataPort,
                         documentProcessorProvider,
                         documentMetadataMapper,
-                        documentSummaryService(openAiChatModel)));
+                        documentSummaryService(openAiConnectionProperties, webClientBuilder)));
     }
 }
