@@ -17,35 +17,32 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.rag.retriever.google_drive.service.processor;
+package ai.yda.framework.rag.retriever.google_drive.adapter;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import org.springframework.ai.reader.tika.TikaDocumentReader;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.lang.NonNull;
 
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentDTO;
 import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentContentMapper;
+import ai.yda.framework.rag.retriever.google_drive.port.DocumentContentPort;
+import ai.yda.framework.rag.retriever.google_drive.repository.DocumentContentRepository;
 
-public class TikaDocumentProcessor implements DocumentProcessor {
+public class DocumentContentAdapter implements DocumentContentPort {
+
+    private final DocumentContentRepository documentContentRepository;
 
     private final DocumentContentMapper documentContentMapper;
 
-    public TikaDocumentProcessor(final @NonNull DocumentContentMapper documentContentMapper) {
+    public DocumentContentAdapter(
+            final DocumentContentRepository documentContentRepository,
+            final DocumentContentMapper documentContentMapper) {
+        this.documentContentRepository = documentContentRepository;
         this.documentContentMapper = documentContentMapper;
     }
 
-    // for PDF, DOC/ DOCX, PPT/ PPTX, and HTML.
     @Override
-    public List<DocumentContentDTO> processDocument(final InputStream inputStream, final String documentMetadataId)
-            throws IOException {
-        return new TikaDocumentReader(new ByteArrayResource(inputStream.readAllBytes()))
-                .read().stream()
-                        .map(document -> documentContentMapper.toDTO(document.getText(), documentMetadataId))
-                        .collect(Collectors.toList());
+    public List<DocumentContentDTO> getDocumentContents(String documentId) {
+        return documentContentRepository.findByDocumentMetadata_DocumentId(documentId).stream()
+                .map(documentContentMapper::toDTO)
+                .toList();
     }
 }

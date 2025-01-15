@@ -19,17 +19,21 @@
 */
 package ai.yda.framework.rag.retriever.google_drive.mapper;
 
+import java.util.List;
+
 import com.google.api.services.drive.model.File;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 
+import ai.yda.framework.rag.retriever.google_drive.dto.DocumentMetadataDTO;
 import ai.yda.framework.rag.retriever.google_drive.entity.DocumentMetadataEntity;
 
 @Mapper
 public interface DocumentMetadataMapper {
 
-    @Mapping(target = "documentId", source = "file.id")
-    @Mapping(target = "uri", source = "file.webViewLink")
+    @Mapping(target = "documentId", source = "id")
+    @Mapping(target = "parentId", source = "parents", qualifiedByName = "extractFirstParent")
     @Mapping(
             target = "createdAt",
             expression = "java(file.getCreatedTime() != null ? "
@@ -42,5 +46,27 @@ public interface DocumentMetadataMapper {
                     + "java.time.OffsetDateTime.ofInstant(java.time.Instant.ofEpochMilli(file.getModifiedTime().getValue()), "
                     + "java.time.ZoneOffset.ofTotalSeconds(file.getModifiedTime().getTimeZoneShift() * 60)) : "
                     + "java.time.OffsetDateTime.now())")
-    DocumentMetadataEntity toEntity(File file);
+    DocumentMetadataDTO toDTO(File file);
+
+    /**
+     * Converts a DocumentMetadataEntity to a DocumentMetadataDTO.
+     *
+     * @param entity the DocumentMetadataEntity to convert.
+     * @return the converted DocumentMetadataDTO.
+     */
+    @Mapping(target = "parentId", source = "parent.documentId")
+    DocumentMetadataDTO toDTO(DocumentMetadataEntity entity);
+
+    /**
+     * Converts a DocumentMetadataDTO to a DocumentMetadataEntity.
+     *
+     * @param dto the DocumentMetadataDTO to convert.
+     * @return the converted DocumentMetadataEntity.
+     */
+    DocumentMetadataEntity toEntity(DocumentMetadataDTO dto);
+
+    @Named("extractFirstParent")
+    default String extractFirstParent(List<String> parents) {
+        return (parents != null && !parents.isEmpty()) ? parents.get(0) : null;
+    }
 }

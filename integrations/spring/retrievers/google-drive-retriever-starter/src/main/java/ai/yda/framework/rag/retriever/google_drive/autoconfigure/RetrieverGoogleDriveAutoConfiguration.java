@@ -46,13 +46,16 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import ai.yda.framework.rag.retriever.google_drive.GoogleDriveRetriever;
+import ai.yda.framework.rag.retriever.google_drive.adapter.DocumentContentAdapter;
 import ai.yda.framework.rag.retriever.google_drive.adapter.DocumentMetadataAdapter;
 import ai.yda.framework.rag.retriever.google_drive.exception.GoogleDriveException;
 import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentContentMapper;
 import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentContentMapperImpl;
 import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentMetadataMapper;
 import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentMetadataMapperImpl;
+import ai.yda.framework.rag.retriever.google_drive.port.DocumentContentPort;
 import ai.yda.framework.rag.retriever.google_drive.port.DocumentMetadataPort;
+import ai.yda.framework.rag.retriever.google_drive.repository.DocumentContentRepository;
 import ai.yda.framework.rag.retriever.google_drive.repository.DocumentMetadataRepository;
 import ai.yda.framework.rag.retriever.google_drive.service.DocumentProcessorProvider;
 import ai.yda.framework.rag.retriever.google_drive.service.DocumentSummaryService;
@@ -108,8 +111,18 @@ public class RetrieverGoogleDriveAutoConfiguration {
     }
 
     @Bean
-    public DocumentMetadataPort documentMetadataPort(final DocumentMetadataRepository documentMetadataRepository) {
-        return new DocumentMetadataAdapter(documentMetadataRepository);
+    public DocumentMetadataPort documentMetadataPort(
+            final DocumentMetadataRepository documentMetadataRepository,
+            final DocumentMetadataMapper documentMetadataMapper,
+            final DocumentContentMapper documentContentMapper) {
+        return new DocumentMetadataAdapter(documentMetadataRepository, documentMetadataMapper, documentContentMapper);
+    }
+
+    @Bean
+    public DocumentContentPort documentContentPort(
+            final DocumentContentRepository documentContentRepository,
+            final DocumentContentMapper documentContentMapper) {
+        return new DocumentContentAdapter(documentContentRepository, documentContentMapper);
     }
 
     @Bean
@@ -140,7 +153,8 @@ public class RetrieverGoogleDriveAutoConfiguration {
 
     @Bean
     public DocumentSummaryService documentSummaryService(
-            final OpenAiConnectionProperties openAiConnectionProperties, final WebClient.Builder webClientBuilder) {
+            final OpenAiConnectionProperties openAiConnectionProperties,
+            final WebClient.Builder webClientBuilder) {
         var restClientBuilder = RestClient.builder()
                 .requestFactory(ClientHttpRequestFactories.get(ClientHttpRequestFactorySettings.DEFAULTS
                         .withConnectTimeout(Duration.ofMinutes(5))
@@ -160,6 +174,7 @@ public class RetrieverGoogleDriveAutoConfiguration {
             final RetrieverGoogleDriveProperties googleDriveProperties,
             final ResourceLoader resourceLoader,
             final DocumentMetadataPort documentMetadataPort,
+            final DocumentContentPort documentContentPort,
             final DocumentProcessorProvider documentProcessorProvider,
             final DocumentMetadataMapper documentMetadataMapper,
             final MilvusVectorStoreProperties milvusProperties,
@@ -190,6 +205,7 @@ public class RetrieverGoogleDriveAutoConfiguration {
                         resource.getInputStream(),
                         googleDriveProperties.getDriveId(),
                         documentMetadataPort,
+                        documentContentPort,
                         documentProcessorProvider,
                         documentMetadataMapper,
                         documentSummaryService(openAiConnectionProperties, webClientBuilder)));

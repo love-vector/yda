@@ -22,6 +22,7 @@ package ai.yda.framework.rag.retriever.google_drive.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentDTO;
 import ai.yda.framework.rag.retriever.google_drive.entity.DocumentContentEntity;
 import ai.yda.framework.rag.retriever.google_drive.entity.DocumentMetadataEntity;
 
@@ -31,12 +32,17 @@ public interface DocumentContentMapper {
     @Mapping(target = "contentId", ignore = true)
     @Mapping(target = "chunkName", source = "chunkName")
     @Mapping(target = "chunkContent", source = "chunkContent")
-    @Mapping(target = "documentMetadata", source = "documentMetadata")
-    DocumentContentEntity toEntity(String chunkName, String chunkContent, DocumentMetadataEntity documentMetadata);
+    @Mapping(target = "documentMetadataId", source = "documentMetadataId")
+    DocumentContentDTO toDTO(String chunkName, String chunkContent, String documentMetadataId);
 
     @Mapping(target = "contentId", ignore = true)
     @Mapping(target = "chunkName", ignore = true)
     @Mapping(target = "chunkContent", source = "chunkContent")
+    @Mapping(target = "documentMetadataId", source = "documentMetadataId")
+    DocumentContentDTO toDTO(String chunkContent, String documentMetadataId);
+
+    DocumentContentDTO toDTO(DocumentContentEntity documentContentEntity);
+
     @Mapping(target = "documentMetadata", source = "documentMetadata")
-    DocumentContentEntity toEntity(String chunkContent, DocumentMetadataEntity documentMetadata);
+    DocumentContentEntity toEntity(DocumentContentDTO documentMetadataDTO, DocumentMetadataEntity documentMetadata);
 }

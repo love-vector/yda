@@ -17,81 +17,44 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.rag.retriever.google_drive.entity;
+package ai.yda.framework.rag.retriever.google_drive.dto;
 
 import java.time.OffsetDateTime;
 import java.util.List;
 
-import jakarta.persistence.*;
-
 import lombok.*;
 
 /**
- * Represents metadata information about a document in the Google Drive.
- * This entity is mapped to the "document_metadata" table in the database.
- * It stores information such as the document's ID, name, description, URI,
- * and timestamps for creation and modification.
+ * DTO for transferring document metadata information.
+ * Contains only the fields necessary for external usage, without persistence annotations.
  *
- * @author Iryna Kopchak
  * @since 0.2.0
  */
-@Entity
-@Table(name = "document_metadata")
 @Getter
 @Setter
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class DocumentMetadataEntity {
+public class DocumentMetadataDTO {
 
-    @Id
-    @Column(name = "document_id")
     private String documentId;
-
-    @Column(name = "name")
     private String name;
-
-    @Column(name = "description")
     private String description;
-
-    @Column(name = "summary")
     private String summary;
-
-    @Column(name = "webViewLink")
     private String webViewLink;
-
-    @Column(name = "created_at")
     private OffsetDateTime createdAt;
-
-    @Column(name = "modified_at")
     private OffsetDateTime modifiedAt;
-
-    @Column(name = "mime_type")
     private String mimeType;
-
-    @Column(name = "drive_id")
     private String driveId;
 
-    /**
-     * Parent folder relationship:
-     * This references another entity in the same table.
-     */
-    @ManyToOne
-    @JoinColumn(name = "parent_id")
-    private DocumentMetadataEntity parent;
+    private String parentId;
 
-    /**
-     * This field represents the list of document content entities associated with this document metadata.
-     * It is the inverse side of the relationship, mapped by the 'documentMetadata' field in the DocumentContentEntity.
-     */
     @Singular
-    @OneToMany(mappedBy = "documentMetadata", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private List<DocumentContentEntity> documentContents;
+    private List<DocumentContentDTO> documentContents;
 
     /**
      * Convenience method to distinguish folders from files.
      */
-    @Transient
     public boolean isFolder() {
         return "application/vnd.google-apps.folder".equalsIgnoreCase(this.mimeType);
     }

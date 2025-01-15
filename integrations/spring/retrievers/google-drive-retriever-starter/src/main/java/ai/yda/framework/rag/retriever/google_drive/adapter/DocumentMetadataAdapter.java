@@ -19,34 +19,45 @@
 */
 package ai.yda.framework.rag.retriever.google_drive.adapter;
 
-import java.util.List;
 import java.util.Optional;
 
-import ai.yda.framework.rag.retriever.google_drive.entity.DocumentMetadataEntity;
+import ai.yda.framework.rag.retriever.google_drive.dto.DocumentMetadataDTO;
+import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentContentMapper;
+import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentMetadataMapper;
 import ai.yda.framework.rag.retriever.google_drive.port.DocumentMetadataPort;
 import ai.yda.framework.rag.retriever.google_drive.repository.DocumentMetadataRepository;
 
 public class DocumentMetadataAdapter implements DocumentMetadataPort {
 
     private final DocumentMetadataRepository repository;
+    private final DocumentMetadataMapper documentMetadataMapper;
+    private final DocumentContentMapper documentContentMapper;
 
-    public DocumentMetadataAdapter(DocumentMetadataRepository repository) {
+    public DocumentMetadataAdapter(
+            final DocumentMetadataRepository repository,
+            final DocumentMetadataMapper documentMetadataMapper,
+            final DocumentContentMapper documentContentMapper) {
         this.repository = repository;
+        this.documentMetadataMapper = documentMetadataMapper;
+        this.documentContentMapper = documentContentMapper;
     }
 
     @Override
-    public Optional<DocumentMetadataEntity> findById(String documentId) {
-        return repository.findById(documentId);
+    public Optional<DocumentMetadataDTO> findById(String documentId) {
+        return repository.findById(documentId).map(documentMetadataMapper::toDTO);
     }
 
     @Override
-    public DocumentMetadataEntity save(DocumentMetadataEntity entity) {
-        return repository.save(entity);
-    }
-
-    @Override
-    public List<DocumentMetadataEntity> findAll() {
-        return repository.findAll();
+    public DocumentMetadataDTO save(DocumentMetadataDTO documentMetadataDTO) {
+        var entity = documentMetadataMapper.toEntity(documentMetadataDTO);
+        if (documentMetadataDTO.getParentId() != null) {
+            entity.setParent(
+                    repository.findById(documentMetadataDTO.getParentId()).orElse(null));
+        }
+        entity.setDocumentContents(documentMetadataDTO.getDocumentContents().stream()
+                .map(documentContentDTO -> documentContentMapper.toEntity(documentContentDTO, entity))
+                .toList());
+        return documentMetadataMapper.toDTO(repository.save(entity));
     }
 
     @Override

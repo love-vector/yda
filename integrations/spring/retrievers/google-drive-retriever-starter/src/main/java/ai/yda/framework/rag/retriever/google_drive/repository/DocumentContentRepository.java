@@ -19,6 +19,8 @@
 */
 package ai.yda.framework.rag.retriever.google_drive.repository;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -27,8 +29,5 @@ import ai.yda.framework.rag.retriever.google_drive.entity.DocumentContentEntity;
 @Repository
 public interface DocumentContentRepository extends JpaRepository<DocumentContentEntity, Long> {
 
-    // Custom queries can be defined here.
-    // For instance, if you want to find all content rows by documentId:
-    // List<DocumentContentEntity> findByDocumentId(String documentId);
-
+    List<DocumentContentEntity> findByDocumentMetadata_DocumentId(String documentId);
 }
