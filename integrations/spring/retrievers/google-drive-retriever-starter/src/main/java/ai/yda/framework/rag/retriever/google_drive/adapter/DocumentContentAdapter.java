@@ -22,6 +22,7 @@ package ai.yda.framework.rag.retriever.google_drive.adapter;
 import java.util.List;
 
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentDTO;
+import ai.yda.framework.rag.retriever.google_drive.dto.DocumentIdsDTO;
 import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentContentMapper;
 import ai.yda.framework.rag.retriever.google_drive.port.DocumentContentPort;
 import ai.yda.framework.rag.retriever.google_drive.repository.DocumentContentRepository;
@@ -40,8 +41,9 @@ public class DocumentContentAdapter implements DocumentContentPort {
     }
 
     @Override
-    public List<DocumentContentDTO> getDocumentContents(String documentId) {
-        return documentContentRepository.findByDocumentMetadata_DocumentId(documentId).stream()
+    public List<DocumentContentDTO> getDocumentsContents(DocumentIdsDTO documentIds) {
+        return documentIds.documentIds().stream()
+                .flatMap(documentId -> documentContentRepository.findByDocumentMetadata_DocumentId(documentId).stream())
                 .map(documentContentMapper::toDTO)
                 .toList();
     }

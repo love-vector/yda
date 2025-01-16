@@ -19,4 +19,4 @@
 */
 package ai.yda.framework.rag.retriever.google_drive.dto;
 
-public record DocumentIdDTO(String documentId) {}
+public record DocumentContentIdDTO(String contentId) {}

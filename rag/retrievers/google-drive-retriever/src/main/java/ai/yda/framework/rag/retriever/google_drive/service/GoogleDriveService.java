@@ -37,7 +37,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.lang.NonNull;
 
-import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentDTO;
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentMetadataDTO;
 import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentMetadataMapper;
 import ai.yda.framework.rag.retriever.google_drive.port.DocumentContentPort;
@@ -104,14 +103,6 @@ public class GoogleDriveService {
                 .build();
 
         log.info("Google Drive service initialized successfully.");
-    }
-
-    public List<DocumentContentDTO> findRetrievedDocuments(final List<String> documentIds) {
-        return documentIds.stream()
-                .map(documentMetadataPort::findById)
-                .flatMap(Optional::stream)
-                .flatMap(dto -> documentContentPort.getDocumentContents(dto.getDocumentId()).stream())
-                .toList();
     }
 
     // TODO: update document metadata and content only if modifiedAt stored in db is not the same as file modifiedTime
