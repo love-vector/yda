@@ -19,9 +19,11 @@
 */
 package ai.yda.framework.rag.retriever.google_drive.adapter;
 
+import java.util.List;
 import java.util.Optional;
 
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentMetadataDTO;
+import ai.yda.framework.rag.retriever.google_drive.dto.DocumentSummaryDTO;
 import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentContentMapper;
 import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentMetadataMapper;
 import ai.yda.framework.rag.retriever.google_drive.port.DocumentMetadataPort;
@@ -63,5 +65,13 @@ public class DocumentMetadataAdapter implements DocumentMetadataPort {
     @Override
     public void deleteAll() {
         repository.deleteAll();
+    }
+
+    @Override
+    public List<DocumentSummaryDTO> getAllFileSummaries() {
+        return repository.findAll().stream()
+                .filter(documentMetadataEntity -> !documentMetadataEntity.isFolder())
+                .map(documentMetadataMapper::toDto)
+                .toList();
     }
 }
