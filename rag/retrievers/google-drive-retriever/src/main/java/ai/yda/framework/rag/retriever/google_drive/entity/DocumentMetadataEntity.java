@@ -85,7 +85,7 @@ public class DocumentMetadataEntity {
      * It is the inverse side of the relationship, mapped by the 'documentMetadata' field in the DocumentContentEntity.
      */
     @Singular
-    @OneToMany(mappedBy = "documentMetadata", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "documentMetadata", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DocumentContentEntity> documentContents;
 
     /**
