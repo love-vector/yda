@@ -21,13 +21,13 @@ package ai.yda.framework.rag.retriever.google_drive.repository;
 
 import java.util.List;
 
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import ai.yda.framework.rag.retriever.google_drive.entity.DocumentContentEntity;
+import ai.yda.framework.rag.retriever.shared.repository.GenericRepository;
 
 @Repository
-public interface DocumentContentRepository extends JpaRepository<DocumentContentEntity, Long> {
+public interface DocumentContentRepository extends GenericRepository<DocumentContentEntity, Long> {
 
     List<DocumentContentEntity> findByDocumentMetadata_DocumentId(String documentId);
 }

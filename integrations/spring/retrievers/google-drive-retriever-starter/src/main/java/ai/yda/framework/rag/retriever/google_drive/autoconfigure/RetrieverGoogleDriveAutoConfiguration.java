@@ -39,7 +39,6 @@ import org.springframework.boot.web.client.ClientHttpRequestFactorySettings;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -86,7 +85,6 @@ import ai.yda.framework.rag.retriever.google_drive.service.processor.TikaDocumen
 @AutoConfiguration
 @EnableConfigurationProperties(RetrieverGoogleDriveProperties.class)
 @ComponentScan("ai.yda.framework.rag.retriever.google_drive")
-@EnableJpaRepositories("ai.yda.framework.rag.retriever.google_drive.repository")
 @EntityScan("ai.yda.framework.rag.retriever.google_drive.entity")
 public class RetrieverGoogleDriveAutoConfiguration {
 

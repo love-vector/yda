@@ -17,12 +17,10 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.rag.retriever.google_drive.repository;
+package ai.yda.framework.rag.retriever.shared.repository;
 
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.NoRepositoryBean;
 
-import ai.yda.framework.rag.retriever.google_drive.entity.DocumentMetadataEntity;
-import ai.yda.framework.rag.retriever.shared.repository.GenericRepository;
-
-@Repository
-public interface DocumentMetadataRepository extends GenericRepository<DocumentMetadataEntity, String> {}
+@NoRepositoryBean
+public interface GenericRepository<T, ID> extends JpaRepository<T, ID> {}

@@ -1,5 +1,9 @@
 dependencies {
+    implementation 'org.liquibase:liquibase-core:4.30.0'
+
     api 'org.springframework.ai:spring-ai-milvus-store'
     api 'org.springframework.ai:spring-ai-spring-boot-autoconfigure'
     api 'org.springframework.ai:spring-ai-openai'
+    api 'org.springframework.boot:spring-boot-starter-data-jpa:3.3.2'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor:3.3.2'
 }
