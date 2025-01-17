@@ -29,19 +29,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 
 @AutoConfiguration
-@EnableConfigurationProperties(DataBaseProperties.class)
+@EnableConfigurationProperties(PostgresSqlProperties.class)
 @ComponentScan("ai.yda.framework.rag.retriever.shared")
-public class DataBaseAutoConfiguration {
+public class PostgresSqlAutoConfiguration {
     @Bean
     @ConfigurationProperties("ai.yda.framework.rag.retriever.shared.database")
     public HikariDataSource dataSource() {
         return DataSourceBuilder.create().type(HikariDataSource.class).build();
     }
 
-    public DataBaseAutoConfiguration() {}
-
-    @Bean
-    public DataBaseAutoConfiguration dataBaseAutoConfiguration(final DataBaseProperties dataBaseProperties) {
-        return new DataBaseAutoConfiguration();
-    }
+    public PostgresSqlAutoConfiguration() {}
 }

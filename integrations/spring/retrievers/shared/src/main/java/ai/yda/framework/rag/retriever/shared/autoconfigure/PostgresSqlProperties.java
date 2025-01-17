@@ -26,8 +26,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Getter
 @Setter
-@ConfigurationProperties(DataBaseProperties.CONFIG_PREFIX)
-public class DataBaseProperties {
+@ConfigurationProperties(PostgresSqlProperties.CONFIG_PREFIX)
+public class PostgresSqlProperties {
 
     public static final String CONFIG_PREFIX = "ai.yda.framework.rag.retriever.shared";
 }

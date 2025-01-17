@@ -1,1 +1,1 @@
-ai.yda.framework.rag.retriever.shared.autoconfigure.DataBaseAutoConfiguration
+ai.yda.framework.rag.retriever.shared.autoconfigure.PostgresSqlAutoConfiguration

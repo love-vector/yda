@@ -1,4 +1,6 @@
 dependencies {
     api project(':google-drive-retriever')
     api project(':retriever-shared-starter')
+
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor:3.3.2'
 }
