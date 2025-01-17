@@ -19,10 +19,10 @@
 */
 package ai.yda.framework.rag.retriever.google_drive.repository;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import ai.yda.framework.rag.retriever.google_drive.entity.DocumentMetadataEntity;
-import ai.yda.framework.rag.retriever.shared.repository.GenericRepository;
 
 @Repository
-public interface DocumentMetadataRepository extends GenericRepository<DocumentMetadataEntity, String> {}
+public interface DocumentMetadataRepository extends JpaRepository<DocumentMetadataEntity, String> {}

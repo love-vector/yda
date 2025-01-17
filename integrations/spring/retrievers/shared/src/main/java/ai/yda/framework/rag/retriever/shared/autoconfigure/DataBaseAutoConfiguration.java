@@ -27,18 +27,21 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @AutoConfiguration
-@EnableConfigurationProperties(DataBaseConfiguration.class)
+@EnableConfigurationProperties(DataBaseProperties.class)
 @ComponentScan("ai.yda.framework.rag.retriever.shared")
-@EnableJpaRepositories("ai.yda.framework.rag.retriever.shared.repository")
-public class DataBaseConfiguration {
+public class DataBaseAutoConfiguration {
     @Bean
     @ConfigurationProperties("ai.yda.framework.rag.retriever.shared.database")
     public HikariDataSource dataSource() {
         return DataSourceBuilder.create().type(HikariDataSource.class).build();
     }
 
-    public DataBaseConfiguration() {}
+    public DataBaseAutoConfiguration() {}
+
+    @Bean
+    public DataBaseAutoConfiguration dataBaseAutoConfiguration(final DataBaseProperties dataBaseProperties) {
+        return new DataBaseAutoConfiguration();
+    }
 }

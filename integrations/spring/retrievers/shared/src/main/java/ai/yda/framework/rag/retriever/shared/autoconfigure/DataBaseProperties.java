@@ -17,10 +17,17 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.rag.retriever.shared.repository;
+package ai.yda.framework.rag.retriever.shared.autoconfigure;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.repository.NoRepositoryBean;
+import lombok.Getter;
+import lombok.Setter;
 
-@NoRepositoryBean
-public interface GenericRepository<T, ID> extends JpaRepository<T, ID> {}
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
+@Getter
+@Setter
+@ConfigurationProperties(DataBaseProperties.CONFIG_PREFIX)
+public class DataBaseProperties {
+
+    public static final String CONFIG_PREFIX = "ai.yda.framework.rag.retriever.shared";
+}
