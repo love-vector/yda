@@ -23,8 +23,6 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.time.Duration;
 
-import com.zaxxer.hikari.HikariDataSource;
-
 import org.springframework.ai.autoconfigure.openai.OpenAiChatProperties;
 import org.springframework.ai.autoconfigure.openai.OpenAiConnectionProperties;
 import org.springframework.ai.chat.client.ChatClient;
@@ -33,9 +31,7 @@ import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.boot.web.client.ClientHttpRequestFactories;
 import org.springframework.boot.web.client.ClientHttpRequestFactorySettings;
 import org.springframework.context.annotation.Bean;
@@ -96,18 +92,6 @@ public class RetrieverGoogleDriveAutoConfiguration {
      * Default constructor for {@link RetrieverGoogleDriveAutoConfiguration}.
      */
     public RetrieverGoogleDriveAutoConfiguration() {}
-
-    /**
-     * Creates a {@link HikariDataSource} bean using properties defined under the prefix
-     * "ai.yda.framework.rag.retriever.google-drive.database".
-     *
-     * @return a configured {@link HikariDataSource} instance.
-     */
-    @Bean
-    @ConfigurationProperties("ai.yda.framework.rag.retriever.google-drive.database")
-    public HikariDataSource dataSource() {
-        return DataSourceBuilder.create().type(HikariDataSource.class).build();
-    }
 
     @Bean
     public DocumentMetadataPort documentMetadataPort(
