@@ -20,7 +20,6 @@
 package ai.yda.framework.rag.retriever.google_drive;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +32,7 @@ import org.springframework.lang.NonNull;
 import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.retriever.Retriever;
+import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentDTO;
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentIdDTO;
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentIdsDTO;
 import ai.yda.framework.rag.retriever.google_drive.port.DocumentContentPort;
@@ -63,27 +63,27 @@ public class GoogleDriveRetriever implements Retriever<RagRequest, RagContext> {
 
     private static final String RETRIEVAL_SYSTEM_INSTRUCTION =
             """
-                1. Definition
-                You are an assistant tasked with selecting the documents chunks id's most relevant to the user's query.
-                Strictly adhere to the instruction by providing accurate, concise responses based solely on the existing document chunks and their IDs, with no fabrication.
+                    1. Definition
+                    You are an assistant tasked with selecting the documents chunks id's most relevant to the user's query.
+                    Strictly adhere to the instruction by providing accurate, concise responses based solely on the existing document chunks and their IDs, with no fabrication.
 
-                2. Operational Guidelines
-                Follow these steps sequentially and do not skip or combine steps:
-                2.1 Obtain all files along with their summaries.
-                2.2 Select ONLY IDs of files with summaries relevant to the user's query. If no suitable files are found, return an empty list [].
-                2.3 Using the IDs of the files deemed relevant, retrieve the corresponding document chunks.
-                2.4 Evaluate the relevance of each chunk based on its content and the user's query. Strictly match the query context to the chunk's content and exclude loosely related chunks.
-                2.5 Identify up to %d IDs of chunks that are most relevant to the user's query. If fewer relevant chunks exist, return only those that match. If no suitable chunks are found, return an empty list [].
+                    2. Operational Guidelines
+                    Follow these steps sequentially and do not skip or combine steps:
+                    2.1 Obtain all files along with their summaries.
+                    2.2 Select ONLY IDs of files with summaries relevant to the user's query. If no suitable files are found, return an empty list [].
+                    2.3 Using the IDs of the files deemed relevant, retrieve the corresponding document chunks.
+                    2.4 Evaluate the relevance of each chunk based on its content and the user's query. Strictly match the query context to the chunk's content and exclude loosely related chunks.
+                    2.5 Identify up to %d IDs of chunks that are most relevant to the user's query. If fewer relevant chunks exist, return only those that match. If no suitable chunks are found, return an empty list [].
 
-                3. Response Format.
-                Construct a JSON array of objects. Each object must represent a relevant content chunk and adhere to the following structure:
-                [
-                    {
-                    "contentId":"string"
-                    }
-                ]
-                Deduplicate chunk IDs to ensure that no chunk appears more than once in the response. If duplicates are found, keep only one instance of each unique ID.
-                Ensure the output strictly complies with the specified format.""";
+                    3. Response Format.
+                    Construct a JSON array of objects. Each object must represent a relevant content chunk and adhere to the following structure:
+                    [
+                        {
+                        "contentId":"string"
+                        }
+                    ]
+                    Deduplicate chunk IDs to ensure that no chunk appears more than once in the response. If duplicates are found, keep only one instance of each unique ID.
+                    Ensure the output strictly complies with the specified format.""";
 
     /**
      * The number of top results to retrieve from the Vector Store.
@@ -136,7 +136,8 @@ public class GoogleDriveRetriever implements Retriever<RagRequest, RagContext> {
                 .description("Fetch chunks content of documents using a provided list of document IDs")
                 .inputType(DocumentIdsDTO.class)
                 .build();
-        var documentIds = chatClient
+
+        var documentContentIds = chatClient
                 .prompt()
                 .user(request.getQuery())
                 .system(String.format(RETRIEVAL_SYSTEM_INSTRUCTION, topK))
@@ -144,11 +145,10 @@ public class GoogleDriveRetriever implements Retriever<RagRequest, RagContext> {
                 .call()
                 .entity(new ParameterizedTypeReference<List<DocumentContentIdDTO>>() {});
 
-        if (documentIds != null) {
-            documentIds.forEach(file -> log.debug("Relevant file id: {}", file.contentId()));
-        }
-
-        // TODO: get all relevant chunks
-        return RagContext.builder().knowledge(Collections.emptyList()).build();
+        return RagContext.builder()
+                .knowledge(documentContentPort.getDocumentContentsByIds(documentContentIds).stream()
+                        .map(DocumentContentDTO::getChunkContent)
+                        .toList())
+                .build();
     }
 }

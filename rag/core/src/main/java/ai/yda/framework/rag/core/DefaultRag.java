@@ -99,18 +99,21 @@ public class DefaultRag implements Rag<RagRequest, RagResponse> {
      */
     @Override
     public RagResponse doRag(final RagRequest request) {
-        var transformingRequest = request;
-        for (RequestTransformer<RagRequest> requestTransformer : requestTransformers) {
-            transformingRequest = requestTransformer.transformRequest(transformingRequest);
-        }
-        var transformedRequest = transformingRequest;
+        //        var transformingRequest = request;
+        //        for (RequestTransformer<RagRequest> requestTransformer : requestTransformers) {
+        //            transformingRequest = requestTransformer.transformRequest(transformingRequest);
+        //        }
+        //        var transformedRequest = transformingRequest;
         var contexts = retrievers.parallelStream()
-                .map(retriever -> retriever.retrieve(transformedRequest))
+                .map(retriever -> retriever.retrieve(request))
+                //                .map(retriever -> retriever.retrieve(transformedRequest))
                 .collect(Collectors.toUnmodifiableList());
         for (var augmenter : augmenters) {
-            contexts = augmenter.augment(transformedRequest, contexts);
+            contexts = augmenter.augment(request, contexts);
+            //            contexts = augmenter.augment(transformedRequest, contexts);
         }
-        return generator.generate(transformedRequest, mergeContexts(contexts));
+        return generator.generate(request, mergeContexts(contexts));
+        //        return generator.generate(transformedRequest, mergeContexts(contexts));
     }
 
     /**
