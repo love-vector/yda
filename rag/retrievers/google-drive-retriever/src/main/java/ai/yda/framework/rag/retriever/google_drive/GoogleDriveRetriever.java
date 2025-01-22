@@ -33,7 +33,9 @@ import org.springframework.lang.NonNull;
 import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.retriever.Retriever;
-import ai.yda.framework.rag.retriever.google_drive.dto.DocumentIdDTO;
+import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentIdDTO;
+import ai.yda.framework.rag.retriever.google_drive.dto.DocumentIdsDTO;
+import ai.yda.framework.rag.retriever.google_drive.port.DocumentContentPort;
 import ai.yda.framework.rag.retriever.google_drive.port.DocumentMetadataPort;
 import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
 
@@ -61,15 +63,27 @@ public class GoogleDriveRetriever implements Retriever<RagRequest, RagContext> {
 
     private static final String RETRIEVAL_SYSTEM_INSTRUCTION =
             """
-                    You are an assistant tasked with selecting the documents most relevant to the user's query.
-                    Compare the query with document summaries and return a JSON array of objects in the following format:
-                    [
-                        {
-                            "documentId": "string"
-                        }
-                    ]
-                    Each object should represent a relevant document. If no documents are relevant, return an empty
-                    array ([]). Ensure the output strictly follows this format.""";
+                1. Definition
+                You are an assistant tasked with selecting the documents chunks id's most relevant to the user's query.
+                Strictly adhere to the instruction by providing accurate, concise responses based solely on the existing document chunks and their IDs, with no fabrication.
+
+                2. Operational Guidelines
+                Follow these steps sequentially and do not skip or combine steps:
+                2.1 Obtain all files along with their summaries.
+                2.2 Select ONLY IDs of files with summaries relevant to the user's query. If no suitable files are found, return an empty list [].
+                2.3 Using the IDs of the files deemed relevant, retrieve the corresponding document chunks.
+                2.4 Evaluate the relevance of each chunk based on its content and the user's query. Strictly match the query context to the chunk's content and exclude loosely related chunks.
+                2.5 Identify up to %d IDs of chunks that are most relevant to the user's query. If fewer relevant chunks exist, return only those that match. If no suitable chunks are found, return an empty list [].
+
+                3. Response Format.
+                Construct a JSON array of objects. Each object must represent a relevant content chunk and adhere to the following structure:
+                [
+                    {
+                    "contentId":"string"
+                    }
+                ]
+                Deduplicate chunk IDs to ensure that no chunk appears more than once in the response. If duplicates are found, keep only one instance of each unique ID.
+                Ensure the output strictly complies with the specified format.""";
 
     /**
      * The number of top results to retrieve from the Vector Store.
@@ -84,16 +98,19 @@ public class GoogleDriveRetriever implements Retriever<RagRequest, RagContext> {
     private final ChatClient chatClient;
 
     private final DocumentMetadataPort documentMetadataPort;
+    private final DocumentContentPort documentContentPort;
 
     public GoogleDriveRetriever(
             final @NonNull Integer topK,
             final @NonNull Boolean isProcessingEnabled,
             final @NonNull ChatClient chatClient,
             final @NonNull DocumentMetadataPort documentMetadataPort,
+            final @NonNull DocumentContentPort documentContentPort,
             final @NonNull GoogleDriveService googleDriveService)
             throws IOException {
         this.chatClient = chatClient;
         this.documentMetadataPort = documentMetadataPort;
+        this.documentContentPort = documentContentPort;
 
         this.googleDriveService = googleDriveService;
 
@@ -110,19 +127,25 @@ public class GoogleDriveRetriever implements Retriever<RagRequest, RagContext> {
 
     @Override
     public RagContext retrieve(final RagRequest request) {
+        var getAllDocumentsFunction = FunctionCallback.builder()
+                .function("getAllDocuments", documentMetadataPort::getAllFileSummaries)
+                .description("Retrieve all documents to enable filtering based on summaries")
+                .build();
+        var getDocumentChunksFunction = FunctionCallback.builder()
+                .function("getFilesChunks", documentContentPort::getDocumentsContents)
+                .description("Fetch chunks content of documents using a provided list of document IDs")
+                .inputType(DocumentIdsDTO.class)
+                .build();
         var documentIds = chatClient
                 .prompt()
                 .user(request.getQuery())
-                .system(RETRIEVAL_SYSTEM_INSTRUCTION)
-                .functions(FunctionCallback.builder()
-                        .function("getAllDocuments", documentMetadataPort::getAllFileSummaries)
-                        .description("Retrieve all documents to enable precise filtering based on summaries")
-                        .build())
+                .system(String.format(RETRIEVAL_SYSTEM_INSTRUCTION, topK))
+                .functions(getAllDocumentsFunction, getDocumentChunksFunction)
                 .call()
-                .entity(new ParameterizedTypeReference<List<DocumentIdDTO>>() {});
+                .entity(new ParameterizedTypeReference<List<DocumentContentIdDTO>>() {});
 
         if (documentIds != null) {
-            documentIds.forEach(file -> log.debug("Relevant file id: {}", file.documentId()));
+            documentIds.forEach(file -> log.debug("Relevant file id: {}", file.contentId()));
         }
 
         // TODO: get all relevant chunks

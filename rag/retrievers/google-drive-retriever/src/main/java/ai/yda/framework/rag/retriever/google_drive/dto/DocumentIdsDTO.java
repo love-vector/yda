@@ -17,14 +17,8 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.rag.retriever.google_drive.port;
+package ai.yda.framework.rag.retriever.google_drive.dto;
 
 import java.util.List;
 
-import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentDTO;
-import ai.yda.framework.rag.retriever.google_drive.dto.DocumentIdsDTO;
-
-public interface DocumentContentPort {
-
-    List<DocumentContentDTO> getDocumentsContents(DocumentIdsDTO documentId);
-}
+public record DocumentIdsDTO(List<String> documentIds) {}

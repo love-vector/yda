@@ -25,9 +25,11 @@ import java.time.Duration;
 
 import com.zaxxer.hikari.HikariDataSource;
 
+import org.springframework.ai.autoconfigure.openai.OpenAiChatProperties;
 import org.springframework.ai.autoconfigure.openai.OpenAiConnectionProperties;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -149,8 +151,15 @@ public class RetrieverGoogleDriveAutoConfiguration {
     }
 
     @Bean
-    public DocumentSummaryService documentSummaryService(
-            final OpenAiConnectionProperties openAiConnectionProperties, final WebClient.Builder webClientBuilder) {
+    public OpenAiChatOptions openAiChatOptions(final OpenAiChatProperties openAiChatProperties) {
+        return openAiChatProperties.getOptions();
+    }
+
+    @Bean
+    public OpenAiChatModel openAiChatModel(
+            final OpenAiConnectionProperties openAiConnectionProperties,
+            final WebClient.Builder webClientBuilder,
+            final OpenAiChatOptions openAiChatOptions) {
         var restClientBuilder = RestClient.builder()
                 .requestFactory(ClientHttpRequestFactories.get(ClientHttpRequestFactorySettings.DEFAULTS
                         .withConnectTimeout(Duration.ofMinutes(5))
@@ -162,7 +171,7 @@ public class RetrieverGoogleDriveAutoConfiguration {
                 restClientBuilder,
                 webClientBuilder);
 
-        return new DocumentSummaryService(new OpenAiChatModel(openAiApi));
+        return new OpenAiChatModel(openAiApi, openAiChatOptions);
     }
 
     @Bean
@@ -173,9 +182,7 @@ public class RetrieverGoogleDriveAutoConfiguration {
             final DocumentContentPort documentContentPort,
             final DocumentProcessorProvider documentProcessorProvider,
             final DocumentMetadataMapper documentMetadataMapper,
-            final ChatClient.Builder chatClientBuilder,
-            final OpenAiConnectionProperties openAiConnectionProperties,
-            final WebClient.Builder webClientBuilder)
+            final OpenAiChatModel openAiChatModel)
             throws IOException, GeneralSecurityException {
 
         var resource = resourceLoader.getResource(googleDriveProperties.getServiceAccountKeyFilePath());
@@ -188,8 +195,9 @@ public class RetrieverGoogleDriveAutoConfiguration {
         return new GoogleDriveRetriever(
                 googleDriveProperties.getTopK(),
                 googleDriveProperties.getIsProcessingEnabled(),
-                chatClientBuilder.build(),
+                ChatClient.create(openAiChatModel),
                 documentMetadataPort,
+                documentContentPort,
                 new GoogleDriveService(
                         resource.getInputStream(),
                         googleDriveProperties.getDriveId(),
@@ -197,6 +205,6 @@ public class RetrieverGoogleDriveAutoConfiguration {
                         documentContentPort,
                         documentProcessorProvider,
                         documentMetadataMapper,
-                        documentSummaryService(openAiConnectionProperties, webClientBuilder)));
+                        new DocumentSummaryService(openAiChatModel)));
     }
 }
