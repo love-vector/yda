@@ -65,6 +65,8 @@ public class RetrieverGoogleDriveProperties extends RetrieverProperties {
 
     private String driveId;
 
+    private String defaultSchema;
+
     /**
      * Default constructor for {@link RetrieverGoogleDriveProperties}.
      */
