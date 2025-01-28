@@ -1,5 +1,6 @@
 dependencies {
     api project(':openai-chat-generator')
+    implementation project(':openai-core-starter')
 
     implementation 'org.springframework.boot:spring-boot-autoconfigure:3.3.2'
 }

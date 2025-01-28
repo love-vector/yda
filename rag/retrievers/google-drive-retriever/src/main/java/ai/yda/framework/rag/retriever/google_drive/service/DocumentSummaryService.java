@@ -35,6 +35,22 @@ import ai.yda.framework.rag.retriever.google_drive.dto.DocumentMetadataDTO;
 @Slf4j
 public class DocumentSummaryService {
 
+    private static final String DOCUMENT_SUMMARY_INSTRUCTION =
+            """
+                    Provide a summary of the attached document by highlighting its key points.
+                    Focus on the main arguments, supporting evidence, and conclusions drawn within the document.
+                    The summary should be concise yet comprehensive, capturing the essence of the document's content.
+                    For each document, ensure the following details are included at the beginning of the summary:
+                    - File Name: Include the file name or mention 'File name is missing' if unavailable.
+                    - Document Description: Include the document description or mention 'Description is missing' if unavailable.
+
+                    Document Content:
+                    {context_str}
+
+                    Output Format:
+                    - Present the summary in paragraph form, using bullet points if necessary to delineate distinct ideas or sections.
+                    """;
+
     private final ChatModel chatModel;
 
     public DocumentSummaryService(final ChatModel chatModel) {
@@ -42,26 +58,11 @@ public class DocumentSummaryService {
     }
 
     public String summarizeDocument(final DocumentMetadataDTO metadataDocument) {
-        var documentSummaryInstruction =
-                """
-        Provide a summary of the attached document by highlighting its key points.
-        Focus on the main arguments, supporting evidence, and conclusions drawn within the document.
-        The summary should be concise yet comprehensive, capturing the essence of the document's content.
-        For each document, ensure the following details are included at the beginning of the summary:
-        - File Name: Include the file name or mention 'File name is missing' if unavailable.
-        - Document Description: Include the document description or mention 'Description is missing' if unavailable.
-
-        Document Content:
-        {context_str}
-
-        Output Format:
-        - Present the summary in paragraph form, using bullet points if necessary to delineate distinct ideas or sections.
-        """;
         var transformDocuments = transformDocument(metadataDocument);
         var documentsEnricher = new SummaryMetadataEnricher(
                 chatModel,
                 List.of(SummaryMetadataEnricher.SummaryType.CURRENT),
-                documentSummaryInstruction,
+                DOCUMENT_SUMMARY_INSTRUCTION,
                 MetadataMode.ALL);
         var documentSummary = documentsEnricher.apply(List.of(transformDocuments));
         return extractSummary(documentSummary.get(0));

@@ -1,0 +1,4 @@
+dependencies {
+    implementation 'org.springframework.ai:spring-ai-spring-boot-autoconfigure'
+    implementation 'org.springframework:spring-web:6.1.0'
+}

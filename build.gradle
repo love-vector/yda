@@ -29,7 +29,7 @@ subprojects {
     java {
         withJavadocJar()
         withSourcesJar()
-        if (project.name.contains('core')) {
+        if (project.name.contains('core') && !project.name.contains('starter')) {
             sourceCompatibility = JavaVersion.VERSION_11
             targetCompatibility = JavaVersion.VERSION_11
         } else {

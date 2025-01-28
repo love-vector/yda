@@ -22,6 +22,7 @@ package ai.yda.framework.rag.retriever.google_drive.autoconfigure;
 import lombok.Getter;
 import lombok.Setter;
 
+import org.springframework.ai.autoconfigure.openai.OpenAiChatProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import ai.yda.framework.rag.retriever.shared.RetrieverProperties;
@@ -66,6 +67,8 @@ public class RetrieverGoogleDriveProperties extends RetrieverProperties {
     private String driveId;
 
     private String defaultSchema;
+
+    private String model = OpenAiChatProperties.DEFAULT_CHAT_MODEL;
 
     /**
      * Default constructor for {@link RetrieverGoogleDriveProperties}.
