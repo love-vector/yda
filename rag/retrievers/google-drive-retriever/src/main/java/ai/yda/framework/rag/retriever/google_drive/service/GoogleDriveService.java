@@ -16,13 +16,16 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.rag.retriever.google_drive.service;
 
-import ai.yda.framework.rag.retriever.google_drive.dto.DocumentMetadataDTO;
-import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentMetadataMapper;
-import ai.yda.framework.rag.retriever.google_drive.port.DocumentContentPort;
-import ai.yda.framework.rag.retriever.google_drive.port.DocumentMetadataPort;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.GeneralSecurityException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.drive.Drive;
@@ -31,14 +34,13 @@ import com.google.api.services.drive.model.File;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.lang.NonNull;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.GeneralSecurityException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import ai.yda.framework.rag.retriever.google_drive.dto.DocumentMetadataDTO;
+import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentMetadataMapper;
+import ai.yda.framework.rag.retriever.google_drive.port.DocumentContentPort;
+import ai.yda.framework.rag.retriever.google_drive.port.DocumentMetadataPort;
 
 /**
  * Service class for interacting with Google Drive using a Service Account.
@@ -98,9 +100,9 @@ public class GoogleDriveService {
                 GoogleCredentials.fromStream(credentialsStream).createScoped(Collections.singleton(DriveScopes.DRIVE));
 
         this.driveService = new Drive.Builder(
-                GoogleNetHttpTransport.newTrustedTransport(),
-                GsonFactory.getDefaultInstance(),
-                new HttpCredentialsAdapter(credentials))
+                        GoogleNetHttpTransport.newTrustedTransport(),
+                        GsonFactory.getDefaultInstance(),
+                        new HttpCredentialsAdapter(credentials))
                 .setApplicationName(GOOGLE_DRIVE_APP_NAME)
                 .build();
 

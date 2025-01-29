@@ -16,18 +16,20 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.rag.retriever.google_drive.service;
-
-import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentDTO;
-import ai.yda.framework.rag.retriever.google_drive.dto.DocumentMetadataDTO;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.ai.document.Document;
-import org.springframework.ai.transformer.splitter.TokenTextSplitter;
 
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.ai.document.Document;
+import org.springframework.ai.transformer.splitter.TokenTextSplitter;
+
+import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentDTO;
+import ai.yda.framework.rag.retriever.google_drive.dto.DocumentMetadataDTO;
 
 @Slf4j
 public class DocumentChunkingService {
@@ -38,7 +40,7 @@ public class DocumentChunkingService {
         this.tokenTextSplitter = tokenTextSplitter;
     }
 
-    public List<String> chunkList(final String documentContent) {
+    public List<String> splitDocumentIntoChunks(final String documentContent) {
         return tokenTextSplitter.split(new Document(documentContent)).stream()
                 .map(Document::getText)
                 .collect(Collectors.toList());
@@ -60,8 +62,8 @@ public class DocumentChunkingService {
 
         log.debug("Processing document: {}", documentMetadataDTO.getName());
 
-        var splitOntoChunks = chunkList(documentForSplitting);
-        var transformEveryChunks = splitOntoChunks.stream()
+        var splitIntoChunks = splitDocumentIntoChunks(documentForSplitting);
+        var transformEveryChunks = splitIntoChunks.stream()
                 .map(chunk -> DocumentContentDTO.builder()
                         .documentMetadataId(documentMetadataDTO.getDocumentId())
                         .chunkName(documentMetadataDTO.getName())
