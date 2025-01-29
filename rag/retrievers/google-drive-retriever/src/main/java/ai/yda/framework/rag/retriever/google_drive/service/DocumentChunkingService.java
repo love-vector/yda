@@ -30,11 +30,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class ChunkingService {
+public class DocumentChunkingService {
     private static final Set<String> SUPPORTED_EXTENSIONS = Set.of("pdf", "docx", "ppt", "pptx", "html");
     private final TokenTextSplitter tokenTextSplitter;
 
-    public ChunkingService(TokenTextSplitter tokenTextSplitter) {
+    public DocumentChunkingService(TokenTextSplitter tokenTextSplitter) {
         this.tokenTextSplitter = tokenTextSplitter;
     }
 

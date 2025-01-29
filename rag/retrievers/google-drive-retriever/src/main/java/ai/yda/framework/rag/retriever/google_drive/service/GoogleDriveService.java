@@ -65,7 +65,7 @@ public class GoogleDriveService {
 
     private final DocumentSummaryService documentSummaryService;
 
-    private final ChunkingService chunkingService;
+    private final DocumentChunkingService documentChunkingService;
 
     /**
      * Constructs a new instance of {@link GoogleDriveService}.
@@ -83,7 +83,7 @@ public class GoogleDriveService {
             final @NonNull DocumentProcessorProvider documentProcessor,
             final @NonNull DocumentMetadataMapper documentMetadataMapper,
             final @NonNull DocumentSummaryService documentSummaryService,
-            final @NonNull ChunkingService chunkingService)
+            final @NonNull DocumentChunkingService documentChunkingService)
             throws IOException, GeneralSecurityException {
 
         this.documentMetadataPort = documentMetadataPort;
@@ -92,7 +92,7 @@ public class GoogleDriveService {
         this.documentMetadataMapper = documentMetadataMapper;
         this.driveId = driveId;
         this.documentSummaryService = documentSummaryService;
-        this.chunkingService = chunkingService;
+        this.documentChunkingService = documentChunkingService;
 
         var credentials =
                 GoogleCredentials.fromStream(credentialsStream).createScoped(Collections.singleton(DriveScopes.DRIVE));
@@ -131,7 +131,7 @@ public class GoogleDriveService {
             }
 
             if (file.getFileExtension() != null) {
-                documentMetadataDTO = chunkingService.processContent(documentMetadataDTO, file.getFileExtension());
+                documentMetadataDTO = documentChunkingService.processContent(documentMetadataDTO, file.getFileExtension());
             }
             documentMetadataPort.save(documentMetadataDTO);
         }
