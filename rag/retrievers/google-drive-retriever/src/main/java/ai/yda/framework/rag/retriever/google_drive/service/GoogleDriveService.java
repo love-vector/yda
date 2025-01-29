@@ -67,6 +67,8 @@ public class GoogleDriveService {
 
     private final DocumentSummaryService documentSummaryService;
 
+    private final ChunkingService chunkingService;
+
     /**
      * Constructs a new instance of {@link GoogleDriveService}.
      * Initializes the Google Drive API client using the provided Service Account JSON InputStream.
@@ -82,7 +84,8 @@ public class GoogleDriveService {
             final @NonNull DocumentContentPort documentContentPort,
             final @NonNull DocumentProcessorProvider documentProcessor,
             final @NonNull DocumentMetadataMapper documentMetadataMapper,
-            final @NonNull DocumentSummaryService documentSummaryService)
+            final @NonNull DocumentSummaryService documentSummaryService,
+            final @NonNull ChunkingService chunkingService)
             throws IOException, GeneralSecurityException {
 
         this.documentMetadataPort = documentMetadataPort;
@@ -91,6 +94,7 @@ public class GoogleDriveService {
         this.documentMetadataMapper = documentMetadataMapper;
         this.driveId = driveId;
         this.documentSummaryService = documentSummaryService;
+        this.chunkingService = chunkingService;
 
         var credentials =
                 GoogleCredentials.fromStream(credentialsStream).createScoped(Collections.singleton(DriveScopes.DRIVE));
@@ -126,6 +130,10 @@ public class GoogleDriveService {
                     documentMetadataDTO.setDocumentContents(contentEntities);
                     documentMetadataDTO.setSummary(documentSummaryService.summarizeDocument(documentMetadataDTO));
                 }
+            }
+
+            if (file.getFileExtension() != null && !file.getFileExtension().contains("xlsx")) {
+                documentMetadataDTO = chunkingService.processContent(documentMetadataDTO, file.getFileExtension());
             }
             documentMetadataPort.save(documentMetadataDTO);
         }

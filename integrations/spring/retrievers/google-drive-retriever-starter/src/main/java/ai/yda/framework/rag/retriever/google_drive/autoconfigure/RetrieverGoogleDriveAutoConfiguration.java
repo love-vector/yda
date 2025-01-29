@@ -49,6 +49,7 @@ import ai.yda.framework.rag.retriever.google_drive.port.DocumentContentPort;
 import ai.yda.framework.rag.retriever.google_drive.port.DocumentMetadataPort;
 import ai.yda.framework.rag.retriever.google_drive.repository.DocumentContentRepository;
 import ai.yda.framework.rag.retriever.google_drive.repository.DocumentMetadataRepository;
+import ai.yda.framework.rag.retriever.google_drive.service.ChunkingService;
 import ai.yda.framework.rag.retriever.google_drive.service.DocumentProcessorProvider;
 import ai.yda.framework.rag.retriever.google_drive.service.DocumentSummaryService;
 import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
@@ -165,7 +166,8 @@ public class RetrieverGoogleDriveAutoConfiguration {
                         documentContentPort,
                         documentProcessorProvider,
                         documentMetadataMapper,
-                        new DocumentSummaryService(openAiChatModel)));
+                        new DocumentSummaryService(openAiChatModel),
+                        new ChunkingService()));
     }
 
     private OpenAiChatModel openAiChatModel(
