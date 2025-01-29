@@ -16,50 +16,67 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.rag.retriever.google_drive.service;
-
-import java.util.List;
-import java.util.stream.Collectors;
-
-import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.ai.document.Document;
-import org.springframework.ai.transformer.splitter.TokenTextSplitter;
 
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentDTO;
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentMetadataDTO;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.document.Document;
+import org.springframework.ai.transformer.splitter.TokenTextSplitter;
+
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class ChunkingService {
+    private static final Set<String> SUPPORTED_EXTENSIONS = Set.of("pdf", "docx", "ppt", "pptx", "html");
+    private final TokenTextSplitter tokenTextSplitter;
 
-    public List<String> chunkList(Document document) {
-        TokenTextSplitter tokenTextSplitter = new TokenTextSplitter(250, 100, 5, 10000, false);
-        return tokenTextSplitter.split(document).stream().map(Document::getText).collect(Collectors.toList());
+    public ChunkingService(TokenTextSplitter tokenTextSplitter) {
+        this.tokenTextSplitter = tokenTextSplitter;
+    }
+
+    public List<String> chunkList(final String documentContent) {
+        return tokenTextSplitter.split(new Document(documentContent)).stream()
+                .map(Document::getText)
+                .collect(Collectors.toList());
     }
 
     public DocumentMetadataDTO processContent(
             final DocumentMetadataDTO documentMetadataDTO, final String filesExtension) {
-        if (filesExtension.contains("pdf") || filesExtension.contains("docx") || filesExtension.contains("docxx")) {
-            var incomeObject = documentMetadataDTO.getDocumentContents().get(0); // достаём текущий обьект
-            var document = documentMetadataDTO
-                    .getDocumentContents()
-                    .get(0); // достаём текущий документ который нужно чанкировать
-            var documentForSplitting = document.getChunkContent(); // достаём нужный контент
-            var transformDocument = new Document(documentForSplitting); // трансформируем в нужный формат
-            var splitOntoChunks = chunkList(transformDocument); // получаем List<String> в нужном формате
-            var transformEveryChunks = splitOntoChunks.stream()
-                    .map(node -> {
-                        return DocumentContentDTO.builder()
-                                .documentMetadataId(documentMetadataDTO.getDocumentId())
-                                .chunkName(documentMetadataDTO.getName())
-                                .contentId(incomeObject.getContentId())
-                                .chunkContent(node)
-                                .build();
-                    })
-                    .toList(); // формируем новый список List<DocumentContentDto> из чанков
-            documentMetadataDTO.setDocumentContents(transformEveryChunks);
+        if (!isSupportedFileType(filesExtension)) {
+            log.warn("Unsupported file extension: {}", filesExtension);
+            return documentMetadataDTO;
         }
+
+        var documentContentDTO = documentMetadataDTO.getDocumentContents().stream()
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException(
+                        "Document contents are empty for document: " + documentMetadataDTO.getDocumentId()));
+
+        var documentForSplitting = documentContentDTO.getChunkContent();
+
+        log.debug("Processing document: {}", documentMetadataDTO.getName());
+
+        var splitOntoChunks = chunkList(documentForSplitting);
+        var transformEveryChunks = splitOntoChunks.stream()
+                .map(chunk -> DocumentContentDTO.builder()
+                        .documentMetadataId(documentMetadataDTO.getDocumentId())
+                        .chunkName(documentMetadataDTO.getName())
+                        .contentId(documentContentDTO.getContentId())
+                        .chunkContent(chunk)
+                        .build())
+                .toList();
+        documentMetadataDTO.setDocumentContents(transformEveryChunks);
+
+        log.debug("Processed document: {} ({} chunks)", documentMetadataDTO.getName(), transformEveryChunks.size());
+
         return documentMetadataDTO;
+    }
+
+    private boolean isSupportedFileType(final String fileExtension) {
+        return SUPPORTED_EXTENSIONS.contains(fileExtension.toLowerCase());
     }
 }
