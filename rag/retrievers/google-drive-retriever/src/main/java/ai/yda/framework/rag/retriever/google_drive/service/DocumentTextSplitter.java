@@ -16,14 +16,19 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.rag.retriever.google_drive.service;
-
-import java.util.List;
 
 import org.springframework.ai.transformer.splitter.TokenTextSplitter;
 
+import java.util.List;
+
 public class DocumentTextSplitter extends TokenTextSplitter {
+
+    public DocumentTextSplitter(final int chunkSize, final int minChunkSizeChars, final int minChunkLengthToEmbed, final int maxNumChunks,
+                                final boolean keepSeparator) {
+        super(chunkSize, minChunkSizeChars, minChunkLengthToEmbed, maxNumChunks, keepSeparator);
+    }
 
     public List<String> splitDocumentIntoChunks(final String documentContent) {
         return splitText(documentContent);

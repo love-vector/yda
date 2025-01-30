@@ -122,7 +122,7 @@ public class RetrieverGoogleDriveAutoConfiguration {
 
     @Bean
     public DocumentTextSplitter documentTextSplitter() {
-        return new DocumentTextSplitter();
+        return new DocumentTextSplitter(250, 100, 5, 10000, false);
     }
 
     @Bean
