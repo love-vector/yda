@@ -173,6 +173,7 @@ public class RetrieverGoogleDriveAutoConfiguration {
                         documentContentPort,
                         documentProcessorProvider,
                         documentMetadataMapper,
+                        new DocumentSummaryService(openAiChatModel)));
                         new DocumentSummaryService(openAiChatModel),
                         new ChunkingService()));
     }

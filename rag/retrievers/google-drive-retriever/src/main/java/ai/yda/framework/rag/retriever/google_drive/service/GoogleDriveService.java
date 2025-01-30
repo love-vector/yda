@@ -67,8 +67,6 @@ public class GoogleDriveService {
 
     private final DocumentSummaryService documentSummaryService;
 
-    private final DocumentChunkingService documentChunkingService;
-
     /**
      * Constructs a new instance of {@link GoogleDriveService}.
      * Initializes the Google Drive API client using the provided Service Account JSON InputStream.
@@ -84,8 +82,7 @@ public class GoogleDriveService {
             final @NonNull DocumentContentPort documentContentPort,
             final @NonNull DocumentProcessorProvider documentProcessor,
             final @NonNull DocumentMetadataMapper documentMetadataMapper,
-            final @NonNull DocumentSummaryService documentSummaryService,
-            final @NonNull DocumentChunkingService documentChunkingService)
+            final @NonNull DocumentSummaryService documentSummaryService)
             throws IOException, GeneralSecurityException {
 
         this.documentMetadataPort = documentMetadataPort;
@@ -94,7 +91,6 @@ public class GoogleDriveService {
         this.documentMetadataMapper = documentMetadataMapper;
         this.driveId = driveId;
         this.documentSummaryService = documentSummaryService;
-        this.documentChunkingService = documentChunkingService;
 
         var credentials =
                 GoogleCredentials.fromStream(credentialsStream).createScoped(Collections.singleton(DriveScopes.DRIVE));

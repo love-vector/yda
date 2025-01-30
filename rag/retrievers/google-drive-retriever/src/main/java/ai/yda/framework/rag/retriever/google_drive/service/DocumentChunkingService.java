@@ -21,12 +21,9 @@ package ai.yda.framework.rag.retriever.google_drive.service;
 
 import java.util.List;
 
-import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.ai.document.Document;
 import org.springframework.ai.transformer.splitter.TokenTextSplitter;
 
-@Slf4j
 public class DocumentChunkingService {
     private final TokenTextSplitter tokenTextSplitter;
 
