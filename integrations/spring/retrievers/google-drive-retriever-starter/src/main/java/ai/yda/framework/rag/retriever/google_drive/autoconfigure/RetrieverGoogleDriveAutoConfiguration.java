@@ -122,8 +122,14 @@ public class RetrieverGoogleDriveAutoConfiguration {
     }
 
     @Bean
-    public TikaDocumentProcessor tikaDocumentProcessor(final DocumentContentMapper documentContentMapper) {
-        return new TikaDocumentProcessor(documentContentMapper);
+    public DocumentChunkingService documentChunkingService() {
+        return new DocumentChunkingService(tokenTextSplitter());
+    }
+
+    @Bean
+    public TikaDocumentProcessor tikaDocumentProcessor(
+            final DocumentContentMapper documentContentMapper, final DocumentChunkingService documentChunkingService) {
+        return new TikaDocumentProcessor(documentContentMapper, documentChunkingService);
     }
 
     @Bean

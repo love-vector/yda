@@ -16,16 +16,15 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.rag.retriever.google_drive.service;
 
-import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentDTO;
-import ai.yda.framework.rag.retriever.google_drive.dto.DocumentMetadataDTO;
+import java.util.List;
+
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.ai.document.Document;
 import org.springframework.ai.transformer.splitter.TokenTextSplitter;
-
-import java.util.List;
 
 @Slf4j
 public class DocumentChunkingService {
@@ -39,37 +38,5 @@ public class DocumentChunkingService {
         return tokenTextSplitter.split(new Document(documentContent)).stream()
                 .map(Document::getText)
                 .toList();
-    }
-
-    public DocumentMetadataDTO processContent(
-            final DocumentMetadataDTO documentMetadataDTO, final String filesExtension) {
-        if (filesExtension.contains("xlsx")) {
-            log.warn("Unsupported file extension: {}", filesExtension);
-            return documentMetadataDTO;
-        }
-
-        var documentContentDTO = documentMetadataDTO.getDocumentContents().stream()
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException(
-                        "Document contents are empty for document: " + documentMetadataDTO.getDocumentId()));
-
-        var documentForSplitting = documentContentDTO.getChunkContent();
-
-        log.debug("Processing document: {}", documentMetadataDTO.getName());
-
-        var splitIntoChunks = splitDocumentIntoChunks(documentForSplitting);
-        var transformEveryChunks = splitIntoChunks.stream()
-                .map(chunk -> DocumentContentDTO.builder()
-                        .documentMetadataId(documentMetadataDTO.getDocumentId())
-                        .chunkName(documentMetadataDTO.getName())
-                        .contentId(documentContentDTO.getContentId())
-                        .chunkContent(chunk)
-                        .build())
-                .toList();
-        documentMetadataDTO.setDocumentContents(transformEveryChunks);
-
-        log.debug("Processed document: {} ({} chunks)", documentMetadataDTO.getName(), transformEveryChunks.size());
-
-        return documentMetadataDTO;
     }
 }
