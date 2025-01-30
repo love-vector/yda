@@ -121,7 +121,7 @@ public class RetrieverGoogleDriveAutoConfiguration {
     }
 
     @Bean
-    public DocumentTextSplitter documentChunkingService() {
+    public DocumentTextSplitter documentTextSplitter() {
         return new DocumentTextSplitter();
     }
 
