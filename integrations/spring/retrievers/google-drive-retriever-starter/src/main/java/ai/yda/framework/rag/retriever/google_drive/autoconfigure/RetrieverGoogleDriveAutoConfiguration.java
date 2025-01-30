@@ -27,7 +27,6 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.api.OpenAiApi;
-import org.springframework.ai.transformer.splitter.TokenTextSplitter;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -50,9 +49,9 @@ import ai.yda.framework.rag.retriever.google_drive.port.DocumentContentPort;
 import ai.yda.framework.rag.retriever.google_drive.port.DocumentMetadataPort;
 import ai.yda.framework.rag.retriever.google_drive.repository.DocumentContentRepository;
 import ai.yda.framework.rag.retriever.google_drive.repository.DocumentMetadataRepository;
-import ai.yda.framework.rag.retriever.google_drive.service.DocumentChunkingService;
 import ai.yda.framework.rag.retriever.google_drive.service.DocumentProcessorProvider;
 import ai.yda.framework.rag.retriever.google_drive.service.DocumentSummaryService;
+import ai.yda.framework.rag.retriever.google_drive.service.DocumentTextSplitter;
 import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
 import ai.yda.framework.rag.retriever.google_drive.service.processor.ExelDocumentProcessor;
 import ai.yda.framework.rag.retriever.google_drive.service.processor.TikaDocumentProcessor;
@@ -122,14 +121,14 @@ public class RetrieverGoogleDriveAutoConfiguration {
     }
 
     @Bean
-    public DocumentChunkingService documentChunkingService() {
-        return new DocumentChunkingService(new TokenTextSplitter(250, 100, 5, 10000, false));
+    public DocumentTextSplitter documentChunkingService() {
+        return new DocumentTextSplitter();
     }
 
     @Bean
     public TikaDocumentProcessor tikaDocumentProcessor(
-            final DocumentContentMapper documentContentMapper, final DocumentChunkingService documentChunkingService) {
-        return new TikaDocumentProcessor(documentContentMapper, documentChunkingService);
+            final DocumentContentMapper documentContentMapper, final DocumentTextSplitter documentTextSplitter) {
+        return new TikaDocumentProcessor(documentContentMapper, documentTextSplitter);
     }
 
     @Bean

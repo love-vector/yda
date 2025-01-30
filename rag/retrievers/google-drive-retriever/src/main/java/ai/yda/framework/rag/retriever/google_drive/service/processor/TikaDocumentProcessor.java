@@ -29,18 +29,18 @@ import org.springframework.lang.NonNull;
 
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentDTO;
 import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentContentMapper;
-import ai.yda.framework.rag.retriever.google_drive.service.DocumentChunkingService;
+import ai.yda.framework.rag.retriever.google_drive.service.DocumentTextSplitter;
 
 public class TikaDocumentProcessor implements DocumentProcessor {
 
     private final DocumentContentMapper documentContentMapper;
-    private final DocumentChunkingService documentChunkingService;
+    private final DocumentTextSplitter documentTextSplitter;
 
     public TikaDocumentProcessor(
             final @NonNull DocumentContentMapper documentContentMapper,
-            final @NonNull DocumentChunkingService documentChunkingService) {
+            final @NonNull DocumentTextSplitter documentTextSplitter) {
         this.documentContentMapper = documentContentMapper;
-        this.documentChunkingService = documentChunkingService;
+        this.documentTextSplitter = documentTextSplitter;
     }
 
     // for PDF, DOC/ DOCX, PPT/ PPTX, and HTML.
@@ -49,8 +49,7 @@ public class TikaDocumentProcessor implements DocumentProcessor {
             throws IOException {
         return new TikaDocumentReader(new ByteArrayResource(inputStream.readAllBytes()))
                 .read().stream()
-                        .flatMap(document ->
-                                documentChunkingService.splitDocumentIntoChunks(document.getText()).stream())
+                        .flatMap(document -> documentTextSplitter.splitDocumentIntoChunks(document.getText()).stream())
                         .map(chunk -> documentContentMapper.toDTO(chunk, documentMetadataId))
                         .toList();
     }

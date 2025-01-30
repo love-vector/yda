@@ -21,19 +21,11 @@ package ai.yda.framework.rag.retriever.google_drive.service;
 
 import java.util.List;
 
-import org.springframework.ai.document.Document;
 import org.springframework.ai.transformer.splitter.TokenTextSplitter;
 
-public class DocumentChunkingService {
-    private final TokenTextSplitter tokenTextSplitter;
-
-    public DocumentChunkingService(final TokenTextSplitter tokenTextSplitter) {
-        this.tokenTextSplitter = tokenTextSplitter;
-    }
+public class DocumentTextSplitter extends TokenTextSplitter {
 
     public List<String> splitDocumentIntoChunks(final String documentContent) {
-        return tokenTextSplitter.split(new Document(documentContent)).stream()
-                .map(Document::getText)
-                .toList();
+        return splitText(documentContent);
     }
 }
