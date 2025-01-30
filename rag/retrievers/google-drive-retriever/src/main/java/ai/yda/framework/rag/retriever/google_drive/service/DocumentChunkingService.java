@@ -16,24 +16,19 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.rag.retriever.google_drive.service;
-
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.ai.document.Document;
-import org.springframework.ai.transformer.splitter.TokenTextSplitter;
 
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentDTO;
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentMetadataDTO;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.document.Document;
+import org.springframework.ai.transformer.splitter.TokenTextSplitter;
+
+import java.util.List;
 
 @Slf4j
 public class DocumentChunkingService {
-    private static final Set<String> SUPPORTED_EXTENSIONS = Set.of("pdf", "docx", "ppt", "pptx", "html");
     private final TokenTextSplitter tokenTextSplitter;
 
     public DocumentChunkingService(TokenTextSplitter tokenTextSplitter) {
@@ -43,12 +38,12 @@ public class DocumentChunkingService {
     public List<String> splitDocumentIntoChunks(final String documentContent) {
         return tokenTextSplitter.split(new Document(documentContent)).stream()
                 .map(Document::getText)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public DocumentMetadataDTO processContent(
             final DocumentMetadataDTO documentMetadataDTO, final String filesExtension) {
-        if (!isSupportedFileType(filesExtension)) {
+        if (filesExtension.contains("xlsx")) {
             log.warn("Unsupported file extension: {}", filesExtension);
             return documentMetadataDTO;
         }
@@ -76,9 +71,5 @@ public class DocumentChunkingService {
         log.debug("Processed document: {} ({} chunks)", documentMetadataDTO.getName(), transformEveryChunks.size());
 
         return documentMetadataDTO;
-    }
-
-    private boolean isSupportedFileType(final String fileExtension) {
-        return SUPPORTED_EXTENSIONS.contains(fileExtension.toLowerCase());
     }
 }
