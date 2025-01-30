@@ -51,6 +51,7 @@ import ai.yda.framework.rag.retriever.google_drive.repository.DocumentContentRep
 import ai.yda.framework.rag.retriever.google_drive.repository.DocumentMetadataRepository;
 import ai.yda.framework.rag.retriever.google_drive.service.DocumentProcessorProvider;
 import ai.yda.framework.rag.retriever.google_drive.service.DocumentSummaryService;
+import ai.yda.framework.rag.retriever.google_drive.service.DocumentTextSplitter;
 import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
 import ai.yda.framework.rag.retriever.google_drive.service.processor.ExelDocumentProcessor;
 import ai.yda.framework.rag.retriever.google_drive.service.processor.TikaDocumentProcessor;
@@ -120,8 +121,14 @@ public class RetrieverGoogleDriveAutoConfiguration {
     }
 
     @Bean
-    public TikaDocumentProcessor tikaDocumentProcessor(final DocumentContentMapper documentContentMapper) {
-        return new TikaDocumentProcessor(documentContentMapper);
+    public DocumentTextSplitter documentTextSplitter() {
+        return new DocumentTextSplitter(250, 100, 5, 10000, false);
+    }
+
+    @Bean
+    public TikaDocumentProcessor tikaDocumentProcessor(
+            final DocumentContentMapper documentContentMapper, final DocumentTextSplitter documentTextSplitter) {
+        return new TikaDocumentProcessor(documentContentMapper, documentTextSplitter);
     }
 
     @Bean

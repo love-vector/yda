@@ -22,7 +22,6 @@ package ai.yda.framework.rag.retriever.google_drive.service.processor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.ai.reader.tika.TikaDocumentReader;
 import org.springframework.core.io.ByteArrayResource;
@@ -30,13 +29,18 @@ import org.springframework.lang.NonNull;
 
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentDTO;
 import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentContentMapper;
+import ai.yda.framework.rag.retriever.google_drive.service.DocumentTextSplitter;
 
 public class TikaDocumentProcessor implements DocumentProcessor {
 
     private final DocumentContentMapper documentContentMapper;
+    private final DocumentTextSplitter documentTextSplitter;
 
-    public TikaDocumentProcessor(final @NonNull DocumentContentMapper documentContentMapper) {
+    public TikaDocumentProcessor(
+            final @NonNull DocumentContentMapper documentContentMapper,
+            final @NonNull DocumentTextSplitter documentTextSplitter) {
         this.documentContentMapper = documentContentMapper;
+        this.documentTextSplitter = documentTextSplitter;
     }
 
     // for PDF, DOC/ DOCX, PPT/ PPTX, and HTML.
@@ -45,7 +49,8 @@ public class TikaDocumentProcessor implements DocumentProcessor {
             throws IOException {
         return new TikaDocumentReader(new ByteArrayResource(inputStream.readAllBytes()))
                 .read().stream()
-                        .map(document -> documentContentMapper.toDTO(document.getText(), documentMetadataId))
-                        .collect(Collectors.toList());
+                        .flatMap(document -> documentTextSplitter.splitDocumentIntoChunks(document.getText()).stream())
+                        .map(chunk -> documentContentMapper.toDTO(chunk, documentMetadataId))
+                        .toList();
     }
 }
