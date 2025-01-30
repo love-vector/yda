@@ -27,7 +27,7 @@ import org.springframework.ai.transformer.splitter.TokenTextSplitter;
 public class DocumentChunkingService {
     private final TokenTextSplitter tokenTextSplitter;
 
-    public DocumentChunkingService(TokenTextSplitter tokenTextSplitter) {
+    public DocumentChunkingService(final TokenTextSplitter tokenTextSplitter) {
         this.tokenTextSplitter = tokenTextSplitter;
     }
 

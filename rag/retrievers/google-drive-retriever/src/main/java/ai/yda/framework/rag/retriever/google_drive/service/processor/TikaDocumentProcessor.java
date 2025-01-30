@@ -49,8 +49,8 @@ public class TikaDocumentProcessor implements DocumentProcessor {
             throws IOException {
         return new TikaDocumentReader(new ByteArrayResource(inputStream.readAllBytes()))
                 .read().stream()
-                        .map(document -> documentChunkingService.splitDocumentIntoChunks(document.getText()))
-                        .flatMap(List::stream)
+                        .flatMap(document ->
+                                documentChunkingService.splitDocumentIntoChunks(document.getText()).stream())
                         .map(chunk -> documentContentMapper.toDTO(chunk, documentMetadataId))
                         .toList();
     }
