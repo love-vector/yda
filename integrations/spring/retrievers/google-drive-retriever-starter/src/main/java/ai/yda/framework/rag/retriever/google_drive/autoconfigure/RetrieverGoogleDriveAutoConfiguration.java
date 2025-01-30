@@ -21,9 +21,7 @@ package ai.yda.framework.rag.retriever.google_drive.autoconfigure;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.time.Duration;
 
-import org.springframework.ai.autoconfigure.openai.OpenAiChatProperties;
 import org.springframework.ai.autoconfigure.openai.OpenAiConnectionProperties;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.openai.OpenAiChatModel;
@@ -32,8 +30,6 @@ import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.web.client.ClientHttpRequestFactories;
-import org.springframework.boot.web.client.ClientHttpRequestFactorySettings;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.io.ResourceLoader;
@@ -135,30 +131,6 @@ public class RetrieverGoogleDriveAutoConfiguration {
     }
 
     @Bean
-    public OpenAiChatOptions openAiChatOptions(final OpenAiChatProperties openAiChatProperties) {
-        return openAiChatProperties.getOptions();
-    }
-
-    @Bean
-    public OpenAiChatModel openAiChatModel(
-            final OpenAiConnectionProperties openAiConnectionProperties,
-            final WebClient.Builder webClientBuilder,
-            final OpenAiChatOptions openAiChatOptions) {
-        var restClientBuilder = RestClient.builder()
-                .requestFactory(ClientHttpRequestFactories.get(ClientHttpRequestFactorySettings.DEFAULTS
-                        .withConnectTimeout(Duration.ofMinutes(5))
-                        .withReadTimeout(Duration.ofMinutes(10))));
-        // TODO Come up with another way to modify OpenAiChatModel
-        var openAiApi = new OpenAiApi(
-                openAiConnectionProperties.getBaseUrl(),
-                openAiConnectionProperties.getApiKey(),
-                restClientBuilder,
-                webClientBuilder);
-
-        return new OpenAiChatModel(openAiApi, openAiChatOptions);
-    }
-
-    @Bean
     public GoogleDriveRetriever googleDriveRetriever(
             final RetrieverGoogleDriveProperties googleDriveProperties,
             final ResourceLoader resourceLoader,
@@ -166,7 +138,9 @@ public class RetrieverGoogleDriveAutoConfiguration {
             final DocumentContentPort documentContentPort,
             final DocumentProcessorProvider documentProcessorProvider,
             final DocumentMetadataMapper documentMetadataMapper,
-            final OpenAiChatModel openAiChatModel)
+            final OpenAiConnectionProperties openAiConnectionProperties,
+            final RestClient.Builder restClientBuilder,
+            final WebClient.Builder webClientBuilder)
             throws IOException, GeneralSecurityException {
 
         var resource = resourceLoader.getResource(googleDriveProperties.getServiceAccountKeyFilePath());
@@ -176,6 +150,8 @@ public class RetrieverGoogleDriveAutoConfiguration {
                     "Service Account key not found at: %s", googleDriveProperties.getServiceAccountKeyFilePath()));
         }
 
+        var openAiChatModel =
+                openAiChatModel(openAiConnectionProperties, googleDriveProperties, restClientBuilder, webClientBuilder);
         return new GoogleDriveRetriever(
                 googleDriveProperties.getTopK(),
                 googleDriveProperties.getIsProcessingEnabled(),
@@ -190,5 +166,23 @@ public class RetrieverGoogleDriveAutoConfiguration {
                         documentProcessorProvider,
                         documentMetadataMapper,
                         new DocumentSummaryService(openAiChatModel)));
+    }
+
+    private OpenAiChatModel openAiChatModel(
+            final OpenAiConnectionProperties openAiConnectionProperties,
+            final RetrieverGoogleDriveProperties retrieverGoogleDriveProperties,
+            final RestClient.Builder restClientBuilder,
+            final WebClient.Builder webClientBuilder) {
+        var openAiApi = new OpenAiApi(
+                openAiConnectionProperties.getBaseUrl(),
+                openAiConnectionProperties.getApiKey(),
+                restClientBuilder,
+                webClientBuilder);
+        var options = OpenAiChatOptions.builder()
+                .model(retrieverGoogleDriveProperties.getModel())
+                .temperature(0.0)
+                .build();
+
+        return new OpenAiChatModel(openAiApi, options);
     }
 }
