@@ -123,7 +123,7 @@ public class RetrieverGoogleDriveAutoConfiguration {
 
     @Bean
     public DocumentChunkingService documentChunkingService() {
-        return new DocumentChunkingService(tokenTextSplitter());
+        return new DocumentChunkingService(new TokenTextSplitter(250, 100, 5, 10000, false));
     }
 
     @Bean
@@ -174,8 +174,6 @@ public class RetrieverGoogleDriveAutoConfiguration {
                         documentProcessorProvider,
                         documentMetadataMapper,
                         new DocumentSummaryService(openAiChatModel)));
-                        new DocumentSummaryService(openAiChatModel),
-                        new ChunkingService()));
     }
 
     private OpenAiChatModel openAiChatModel(
