@@ -24,6 +24,8 @@ import java.util.Optional;
 
 import jakarta.transaction.Transactional;
 
+import lombok.extern.slf4j.Slf4j;
+
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentMetadataDTO;
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentSummaryDTO;
 import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentContentMapper;
@@ -32,6 +34,7 @@ import ai.yda.framework.rag.retriever.google_drive.port.DocumentMetadataPort;
 import ai.yda.framework.rag.retriever.google_drive.repository.DocumentMetadataRepository;
 
 @Transactional
+@Slf4j
 public class DocumentMetadataAdapter implements DocumentMetadataPort {
 
     private final DocumentMetadataRepository repository;
@@ -72,6 +75,11 @@ public class DocumentMetadataAdapter implements DocumentMetadataPort {
 
     @Override
     public List<DocumentSummaryDTO> getAllFileSummaries() {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Function Calling: DocumentMetadataAdapter::getAllFileSummaries()");
+        }
+
         return repository.findAll().stream()
                 .filter(documentMetadataEntity -> !documentMetadataEntity.isFolder())
                 .map(documentMetadataMapper::toDto)

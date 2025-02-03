@@ -58,13 +58,13 @@ public class OpenAiAssistantGenerator implements Generator<RagRequest, RagRespon
     /**
      * Constructs a new {@link OpenAiAssistantGenerator} instance.
      *
-     * @param assistantService        the {@link AzureOpenAiAssistantService} instance used to interact with the
-     *                                Azure OpenAI Service.
-     * @param assistantId             the unique identifier for the Assistant that will be used to interact with the
-     *                                Azure OpenAI Service. This ID specifies which Assistant to use when making
-     *                                requests.
-     * @param sessionProvider         the {@link SessionProvider} instance responsible for managing sessions
-     *                                in a blocking manner, maintaining user context between interactions.
+     * @param assistantService the {@link AzureOpenAiAssistantService} instance used to interact with the
+     *                         Azure OpenAI Service.
+     * @param assistantId      the unique identifier for the Assistant that will be used to interact with the
+     *                         Azure OpenAI Service. This ID specifies which Assistant to use when making
+     *                         requests.
+     * @param sessionProvider  the {@link SessionProvider} instance responsible for managing sessions
+     *                         in a blocking manner, maintaining user context between interactions.
      */
     public OpenAiAssistantGenerator(
             final AzureOpenAiAssistantService assistantService,
@@ -98,7 +98,14 @@ public class OpenAiAssistantGenerator implements Generator<RagRequest, RagRespon
                     sessionProvider.put(OpenAiAssistantConstant.THREAD_ID_KEY, newThreadId);
                     return newThreadId;
                 });
-        log.debug("Thread ID: {}", threadId);
+        if (log.isDebugEnabled()) {
+            log.debug(
+                    "Assistant Call:\nAssistant ID: {},\nThread ID: {},\nQuery: {},\nContext: {}",
+                    assistantId,
+                    threadId,
+                    request.getQuery(),
+                    context);
+        }
         return RagResponse.builder()
                 .result(assistantService.createRunAndWaitForResponse(threadId, assistantId, context))
                 .build();

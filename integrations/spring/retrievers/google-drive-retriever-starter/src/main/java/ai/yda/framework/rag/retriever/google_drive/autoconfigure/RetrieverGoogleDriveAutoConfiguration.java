@@ -53,7 +53,7 @@ import ai.yda.framework.rag.retriever.google_drive.service.DocumentProcessorProv
 import ai.yda.framework.rag.retriever.google_drive.service.DocumentSummaryService;
 import ai.yda.framework.rag.retriever.google_drive.service.DocumentTextSplitter;
 import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
-import ai.yda.framework.rag.retriever.google_drive.service.processor.ExelDocumentProcessor;
+import ai.yda.framework.rag.retriever.google_drive.service.processor.ExcelDocumentProcessor;
 import ai.yda.framework.rag.retriever.google_drive.service.processor.TikaDocumentProcessor;
 
 /**
@@ -116,8 +116,8 @@ public class RetrieverGoogleDriveAutoConfiguration {
     }
 
     @Bean
-    public ExelDocumentProcessor exelDocumentProcessor(final DocumentContentMapper documentContentMapper) {
-        return new ExelDocumentProcessor(documentContentMapper);
+    public ExcelDocumentProcessor exelDocumentProcessor(final DocumentContentMapper documentContentMapper) {
+        return new ExcelDocumentProcessor(documentContentMapper);
     }
 
     @Bean
@@ -133,7 +133,7 @@ public class RetrieverGoogleDriveAutoConfiguration {
 
     @Bean
     public DocumentProcessorProvider documentProcessorProvider(
-            final ExelDocumentProcessor exelDocumentProcessor, final TikaDocumentProcessor tikaDocumentProcessor) {
+            final ExcelDocumentProcessor exelDocumentProcessor, final TikaDocumentProcessor tikaDocumentProcessor) {
         return new DocumentProcessorProvider(exelDocumentProcessor, tikaDocumentProcessor);
     }
 

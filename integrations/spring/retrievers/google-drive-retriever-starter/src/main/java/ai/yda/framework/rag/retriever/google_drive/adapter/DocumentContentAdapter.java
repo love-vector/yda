@@ -21,6 +21,8 @@ package ai.yda.framework.rag.retriever.google_drive.adapter;
 
 import java.util.List;
 
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.ai.document.Document;
 
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentDTO;
@@ -30,6 +32,7 @@ import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentContentMapper;
 import ai.yda.framework.rag.retriever.google_drive.port.DocumentContentPort;
 import ai.yda.framework.rag.retriever.google_drive.repository.DocumentContentRepository;
 
+@Slf4j
 public class DocumentContentAdapter implements DocumentContentPort {
 
     private final DocumentContentRepository documentContentRepository;
@@ -45,6 +48,11 @@ public class DocumentContentAdapter implements DocumentContentPort {
 
     @Override
     public List<DocumentContentDTO> getDocumentsContents(final DocumentIdsDTO documentIds) {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Function Calling: DocumentContentAdapter::getDocumentsContents({})", documentIds.documentIds());
+        }
+
         return documentContentMapper.toDTOs(
                 documentContentRepository.findByDocumentMetadata_DocumentIdIn(documentIds.documentIds()));
     }
