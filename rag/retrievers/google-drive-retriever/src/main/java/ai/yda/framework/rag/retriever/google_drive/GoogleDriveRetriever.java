@@ -25,11 +25,11 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.document.Document;
 import org.springframework.ai.model.function.FunctionCallback;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.lang.NonNull;
 
-import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.retriever.Retriever;
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentDTO;
@@ -59,7 +59,7 @@ import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
  * @since 0.2.0
  */
 @Slf4j
-public class GoogleDriveRetriever implements Retriever<RagRequest, RagContext> {
+public class GoogleDriveRetriever implements Retriever<RagRequest, Document> {
 
     private static final String RETRIEVAL_SYSTEM_INSTRUCTION =
             """
@@ -126,7 +126,7 @@ public class GoogleDriveRetriever implements Retriever<RagRequest, RagContext> {
     }
 
     @Override
-    public RagContext retrieve(final RagRequest request) {
+    public List<Document> retrieve(final RagRequest request) {
         var getAllDocumentsFunction = FunctionCallback.builder()
                 .function("getAllDocuments", documentMetadataPort::getAllFileSummaries)
                 .description("Retrieve all documents to enable filtering based on summaries")
@@ -145,10 +145,9 @@ public class GoogleDriveRetriever implements Retriever<RagRequest, RagContext> {
                 .call()
                 .entity(new ParameterizedTypeReference<List<DocumentContentIdDTO>>() {});
 
-        return RagContext.builder()
-                .knowledge(documentContentPort.getDocumentContentsByIds(documentContentIds).stream()
-                        .map(DocumentContentDTO::getChunkContent)
-                        .toList())
-                .build();
+        return documentContentPort.getDocumentContentsByIds(documentContentIds).stream()
+                .map(DocumentContentDTO::getChunkContent)
+                .map(Document::new)
+                .toList();
     }
 }

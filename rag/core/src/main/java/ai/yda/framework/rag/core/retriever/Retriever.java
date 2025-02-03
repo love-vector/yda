@@ -19,28 +19,31 @@
 */
 package ai.yda.framework.rag.core.retriever;
 
-import ai.yda.framework.rag.core.model.RagContext;
+import java.util.List;
+
+import org.springframework.ai.document.Document;
+
 import ai.yda.framework.rag.core.model.RagRequest;
 
 /**
  * Provides a generic mechanism for fetching relevant data or documents that can provide Context based on the User
  * Request.
  *
- * @param <REQUEST> the generic type of the Request from the User, which must extend {@link RagRequest}.
- * @param <CONTEXT> the generic type of the Context data that will be retrieved based on the given Request, which must
- *                  extend {@link RagContext}.
+ * @param <REQUEST>  the generic type of the Request from the User, which must extend {@link RagRequest}.
+ * @param <DOCUMENT> the generic type of the Context data that will be retrieved based on the given Request, which must
+ *                   extend {@link Document}.
  * @author Nikita Litvinov
  * @see RagRequest
- * @see RagContext
+ * @see Document
  * @since 0.1.0
  */
-public interface Retriever<REQUEST extends RagRequest, CONTEXT extends RagContext> {
+public interface Retriever<REQUEST extends RagRequest, DOCUMENT extends Document> {
 
     /**
      * Fetches relevant data or documents that can provide additional information based on the User Request.
      *
      * @param request the Request object that contains query data from the User.
-     * @return the Context object generated that contains additional information based on the User Request.
+     * @return the List<DOCUMENT></> objects generated that contains additional information based on the User Request.
      */
-    CONTEXT retrieve(REQUEST request);
+    List<DOCUMENT> retrieve(REQUEST request);
 }

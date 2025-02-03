@@ -28,17 +28,17 @@ import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.lang.NonNull;
 
-import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.retriever.Retriever;
 import ai.yda.framework.rag.retriever.filesystem.service.FilesystemService;
 
 /**
- * Retrieves filesystem Context data from a Vector Store based on a Request. It processes files stored in a specified
+ * Retrieves filesystem Documents data from a Vector Store based on a Request. It processes files stored in a specified
  * directory and uses a Vector Store to perform similarity searches. If file processing is enabled, it processes files
  * in the storage folder during initialization.
  *
@@ -49,7 +49,7 @@ import ai.yda.framework.rag.retriever.filesystem.service.FilesystemService;
  * @since 0.1.0
  */
 @Slf4j
-public class FilesystemRetriever implements Retriever<RagRequest, RagContext> {
+public class FilesystemRetriever implements Retriever<RagRequest, Document> {
     /**
      * The Vector Store used to retrieve Context data for User Request through similarity search.
      */
@@ -100,25 +100,15 @@ public class FilesystemRetriever implements Retriever<RagRequest, RagContext> {
     }
 
     /**
-     * Retrieves Context data based on the given Request by performing a similarity search in the Vector Store.
+     * Retrieves Documents data based on the given Request by performing a similarity search in the Vector Store.
      *
      * @param request the {@link RagRequest} object containing the User query for the similarity search.
-     * @return a {@link RagContext} object containing the Knowledge obtained from the similarity search.
+     * @return a {@link Document} object containing the Knowledge obtained from the similarity search.
      */
     @Override
-    public RagContext retrieve(final RagRequest request) {
-        return RagContext.builder()
-                .knowledge(
-                        vectorStore
-                                .similaritySearch(
-                                        SearchRequest.query(request.getQuery()).withTopK(topK))
-                                .parallelStream()
-                                .map(document -> {
-                                    log.debug("Document metadata: {}", document.getMetadata());
-                                    return document.getContent();
-                                })
-                                .toList())
-                .build();
+    public List<Document> retrieve(final RagRequest request) {
+        return vectorStore.similaritySearch(
+                SearchRequest.builder().query(request.getQuery()).topK(topK).build());
     }
 
     /**

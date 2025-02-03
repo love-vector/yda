@@ -25,9 +25,10 @@ import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.Getter;
 
+import org.springframework.ai.document.Document;
+
 import ai.yda.framework.rag.core.augmenter.Augmenter;
 import ai.yda.framework.rag.core.generator.Generator;
-import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.model.RagResponse;
 import ai.yda.framework.rag.core.retriever.Retriever;
@@ -44,14 +45,14 @@ import ai.yda.framework.rag.core.util.RequestTransformer;
 public class DefaultRag implements Rag<RagRequest, RagResponse> {
 
     /**
-     * The list of {@link Retriever} instances used to retrieve {@link RagContext} based on the {@link RagRequest}.
+     * The list of {@link Retriever} instances used to retrieve {@link Document} based on the {@link RagRequest}.
      */
-    private final List<Retriever<RagRequest, RagContext>> retrievers;
+    private final List<Retriever<RagRequest, Document>> retrievers;
 
     /**
-     * The list of {@link Augmenter} instances used to modify or enhance the retrieved {@link RagContext}.
+     * The list of {@link Augmenter} instances used to modify or enhance the retrieved {@link Document}.
      */
-    private final List<Augmenter<RagRequest, RagContext>> augmenters;
+    private final List<Augmenter<RagRequest, Document>> augmenters;
 
     /**
      * The {@link Generator} instance responsible for generating the final {@link RagResponse}.
@@ -66,15 +67,15 @@ public class DefaultRag implements Rag<RagRequest, RagResponse> {
     /**
      * Constructs a new {@link DefaultRag} instance.
      *
-     * @param retrievers          the list of {@link Retriever} objects to retrieve {@link RagContext} data.
+     * @param retrievers          the list of {@link Retriever} objects to retrieve {@link Document} data.
      * @param augmenters          the list of {@link Augmenter} objects to augment the retrieved Contexts.
      * @param generator           the {@link Generator} used to generate the {@link RagResponse}.
      * @param requestTransformers the list of {@link RequestTransformer} objects for transforming the
      *                            {@link RagRequest}.
      */
     public DefaultRag(
-            final List<Retriever<RagRequest, RagContext>> retrievers,
-            final List<Augmenter<RagRequest, RagContext>> augmenters,
+            final List<Retriever<RagRequest, Document>> retrievers,
+            final List<Augmenter<RagRequest, Document>> augmenters,
             final Generator<RagRequest, RagResponse> generator,
             final List<RequestTransformer<RagRequest>> requestTransformers) {
         this.retrievers = retrievers;
@@ -87,7 +88,7 @@ public class DefaultRag implements Rag<RagRequest, RagResponse> {
      * Executes the Retrieval-Augmented Generation (RAG) process by:
      * <ul>
      *     <li>Transforming the initial {@link RagRequest} using the provided {@link RequestTransformer} instances.</li>
-     *     <li>Retrieving relevant {@link RagContext} from the {@link Retriever} instances.</li>
+     *     <li>Retrieving relevant {@link Document} from the {@link Retriever} instances.</li>
      *     <li>Augmenting the retrieved Contexts using the provided {@link Augmenter} instances.</li>
      *     <li>
      *         Generating the final {@link RagResponse} using the {@link Generator}, based on the augmented Contexts.
@@ -104,28 +105,30 @@ public class DefaultRag implements Rag<RagRequest, RagResponse> {
         //            transformingRequest = requestTransformer.transformRequest(transformingRequest);
         //        }
         //        var transformedRequest = transformingRequest;
-        var contexts = retrievers.parallelStream()
-                .map(retriever -> retriever.retrieve(request))
+        var documents = retrievers.parallelStream()
+                .flatMap(retriever -> retriever.retrieve(request).stream())
+                .toList();
                 //                .map(retriever -> retriever.retrieve(transformedRequest))
-                .collect(Collectors.toUnmodifiableList());
+
+
         for (var augmenter : augmenters) {
-            contexts = augmenter.augment(request, contexts);
-            //            contexts = augmenter.augment(transformedRequest, contexts);
+            documents = augmenter.augment(request, documents);
+            //            documents = augmenter.augment(transformedRequest, documents);
         }
-        return generator.generate(request, mergeContexts(contexts));
-        //        return generator.generate(transformedRequest, mergeContexts(contexts));
+        return generator.generate(request, mergeDocuments(documents));
+        //        return generator.generate(transformedRequest, mergeContexts(documents));
     }
 
     /**
-     * Merges the Knowledge from the list of {@link RagContext} objects into a single string. Each piece of Knowledge is
+     * Merges the Knowledge from the list of {@link Document} objects into a single string. Each piece of Knowledge is
      * separated by a point character.
      *
-     * @param contexts the list of {@link RagContext} objects containing Knowledge data.
+     * @param documents the list of {@link Document} objects containing Knowledge data.
      * @return a string that combines all pieces of Knowledge from the Contexts.
      */
-    protected String mergeContexts(final List<RagContext> contexts) {
-        return contexts.parallelStream()
-                .map(ragContext -> String.join(ContentUtil.SENTENCE_SEPARATOR, ragContext.getKnowledge()))
+    protected String mergeDocuments(final List<Document> documents) {
+        return documents.parallelStream()
+                .map(Document::getFormattedContent)
                 .collect(Collectors.joining(ContentUtil.SENTENCE_SEPARATOR));
     }
 }
