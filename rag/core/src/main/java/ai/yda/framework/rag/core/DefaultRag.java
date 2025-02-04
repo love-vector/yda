@@ -32,7 +32,6 @@ import ai.yda.framework.rag.core.generator.Generator;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.model.RagResponse;
 import ai.yda.framework.rag.core.retriever.Retriever;
-import ai.yda.framework.rag.core.util.ContentUtil;
 import ai.yda.framework.rag.core.util.RequestTransformer;
 
 /**
@@ -108,8 +107,7 @@ public class DefaultRag implements Rag<RagRequest, RagResponse> {
         var documents = retrievers.parallelStream()
                 .flatMap(retriever -> retriever.retrieve(request).stream())
                 .toList();
-                //                .map(retriever -> retriever.retrieve(transformedRequest))
-
+        //                .map(retriever -> retriever.retrieve(transformedRequest))
 
         for (var augmenter : augmenters) {
             documents = augmenter.augment(request, documents);
@@ -127,8 +125,6 @@ public class DefaultRag implements Rag<RagRequest, RagResponse> {
      * @return a string that combines all pieces of Knowledge from the Contexts.
      */
     protected String mergeDocuments(final List<Document> documents) {
-        return documents.parallelStream()
-                .map(Document::getFormattedContent)
-                .collect(Collectors.joining(ContentUtil.SENTENCE_SEPARATOR));
+        return documents.parallelStream().map(Document::getFormattedContent).collect(Collectors.joining("\n\n"));
     }
 }

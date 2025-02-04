@@ -32,7 +32,6 @@ import org.springframework.lang.NonNull;
 
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.retriever.Retriever;
-import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentDTO;
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentIdDTO;
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentIdsDTO;
 import ai.yda.framework.rag.retriever.google_drive.port.DocumentContentPort;
@@ -145,9 +144,6 @@ public class GoogleDriveRetriever implements Retriever<RagRequest, Document> {
                 .call()
                 .entity(new ParameterizedTypeReference<List<DocumentContentIdDTO>>() {});
 
-        return documentContentPort.getDocumentContentsByIds(documentContentIds).stream()
-                .map(DocumentContentDTO::getChunkContent)
-                .map(Document::new)
-                .toList();
+        return documentContentPort.getDocumentsByIds(documentContentIds);
     }
 }

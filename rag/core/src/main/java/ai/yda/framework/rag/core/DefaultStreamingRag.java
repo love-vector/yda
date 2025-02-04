@@ -16,8 +16,17 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.rag.core;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
+
+import org.springframework.ai.document.Document;
 
 import ai.yda.framework.rag.core.augmenter.Augmenter;
 import ai.yda.framework.rag.core.generator.StreamingGenerator;
@@ -26,13 +35,6 @@ import ai.yda.framework.rag.core.model.RagResponse;
 import ai.yda.framework.rag.core.retriever.Retriever;
 import ai.yda.framework.rag.core.util.ContentUtil;
 import ai.yda.framework.rag.core.util.StreamingRequestTransformer;
-import org.springframework.ai.document.Document;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Default implementation of the Retrieval-Augmented Generation (RAG) process in a streaming manner.
@@ -110,7 +112,8 @@ public class DefaultStreamingRag implements StreamingRag<RagRequest, RagResponse
                                 .subscribeOn(Schedulers.boundedElastic()))
                         .collectList()
                         .flatMap(documents -> {
-                            var documentsList = documents.stream().flatMap(List::stream).toList();
+                            var documentsList =
+                                    documents.stream().flatMap(List::stream).toList();
                             for (var augmenter : augmenters) {
                                 documentsList = augmenter.augment(transformedRequest, documentsList);
                             }

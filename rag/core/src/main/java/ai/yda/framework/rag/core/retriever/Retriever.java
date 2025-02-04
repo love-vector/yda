@@ -43,7 +43,7 @@ public interface Retriever<REQUEST extends RagRequest, DOCUMENT extends Document
      * Fetches relevant data or documents that can provide additional information based on the User Request.
      *
      * @param request the Request object that contains query data from the User.
-     * @return the List<DOCUMENT></> objects generated that contains additional information based on the User Request.
+     * @return the list of DOCUMENT objects generated that contains additional information based on the User Request.
      */
     List<DOCUMENT> retrieve(REQUEST request);
 }

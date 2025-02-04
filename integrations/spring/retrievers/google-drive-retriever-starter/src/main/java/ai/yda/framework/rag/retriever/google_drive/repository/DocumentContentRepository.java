@@ -28,6 +28,5 @@ import ai.yda.framework.rag.retriever.google_drive.entity.DocumentContentEntity;
 
 @Repository
 public interface DocumentContentRepository extends JpaRepository<DocumentContentEntity, Long> {
-
-    List<DocumentContentEntity> findByDocumentMetadata_DocumentId(String documentId);
+    List<DocumentContentEntity> findByDocumentMetadata_DocumentIdIn(List<String> documentIds);
 }
