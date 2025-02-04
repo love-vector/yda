@@ -21,6 +21,7 @@ package ai.yda.framework.rag.autoconfigure;
 
 import java.util.List;
 
+import org.springframework.ai.document.Document;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
@@ -28,7 +29,6 @@ import org.springframework.context.annotation.Bean;
 import ai.yda.framework.rag.core.DefaultRag;
 import ai.yda.framework.rag.core.augmenter.Augmenter;
 import ai.yda.framework.rag.core.generator.Generator;
-import ai.yda.framework.rag.core.model.RagContext;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.model.RagResponse;
 import ai.yda.framework.rag.core.retriever.Retriever;
@@ -61,8 +61,8 @@ public class RagAutoConfiguration {
      */
     @Bean
     public DefaultRag defaultRag(
-            final List<Retriever<RagRequest, RagContext>> retrievers,
-            final List<Augmenter<RagRequest, RagContext>> augmenters,
+            final List<Retriever<RagRequest, Document>> retrievers,
+            final List<Augmenter<RagRequest, Document>> augmenters,
             final Generator<RagRequest, RagResponse> generator,
             final List<RequestTransformer<RagRequest>> requestTransformers) {
         return new DefaultRag(retrievers, augmenters, generator, requestTransformers);

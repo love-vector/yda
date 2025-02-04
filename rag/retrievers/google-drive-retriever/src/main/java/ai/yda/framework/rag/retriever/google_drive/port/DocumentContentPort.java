@@ -21,6 +21,8 @@ package ai.yda.framework.rag.retriever.google_drive.port;
 
 import java.util.List;
 
+import org.springframework.ai.document.Document;
+
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentDTO;
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentIdDTO;
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentIdsDTO;
@@ -29,5 +31,5 @@ public interface DocumentContentPort {
 
     List<DocumentContentDTO> getDocumentsContents(DocumentIdsDTO documentId);
 
-    List<DocumentContentDTO> getDocumentContentsByIds(List<DocumentContentIdDTO> documentContentIdDTOs);
+    List<Document> getDocumentsByIds(List<DocumentContentIdDTO> documentContentIdDTOs);
 }

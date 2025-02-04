@@ -40,6 +40,8 @@ public class DocumentContentDTO {
 
     private String chunkContent;
 
+    private String documentName;
+
     /**
      * ID of the document this content belongs to.
      */

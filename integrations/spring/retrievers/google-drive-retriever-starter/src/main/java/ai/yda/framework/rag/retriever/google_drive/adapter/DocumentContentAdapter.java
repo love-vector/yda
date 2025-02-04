@@ -21,6 +21,8 @@ package ai.yda.framework.rag.retriever.google_drive.adapter;
 
 import java.util.List;
 
+import org.springframework.ai.document.Document;
+
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentDTO;
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentIdDTO;
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentIdsDTO;
@@ -43,19 +45,15 @@ public class DocumentContentAdapter implements DocumentContentPort {
 
     @Override
     public List<DocumentContentDTO> getDocumentsContents(final DocumentIdsDTO documentIds) {
-        return documentIds.documentIds().stream()
-                .flatMap(documentId -> documentContentRepository.findByDocumentMetadata_DocumentId(documentId).stream())
-                .map(documentContentMapper::toDTO)
-                .toList();
+        return documentContentMapper.toDTOs(
+                documentContentRepository.findByDocumentMetadata_DocumentIdIn(documentIds.documentIds()));
     }
 
     @Override
-    public List<DocumentContentDTO> getDocumentContentsByIds(final List<DocumentContentIdDTO> documentContentIdDTOs) {
-        var documentContentIds = documentContentIdDTOs.stream()
+    public List<Document> getDocumentsByIds(final List<DocumentContentIdDTO> documentContentIdDTOs) {
+        var documentContentIds = documentContentIdDTOs.parallelStream()
                 .map(DocumentContentIdDTO::contentId)
                 .toList();
-        return documentContentRepository.findAllById(documentContentIds).stream()
-                .map(documentContentMapper::toDTO)
-                .toList();
+        return documentContentMapper.toDocuments(documentContentRepository.findAllById(documentContentIds));
     }
 }

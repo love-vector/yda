@@ -19,8 +19,13 @@
 */
 package ai.yda.framework.rag.retriever.google_drive.mapper;
 
+import java.util.HashMap;
+import java.util.List;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+
+import org.springframework.ai.document.Document;
 
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentDTO;
 import ai.yda.framework.rag.retriever.google_drive.entity.DocumentContentEntity;
@@ -41,7 +46,21 @@ public interface DocumentContentMapper {
     @Mapping(target = "documentMetadataId", source = "documentMetadataId")
     DocumentContentDTO toDTO(String chunkContent, String documentMetadataId);
 
+    @Mapping(target = "documentName", source = "documentMetadata.name")
     DocumentContentDTO toDTO(DocumentContentEntity documentContentEntity);
+
+    List<DocumentContentDTO> toDTOs(List<DocumentContentEntity> documentContentEntities);
+
+    default Document toDocument(DocumentContentEntity documentContentEntity) {
+        var metadata = new HashMap<String, Object>();
+        metadata.put("documentName", documentContentEntity.getDocumentMetadata().getName());
+        if (documentContentEntity.getChunkName() != null) {
+            metadata.put("chunkName", documentContentEntity.getChunkName());
+        }
+        return new Document(documentContentEntity.getChunkContent(), metadata);
+    }
+
+    List<Document> toDocuments(List<DocumentContentEntity> documentContentEntities);
 
     @Mapping(target = "documentMetadata", source = "documentMetadata")
     DocumentContentEntity toEntity(DocumentContentDTO documentMetadataDTO, DocumentMetadataEntity documentMetadata);
