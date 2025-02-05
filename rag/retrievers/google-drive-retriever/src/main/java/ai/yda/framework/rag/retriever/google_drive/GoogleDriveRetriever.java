@@ -144,6 +144,14 @@ public class GoogleDriveRetriever implements Retriever<RagRequest, Document> {
                 .call()
                 .entity(new ParameterizedTypeReference<List<DocumentContentIdDTO>>() {});
 
+        if (log.isDebugEnabled() && documentContentIds != null) {
+            log.debug(
+                    "Retrieved documents with IDs: {}",
+                    documentContentIds.stream()
+                            .map(DocumentContentIdDTO::contentId)
+                            .toList());
+        }
+
         return documentContentPort.getDocumentsByIds(documentContentIds);
     }
 }

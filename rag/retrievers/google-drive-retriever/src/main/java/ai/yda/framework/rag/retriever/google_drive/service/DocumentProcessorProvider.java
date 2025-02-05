@@ -28,15 +28,15 @@ import org.springframework.lang.NonNull;
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentDTO;
 import ai.yda.framework.rag.retriever.google_drive.service.processor.DocumentProcessor;
 import ai.yda.framework.rag.retriever.google_drive.service.processor.DocumentType;
-import ai.yda.framework.rag.retriever.google_drive.service.processor.ExelDocumentProcessor;
+import ai.yda.framework.rag.retriever.google_drive.service.processor.ExcelDocumentProcessor;
 import ai.yda.framework.rag.retriever.google_drive.service.processor.TikaDocumentProcessor;
 
 public class DocumentProcessorProvider {
-    private final ExelDocumentProcessor excelProcessor;
+    private final ExcelDocumentProcessor excelProcessor;
     private final TikaDocumentProcessor tikaProcessor;
 
     public DocumentProcessorProvider(
-            final @NonNull ExelDocumentProcessor excelProcessor, final @NonNull TikaDocumentProcessor tikaProcessor) {
+            final @NonNull ExcelDocumentProcessor excelProcessor, final @NonNull TikaDocumentProcessor tikaProcessor) {
         this.excelProcessor = excelProcessor;
         this.tikaProcessor = tikaProcessor;
     }

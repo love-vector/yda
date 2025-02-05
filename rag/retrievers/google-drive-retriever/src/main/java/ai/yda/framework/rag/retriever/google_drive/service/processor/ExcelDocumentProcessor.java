@@ -23,33 +23,37 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import org.springframework.ai.reader.tika.TikaDocumentReader;
+import org.springframework.ai.reader.ExtractedTextFormatter;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.lang.NonNull;
 
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentDTO;
 import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentContentMapper;
-import ai.yda.framework.rag.retriever.google_drive.service.DocumentTextSplitter;
+import ai.yda.framework.rag.retriever.google_drive.service.SplitSheetBodyContentHandler;
+import ai.yda.framework.rag.retriever.google_drive.service.TikaExcelDocumentReader;
 
-public class TikaDocumentProcessor implements DocumentProcessor {
+import static ai.yda.framework.rag.retriever.google_drive.util.Constant.DOCUMENT_METADATA_NAME;
+
+public class ExcelDocumentProcessor implements DocumentProcessor {
 
     private final DocumentContentMapper documentContentMapper;
-    private final DocumentTextSplitter documentTextSplitter;
 
-    public TikaDocumentProcessor(
-            final @NonNull DocumentContentMapper documentContentMapper,
-            final @NonNull DocumentTextSplitter documentTextSplitter) {
+    public ExcelDocumentProcessor(final @NonNull DocumentContentMapper documentContentMapper) {
         this.documentContentMapper = documentContentMapper;
-        this.documentTextSplitter = documentTextSplitter;
     }
 
     @Override
     public List<DocumentContentDTO> processDocument(final InputStream inputStream, final String documentMetadataId)
             throws IOException {
-        return new TikaDocumentReader(new ByteArrayResource(inputStream.readAllBytes()))
-                .read().stream()
-                        .flatMap(document -> documentTextSplitter.splitDocumentIntoChunks(document.getText()).stream())
-                        .map(chunk -> documentContentMapper.toDTO(chunk, documentMetadataId))
+        return new TikaExcelDocumentReader(
+                        new ByteArrayResource(inputStream.readAllBytes()),
+                        new SplitSheetBodyContentHandler(),
+                        ExtractedTextFormatter.defaults())
+                .get().stream()
+                        .map(sheet -> documentContentMapper.toDTO(
+                                sheet.getMetadata().get(DOCUMENT_METADATA_NAME).toString(),
+                                sheet.getText(),
+                                documentMetadataId))
                         .toList();
     }
 }

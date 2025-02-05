@@ -21,6 +21,8 @@ package ai.yda.framework.rag.generator.chat.openai;
 
 import java.util.Map;
 
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.openai.OpenAiChatModel;
 
@@ -41,6 +43,7 @@ import ai.yda.framework.rag.core.model.RagResponse;
  * @see OpenAiChatModel
  * @since 0.1.0
  */
+@Slf4j
 public class OpenAiChatGenerator implements Generator<RagRequest, RagResponse> {
 
     private final OpenAiChatModel chatModel;
@@ -80,6 +83,11 @@ public class OpenAiChatGenerator implements Generator<RagRequest, RagResponse> {
     public RagResponse generate(final RagRequest request, final String context) {
         var prompt = new PromptTemplate(USER_QUERY_RESPONSE_TEMPLATE)
                 .create(Map.of(CONTEXT_STR_PLACEHOLDER, context, USER_QUERY_PLACEHOLDER, request.getQuery()));
+
+        if (log.isDebugEnabled()) {
+            log.debug("Chat Completion Call:\nQuery: {},\nContext: {}", request.getQuery(), context);
+        }
+
         var response = chatModel.call(prompt).getResult().getOutput();
         return RagResponse.builder().result(response.getContent()).build();
     }
