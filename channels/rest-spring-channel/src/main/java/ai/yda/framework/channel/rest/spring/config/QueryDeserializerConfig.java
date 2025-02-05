@@ -22,11 +22,12 @@ package ai.yda.framework.channel.rest.spring.config;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
+import org.springframework.ai.rag.Query;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import ai.yda.framework.channel.shared.RagRequestDeserializer;
+import ai.yda.framework.channel.shared.QueryDeserializer;
 import ai.yda.framework.rag.core.model.RagRequest;
 
 /**
@@ -36,7 +37,7 @@ import ai.yda.framework.rag.core.model.RagRequest;
  * @since 0.2.0
  */
 @Configuration
-public class RagRequestDeserializerConfig {
+public class QueryDeserializerConfig {
 
     /**
      * Registers a custom deserializer for {@link RagRequest} using a {@link SimpleModule}.
@@ -47,7 +48,7 @@ public class RagRequestDeserializerConfig {
     @Bean
     public Module openAiRequestModule(final ApplicationContext applicationContext) {
         var module = new SimpleModule();
-        module.addDeserializer(RagRequest.class, new RagRequestDeserializer(applicationContext));
+        module.addDeserializer(Query.class, new QueryDeserializer(applicationContext));
         return module;
     }
 }

@@ -19,6 +19,7 @@
 */
 package ai.yda.framework.channel.rest.spring.web;
 
+import org.springframework.ai.rag.Query;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -43,9 +44,9 @@ import ai.yda.framework.rag.core.model.RagResponse;
 @RequestMapping(
         path = "${" + RestSpringProperties.CONFIG_PREFIX + ".endpoint-relative-path:"
                 + RestSpringProperties.DEFAULT_ENDPOINT_RELATIVE_PATH + "}")
-public class RestChannel implements Channel<RagRequest, RagResponse> {
+public class RestChannel implements Channel<Query> {
 
-    private final Assistant<RagRequest, RagResponse> assistant;
+    private final Assistant<Query> assistant;
 
     /**
      * Constructs a new {@link RestChannel} instance with the specified {@link Assistant} instance.
@@ -53,7 +54,7 @@ public class RestChannel implements Channel<RagRequest, RagResponse> {
      * @param assistant the {@link Assistant} instance used to process {@link RagRequest} and generate
      *                  {@link RagResponse}.
      */
-    public RestChannel(final Assistant<RagRequest, RagResponse> assistant) {
+    public RestChannel(final Assistant<Query> assistant) {
         this.assistant = assistant;
     }
 
@@ -71,7 +72,7 @@ public class RestChannel implements Channel<RagRequest, RagResponse> {
      */
     @Override
     @PostMapping
-    public RagResponse processRequest(@RequestBody @Validated final RagRequest ragRequest) {
+    public Query processRequest(@RequestBody @Validated final Query ragRequest) {
         return assistant.assist(ragRequest);
     }
 }

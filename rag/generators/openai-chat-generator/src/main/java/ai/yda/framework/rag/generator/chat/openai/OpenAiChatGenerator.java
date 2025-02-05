@@ -20,15 +20,13 @@
 package ai.yda.framework.rag.generator.chat.openai;
 
 import java.util.Map;
-
-import lombok.extern.slf4j.Slf4j;
+import java.util.stream.Collectors;
 
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.ai.rag.Query;
 
 import ai.yda.framework.rag.core.generator.Generator;
-import ai.yda.framework.rag.core.model.RagRequest;
-import ai.yda.framework.rag.core.model.RagResponse;
 
 /**
  * Generates Responses using an OpenAI Chat Model. This class is designed to interact with a Chat Model to process User
@@ -43,20 +41,19 @@ import ai.yda.framework.rag.core.model.RagResponse;
  * @see OpenAiChatModel
  * @since 0.1.0
  */
-@Slf4j
-public class OpenAiChatGenerator implements Generator<RagRequest, RagResponse> {
+public class OpenAiChatGenerator implements Generator<Query> {
 
     private final OpenAiChatModel chatModel;
 
     public static final String USER_QUERY_RESPONSE_TEMPLATE =
             """
-            Here is the context:
-            {context_str}
+                    Here is the context:
+                    {context_str}
 
-            Here is the user's query:
-            {user_query}
+                    Here is the user's query:
+                    {user_query}
 
-            Respond to the user's query based on the provided context.""";
+                    Respond to the user's query based on the provided context.""";
 
     private static final String CONTEXT_STR_PLACEHOLDER = "context_str";
     private static final String USER_QUERY_PLACEHOLDER = "user_query";
@@ -72,15 +69,9 @@ public class OpenAiChatGenerator implements Generator<RagRequest, RagResponse> {
         this.chatModel = chatModel;
     }
 
-    /**
-     * Generates a Response for a given Request using the OpenAI Chat Model.
-     *
-     * @param request the {@link RagRequest} object containing the query from the User.
-     * @param context the Context to be included in the Request to the Chat Model.
-     * @return a {@link RagResponse} containing the Content of the Chat Model's Response.
-     */
     @Override
-    public RagResponse generate(final RagRequest request, final String context) {
+    public Query generate(final Query request) {
+        var context = request.context().values().stream().map(Object::toString).collect(Collectors.joining(" ,"));
         var prompt = new PromptTemplate(USER_QUERY_RESPONSE_TEMPLATE)
                 .create(Map.of(CONTEXT_STR_PLACEHOLDER, context, USER_QUERY_PLACEHOLDER, request.getQuery()));
 
@@ -88,7 +79,11 @@ public class OpenAiChatGenerator implements Generator<RagRequest, RagResponse> {
             log.debug("Chat Completion Call:\nQuery: {},\nContext: {}", request.getQuery(), context);
         }
 
+                .create(Map.of(CONTEXT_STR_PLACEHOLDER, context, USER_QUERY_PLACEHOLDER, request.text()));
         var response = chatModel.call(prompt).getResult().getOutput();
-        return RagResponse.builder().result(response.getContent()).build();
+        return Query.builder()
+                .text(request.text())
+                .context(Map.of("answer", response.getContent()))
+                .build();
     }
 }

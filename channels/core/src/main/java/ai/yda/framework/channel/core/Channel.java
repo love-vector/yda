@@ -19,16 +19,7 @@
 */
 package ai.yda.framework.channel.core;
 
-/**
- * Provides a generic interface for implementing communication gateways to the Assistant.
- *
- * @param <REQUEST>  the generic type of the Request from the User.
- * @param <RESPONSE> the generic type of the Response that will be generated based on the given Request.
- * @author Nikita Litvinov
- * @see StreamingChannel
- * @since 0.1.0
- */
-public interface Channel<REQUEST, RESPONSE> {
+public interface Channel<QUERY> {
 
     /**
      * Processes Request data involving the Assistant.
@@ -36,5 +27,5 @@ public interface Channel<REQUEST, RESPONSE> {
      * @param request the Request object to be processed.
      * @return the Response object generated after processing the Request.
      */
-    RESPONSE processRequest(REQUEST request);
+    QUERY processRequest(QUERY request);
 }

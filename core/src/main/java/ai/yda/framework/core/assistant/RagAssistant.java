@@ -19,6 +19,8 @@
 */
 package ai.yda.framework.core.assistant;
 
+import org.springframework.ai.rag.Query;
+
 import ai.yda.framework.rag.core.Rag;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.model.RagResponse;
@@ -30,30 +32,24 @@ import ai.yda.framework.rag.core.model.RagResponse;
  * @author Nikita Litvinov
  * @since 0.1.0
  */
-public class RagAssistant implements Assistant<RagRequest, RagResponse> {
+public class RagAssistant implements Assistant<Query> {
 
     /**
      * The {@link Rag} instance responsible for synchronous RAG processing.
      */
-    private final Rag<RagRequest, RagResponse> rag;
+    private final Rag<Query> rag;
 
     /**
      * Constructs a new {@link RagAssistant} instance.
      *
      * @param rag the {@link Rag} instance used for synchronous request-response processing.
      */
-    public RagAssistant(final Rag<RagRequest, RagResponse> rag) {
+    public RagAssistant(final Rag<Query> rag) {
         this.rag = rag;
     }
 
-    /**
-     * Processes the given {@link RagRequest} synchronously by delegating to the {@link Rag#doRag(RagRequest)} method.
-     *
-     * @param request the {@link RagRequest} to be processed.
-     * @return the {@link RagResponse} generated from processing the request.
-     */
     @Override
-    public RagResponse assist(final RagRequest request) {
+    public Query assist(final Query request) {
         return rag.doRag(request);
     }
 }

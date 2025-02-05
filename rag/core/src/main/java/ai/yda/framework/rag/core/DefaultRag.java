@@ -20,8 +20,8 @@
 package ai.yda.framework.rag.core;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -33,7 +33,6 @@ import org.springframework.ai.rag.retrieval.search.DocumentRetriever;
 
 import ai.yda.framework.rag.core.generator.Generator;
 import ai.yda.framework.rag.core.model.RagRequest;
-import ai.yda.framework.rag.core.model.RagResponse;
 import ai.yda.framework.rag.core.util.RequestTransformer;
 
 /**
@@ -43,26 +42,20 @@ import ai.yda.framework.rag.core.util.RequestTransformer;
  * @since 0.1.0
  */
 @Getter(AccessLevel.PROTECTED)
-public class DefaultRag implements Rag<RagRequest, RagResponse> {
+public class DefaultRag implements Rag<Query> {
 
     private final List<DocumentRetriever> retrievers;
 
     private final List<QueryAugmenter> augmenters;
 
-    /**
-     * The {@link Generator} instance responsible for generating the final {@link RagResponse}.
-     */
-    private final Generator<RagRequest, RagResponse> generator;
+    private final Generator<Query> generator;
 
-    /**
-     * The list of {@link RequestTransformer} instances used to transform the incoming {@link RagRequest}.
-     */
     private final List<RequestTransformer<RagRequest>> requestTransformers;
 
     public DefaultRag(
             final List<DocumentRetriever> retrievers,
             final List<QueryAugmenter> augmenters,
-            final Generator<RagRequest, RagResponse> generator,
+            final Generator<Query> generator,
             final List<RequestTransformer<RagRequest>> requestTransformers) {
         this.retrievers = retrievers;
         this.augmenters = augmenters;
@@ -71,25 +64,17 @@ public class DefaultRag implements Rag<RagRequest, RagResponse> {
     }
 
     @Override
-    public RagResponse doRag(final RagRequest request) {
-        //        var transformingRequest = request;
-        //        for (RequestTransformer<RagRequest> requestTransformer : requestTransformers) {
-        //            transformingRequest = requestTransformer.transformRequest(transformingRequest);
-        //        }
-        //        var transformedRequest = transformingRequest;
+    public Query doRag(final Query request) {
         var documents = retrievers.parallelStream()
-                .flatMap(retriever -> retriever.retrieve(new Query(request.getQuery())).stream())
+                .flatMap(retriever -> retriever.retrieve(request).stream())
                 .toList();
-        //                .map(retriever -> retriever.retrieve(transformedRequest))
 
         for (var augmenter : augmenters) {
-            documents = Stream.of(augmenter.augment(new Query(request.getQuery()), documents))
-                    .map(query -> new Document(query.text()))
-                    .collect(Collectors.toList());
-            //            documents = augmenter.augment(transformedRequest, documents);
+            augmenter.augment(request, documents);
         }
-        return generator.generate(request, mergeDocuments(documents));
-        //        return generator.generate(transformedRequest, mergeContexts(documents));
+        return generator.generate(request.mutate()
+                .context(Map.of("context", mergeDocuments(documents)))
+                .build());
     }
 
     /**

@@ -21,6 +21,7 @@ package ai.yda.framework.rag.autoconfigure;
 
 import java.util.List;
 
+import org.springframework.ai.rag.Query;
 import org.springframework.ai.rag.generation.augmentation.QueryAugmenter;
 import org.springframework.ai.rag.retrieval.search.DocumentRetriever;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -30,7 +31,6 @@ import org.springframework.context.annotation.Bean;
 import ai.yda.framework.rag.core.DefaultRag;
 import ai.yda.framework.rag.core.generator.Generator;
 import ai.yda.framework.rag.core.model.RagRequest;
-import ai.yda.framework.rag.core.model.RagResponse;
 import ai.yda.framework.rag.core.util.RequestTransformer;
 
 @AutoConfiguration
@@ -43,7 +43,7 @@ public class RagAutoConfiguration {
     public DefaultRag defaultRag(
             final List<DocumentRetriever> retrievers,
             final List<QueryAugmenter> augmenters,
-            final Generator<RagRequest, RagResponse> generator,
+            final Generator<Query> generator,
             final List<RequestTransformer<RagRequest>> requestTransformers) {
         return new DefaultRag(retrievers, augmenters, generator, requestTransformers);
     }
