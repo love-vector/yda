@@ -21,17 +21,19 @@ package ai.yda.framework.rag.core;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import lombok.AccessLevel;
 import lombok.Getter;
 
 import org.springframework.ai.document.Document;
+import org.springframework.ai.rag.Query;
+import org.springframework.ai.rag.generation.augmentation.QueryAugmenter;
+import org.springframework.ai.rag.retrieval.search.DocumentRetriever;
 
-import ai.yda.framework.rag.core.augmenter.Augmenter;
 import ai.yda.framework.rag.core.generator.Generator;
 import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.model.RagResponse;
-import ai.yda.framework.rag.core.retriever.Retriever;
 import ai.yda.framework.rag.core.util.RequestTransformer;
 
 /**
@@ -43,15 +45,9 @@ import ai.yda.framework.rag.core.util.RequestTransformer;
 @Getter(AccessLevel.PROTECTED)
 public class DefaultRag implements Rag<RagRequest, RagResponse> {
 
-    /**
-     * The list of {@link Retriever} instances used to retrieve {@link Document} based on the {@link RagRequest}.
-     */
-    private final List<Retriever<RagRequest, Document>> retrievers;
+    private final List<DocumentRetriever> retrievers;
 
-    /**
-     * The list of {@link Augmenter} instances used to modify or enhance the retrieved {@link Document}.
-     */
-    private final List<Augmenter<RagRequest, Document>> augmenters;
+    private final List<QueryAugmenter> augmenters;
 
     /**
      * The {@link Generator} instance responsible for generating the final {@link RagResponse}.
@@ -63,18 +59,9 @@ public class DefaultRag implements Rag<RagRequest, RagResponse> {
      */
     private final List<RequestTransformer<RagRequest>> requestTransformers;
 
-    /**
-     * Constructs a new {@link DefaultRag} instance.
-     *
-     * @param retrievers          the list of {@link Retriever} objects to retrieve {@link Document} data.
-     * @param augmenters          the list of {@link Augmenter} objects to augment the retrieved Contexts.
-     * @param generator           the {@link Generator} used to generate the {@link RagResponse}.
-     * @param requestTransformers the list of {@link RequestTransformer} objects for transforming the
-     *                            {@link RagRequest}.
-     */
     public DefaultRag(
-            final List<Retriever<RagRequest, Document>> retrievers,
-            final List<Augmenter<RagRequest, Document>> augmenters,
+            final List<DocumentRetriever> retrievers,
+            final List<QueryAugmenter> augmenters,
             final Generator<RagRequest, RagResponse> generator,
             final List<RequestTransformer<RagRequest>> requestTransformers) {
         this.retrievers = retrievers;
@@ -83,20 +70,6 @@ public class DefaultRag implements Rag<RagRequest, RagResponse> {
         this.requestTransformers = requestTransformers;
     }
 
-    /**
-     * Executes the Retrieval-Augmented Generation (RAG) process by:
-     * <ul>
-     *     <li>Transforming the initial {@link RagRequest} using the provided {@link RequestTransformer} instances.</li>
-     *     <li>Retrieving relevant {@link Document} from the {@link Retriever} instances.</li>
-     *     <li>Augmenting the retrieved Contexts using the provided {@link Augmenter} instances.</li>
-     *     <li>
-     *         Generating the final {@link RagResponse} using the {@link Generator}, based on the augmented Contexts.
-     *     </li>
-     * </ul>
-     *
-     * @param request the {@link RagRequest} to process.
-     * @return the generated {@link RagResponse}.
-     */
     @Override
     public RagResponse doRag(final RagRequest request) {
         //        var transformingRequest = request;
@@ -105,12 +78,14 @@ public class DefaultRag implements Rag<RagRequest, RagResponse> {
         //        }
         //        var transformedRequest = transformingRequest;
         var documents = retrievers.parallelStream()
-                .flatMap(retriever -> retriever.retrieve(request).stream())
+                .flatMap(retriever -> retriever.retrieve(new Query(request.getQuery())).stream())
                 .toList();
         //                .map(retriever -> retriever.retrieve(transformedRequest))
 
         for (var augmenter : augmenters) {
-            documents = augmenter.augment(request, documents);
+            documents = Stream.of(augmenter.augment(new Query(request.getQuery()), documents))
+                    .map(query -> new Document(query.text()))
+                    .collect(Collectors.toList());
             //            documents = augmenter.augment(transformedRequest, documents);
         }
         return generator.generate(request, mergeDocuments(documents));
