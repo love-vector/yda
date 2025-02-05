@@ -28,10 +28,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import ai.yda.framework.channel.shared.QueryDeserializer;
-import ai.yda.framework.rag.core.model.RagRequest;
 
 /**
- * Configuration class responsible for setting up a deserialization of {@link RagRequest} objects.
+ * Configuration class responsible for setting up a deserialization of {@link Query} objects.
  *
  * @author Nikita Litvinov
  * @since 0.2.0
@@ -40,10 +39,10 @@ import ai.yda.framework.rag.core.model.RagRequest;
 public class RagRequestDeserializerConfig {
 
     /**
-     * Registers a custom deserializer for {@link RagRequest} using a {@link SimpleModule}.
+     * Registers a custom deserializer for {@link Query} using a {@link SimpleModule}.
      *
      * @param applicationContext the application context used to get required details.
-     * @return the {@link Module} containing the custom deserializer for {@link RagRequest}.
+     * @return the {@link Module} containing the custom deserializer for {@link Query}.
      */
     @Bean
     public Module openAiRequestModule(final ApplicationContext applicationContext) {

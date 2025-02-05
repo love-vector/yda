@@ -22,16 +22,7 @@ package ai.yda.framework.core.assistant;
 import org.springframework.ai.rag.Query;
 
 import ai.yda.framework.rag.core.Rag;
-import ai.yda.framework.rag.core.model.RagRequest;
-import ai.yda.framework.rag.core.model.RagResponse;
 
-/**
- * Represents a RAG Assistant that synchronously processes a {@link RagRequest} and returns a corresponding
- * {@link RagResponse}.
- *
- * @author Nikita Litvinov
- * @since 0.1.0
- */
 public class RagAssistant implements Assistant<Query> {
 
     /**

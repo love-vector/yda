@@ -19,14 +19,16 @@
 */
 package ai.yda.framework.rag.generator.assistant.openai;
 
+import java.util.Map;
+
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+import org.springframework.ai.rag.Query;
+
 import ai.yda.framework.rag.core.generator.StreamingGenerator;
-import ai.yda.framework.rag.core.model.RagRequest;
-import ai.yda.framework.rag.core.model.RagResponse;
 import ai.yda.framework.rag.generator.assistant.openai.service.AzureOpenAiAssistantService;
 import ai.yda.framework.rag.generator.assistant.openai.util.OpenAiAssistantConstant;
 import ai.yda.framework.session.core.ReactiveSessionProvider;
@@ -42,7 +44,7 @@ import ai.yda.framework.session.core.ReactiveSessionProvider;
  * @since 0.1.0
  */
 @Slf4j
-public class OpenAiAssistantStreamingGenerator implements StreamingGenerator<RagRequest, RagResponse> {
+public class OpenAiAssistantStreamingGenerator implements StreamingGenerator<Query> {
 
     /**
      * Service used to interact with the Azure OpenAI Assistant API.
@@ -79,33 +81,25 @@ public class OpenAiAssistantStreamingGenerator implements StreamingGenerator<Rag
         this.assistantId = assistantId;
     }
 
-    /**
-     * Generates a Response for a given Request using the OpenAI Assistant Service in a streaming manner. This involves
-     * either retrieving an existing Thread ID from the Reactive Session Provider or creating a new Thread, sending the
-     * Request query to the Assistant, and obtaining the Response as a stream.
-     *
-     * @param request the {@link RagRequest} object containing the query from the User.
-     * @param context the Context to be included in the Request to the Assistant.
-     * @return a {@link Flux} stream of {@link RagResponse} objects containing the result of the Assistant's Response.
-     */
+    // Дописать логику добавления контекста в Publisher
     @Override
-    public Flux<RagResponse> streamGeneration(final RagRequest request, final String context) {
+    public Flux<Query> streamGeneration(final Query request) {
         return reactiveSessionProvider
                 .get(OpenAiAssistantConstant.THREAD_ID_KEY)
                 .map(Object::toString)
                 .flatMap(threadId -> Mono.fromCallable(() -> assistantService
-                                .addMessageToThread(threadId, request.getQuery())
+                                .addMessageToThread(threadId, request.text())
                                 .getThreadId())
                         .subscribeOn(Schedulers.boundedElastic()))
-                .switchIfEmpty(Mono.defer(() -> Mono.fromCallable(() -> assistantService
-                                .createThread(request.getQuery())
-                                .getId())
+                .switchIfEmpty(Mono.defer(() -> Mono.fromCallable(() ->
+                                assistantService.createThread(request.text()).getId())
                         .subscribeOn(Schedulers.boundedElastic())
                         .flatMap(threadId -> reactiveSessionProvider
                                 .put(OpenAiAssistantConstant.THREAD_ID_KEY, threadId)
                                 .thenReturn(threadId))))
                 .doOnNext(threadId -> log.debug("Thread ID: {}", threadId))
-                .flatMapMany(threadId -> assistantService.createRunStream(threadId, assistantId, context))
-                .map(deltaMessage -> RagResponse.builder().result(deltaMessage).build());
+                .flatMapMany(threadId -> assistantService.createRunStream(threadId, assistantId, ""))
+                .map(deltaMessage ->
+                        Query.builder().context(Map.of("context", deltaMessage)).build());
     }
 }

@@ -30,8 +30,6 @@ import org.springframework.context.annotation.Bean;
 
 import ai.yda.framework.rag.core.DefaultRag;
 import ai.yda.framework.rag.core.generator.Generator;
-import ai.yda.framework.rag.core.model.RagRequest;
-import ai.yda.framework.rag.core.util.RequestTransformer;
 
 @AutoConfiguration
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
@@ -43,8 +41,7 @@ public class RagAutoConfiguration {
     public DefaultRag defaultRag(
             final List<DocumentRetriever> retrievers,
             final List<QueryAugmenter> augmenters,
-            final Generator<Query> generator,
-            final List<RequestTransformer<RagRequest>> requestTransformers) {
-        return new DefaultRag(retrievers, augmenters, generator, requestTransformers);
+            final Generator<Query> generator) {
+        return new DefaultRag(retrievers, augmenters, generator);
     }
 }

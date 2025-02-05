@@ -32,8 +32,6 @@ import org.springframework.ai.rag.generation.augmentation.QueryAugmenter;
 import org.springframework.ai.rag.retrieval.search.DocumentRetriever;
 
 import ai.yda.framework.rag.core.generator.Generator;
-import ai.yda.framework.rag.core.model.RagRequest;
-import ai.yda.framework.rag.core.util.RequestTransformer;
 
 /**
  * Default implementation of the Retrieval-Augmented Generation (RAG) process.
@@ -50,21 +48,18 @@ public class DefaultRag implements Rag<Query> {
 
     private final Generator<Query> generator;
 
-    private final List<RequestTransformer<RagRequest>> requestTransformers;
-
     public DefaultRag(
             final List<DocumentRetriever> retrievers,
             final List<QueryAugmenter> augmenters,
-            final Generator<Query> generator,
-            final List<RequestTransformer<RagRequest>> requestTransformers) {
+            final Generator<Query> generator) {
         this.retrievers = retrievers;
         this.augmenters = augmenters;
         this.generator = generator;
-        this.requestTransformers = requestTransformers;
     }
 
     @Override
     public Query doRag(final Query request) {
+
         var documents = retrievers.parallelStream()
                 .flatMap(retriever -> retriever.retrieve(request).stream())
                 .toList();

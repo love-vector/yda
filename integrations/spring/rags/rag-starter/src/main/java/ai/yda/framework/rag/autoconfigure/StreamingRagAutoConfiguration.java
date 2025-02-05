@@ -21,6 +21,7 @@ package ai.yda.framework.rag.autoconfigure;
 
 import java.util.List;
 
+import org.springframework.ai.rag.Query;
 import org.springframework.ai.rag.generation.augmentation.QueryAugmenter;
 import org.springframework.ai.rag.retrieval.search.DocumentRetriever;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -29,9 +30,6 @@ import org.springframework.context.annotation.Bean;
 
 import ai.yda.framework.rag.core.DefaultStreamingRag;
 import ai.yda.framework.rag.core.generator.StreamingGenerator;
-import ai.yda.framework.rag.core.model.RagRequest;
-import ai.yda.framework.rag.core.model.RagResponse;
-import ai.yda.framework.rag.core.util.StreamingRequestTransformer;
 
 /**
  * Autoconfiguration class for setting up a {@link DefaultStreamingRag} bean in the RAG framework.
@@ -52,8 +50,7 @@ public class StreamingRagAutoConfiguration {
     public DefaultStreamingRag defaultStreamingRag(
             final List<DocumentRetriever> retrievers,
             final List<QueryAugmenter> augmenters,
-            final StreamingGenerator<RagRequest, RagResponse> streamingGenerator,
-            final List<StreamingRequestTransformer<RagRequest>> streamingRequestTransformers) {
-        return new DefaultStreamingRag(retrievers, augmenters, streamingGenerator, streamingRequestTransformers);
+            final StreamingGenerator<Query> streamingGenerator) {
+        return new DefaultStreamingRag(retrievers, augmenters, streamingGenerator);
     }
 }

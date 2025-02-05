@@ -21,21 +21,7 @@ package ai.yda.framework.core.assistant;
 
 import reactor.core.publisher.Flux;
 
-/**
- * Represents an Assistant that helps process Requests in a streaming manner by utilizing the Retrieval-Augmented
- * Generation (RAG) system.
- * <p>
- * This Assistant plays a central role in managing interactions, transmitting information through communication channels
- * and performing various tasks to assist in the processing of Requests. While it primarily leverages RAG, it is
- * designed to handle additional tasks and functionalities.
- * </p>
- *
- * @param <REQUEST>  the generic type of the Request from the User.
- * @param <RESPONSE> the generic type of the Response that will be generated based on the given Request.
- * @author Nikita Litvinov
- * @since 0.1.0
- */
-public interface StreamingAssistant<REQUEST, RESPONSE> {
+public interface StreamingAssistant<QUERY> {
 
     /**
      * Processes the Request and returns the corresponding Response in a streaming manner.
@@ -43,5 +29,5 @@ public interface StreamingAssistant<REQUEST, RESPONSE> {
      * @param request the Request to be processed.
      * @return a {@link Flux} stream of Response objects generated after processing the Request.
      */
-    Flux<RESPONSE> streamAssistance(REQUEST request);
+    Flux<QUERY> streamAssistance(QUERY request);
 }
