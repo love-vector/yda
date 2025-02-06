@@ -26,6 +26,13 @@ import org.springframework.ai.rag.Query;
 import ai.yda.framework.rag.core.StreamingRag;
 import ai.yda.framework.rag.core.model.RagResponse;
 
+/**
+ * Represents a RAG Assistant that processes a {@link Query} and returns a {@link Flux} of {@link RagResponse}
+ * in a streaming manner.
+ *
+ * @author Nikita Litvinov
+ * @since 0.1.0
+ */
 public class StreamingRagAssistant implements StreamingAssistant<RagResponse, Query> {
 
     /**
@@ -42,6 +49,13 @@ public class StreamingRagAssistant implements StreamingAssistant<RagResponse, Qu
         this.streamingRag = streamingRag;
     }
 
+    /**
+     * Processes the given {@link Query} by delegating to the {@link StreamingRag#streamRag(Query)} method
+     * and returns a {@link Flux} of {@link RagResponse}.
+     *
+     * @param request the {@link Query} to be processed.
+     * @return a {@link Flux} stream of {@link RagResponse} objects.
+     */
     @Override
     public Flux<RagResponse> streamAssistance(final Query request) {
         return streamingRag.streamRag(request);

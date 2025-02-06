@@ -23,6 +23,16 @@ import org.springframework.ai.rag.Query;
 
 import ai.yda.framework.rag.core.model.RagResponse;
 
+/**
+ * Provides a generic mechanism that coordinates the retrieval, augmentation, and generation processes to produce a
+ * final Response based on the Request.
+ *
+ * @param <QUERY>>  the generic type of the Request, which must extend {@link Query}.
+ * @param <RESPONSE> the generic type of the Response generated based on the given Request, which must extend
+ *                   {@link RagResponse}.
+ * @author Nikita Litvinov
+ * @since 0.1.0
+ */
 public interface Rag<RESPONSE extends RagResponse, QUERY extends Query> {
 
     /**

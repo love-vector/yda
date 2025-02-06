@@ -16,18 +16,20 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.rag.generator.assistant.openai;
+
+import java.util.stream.Collectors;
+
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.ai.rag.Query;
 
 import ai.yda.framework.rag.core.generator.Generator;
 import ai.yda.framework.rag.core.model.RagResponse;
 import ai.yda.framework.rag.generator.assistant.openai.service.AzureOpenAiAssistantService;
 import ai.yda.framework.rag.generator.assistant.openai.util.OpenAiAssistantConstant;
 import ai.yda.framework.session.core.SessionProvider;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.ai.rag.Query;
-
-import java.util.stream.Collectors;
 
 /**
  * Generates responses to the Request by sending queries to the Assistant Service. The class relies on the
@@ -76,6 +78,14 @@ public class OpenAiAssistantGenerator implements Generator<RagResponse, Query> {
         this.assistantId = assistantId;
     }
 
+    /**
+     * Generates a Response for a given Request using the OpenAI Assistant Service. This involves either retrieving an
+     * existing Thread ID from the Session Provider or creating a new Thread, sending the Request query to the
+     * Assistant, and obtaining the Response.
+     *
+     * @param request the {@link Query} object containing the query from the User.
+     * @return a {@link RagResponse} containing the result of the Assistant's Response.
+     */
     @Override
     public RagResponse generate(final Query request) {
         var context = request.context().values().stream().map(Object::toString).collect(Collectors.joining(" ,"));

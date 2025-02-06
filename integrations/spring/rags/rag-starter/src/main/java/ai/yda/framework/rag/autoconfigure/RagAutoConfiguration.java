@@ -32,12 +32,29 @@ import ai.yda.framework.rag.core.DefaultRag;
 import ai.yda.framework.rag.core.generator.Generator;
 import ai.yda.framework.rag.core.model.RagResponse;
 
+/**
+ * Autoconfiguration class for setting up a {@link DefaultRag} bean in the RAG framework.
+ *
+ * @author Nikita Litvinov
+ * @since 0.1.0
+ */
 @AutoConfiguration
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 public class RagAutoConfiguration {
 
+    /**
+     * Default constructor for {@link RagAutoConfiguration}.
+     */
     public RagAutoConfiguration() {}
 
+    /**
+     * Creates and configures a {@link DefaultRag} bean.
+     *
+     * @param retrievers          the list of {@link DocumentRetriever} beans for retrieving Context based on the Request.
+     * @param augmenters          the list of {@link QueryAugmenter} beans for enhancing the retrieved Context.
+     * @param generator           the {@link Generator} bean for generating Responses based on the augmented Context.
+     * @return a configured {@link DefaultRag} instance.
+     */
     @Bean
     public DefaultRag defaultRag(
             final List<DocumentRetriever> retrievers,

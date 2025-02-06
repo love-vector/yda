@@ -70,6 +70,12 @@ public class OpenAiChatGenerator implements Generator<RagResponse, Query> {
         this.chatModel = chatModel;
     }
 
+    /**
+     * Generates a Response for a given Request using the OpenAI Chat Model.
+     *
+     * @param request the {@link Query} object containing the query from the User.
+     * @return a {@link RagResponse} containing the Content of the Chat Model's Response.
+     */
     @Override
     public RagResponse generate(final Query request) {
         var context = request.context().values().stream().map(Object::toString).collect(Collectors.joining(" ,"));

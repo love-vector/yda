@@ -19,6 +19,8 @@
 */
 package ai.yda.framework.rag.generator.assistant.openai;
 
+import java.util.stream.Collectors;
+
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -31,8 +33,6 @@ import ai.yda.framework.rag.core.model.RagResponse;
 import ai.yda.framework.rag.generator.assistant.openai.service.AzureOpenAiAssistantService;
 import ai.yda.framework.rag.generator.assistant.openai.util.OpenAiAssistantConstant;
 import ai.yda.framework.session.core.ReactiveSessionProvider;
-
-import java.util.stream.Collectors;
 
 /**
  * Generates responses to the Request in a streaming manner by sending queries to the Assistant Service. The class
@@ -82,6 +82,14 @@ public class OpenAiAssistantStreamingGenerator implements StreamingGenerator<Rag
         this.assistantId = assistantId;
     }
 
+    /**
+     * Generates a Response for a given Request using the OpenAI Assistant Service in a streaming manner. This involves
+     * either retrieving an existing Thread ID from the Reactive Session Provider or creating a new Thread, sending the
+     * Request query to the Assistant, and obtaining the Response as a stream.
+     *
+     * @param request the {@link Query} object containing the query from the User.
+     * @return a {@link Flux} stream of {@link RagResponse} objects containing the result of the Assistant's Response.
+     */
     @Override
     public Flux<RagResponse> streamGeneration(final Query request) {
         var context = request.context().values().stream().map(Object::toString).collect(Collectors.joining(" ,"));

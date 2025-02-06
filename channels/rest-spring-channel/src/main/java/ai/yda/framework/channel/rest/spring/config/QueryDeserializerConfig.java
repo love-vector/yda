@@ -29,9 +29,22 @@ import org.springframework.context.annotation.Configuration;
 
 import ai.yda.framework.channel.shared.QueryDeserializer;
 
+/**
+ * Custom deserializer for {@link Query} objects. It dynamically identifies all subclasses of {@link Query}
+ * based on the available fields in the JSON payload.
+ *
+ * @author Nikita Litvinov
+ * @since 0.2.0
+ */
 @Configuration
 public class QueryDeserializerConfig {
 
+    /**
+     * Registers a custom deserializer for {@link Query} using a {@link SimpleModule}.
+     *
+     * @param applicationContext the application context used to get required details.
+     * @return the {@link Module} containing the custom deserializer for {@link Query}.
+     */
     @Bean
     public Module openAiRequestModule(final ApplicationContext applicationContext) {
         var module = new SimpleModule();

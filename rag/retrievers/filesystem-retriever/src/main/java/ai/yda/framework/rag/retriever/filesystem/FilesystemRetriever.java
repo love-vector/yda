@@ -100,6 +100,12 @@ public class FilesystemRetriever implements DocumentRetriever {
         }
     }
 
+    /**
+     * Retrieves Documents data based on the given Request by performing a similarity search in the Vector Store.
+     *
+     * @param query the {@link List<Document>} object containing the User query for the similarity search.
+     * @return a {@link Document} object containing the Knowledge obtained from the similarity search.
+     */
     @Override
     public @NonNull List<Document> retrieve(final @NonNull Query query) {
         return Objects.requireNonNull(vectorStore.similaritySearch(

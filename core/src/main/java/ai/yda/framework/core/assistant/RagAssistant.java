@@ -24,6 +24,13 @@ import org.springframework.ai.rag.Query;
 import ai.yda.framework.rag.core.Rag;
 import ai.yda.framework.rag.core.model.RagResponse;
 
+/**
+ * Represents a RAG Assistant that synchronously processes a {@link Query} and returns a corresponding
+ * {@link RagResponse}.
+ *
+ * @author Nikita Litvinov
+ * @since 0.1.0
+ */
 public class RagAssistant implements Assistant<RagResponse, Query> {
 
     /**
@@ -40,6 +47,12 @@ public class RagAssistant implements Assistant<RagResponse, Query> {
         this.rag = rag;
     }
 
+    /**
+     * Processes the given {@link Query} synchronously by delegating to the {@link Rag#doRag(Query)} method.
+     *
+     * @param request the {@link Query} to be processed.
+     * @return the {@link RagResponse} generated from processing the request.
+     */
     @Override
     public RagResponse assist(final Query request) {
         return rag.doRag(request);

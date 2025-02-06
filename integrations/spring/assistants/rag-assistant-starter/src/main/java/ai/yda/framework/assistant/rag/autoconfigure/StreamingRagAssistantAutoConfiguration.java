@@ -19,7 +19,6 @@
 */
 package ai.yda.framework.assistant.rag.autoconfigure;
 
-import ai.yda.framework.rag.core.model.RagResponse;
 import org.springframework.ai.rag.Query;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -27,6 +26,7 @@ import org.springframework.context.annotation.Bean;
 
 import ai.yda.framework.core.assistant.StreamingRagAssistant;
 import ai.yda.framework.rag.core.StreamingRag;
+import ai.yda.framework.rag.core.model.RagResponse;
 
 /**
  * Autoconfiguration class for setting up a {@link StreamingRagAssistant} bean in a Spring application.
@@ -38,8 +38,18 @@ import ai.yda.framework.rag.core.StreamingRag;
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
 public class StreamingRagAssistantAutoConfiguration {
 
+    /**
+     * Default constructor for {@link StreamingRagAssistantAutoConfiguration}.
+     */
     public StreamingRagAssistantAutoConfiguration() {}
 
+    /**
+     * Creates and configures a {@link StreamingRagAssistant} bean in the Spring application context.
+     *
+     * @param streamingRag the {@link StreamingRag} instance used by the {@link StreamingRagAssistant} to perform its
+     *                     operations.
+     * @return a configured {@link StreamingRagAssistant} bean.
+     */
     @Bean
     public StreamingRagAssistant streamingAssistant(final StreamingRag<RagResponse, Query> streamingRag) {
         return new StreamingRagAssistant(streamingRag);

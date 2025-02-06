@@ -47,6 +47,15 @@ public class StreamingRagAutoConfiguration {
      */
     public StreamingRagAutoConfiguration() {}
 
+    /**
+     * Creates and configures a {@link DefaultStreamingRag} bean.
+     *
+     * @param retrievers                   the list of {@link DocumentRetriever} beans for retrieving Context based on the
+     *                                     Request.
+     * @param augmenters                   the list of {@link QueryAugmenter} beans for enhancing the retrieved Context.
+     * @param streamingGenerator           the {@link StreamingGenerator} bean for generating Responses in a streaming
+     * @return a configured {@link DefaultStreamingRag} instance.
+     */
     @Bean
     public DefaultStreamingRag defaultStreamingRag(
             final List<DocumentRetriever> retrievers,

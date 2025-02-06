@@ -16,24 +16,26 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.rag.core;
-
-import ai.yda.framework.rag.core.generator.StreamingGenerator;
-import ai.yda.framework.rag.core.model.RagResponse;
-import ai.yda.framework.rag.core.util.ContentUtil;
-import org.springframework.ai.document.Document;
-import org.springframework.ai.rag.Query;
-import org.springframework.ai.rag.generation.augmentation.QueryAugmenter;
-import org.springframework.ai.rag.retrieval.search.DocumentRetriever;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
+
+import org.springframework.ai.document.Document;
+import org.springframework.ai.rag.Query;
+import org.springframework.ai.rag.generation.augmentation.QueryAugmenter;
+import org.springframework.ai.rag.retrieval.search.DocumentRetriever;
+
+import ai.yda.framework.rag.core.generator.StreamingGenerator;
+import ai.yda.framework.rag.core.model.RagResponse;
+import ai.yda.framework.rag.core.util.ContentUtil;
 
 /**
  * Default implementation of the Retrieval-Augmented Generation (RAG) process in a streaming manner.
@@ -43,12 +45,29 @@ import java.util.stream.Collectors;
  */
 public class DefaultStreamingRag implements StreamingRag<RagResponse, Query> {
 
+    /**
+     * The list of {@link DocumentRetriever} instances used to retrieving {@link Document}
+     */
     private final List<DocumentRetriever> retrievers;
 
+    /**
+     * The list of {@link QueryAugmenter} instances used to modify or enhance the retrieved {@link Query}.
+     */
     private final List<QueryAugmenter> augmenters;
 
+    /**
+     * The {@link StreamingGenerator} responsible for generating the final {@link RagResponse} in a streaming manner.
+     */
     private final StreamingGenerator<RagResponse, Query> streamingGenerator;
 
+    /**
+     * Constructs a new {@link DefaultStreamingRag} instance.
+     *
+     * @param retrievers          the list of {@link DocumentRetriever} objects used to retrieve {@link Document} data.
+     * @param augmenters          the list of {@link QueryAugmenter} objects used to augment the retrieved Contexts.
+     * @param streamingGenerator  the {@link StreamingGenerator} used to generate {@link RagResponse} objects in a
+     *                            streaming manner.
+     */
     public DefaultStreamingRag(
             final List<DocumentRetriever> retrievers,
             final List<QueryAugmenter> augmenters,
@@ -58,6 +77,17 @@ public class DefaultStreamingRag implements StreamingRag<RagResponse, Query> {
         this.streamingGenerator = streamingGenerator;
     }
 
+    /**
+     * Executes the Retrieval-Augmented Generation (RAG) process in a streaming manner by:
+     * <ul>
+     *     <li>Retrieving relevant {@link Document} from the {@link DocumentRetriever} instances.</li>
+     *     <li>Augmenting the retrieved Contexts using the provided {@link QueryAugmenter} instances.</li>
+     *     <li>Generating a stream of {@link RagResponse} objects using the {@link StreamingGenerator}.</li>
+     * </ul>
+     *
+     * @param request the {@link Query} to process.
+     * @return a {@link Flux} stream of generated {@link RagResponse} objects.
+     */
     @Override
     public Flux<RagResponse> streamRag(final Query request) {
         return Flux.fromIterable(retrievers)
@@ -77,6 +107,13 @@ public class DefaultStreamingRag implements StreamingRag<RagResponse, Query> {
                 });
     }
 
+    /**
+     * Merges the documents into a single string. Each piece of knowledge is separated by a point character.
+     *
+     * @param documents the list of {@link Document} objects containing knowledge data.
+     * @return a {@link Mono<String>} that emits a single string combining all pieces of knowledge from the provided
+     * contexts.
+     */
     protected Mono<String> mergeDocuments(final List<Document> documents) {
         return Flux.fromStream(documents.parallelStream())
                 .map(Document::getFormattedContent)

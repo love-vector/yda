@@ -42,13 +42,28 @@ import ai.yda.framework.rag.core.model.RagResponse;
  */
 @Getter(AccessLevel.PROTECTED)
 public class DefaultRag implements Rag<RagResponse, Query> {
-
+    /**
+     * The list of {@link DocumentRetriever} instances used to retrieve {@link Document}.
+     */
     private final List<DocumentRetriever> retrievers;
 
+    /**
+     * The list of {@link QueryAugmenter} instances used to modify or enhance the retrieved {@link Query}.
+     */
     private final List<QueryAugmenter> augmenters;
 
+    /**
+     * The {@link Generator} instance responsible for generating the final {@link RagResponse}.
+     */
     private final Generator<RagResponse, Query> generator;
 
+    /**
+     * Constructs a new {@link DefaultRag} instance.
+     *
+     * @param retrievers          the list of {@link DocumentRetriever} objects to retrieve {@link Document} data.
+     * @param augmenters          the list of {@link QueryAugmenter} objects to augment the retrieved Contexts.
+     * @param generator           the {@link Generator} used to generate the {@link RagResponse}.
+     */
     public DefaultRag(
             final List<DocumentRetriever> retrievers,
             final List<QueryAugmenter> augmenters,
@@ -58,6 +73,20 @@ public class DefaultRag implements Rag<RagResponse, Query> {
         this.generator = generator;
     }
 
+    /**
+     * Executes the Retrieval-Augmented Generation (RAG) process by:
+     * <ul>
+     *     <li>Transforming the initial {@link Query}
+     *     <li>Retrieving relevant {@link Document} from the {@link DocumentRetriever} instances.</li>
+     *     <li>Augmenting the retrieved Contexts using the provided {@link QueryAugmenter} instances.</li>
+     *     <li>
+     *         Generating the final {@link RagResponse} using the {@link Generator}, based on the augmented Contexts.
+     *     </li>
+     * </ul>
+     *
+     * @param request the {@link Query} to process.
+     * @return the generated {@link RagResponse}.
+     */
     @Override
     public RagResponse doRag(final Query request) {
 

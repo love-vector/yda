@@ -37,8 +37,18 @@ import org.springframework.ai.rag.Query;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 
+/**
+ * Custom deserializer for {@link Query} objects. It dynamically identifies all subclasses of {@link Query}
+ * based on the available fields in the JSON payload.
+ *
+ * @author Nikita Litvinov
+ * @since 0.2.0
+ */
 public class QueryDeserializer extends JsonDeserializer<Query> {
 
+    /**
+     * A set of all subclasses of {@link Query} that are scanned from YDA and consumer project packages.
+     */
     private final Set<Class<? extends Query>> requestSubclasses;
 
     public QueryDeserializer(final ApplicationContext applicationContext) {
@@ -56,6 +66,16 @@ public class QueryDeserializer extends JsonDeserializer<Query> {
         }
     }
 
+    /**
+     * Deserializes the JSON payload into an appropriate {@link Query} subclass if a match is found based on
+     * the fields in the payload. If no subclass matches, a default {@link Query} is constructed with
+     * the provided query field.
+     *
+     * @param parser  the {@link JsonParser} used to parse the incoming JSON.
+     * @param context the deserialization context.
+     * @return the deserialized {@link Query} or one of its subclasses.
+     * @throws IOException if an error occurs during deserialization.
+     */
     @Override
     public Query deserialize(final JsonParser parser, final DeserializationContext context) throws IOException {
         var codec = parser.getCodec();
@@ -71,6 +91,13 @@ public class QueryDeserializer extends JsonDeserializer<Query> {
         return Query.builder().text(query).build();
     }
 
+    /**
+     * Determines if the provided JSON structure matches the fields of the specified {@link Query} subclass.
+     *
+     * @param subclass the {@link Query} subclass to check against.
+     * @param rootNode the root JSON node to compare.
+     * @return {@code true} if the JSON structure matches the subclass, {@code false} otherwise.
+     */
     private Boolean isMatchingSubclass(final Class<? extends Query> subclass, final TreeNode rootNode) {
         for (var field : getAllFields(subclass)) {
             if (rootNode.get(field.getName()) == null) {

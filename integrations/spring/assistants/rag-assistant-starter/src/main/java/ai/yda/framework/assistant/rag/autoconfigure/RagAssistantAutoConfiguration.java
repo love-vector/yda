@@ -19,12 +19,14 @@
 */
 package ai.yda.framework.assistant.rag.autoconfigure;
 
+import org.springframework.ai.rag.Query;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 
 import ai.yda.framework.core.assistant.RagAssistant;
 import ai.yda.framework.rag.core.Rag;
+import ai.yda.framework.rag.core.model.RagResponse;
 
 /**
  * Autoconfiguration class for setting up the {@link RagAssistant} bean in a Spring application.
@@ -41,8 +43,14 @@ public class RagAssistantAutoConfiguration {
      */
     public RagAssistantAutoConfiguration() {}
 
+    /**
+     * Creates and configures a {@link RagAssistant} bean in the Spring application context.
+     *
+     * @param rag the {@link Rag} instance used by the {@link RagAssistant} to perform its operations.
+     * @return a configured {@link RagAssistant} bean.
+     */
     @Bean
-    public RagAssistant ragAssistant(final Rag rag) {
+    public RagAssistant ragAssistant(final Rag<RagResponse, Query> rag) {
         return new RagAssistant(rag);
     }
 }
