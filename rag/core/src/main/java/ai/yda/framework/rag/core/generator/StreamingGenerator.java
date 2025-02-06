@@ -34,7 +34,7 @@ import ai.yda.framework.rag.core.model.RagResponse;
  * chunks.
  * </p>
  *
- * @param <QUERY>  the generic type of the Request from the User, which must extend {@link Query}.
+ * @param <QUERY>  the generic type of the query from the User, which must extend {@link Query}.
  * @param <RESPONSE> the generic type of the Response generated based on the given Request, which must extend
  *                   {@link RagResponse}.
  * @author Nikita Litvinov

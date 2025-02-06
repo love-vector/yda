@@ -27,7 +27,7 @@ package ai.yda.framework.core.assistant;
  * designed to handle additional tasks and functionalities.
  * </p>
  *
- * @param <QUERY>  the generic type of the Request from the User.
+ * @param <QUERY>  the generic type of the query from the User.
  * @param <RESPONSE> the generic type of the Response that will be generated based on the given Request.
  * @author Nikita Litvinov
  * @since 0.1.0

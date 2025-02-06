@@ -27,7 +27,7 @@ import ai.yda.framework.rag.core.model.RagResponse;
  * Provides a generic mechanism that takes the User's Request and the retrieved Context to produce a final Response,
  * often by leveraging a language model or other generative mechanism.
  *
- * @param <QUERY>   the generic type of the Request from the User, which must extend {@link Query}.
+ * @param <QUERY>   the generic type of the query from the User, which must extend {@link Query}.
  * @param <RESPONSE> the generic type of the Response generated based on the given Request, which must extend
  *                   {@link RagResponse}.
  * @author Nikita Litvinov
