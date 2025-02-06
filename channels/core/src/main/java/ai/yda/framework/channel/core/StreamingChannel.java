@@ -35,8 +35,8 @@ public interface StreamingChannel<QUERY, RESPONSE> {
     /**
      * Processes the Request data involving the streaming Assistant.
      *
-     * @param request the Request object to be processed.
+     * @param query the Request object to be processed.
      * @return a {@link Flux} stream of Response objects generated after processing the Request.
      */
-    Flux<RESPONSE> processRequest(QUERY request);
+    Flux<RESPONSE> processRequest(QUERY query);
 }

@@ -40,8 +40,8 @@ public interface StreamingRag<QUERY extends Query, RESPONSE extends RagResponse>
     /**
      * Performs a Retrieval-Augmented Generation (RAG) operation in a streaming manner based on the provided Request.
      *
-     * @param request the Request to process.
+     * @param query the Request to process.
      * @return a {@link Flux stream} of Response objects containing the results of the RAG operation.
      */
-    Flux<RESPONSE> streamRag(QUERY request);
+    Flux<RESPONSE> streamRag(QUERY query);
 }

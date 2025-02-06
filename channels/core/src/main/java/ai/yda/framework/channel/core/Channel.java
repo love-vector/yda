@@ -33,8 +33,8 @@ public interface Channel<QUERY, RESPONSE> {
     /**
      * Processes Request data involving the Assistant.
      *
-     * @param request the Request object to be processed.
+     * @param query the Request object to be processed.
      * @return the Response object generated after processing the Request.
      */
-    RESPONSE processRequest(QUERY request);
+    RESPONSE processRequest(QUERY query);
 }

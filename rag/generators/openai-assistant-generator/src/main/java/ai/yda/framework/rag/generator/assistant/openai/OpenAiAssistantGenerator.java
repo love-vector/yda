@@ -92,8 +92,7 @@ public class OpenAiAssistantGenerator implements Generator<Query, RagResponse> {
         var threadId = sessionProvider
                 .get(OpenAiAssistantConstant.THREAD_ID_KEY)
                 .map(Object::toString)
-                .map(id ->
-                        assistantService.addMessageToThread(id, query.text()).getThreadId())
+                .map(id -> assistantService.addMessageToThread(id, query.text()).getThreadId())
                 .orElseGet(() -> {
                     var newThreadId =
                             assistantService.createThread(query.text()).getId();
