@@ -16,22 +16,20 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.rag.core;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
+import ai.yda.framework.rag.core.generator.StreamingGenerator;
+import ai.yda.framework.rag.core.util.ContentUtil;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.rag.Query;
 import org.springframework.ai.rag.generation.augmentation.QueryAugmenter;
 import org.springframework.ai.rag.retrieval.search.DocumentRetriever;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import ai.yda.framework.rag.core.generator.StreamingGenerator;
-import ai.yda.framework.rag.core.util.ContentUtil;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Default implementation of the Retrieval-Augmented Generation (RAG) process in a streaming manner.
@@ -45,12 +43,12 @@ public class DefaultStreamingRag implements StreamingRag<Query> {
 
     private final List<QueryAugmenter> augmenters;
 
-    private final StreamingGenerator<Query> streamingGenerator;
+    private final StreamingGenerator streamingGenerator;
 
     public DefaultStreamingRag(
             final List<DocumentRetriever> retrievers,
             final List<QueryAugmenter> augmenters,
-            final StreamingGenerator<Query> streamingGenerator) {
+            final StreamingGenerator streamingGenerator) {
         this.retrievers = retrievers;
         this.augmenters = augmenters;
         this.streamingGenerator = streamingGenerator;

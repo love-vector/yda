@@ -16,10 +16,12 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.core.assistant;
 
-public interface Assistant<QUERY> {
+import org.springframework.ai.rag.Query;
+
+public interface Assistant {
 
     /**
      * Processes the given Request and returns a corresponding Response.
@@ -27,5 +29,5 @@ public interface Assistant<QUERY> {
      * @param request the Request to be processed.
      * @return the Response generated from processing the Request.
      */
-    QUERY assist(QUERY request);
+    Query assist(Query request);
 }

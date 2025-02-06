@@ -23,7 +23,7 @@ import reactor.core.publisher.Flux;
 
 import org.springframework.ai.rag.Query;
 
-public interface StreamingGenerator<QUERY extends Query> {
+public interface StreamingGenerator {
 
-    Flux<QUERY> streamGeneration(QUERY request);
+    Flux<Query> streamGeneration(Query request);
 }

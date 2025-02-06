@@ -16,26 +16,25 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.core.assistant;
 
+import ai.yda.framework.rag.core.Rag;
 import org.springframework.ai.rag.Query;
 
-import ai.yda.framework.rag.core.Rag;
-
-public class RagAssistant implements Assistant<Query> {
+public class RagAssistant implements Assistant {
 
     /**
      * The {@link Rag} instance responsible for synchronous RAG processing.
      */
-    private final Rag<Query> rag;
+    private final Rag rag;
 
     /**
      * Constructs a new {@link RagAssistant} instance.
      *
      * @param rag the {@link Rag} instance used for synchronous request-response processing.
      */
-    public RagAssistant(final Rag<Query> rag) {
+    public RagAssistant(final Rag rag) {
         this.rag = rag;
     }
 

@@ -16,19 +16,18 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.channel.rest.spring.web;
 
+import ai.yda.framework.channel.core.Channel;
+import ai.yda.framework.channel.rest.spring.RestSpringProperties;
+import ai.yda.framework.core.assistant.Assistant;
 import org.springframework.ai.rag.Query;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import ai.yda.framework.channel.core.Channel;
-import ai.yda.framework.channel.rest.spring.RestSpringProperties;
-import ai.yda.framework.core.assistant.Assistant;
 
 /**
  * Provides REST controller logic that handles incoming requests for processing using an assistant. The path of the
@@ -44,9 +43,9 @@ import ai.yda.framework.core.assistant.Assistant;
                 + RestSpringProperties.DEFAULT_ENDPOINT_RELATIVE_PATH + "}")
 public class RestChannel implements Channel<Query> {
 
-    private final Assistant<Query> assistant;
+    private final Assistant assistant;
 
-    public RestChannel(final Assistant<Query> assistant) {
+    public RestChannel(final Assistant assistant) {
         this.assistant = assistant;
     }
 

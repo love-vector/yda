@@ -16,22 +16,20 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.rag.core;
 
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
+import ai.yda.framework.rag.core.generator.Generator;
 import lombok.AccessLevel;
 import lombok.Getter;
-
 import org.springframework.ai.document.Document;
 import org.springframework.ai.rag.Query;
 import org.springframework.ai.rag.generation.augmentation.QueryAugmenter;
 import org.springframework.ai.rag.retrieval.search.DocumentRetriever;
 
-import ai.yda.framework.rag.core.generator.Generator;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Default implementation of the Retrieval-Augmented Generation (RAG) process.
@@ -40,18 +38,18 @@ import ai.yda.framework.rag.core.generator.Generator;
  * @since 0.1.0
  */
 @Getter(AccessLevel.PROTECTED)
-public class DefaultRag implements Rag<Query> {
+public class DefaultRag implements Rag {
 
     private final List<DocumentRetriever> retrievers;
 
     private final List<QueryAugmenter> augmenters;
 
-    private final Generator<Query> generator;
+    private final Generator generator;
 
     public DefaultRag(
             final List<DocumentRetriever> retrievers,
             final List<QueryAugmenter> augmenters,
-            final Generator<Query> generator) {
+            final Generator generator) {
         this.retrievers = retrievers;
         this.augmenters = augmenters;
         this.generator = generator;

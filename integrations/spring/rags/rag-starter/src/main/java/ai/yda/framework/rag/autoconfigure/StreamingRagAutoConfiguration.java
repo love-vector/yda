@@ -16,20 +16,18 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.rag.autoconfigure;
 
-import java.util.List;
-
-import org.springframework.ai.rag.Query;
+import ai.yda.framework.rag.core.DefaultStreamingRag;
+import ai.yda.framework.rag.core.generator.StreamingGenerator;
 import org.springframework.ai.rag.generation.augmentation.QueryAugmenter;
 import org.springframework.ai.rag.retrieval.search.DocumentRetriever;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 
-import ai.yda.framework.rag.core.DefaultStreamingRag;
-import ai.yda.framework.rag.core.generator.StreamingGenerator;
+import java.util.List;
 
 /**
  * Autoconfiguration class for setting up a {@link DefaultStreamingRag} bean in the RAG framework.
@@ -44,13 +42,14 @@ public class StreamingRagAutoConfiguration {
     /**
      * Default constructor for {@link StreamingRagAutoConfiguration}.
      */
-    public StreamingRagAutoConfiguration() {}
+    public StreamingRagAutoConfiguration() {
+    }
 
     @Bean
     public DefaultStreamingRag defaultStreamingRag(
             final List<DocumentRetriever> retrievers,
             final List<QueryAugmenter> augmenters,
-            final StreamingGenerator<Query> streamingGenerator) {
+            final StreamingGenerator streamingGenerator) {
         return new DefaultStreamingRag(retrievers, augmenters, streamingGenerator);
     }
 }
