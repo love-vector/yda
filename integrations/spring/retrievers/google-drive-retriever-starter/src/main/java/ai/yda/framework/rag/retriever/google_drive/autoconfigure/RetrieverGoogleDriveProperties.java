@@ -25,8 +25,6 @@ import lombok.Setter;
 import org.springframework.ai.autoconfigure.openai.OpenAiChatProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import ai.yda.framework.rag.retriever.shared.RetrieverProperties;
-
 /**
  * Provides configuration properties for Google Drive Retriever. These properties can be customized through the
  * application’s external configuration, such as a properties file, YAML file, or environment variables.
@@ -54,13 +52,15 @@ import ai.yda.framework.rag.retriever.shared.RetrieverProperties;
 @Setter
 @Getter
 @ConfigurationProperties(RetrieverGoogleDriveProperties.CONFIG_PREFIX)
-public class RetrieverGoogleDriveProperties extends RetrieverProperties {
+public class RetrieverGoogleDriveProperties {
 
     /**
      * The configuration prefix used to reference properties related to the Google Drive Retriever in application
      * configurations. This prefix is used for binding properties within the particular namespace.
      */
     public static final String CONFIG_PREFIX = "ai.yda.framework.rag.retriever.google-drive";
+
+    private Boolean isProcessingEnabled = Boolean.FALSE;
 
     private String serviceAccountKeyFilePath;
 

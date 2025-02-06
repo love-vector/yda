@@ -76,8 +76,8 @@ project(':openai-core-starter').projectDir = file('integrations/spring/core/open
 
 // RAG - Retrievers
 
-include 'retriever-shared-starter'
-project(':retriever-shared-starter').projectDir = file('integrations/spring/retrievers/shared')
+include 'retriever-milvus-shared-starter'
+project(':retriever-milvus-shared-starter').projectDir = file('integrations/spring/retrievers/shared')
 
 include 'filesystem-retriever-starter'
 project(':filesystem-retriever-starter').projectDir = file('integrations/spring/retrievers/filesystem-retriever-starter')

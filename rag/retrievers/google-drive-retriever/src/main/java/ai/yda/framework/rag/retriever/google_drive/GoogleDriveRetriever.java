@@ -72,7 +72,7 @@ public class GoogleDriveRetriever implements Retriever<RagRequest, Document> {
                     2.2 Select ONLY IDs of files with summaries relevant to the user's query. If no suitable files are found, return an empty list [].
                     2.3 Using the IDs of the files deemed relevant, retrieve the corresponding document chunks.
                     2.4 Evaluate the relevance of each chunk based on its content and the user's query. Strictly match the query context to the chunk's content and exclude loosely related chunks.
-                    2.5 Identify up to %d IDs of chunks that are most relevant to the user's query. If fewer relevant chunks exist, return only those that match. If no suitable chunks are found, return an empty list [].
+                    2.5 Identify IDs of chunks that are most relevant to the user's query. If no suitable chunks are found, return an empty list [].
 
                     3. Response Format.
                     Construct a JSON array of objects. Each object must represent a relevant content chunk and adhere to the following structure:
@@ -85,11 +85,6 @@ public class GoogleDriveRetriever implements Retriever<RagRequest, Document> {
                     Ensure the output strictly complies with the specified format.""";
 
     /**
-     * The number of top results to retrieve from the Vector Store.
-     */
-    private final Integer topK;
-
-    /**
      * The service used to interact with Google Drive.
      */
     private final GoogleDriveService googleDriveService;
@@ -100,7 +95,6 @@ public class GoogleDriveRetriever implements Retriever<RagRequest, Document> {
     private final DocumentContentPort documentContentPort;
 
     public GoogleDriveRetriever(
-            final @NonNull Integer topK,
             final @NonNull Boolean isProcessingEnabled,
             final @NonNull ChatClient chatClient,
             final @NonNull DocumentMetadataPort documentMetadataPort,
@@ -112,11 +106,6 @@ public class GoogleDriveRetriever implements Retriever<RagRequest, Document> {
         this.documentContentPort = documentContentPort;
 
         this.googleDriveService = googleDriveService;
-
-        if (topK <= 0) {
-            throw new IllegalArgumentException("TopK must be a positive number.");
-        }
-        this.topK = topK;
 
         if (isProcessingEnabled) {
             log.info("Starting Google Drive retriever...");
@@ -139,7 +128,7 @@ public class GoogleDriveRetriever implements Retriever<RagRequest, Document> {
         var documentContentIds = chatClient
                 .prompt()
                 .user(request.getQuery())
-                .system(String.format(RETRIEVAL_SYSTEM_INSTRUCTION, topK))
+                .system(RETRIEVAL_SYSTEM_INSTRUCTION)
                 .functions(getAllDocumentsFunction, getDocumentChunksFunction)
                 .call()
                 .entity(new ParameterizedTypeReference<List<DocumentContentIdDTO>>() {});

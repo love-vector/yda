@@ -1,6 +1,6 @@
 dependencies {
     api project(':website-retriever')
-    api project(':retriever-shared-starter')
+    api project(':retriever-milvus-shared-starter')
 
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor:3.3.2'
 }
