@@ -160,7 +160,6 @@ public class RetrieverGoogleDriveAutoConfiguration {
         var openAiChatModel =
                 openAiChatModel(openAiConnectionProperties, googleDriveProperties, restClientBuilder, webClientBuilder);
         return new GoogleDriveRetriever(
-                googleDriveProperties.getTopK(),
                 googleDriveProperties.getIsProcessingEnabled(),
                 ChatClient.create(openAiChatModel),
                 documentMetadataPort,
