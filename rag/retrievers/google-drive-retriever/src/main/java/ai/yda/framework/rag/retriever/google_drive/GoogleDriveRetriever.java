@@ -16,31 +16,29 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.rag.retriever.google_drive;
 
-import java.io.IOException;
-import java.util.List;
-
-import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.document.Document;
-import org.springframework.ai.model.function.FunctionCallback;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.lang.NonNull;
-
-import ai.yda.framework.rag.core.model.RagRequest;
-import ai.yda.framework.rag.core.retriever.Retriever;
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentIdDTO;
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentIdsDTO;
 import ai.yda.framework.rag.retriever.google_drive.port.DocumentContentPort;
 import ai.yda.framework.rag.retriever.google_drive.port.DocumentMetadataPort;
 import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.document.Document;
+import org.springframework.ai.model.function.FunctionCallback;
+import org.springframework.ai.rag.Query;
+import org.springframework.ai.rag.retrieval.search.DocumentRetriever;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.lang.NonNull;
+
+import java.io.IOException;
+import java.util.List;
 
 /**
  * The {@code GoogleDriveRetriever} class is a Retriever implementation that interacts with Google Drive
- * to retrieve contextual data for a given {@link RagRequest}. It uses the {@link GoogleDriveService}
+ * to retrieve contextual data for a given {@link Query}. It uses the {@link GoogleDriveService}
  * to perform operations on Google Drive.
  *
  * <p>This retriever is designed to process and fetch documents or data stored in Google Drive
@@ -49,7 +47,7 @@ import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
  * <p>Usage:
  * - Instantiate this class with the desired `topK` (number of results to retrieve) and a
  * configured {@link GoogleDriveService}.
- * - Use the {@link #retrieve(RagRequest)} method to perform the data retrieval operation.
+ * - Use the {@link #retrieve(Query)} method to perform the data retrieval operation.
  *
  * <p>Dependencies:
  * - Requires a properly configured {@link GoogleDriveService} instance.
@@ -58,14 +56,14 @@ import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
  * @since 0.2.0
  */
 @Slf4j
-public class GoogleDriveRetriever implements Retriever<RagRequest, Document> {
+public class GoogleDriveRetriever implements DocumentRetriever {
 
     private static final String RETRIEVAL_SYSTEM_INSTRUCTION =
             """
                     1. Definition
                     You are an assistant tasked with selecting the documents chunks id's most relevant to the user's query.
                     Strictly adhere to the instruction by providing accurate, concise responses based solely on the existing document chunks and their IDs, with no fabrication.
-
+                    
                     2. Operational Guidelines
                     Follow these steps sequentially and do not skip or combine steps:
                     2.1 Obtain all files along with their summaries.
@@ -73,7 +71,7 @@ public class GoogleDriveRetriever implements Retriever<RagRequest, Document> {
                     2.3 Using the IDs of the files deemed relevant, retrieve the corresponding document chunks.
                     2.4 Evaluate the relevance of each chunk based on its content and the user's query. Strictly match the query context to the chunk's content and exclude loosely related chunks.
                     2.5 Identify IDs of chunks that are most relevant to the user's query. If no suitable chunks are found, return an empty list [].
-
+                    
                     3. Response Format.
                     Construct a JSON array of objects. Each object must represent a relevant content chunk and adhere to the following structure:
                     [
@@ -114,7 +112,7 @@ public class GoogleDriveRetriever implements Retriever<RagRequest, Document> {
     }
 
     @Override
-    public List<Document> retrieve(final RagRequest request) {
+    public @NonNull List<Document> retrieve(@NonNull final Query query) {
         var getAllDocumentsFunction = FunctionCallback.builder()
                 .function("getAllDocuments", documentMetadataPort::getAllFileSummaries)
                 .description("Retrieve all documents to enable filtering based on summaries")
@@ -127,11 +125,12 @@ public class GoogleDriveRetriever implements Retriever<RagRequest, Document> {
 
         var documentContentIds = chatClient
                 .prompt()
-                .user(request.getQuery())
+                .user(query.text())
                 .system(RETRIEVAL_SYSTEM_INSTRUCTION)
                 .functions(getAllDocumentsFunction, getDocumentChunksFunction)
                 .call()
-                .entity(new ParameterizedTypeReference<List<DocumentContentIdDTO>>() {});
+                .entity(new ParameterizedTypeReference<List<DocumentContentIdDTO>>() {
+                });
 
         if (log.isDebugEnabled() && documentContentIds != null) {
             log.debug(
