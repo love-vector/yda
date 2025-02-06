@@ -49,9 +49,9 @@ public interface StreamingGenerator<QUERY extends Query, RESPONSE extends RagRes
      * Streams Responses based on the provided Request and Context. The method returns a Flux that emits a sequence of
      * Responses, allowing for the processing of data in a non-blocking and incremental manner.
      *
-     * @param request the Request object that contains query data from the User.
+     * @param query the Request object that contains query data from the User.
      * @return a {@link Flux stream} of Responses generated as a result of processing the Request and Context. Each
      * response in the Flux represents a part of the overall Response, allowing for the incremental delivery of results.
      */
-    Flux<RESPONSE> streamGeneration(QUERY request);
+    Flux<RESPONSE> streamGeneration(QUERY query);
 }
