@@ -16,25 +16,24 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.rag.core;
+
+import ai.yda.framework.rag.core.generator.StreamingGenerator;
+import ai.yda.framework.rag.core.model.RagResponse;
+import ai.yda.framework.rag.core.util.ContentUtil;
+import org.springframework.ai.document.Document;
+import org.springframework.ai.rag.Query;
+import org.springframework.ai.rag.generation.augmentation.QueryAugmenter;
+import org.springframework.ai.rag.retrieval.search.DocumentRetriever;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
-
-import org.springframework.ai.document.Document;
-import org.springframework.ai.rag.Query;
-import org.springframework.ai.rag.generation.augmentation.QueryAugmenter;
-import org.springframework.ai.rag.retrieval.search.DocumentRetriever;
-
-import ai.yda.framework.rag.core.generator.StreamingGenerator;
-import ai.yda.framework.rag.core.util.ContentUtil;
 
 /**
  * Default implementation of the Retrieval-Augmented Generation (RAG) process in a streaming manner.
@@ -42,25 +41,25 @@ import ai.yda.framework.rag.core.util.ContentUtil;
  * @author Nikita Litvinov
  * @since 0.1.0
  */
-public class DefaultStreamingRag implements StreamingRag {
+public class DefaultStreamingRag implements StreamingRag<RagResponse, Query> {
 
     private final List<DocumentRetriever> retrievers;
 
     private final List<QueryAugmenter> augmenters;
 
-    private final StreamingGenerator streamingGenerator;
+    private final StreamingGenerator<RagResponse, Query> streamingGenerator;
 
     public DefaultStreamingRag(
             final List<DocumentRetriever> retrievers,
             final List<QueryAugmenter> augmenters,
-            final StreamingGenerator streamingGenerator) {
+            final StreamingGenerator<RagResponse, Query> streamingGenerator) {
         this.retrievers = retrievers;
         this.augmenters = augmenters;
         this.streamingGenerator = streamingGenerator;
     }
 
     @Override
-    public Flux<Query> streamRag(final Query request) {
+    public Flux<RagResponse> streamRag(final Query request) {
         return Flux.fromIterable(retrievers)
                 .flatMap(retriever ->
                         Mono.fromCallable(() -> retriever.retrieve(request)).subscribeOn(Schedulers.boundedElastic()))

@@ -19,7 +19,7 @@
 */
 package ai.yda.framework.channel.core;
 
-public interface Channel<QUERY> {
+public interface Channel<RESPONSE, QUERY> {
 
     /**
      * Processes Request data involving the Assistant.
@@ -27,5 +27,5 @@ public interface Channel<QUERY> {
      * @param request the Request object to be processed.
      * @return the Response object generated after processing the Request.
      */
-    QUERY processRequest(QUERY request);
+    RESPONSE processRequest(QUERY request);
 }

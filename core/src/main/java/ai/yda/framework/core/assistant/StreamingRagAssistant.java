@@ -24,8 +24,9 @@ import reactor.core.publisher.Flux;
 import org.springframework.ai.rag.Query;
 
 import ai.yda.framework.rag.core.StreamingRag;
+import ai.yda.framework.rag.core.model.RagResponse;
 
-public class StreamingRagAssistant implements StreamingAssistant {
+public class StreamingRagAssistant implements StreamingAssistant<RagResponse, Query> {
 
     /**
      * The {@link StreamingRag} instance responsible for asynchronous RAG processing.
@@ -42,7 +43,7 @@ public class StreamingRagAssistant implements StreamingAssistant {
     }
 
     @Override
-    public Flux<Query> streamAssistance(final Query request) {
+    public Flux<RagResponse> streamAssistance(final Query request) {
         return streamingRag.streamRag(request);
     }
 }

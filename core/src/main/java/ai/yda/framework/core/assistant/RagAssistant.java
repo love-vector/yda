@@ -22,25 +22,26 @@ package ai.yda.framework.core.assistant;
 import org.springframework.ai.rag.Query;
 
 import ai.yda.framework.rag.core.Rag;
+import ai.yda.framework.rag.core.model.RagResponse;
 
-public class RagAssistant implements Assistant {
+public class RagAssistant implements Assistant<RagResponse, Query> {
 
     /**
      * The {@link Rag} instance responsible for synchronous RAG processing.
      */
-    private final Rag rag;
+    private final Rag<RagResponse, Query> rag;
 
     /**
      * Constructs a new {@link RagAssistant} instance.
      *
      * @param rag the {@link Rag} instance used for synchronous request-response processing.
      */
-    public RagAssistant(final Rag rag) {
+    public RagAssistant(final Rag<RagResponse, Query> rag) {
         this.rag = rag;
     }
 
     @Override
-    public Query assist(final Query request) {
+    public RagResponse assist(final Query request) {
         return rag.doRag(request);
     }
 }

@@ -21,9 +21,7 @@ package ai.yda.framework.core.assistant;
 
 import reactor.core.publisher.Flux;
 
-import org.springframework.ai.rag.Query;
-
-public interface StreamingAssistant {
+public interface StreamingAssistant<RESPONSE, QUERY> {
 
     /**
      * Processes the Request and returns the corresponding Response in a streaming manner.
@@ -31,5 +29,5 @@ public interface StreamingAssistant {
      * @param request the Request to be processed.
      * @return a {@link Flux} stream of Response objects generated after processing the Request.
      */
-    Flux<Query> streamAssistance(Query request);
+    Flux<RESPONSE> streamAssistance(QUERY request);
 }

@@ -16,19 +16,18 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.rag.generator.assistant.openai;
 
-import java.util.Map;
-
-import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.ai.rag.Query;
-
 import ai.yda.framework.rag.core.generator.Generator;
+import ai.yda.framework.rag.core.model.RagResponse;
 import ai.yda.framework.rag.generator.assistant.openai.service.AzureOpenAiAssistantService;
 import ai.yda.framework.rag.generator.assistant.openai.util.OpenAiAssistantConstant;
 import ai.yda.framework.session.core.SessionProvider;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.rag.Query;
+
+import java.util.stream.Collectors;
 
 /**
  * Generates responses to the Request by sending queries to the Assistant Service. The class relies on the
@@ -40,7 +39,7 @@ import ai.yda.framework.session.core.SessionProvider;
  * @since 0.1.0
  */
 @Slf4j
-public class OpenAiAssistantGenerator implements Generator {
+public class OpenAiAssistantGenerator implements Generator<RagResponse, Query> {
 
     /**
      * Service used to interact with the Azure OpenAI Assistant API.
@@ -78,7 +77,8 @@ public class OpenAiAssistantGenerator implements Generator {
     }
 
     @Override
-    public Query generate(Query request) {
+    public RagResponse generate(final Query request) {
+        var context = request.context().values().stream().map(Object::toString).collect(Collectors.joining(" ,"));
         var threadId = sessionProvider
                 .get(OpenAiAssistantConstant.THREAD_ID_KEY)
                 .map(Object::toString)
@@ -91,9 +91,8 @@ public class OpenAiAssistantGenerator implements Generator {
                     return newThreadId;
                 });
         log.debug("Thread ID: {}", threadId);
-        return Query.builder()
-                .text(request.text())
-                .context(Map.of("answer", assistantService.createRunAndWaitForResponse(threadId, assistantId)))
+        return RagResponse.builder()
+                .result(assistantService.createRunAndWaitForResponse(threadId, assistantId, context))
                 .build();
     }
 }

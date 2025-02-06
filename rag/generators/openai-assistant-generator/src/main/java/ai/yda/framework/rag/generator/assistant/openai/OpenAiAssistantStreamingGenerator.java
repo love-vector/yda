@@ -19,8 +19,6 @@
 */
 package ai.yda.framework.rag.generator.assistant.openai;
 
-import java.util.Map;
-
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -29,9 +27,12 @@ import reactor.core.scheduler.Schedulers;
 import org.springframework.ai.rag.Query;
 
 import ai.yda.framework.rag.core.generator.StreamingGenerator;
+import ai.yda.framework.rag.core.model.RagResponse;
 import ai.yda.framework.rag.generator.assistant.openai.service.AzureOpenAiAssistantService;
 import ai.yda.framework.rag.generator.assistant.openai.util.OpenAiAssistantConstant;
 import ai.yda.framework.session.core.ReactiveSessionProvider;
+
+import java.util.stream.Collectors;
 
 /**
  * Generates responses to the Request in a streaming manner by sending queries to the Assistant Service. The class
@@ -44,7 +45,7 @@ import ai.yda.framework.session.core.ReactiveSessionProvider;
  * @since 0.1.0
  */
 @Slf4j
-public class OpenAiAssistantStreamingGenerator implements StreamingGenerator {
+public class OpenAiAssistantStreamingGenerator implements StreamingGenerator<RagResponse, Query> {
 
     /**
      * Service used to interact with the Azure OpenAI Assistant API.
@@ -81,9 +82,9 @@ public class OpenAiAssistantStreamingGenerator implements StreamingGenerator {
         this.assistantId = assistantId;
     }
 
-    // Дописать логику добавления контекста в Publisher
     @Override
-    public Flux<Query> streamGeneration(final Query request) {
+    public Flux<RagResponse> streamGeneration(final Query request) {
+        var context = request.context().values().stream().map(Object::toString).collect(Collectors.joining(" ,"));
         return reactiveSessionProvider
                 .get(OpenAiAssistantConstant.THREAD_ID_KEY)
                 .map(Object::toString)
@@ -98,8 +99,7 @@ public class OpenAiAssistantStreamingGenerator implements StreamingGenerator {
                                 .put(OpenAiAssistantConstant.THREAD_ID_KEY, threadId)
                                 .thenReturn(threadId))))
                 .doOnNext(threadId -> log.debug("Thread ID: {}", threadId))
-                .flatMapMany(threadId -> assistantService.createRunStream(threadId, assistantId, ""))
-                .map(deltaMessage ->
-                        Query.builder().context(Map.of("context", deltaMessage)).build());
+                .flatMapMany(threadId -> assistantService.createRunStream(threadId, assistantId, context))
+                .map(deltaMessage -> RagResponse.builder().result(deltaMessage).build());
     }
 }

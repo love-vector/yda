@@ -21,7 +21,9 @@ package ai.yda.framework.rag.core;
 
 import org.springframework.ai.rag.Query;
 
-public interface Rag {
+import ai.yda.framework.rag.core.model.RagResponse;
+
+public interface Rag<RESPONSE extends RagResponse, QUERY extends Query> {
 
     /**
      * Performs a Retrieval-Augmented Generation (RAG) operation based on the provided Request.
@@ -29,5 +31,5 @@ public interface Rag {
      * @param request the Request to process.
      * @return the Response object containing the results of the RAG operation.
      */
-    Query doRag(Query request);
+    RESPONSE doRag(QUERY request);
 }

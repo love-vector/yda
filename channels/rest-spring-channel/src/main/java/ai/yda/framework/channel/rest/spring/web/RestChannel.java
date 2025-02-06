@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ai.yda.framework.channel.core.Channel;
 import ai.yda.framework.channel.rest.spring.RestSpringProperties;
 import ai.yda.framework.core.assistant.Assistant;
+import ai.yda.framework.rag.core.model.RagResponse;
 
 /**
  * Provides REST controller logic that handles incoming requests for processing using an assistant. The path of the
@@ -42,17 +43,17 @@ import ai.yda.framework.core.assistant.Assistant;
 @RequestMapping(
         path = "${" + RestSpringProperties.CONFIG_PREFIX + ".endpoint-relative-path:"
                 + RestSpringProperties.DEFAULT_ENDPOINT_RELATIVE_PATH + "}")
-public class RestChannel implements Channel<Query> {
+public class RestChannel implements Channel<RagResponse, Query> {
 
-    private final Assistant assistant;
+    private final Assistant<RagResponse, Query> assistant;
 
-    public RestChannel(final Assistant assistant) {
+    public RestChannel(final Assistant<RagResponse, Query> assistant) {
         this.assistant = assistant;
     }
 
     @Override
     @PostMapping
-    public Query processRequest(@RequestBody @Validated final Query request) {
+    public RagResponse processRequest(@RequestBody @Validated final Query request) {
         return assistant.assist(request);
     }
 }

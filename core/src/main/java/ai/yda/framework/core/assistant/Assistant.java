@@ -19,9 +19,7 @@
 */
 package ai.yda.framework.core.assistant;
 
-import org.springframework.ai.rag.Query;
-
-public interface Assistant {
+public interface Assistant<RESPONSE, QUERY> {
 
     /**
      * Processes the given Request and returns a corresponding Response.
@@ -29,5 +27,5 @@ public interface Assistant {
      * @param request the Request to be processed.
      * @return the Response generated from processing the Request.
      */
-    Query assist(Query request);
+    RESPONSE assist(QUERY request);
 }

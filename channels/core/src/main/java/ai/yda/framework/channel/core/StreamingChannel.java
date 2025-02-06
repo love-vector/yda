@@ -21,7 +21,7 @@ package ai.yda.framework.channel.core;
 
 import reactor.core.publisher.Flux;
 
-public interface StreamingChannel<QUERY> {
+public interface StreamingChannel<RESPONSE, QUERY> {
 
-    Flux<QUERY> processRequest(QUERY request);
+    Flux<RESPONSE> processRequest(QUERY request);
 }

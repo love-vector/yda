@@ -27,6 +27,7 @@ import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.rag.Query;
 
 import ai.yda.framework.rag.core.generator.Generator;
+import ai.yda.framework.rag.core.model.RagResponse;
 
 /**
  * Generates Responses using an OpenAI Chat Model. This class is designed to interact with a Chat Model to process User
@@ -41,7 +42,7 @@ import ai.yda.framework.rag.core.generator.Generator;
  * @see OpenAiChatModel
  * @since 0.1.0
  */
-public class OpenAiChatGenerator implements Generator {
+public class OpenAiChatGenerator implements Generator<RagResponse, Query> {
 
     private final OpenAiChatModel chatModel;
 
@@ -70,14 +71,11 @@ public class OpenAiChatGenerator implements Generator {
     }
 
     @Override
-    public Query generate(final Query request) {
+    public RagResponse generate(final Query request) {
         var context = request.context().values().stream().map(Object::toString).collect(Collectors.joining(" ,"));
         var prompt = new PromptTemplate(USER_QUERY_RESPONSE_TEMPLATE)
                 .create(Map.of(CONTEXT_STR_PLACEHOLDER, context, USER_QUERY_PLACEHOLDER, request.text()));
         var response = chatModel.call(prompt).getResult().getOutput();
-        return Query.builder()
-                .text(request.text())
-                .context(Map.of("answer", response.getContent()))
-                .build();
+        return RagResponse.builder().result(response.getContent()).build();
     }
 }

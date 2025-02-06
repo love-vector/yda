@@ -21,7 +21,9 @@ package ai.yda.framework.rag.core.generator;
 
 import org.springframework.ai.rag.Query;
 
-public interface Generator {
+import ai.yda.framework.rag.core.model.RagResponse;
 
-    Query generate(Query request);
+public interface Generator<RESPONSE extends RagResponse, QUERY extends Query> {
+
+    RESPONSE generate(QUERY request);
 }

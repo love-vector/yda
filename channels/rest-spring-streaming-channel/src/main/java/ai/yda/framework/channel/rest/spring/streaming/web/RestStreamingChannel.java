@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ai.yda.framework.channel.core.StreamingChannel;
 import ai.yda.framework.channel.rest.spring.streaming.RestSpringStreamingProperties;
 import ai.yda.framework.core.assistant.StreamingAssistant;
+import ai.yda.framework.rag.core.model.RagResponse;
 
 /**
  * Provides REST controller logic that handles incoming requests for processing using a streaming assistant. The path
@@ -45,17 +46,17 @@ import ai.yda.framework.core.assistant.StreamingAssistant;
 @RequestMapping(
         path = "${" + RestSpringStreamingProperties.CONFIG_PREFIX + ".endpoint-relative-path:"
                 + RestSpringStreamingProperties.DEFAULT_ENDPOINT_RELATIVE_PATH + "}")
-public class RestStreamingChannel implements StreamingChannel<Query> {
+public class RestStreamingChannel implements StreamingChannel<RagResponse, Query> {
 
-    private final StreamingAssistant assistant;
+    private final StreamingAssistant<RagResponse, Query> assistant;
 
-    public RestStreamingChannel(final StreamingAssistant assistant) {
+    public RestStreamingChannel(final StreamingAssistant<RagResponse, Query> assistant) {
         this.assistant = assistant;
     }
 
     @Override
     @PostMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<Query> processRequest(@RequestBody @Validated final Query request) {
+    public Flux<RagResponse> processRequest(@RequestBody @Validated final Query request) {
         return assistant.streamAssistance(request);
     }
 }
