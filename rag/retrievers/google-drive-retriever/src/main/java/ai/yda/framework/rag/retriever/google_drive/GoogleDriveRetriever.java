@@ -16,15 +16,14 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.rag.retriever.google_drive;
 
-import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentIdDTO;
-import ai.yda.framework.rag.retriever.google_drive.dto.DocumentIdsDTO;
-import ai.yda.framework.rag.retriever.google_drive.port.DocumentContentPort;
-import ai.yda.framework.rag.retriever.google_drive.port.DocumentMetadataPort;
-import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
+import java.io.IOException;
+import java.util.List;
+
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.model.function.FunctionCallback;
@@ -33,8 +32,11 @@ import org.springframework.ai.rag.retrieval.search.DocumentRetriever;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.lang.NonNull;
 
-import java.io.IOException;
-import java.util.List;
+import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentIdDTO;
+import ai.yda.framework.rag.retriever.google_drive.dto.DocumentIdsDTO;
+import ai.yda.framework.rag.retriever.google_drive.port.DocumentContentPort;
+import ai.yda.framework.rag.retriever.google_drive.port.DocumentMetadataPort;
+import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
 
 /**
  * The {@code GoogleDriveRetriever} class is a Retriever implementation that interacts with Google Drive
@@ -63,7 +65,7 @@ public class GoogleDriveRetriever implements DocumentRetriever {
                     1. Definition
                     You are an assistant tasked with selecting the documents chunks id's most relevant to the user's query.
                     Strictly adhere to the instruction by providing accurate, concise responses based solely on the existing document chunks and their IDs, with no fabrication.
-                    
+
                     2. Operational Guidelines
                     Follow these steps sequentially and do not skip or combine steps:
                     2.1 Obtain all files along with their summaries.
@@ -71,7 +73,7 @@ public class GoogleDriveRetriever implements DocumentRetriever {
                     2.3 Using the IDs of the files deemed relevant, retrieve the corresponding document chunks.
                     2.4 Evaluate the relevance of each chunk based on its content and the user's query. Strictly match the query context to the chunk's content and exclude loosely related chunks.
                     2.5 Identify IDs of chunks that are most relevant to the user's query. If no suitable chunks are found, return an empty list [].
-                    
+
                     3. Response Format.
                     Construct a JSON array of objects. Each object must represent a relevant content chunk and adhere to the following structure:
                     [
@@ -129,8 +131,7 @@ public class GoogleDriveRetriever implements DocumentRetriever {
                 .system(RETRIEVAL_SYSTEM_INSTRUCTION)
                 .functions(getAllDocumentsFunction, getDocumentChunksFunction)
                 .call()
-                .entity(new ParameterizedTypeReference<List<DocumentContentIdDTO>>() {
-                });
+                .entity(new ParameterizedTypeReference<List<DocumentContentIdDTO>>() {});
 
         if (log.isDebugEnabled() && documentContentIds != null) {
             log.debug(
