@@ -16,7 +16,7 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.rag.retriever.google_drive.service;
 
 import java.io.IOException;
@@ -38,6 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentMetadataDTO;
+import ai.yda.framework.rag.retriever.google_drive.exception.UnsupportedExtensionException;
 import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentMetadataMapper;
 import ai.yda.framework.rag.retriever.google_drive.port.DocumentContentPort;
 import ai.yda.framework.rag.retriever.google_drive.port.DocumentMetadataPort;
@@ -96,9 +97,9 @@ public class GoogleDriveService {
                 GoogleCredentials.fromStream(credentialsStream).createScoped(Collections.singleton(DriveScopes.DRIVE));
 
         this.driveService = new Drive.Builder(
-                        GoogleNetHttpTransport.newTrustedTransport(),
-                        GsonFactory.getDefaultInstance(),
-                        new HttpCredentialsAdapter(credentials))
+                GoogleNetHttpTransport.newTrustedTransport(),
+                GsonFactory.getDefaultInstance(),
+                new HttpCredentialsAdapter(credentials))
                 .setApplicationName(GOOGLE_DRIVE_APP_NAME)
                 .build();
 
@@ -117,16 +118,20 @@ public class GoogleDriveService {
                 documentMetadataDTO.setParentId(parent.getDocumentId());
             }
 
-            if (!documentMetadataDTO.isFolder()) {
-                try (var inputStream = driveService.files().get(file.getId()).executeMediaAsInputStream()) {
-                    var contentEntities = documentProcessor.processDocument(
-                            file.getFileExtension(), inputStream, documentMetadataDTO);
-                    documentMetadataDTO.setDocumentContents(contentEntities);
-                    documentMetadataDTO.setAiDescription(
-                            documentAiDescriptionService.generateAiDescription(documentMetadataDTO));
+            try {
+                if (!documentMetadataDTO.isFolder()) {
+                    try (var inputStream = driveService.files().get(file.getId()).executeMediaAsInputStream()) {
+                        var contentEntities = documentProcessor.processDocument(
+                                file.getFileExtension(), inputStream, documentMetadataDTO);
+                        documentMetadataDTO.setDocumentContents(contentEntities);
+                        documentMetadataDTO.setAiDescription(
+                                documentAiDescriptionService.generateAiDescription(documentMetadataDTO));
+                    }
                 }
+                documentMetadataPort.save(documentMetadataDTO);
+            } catch (UnsupportedExtensionException unsupportedExtensionException) {
+                log.error(unsupportedExtensionException.getMessage());
             }
-            documentMetadataPort.save(documentMetadataDTO);
         }
     }
 
@@ -168,7 +173,7 @@ public class GoogleDriveService {
                         .setDriveId(driveId)
                         .setFields("files(id,name,parents,description,driveId,webViewLink,createdTime,modifiedTime,"
                                 + "mimeType,fileExtension)")
-                        .setPageSize(100)
+                        .setPageSize(1000)
                         .execute()
                         .getFiles())
                 .orElseGet(Collections::emptyList);
