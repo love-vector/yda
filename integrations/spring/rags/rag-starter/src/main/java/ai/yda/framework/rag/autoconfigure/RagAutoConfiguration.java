@@ -21,7 +21,6 @@ package ai.yda.framework.rag.autoconfigure;
 
 import java.util.List;
 
-import org.springframework.ai.rag.Query;
 import org.springframework.ai.rag.generation.augmentation.QueryAugmenter;
 import org.springframework.ai.rag.retrieval.search.DocumentRetriever;
 import org.springframework.boot.autoconfigure.AutoConfiguration;

@@ -100,19 +100,11 @@ public class FilesystemRetriever implements DocumentRetriever {
         }
     }
 
-    @SuppressWarnings("NullableProblems")
     @Override
-    public List<Document> retrieve(final Query query) {
+    public @NonNull List<Document> retrieve(final @NonNull Query query) {
         return Objects.requireNonNull(vectorStore.similaritySearch(
                 SearchRequest.builder().query(query.text()).topK(topK).build()));
     }
-
-    /**
-     * Retrieves Documents data based on the given Request by performing a similarity search in the Vector Store.
-     *
-     * @param request the {@link RagRequest} object containing the User query for the similarity search.
-     * @return a {@link Document} object containing the Knowledge obtained from the similarity search.
-     */
 
     /**
      * Lists all regular files in the local directory, processes each file to create chunks, and then adds these chunks

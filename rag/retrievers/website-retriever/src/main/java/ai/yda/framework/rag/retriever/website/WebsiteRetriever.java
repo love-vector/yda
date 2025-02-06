@@ -109,7 +109,7 @@ public class WebsiteRetriever implements DocumentRetriever {
     }
 
     @Override
-    public List<Document> retrieve(Query query) {
+    public @NonNull List<Document> retrieve(final @NonNull Query query) {
         return Objects.requireNonNull(vectorStore.similaritySearch(
                 SearchRequest.builder().query(query.text()).topK(topK).build()));
     }

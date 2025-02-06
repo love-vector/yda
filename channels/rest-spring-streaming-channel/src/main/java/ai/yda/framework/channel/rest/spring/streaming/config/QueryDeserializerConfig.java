@@ -36,7 +36,7 @@ import ai.yda.framework.channel.shared.QueryDeserializer;
  * @since 0.2.0
  */
 @Configuration
-public class RagRequestDeserializerConfig {
+public class QueryDeserializerConfig {
 
     /**
      * Registers a custom deserializer for {@link Query} using a {@link SimpleModule}.

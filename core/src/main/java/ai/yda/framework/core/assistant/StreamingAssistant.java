@@ -19,8 +19,9 @@
 */
 package ai.yda.framework.core.assistant;
 
-import org.springframework.ai.rag.Query;
 import reactor.core.publisher.Flux;
+
+import org.springframework.ai.rag.Query;
 
 public interface StreamingAssistant {
 

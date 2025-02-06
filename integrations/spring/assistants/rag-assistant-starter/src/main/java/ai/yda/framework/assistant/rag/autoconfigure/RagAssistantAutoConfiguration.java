@@ -16,14 +16,15 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.assistant.rag.autoconfigure;
 
-import ai.yda.framework.core.assistant.RagAssistant;
-import ai.yda.framework.rag.core.Rag;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
+
+import ai.yda.framework.core.assistant.RagAssistant;
+import ai.yda.framework.rag.core.Rag;
 
 /**
  * Autoconfiguration class for setting up the {@link RagAssistant} bean in a Spring application.
@@ -38,8 +39,7 @@ public class RagAssistantAutoConfiguration {
     /**
      * Default constructor for {@link RagAssistantAutoConfiguration}.
      */
-    public RagAssistantAutoConfiguration() {
-    }
+    public RagAssistantAutoConfiguration() {}
 
     @Bean
     public RagAssistant ragAssistant(final Rag rag) {

@@ -16,16 +16,17 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.rag.generator.chat.openai;
 
-import ai.yda.framework.rag.core.generator.Generator;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.rag.Query;
 
-import java.util.Map;
-import java.util.stream.Collectors;
+import ai.yda.framework.rag.core.generator.Generator;
 
 /**
  * Generates Responses using an OpenAI Chat Model. This class is designed to interact with a Chat Model to process User
@@ -40,7 +41,6 @@ import java.util.stream.Collectors;
  * @see OpenAiChatModel
  * @since 0.1.0
  */
-
 public class OpenAiChatGenerator implements Generator {
 
     private final OpenAiChatModel chatModel;
@@ -49,10 +49,10 @@ public class OpenAiChatGenerator implements Generator {
             """
                     Here is the context:
                     {context_str}
-                    
+
                     Here is the user's query:
                     {user_query}
-                    
+
                     Respond to the user's query based on the provided context.""";
 
     private static final String CONTEXT_STR_PLACEHOLDER = "context_str";

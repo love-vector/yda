@@ -16,14 +16,15 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.rag.generator.chat.openai.autoconfigure;
 
-import ai.yda.framework.rag.core.generator.Generator;
-import ai.yda.framework.rag.generator.chat.openai.OpenAiChatGenerator;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
+
+import ai.yda.framework.rag.core.generator.Generator;
+import ai.yda.framework.rag.generator.chat.openai.OpenAiChatGenerator;
 
 /**
  * Autoconfiguration class for setting up a {@link Generator} bean that uses the OpenAI Chat model. This class
@@ -43,8 +44,7 @@ public class OpenAiChatGeneratorAutoConfiguration {
     /**
      * Default constructor for {@link OpenAiChatGeneratorAutoConfiguration}.
      */
-    public OpenAiChatGeneratorAutoConfiguration() {
-    }
+    public OpenAiChatGeneratorAutoConfiguration() {}
 
     /**
      * Defines a {@link Generator} bean that utilizes an {@link OpenAiChatModel} to generate Responses. This method

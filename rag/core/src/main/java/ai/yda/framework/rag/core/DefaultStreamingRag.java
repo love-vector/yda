@@ -16,20 +16,25 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.rag.core;
 
-import ai.yda.framework.rag.core.generator.StreamingGenerator;
-import ai.yda.framework.rag.core.util.ContentUtil;
+import java.util.AbstractMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
+
 import org.springframework.ai.document.Document;
 import org.springframework.ai.rag.Query;
 import org.springframework.ai.rag.generation.augmentation.QueryAugmenter;
 import org.springframework.ai.rag.retrieval.search.DocumentRetriever;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import ai.yda.framework.rag.core.generator.StreamingGenerator;
+import ai.yda.framework.rag.core.util.ContentUtil;
 
 /**
  * Default implementation of the Retrieval-Augmented Generation (RAG) process in a streaming manner.
@@ -37,7 +42,7 @@ import java.util.stream.Collectors;
  * @author Nikita Litvinov
  * @since 0.1.0
  */
-public class DefaultStreamingRag implements StreamingRag<Query> {
+public class DefaultStreamingRag implements StreamingRag {
 
     private final List<DocumentRetriever> retrievers;
 
@@ -56,8 +61,21 @@ public class DefaultStreamingRag implements StreamingRag<Query> {
 
     @Override
     public Flux<Query> streamRag(final Query request) {
-        // TODO обновить логику убрав трансформатор и вернув логику в Publisher
-        return Flux.just(request);
+        return Flux.fromIterable(retrievers)
+                .flatMap(retriever ->
+                        Mono.fromCallable(() -> retriever.retrieve(request)).subscribeOn(Schedulers.boundedElastic()))
+                .collectList()
+                .map(lists -> lists.stream().flatMap(List::stream).collect(Collectors.toList()))
+                .flatMap(documents -> {
+                    augmenters.forEach(augmenter -> augmenter.augment(request, documents));
+                    return mergeDocuments(documents).map(merged -> new AbstractMap.SimpleEntry<>(documents, merged));
+                })
+                .flatMapMany(entry -> {
+                    String merged = entry.getValue();
+                    Query updatedRequest =
+                            request.mutate().context(Map.of("context", merged)).build();
+                    return streamingGenerator.streamGeneration(updatedRequest);
+                });
     }
 
     protected Mono<String> mergeDocuments(final List<Document> documents) {

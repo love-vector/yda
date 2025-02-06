@@ -16,26 +16,28 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.core.assistant;
 
-import ai.yda.framework.rag.core.StreamingRag;
-import org.springframework.ai.rag.Query;
 import reactor.core.publisher.Flux;
+
+import org.springframework.ai.rag.Query;
+
+import ai.yda.framework.rag.core.StreamingRag;
 
 public class StreamingRagAssistant implements StreamingAssistant {
 
     /**
      * The {@link StreamingRag} instance responsible for asynchronous RAG processing.
      */
-    private final StreamingRag<Query> streamingRag;
+    private final StreamingRag streamingRag;
 
     /**
      * Constructs a new {@link StreamingRagAssistant} instance.
      *
      * @param streamingRag the {@link StreamingRag} instance used for streaming request-response processing.
      */
-    public StreamingRagAssistant(final StreamingRag<Query> streamingRag) {
+    public StreamingRagAssistant(final StreamingRag streamingRag) {
         this.streamingRag = streamingRag;
     }
 

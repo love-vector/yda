@@ -16,20 +16,22 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.rag.generator.assistant.openai;
+
+import java.util.Map;
+
+import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
+
+import org.springframework.ai.rag.Query;
 
 import ai.yda.framework.rag.core.generator.StreamingGenerator;
 import ai.yda.framework.rag.generator.assistant.openai.service.AzureOpenAiAssistantService;
 import ai.yda.framework.rag.generator.assistant.openai.util.OpenAiAssistantConstant;
 import ai.yda.framework.session.core.ReactiveSessionProvider;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.ai.rag.Query;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
-
-import java.util.Map;
 
 /**
  * Generates responses to the Request in a streaming manner by sending queries to the Assistant Service. The class
