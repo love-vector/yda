@@ -87,21 +87,21 @@ public class OpenAiAssistantStreamingGenerator implements StreamingGenerator<Que
      * either retrieving an existing Thread ID from the Reactive Session Provider or creating a new Thread, sending the
      * Request query to the Assistant, and obtaining the Response as a stream.
      *
-     * @param request the {@link Query} object containing the query from the User.
+     * @param query the {@link Query} object containing the query from the User.
      * @return a {@link Flux} stream of {@link RagResponse} objects containing the result of the Assistant's Response.
      */
     @Override
-    public Flux<RagResponse> streamGeneration(final Query request) {
-        var context = request.context().values().stream().map(Object::toString).collect(Collectors.joining(" ,"));
+    public Flux<RagResponse> streamGeneration(final Query query) {
+        var context = query.context().values().stream().map(Object::toString).collect(Collectors.joining(" ,"));
         return reactiveSessionProvider
                 .get(OpenAiAssistantConstant.THREAD_ID_KEY)
                 .map(Object::toString)
                 .flatMap(threadId -> Mono.fromCallable(() -> assistantService
-                                .addMessageToThread(threadId, request.text())
+                                .addMessageToThread(threadId, query.text())
                                 .getThreadId())
                         .subscribeOn(Schedulers.boundedElastic()))
                 .switchIfEmpty(Mono.defer(() -> Mono.fromCallable(() ->
-                                assistantService.createThread(request.text()).getId())
+                                assistantService.createThread(query.text()).getId())
                         .subscribeOn(Schedulers.boundedElastic())
                         .flatMap(threadId -> reactiveSessionProvider
                                 .put(OpenAiAssistantConstant.THREAD_ID_KEY, threadId)

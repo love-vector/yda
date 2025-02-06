@@ -29,7 +29,7 @@ import ai.yda.framework.rag.core.model.RagResponse;
  * Provides a generic mechanism that coordinates the retrieval, augmentation, and generation processes to produce a
  * final Response based on the Request in a streaming manner.
  *
- * @param <QUERY>>  the generic type of the Request, which must extend {@link Query}.
+ * @param <QUERY>  the generic type of the Request, which must extend {@link Query}.
  * @param <RESPONSE> the generic type of the Response generated based on the given Request, which must extend
  *                   {@link RagResponse}.
  * @author Nikita Litvinov

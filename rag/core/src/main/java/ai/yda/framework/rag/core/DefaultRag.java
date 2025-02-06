@@ -84,20 +84,20 @@ public class DefaultRag implements Rag<Query, RagResponse> {
      *     </li>
      * </ul>
      *
-     * @param request the {@link Query} to process.
+     * @param query the {@link Query} to process.
      * @return the generated {@link RagResponse}.
      */
     @Override
-    public RagResponse doRag(final Query request) {
+    public RagResponse doRag(final Query query) {
 
         var documents = retrievers.parallelStream()
-                .flatMap(retriever -> retriever.retrieve(request).stream())
+                .flatMap(retriever -> retriever.retrieve(query).stream())
                 .toList();
 
         for (var augmenter : augmenters) {
-            augmenter.augment(request, documents);
+            augmenter.augment(query, documents);
         }
-        return generator.generate(request.mutate()
+        return generator.generate(query.mutate()
                 .context(Map.of("context", mergeDocuments(documents)))
                 .build());
     }

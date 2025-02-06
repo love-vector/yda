@@ -53,11 +53,11 @@ public class StreamingRagAssistant implements StreamingAssistant<Query, RagRespo
      * Processes the given {@link Query} by delegating to the {@link StreamingRag#streamRag(Query)} method
      * and returns a {@link Flux} of {@link RagResponse}.
      *
-     * @param request the {@link Query} to be processed.
+     * @param query the {@link Query} to be processed.
      * @return a {@link Flux} stream of {@link RagResponse} objects.
      */
     @Override
-    public Flux<RagResponse> streamAssistance(final Query request) {
-        return streamingRag.streamRag(request);
+    public Flux<RagResponse> streamAssistance(final Query query) {
+        return streamingRag.streamRag(query);
     }
 }

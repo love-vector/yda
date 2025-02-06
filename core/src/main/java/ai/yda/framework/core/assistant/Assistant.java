@@ -37,8 +37,8 @@ public interface Assistant<QUERY, RESPONSE> {
     /**
      * Processes the given Request and returns a corresponding Response.
      *
-     * @param request the Request to be processed.
+     * @param query the Request to be processed.
      * @return the Response generated from processing the Request.
      */
-    RESPONSE assist(QUERY request);
+    RESPONSE assist(QUERY query);
 }

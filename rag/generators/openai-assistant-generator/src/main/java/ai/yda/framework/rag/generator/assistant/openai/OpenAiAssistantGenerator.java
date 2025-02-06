@@ -83,20 +83,20 @@ public class OpenAiAssistantGenerator implements Generator<Query, RagResponse> {
      * existing Thread ID from the Session Provider or creating a new Thread, sending the Request query to the
      * Assistant, and obtaining the Response.
      *
-     * @param request the {@link Query} object containing the query from the User.
+     * @param query the {@link Query} object containing the query from the User.
      * @return a {@link RagResponse} containing the result of the Assistant's Response.
      */
     @Override
-    public RagResponse generate(final Query request) {
-        var context = request.context().values().stream().map(Object::toString).collect(Collectors.joining(" ,"));
+    public RagResponse generate(final Query query) {
+        var context = query.context().values().stream().map(Object::toString).collect(Collectors.joining(" ,"));
         var threadId = sessionProvider
                 .get(OpenAiAssistantConstant.THREAD_ID_KEY)
                 .map(Object::toString)
                 .map(id ->
-                        assistantService.addMessageToThread(id, request.text()).getThreadId())
+                        assistantService.addMessageToThread(id, query.text()).getThreadId())
                 .orElseGet(() -> {
                     var newThreadId =
-                            assistantService.createThread(request.text()).getId();
+                            assistantService.createThread(query.text()).getId();
                     sessionProvider.put(OpenAiAssistantConstant.THREAD_ID_KEY, newThreadId);
                     return newThreadId;
                 });

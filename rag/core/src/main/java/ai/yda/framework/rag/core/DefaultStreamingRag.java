@@ -85,25 +85,25 @@ public class DefaultStreamingRag implements StreamingRag<Query, RagResponse> {
      *     <li>Generating a stream of {@link RagResponse} objects using the {@link StreamingGenerator}.</li>
      * </ul>
      *
-     * @param request the {@link Query} to process.
+     * @param query the {@link Query} to process.
      * @return a {@link Flux} stream of generated {@link RagResponse} objects.
      */
     @Override
-    public Flux<RagResponse> streamRag(final Query request) {
+    public Flux<RagResponse> streamRag(final Query query) {
         return Flux.fromIterable(retrievers)
                 .flatMap(retriever ->
-                        Mono.fromCallable(() -> retriever.retrieve(request)).subscribeOn(Schedulers.boundedElastic()))
+                        Mono.fromCallable(() -> retriever.retrieve(query)).subscribeOn(Schedulers.boundedElastic()))
                 .collectList()
                 .map(lists -> lists.stream().flatMap(List::stream).collect(Collectors.toList()))
                 .flatMap(documents -> {
-                    augmenters.forEach(augmenter -> augmenter.augment(request, documents));
+                    augmenters.forEach(augmenter -> augmenter.augment(query, documents));
                     return mergeDocuments(documents).map(merged -> new AbstractMap.SimpleEntry<>(documents, merged));
                 })
                 .flatMapMany(entry -> {
                     String merged = entry.getValue();
-                    Query updatedRequest =
-                            request.mutate().context(Map.of("context", merged)).build();
-                    return streamingGenerator.streamGeneration(updatedRequest);
+                    Query updatedQuery =
+                            query.mutate().context(Map.of("context", merged)).build();
+                    return streamingGenerator.streamGeneration(updatedQuery);
                 });
     }
 

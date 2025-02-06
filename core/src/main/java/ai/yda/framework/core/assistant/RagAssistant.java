@@ -50,11 +50,11 @@ public class RagAssistant implements Assistant<Query, RagResponse> {
     /**
      * Processes the given {@link Query} synchronously by delegating to the {@link Rag#doRag(Query)} method.
      *
-     * @param request the {@link Query} to be processed.
+     * @param query the {@link Query} to be processed.
      * @return the {@link RagResponse} generated from processing the request.
      */
     @Override
-    public RagResponse assist(final Query request) {
-        return rag.doRag(request);
+    public RagResponse assist(final Query query) {
+        return rag.doRag(query);
     }
 }

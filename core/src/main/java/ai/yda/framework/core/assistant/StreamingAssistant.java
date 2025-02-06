@@ -16,7 +16,7 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.core.assistant;
 
 import reactor.core.publisher.Flux;
@@ -30,7 +30,7 @@ import reactor.core.publisher.Flux;
  * designed to handle additional tasks and functionalities.
  * </p>
  *
- * @param <QUERY>>  the generic type of the Request from the User.
+ * @param <QUERY>    the generic type of the Request from the User.
  * @param <RESPONSE> the generic type of the Response that will be generated based on the given Request.
  * @author Nikita Litvinov
  * @since 0.1.0
@@ -40,8 +40,8 @@ public interface StreamingAssistant<QUERY, RESPONSE> {
     /**
      * Processes the Request and returns the corresponding Response in a streaming manner.
      *
-     * @param request the Request to be processed.
+     * @param query the Request to be processed.
      * @return a {@link Flux} stream of Response objects generated after processing the Request.
      */
-    Flux<RESPONSE> streamAssistance(QUERY request);
+    Flux<RESPONSE> streamAssistance(QUERY query);
 }
