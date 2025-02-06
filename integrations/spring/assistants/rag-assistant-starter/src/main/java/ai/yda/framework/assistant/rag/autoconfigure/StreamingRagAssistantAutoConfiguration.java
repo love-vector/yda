@@ -51,7 +51,7 @@ public class StreamingRagAssistantAutoConfiguration {
      * @return a configured {@link StreamingRagAssistant} bean.
      */
     @Bean
-    public StreamingRagAssistant streamingAssistant(final StreamingRag<RagResponse, Query> streamingRag) {
+    public StreamingRagAssistant streamingAssistant(final StreamingRag<Query, RagResponse> streamingRag) {
         return new StreamingRagAssistant(streamingRag);
     }
 }

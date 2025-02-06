@@ -50,7 +50,7 @@ public class RagAssistantAutoConfiguration {
      * @return a configured {@link RagAssistant} bean.
      */
     @Bean
-    public RagAssistant ragAssistant(final Rag<RagResponse, Query> rag) {
+    public RagAssistant ragAssistant(final Rag<Query, RagResponse> rag) {
         return new RagAssistant(rag);
     }
 }

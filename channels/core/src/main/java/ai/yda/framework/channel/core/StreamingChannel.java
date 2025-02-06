@@ -30,7 +30,7 @@ import reactor.core.publisher.Flux;
  * @see Channel
  * @since 0.1.0
  */
-public interface StreamingChannel<RESPONSE, QUERY> {
+public interface StreamingChannel<QUERY, RESPONSE> {
 
     /**
      * Processes the Request data involving the streaming Assistant.

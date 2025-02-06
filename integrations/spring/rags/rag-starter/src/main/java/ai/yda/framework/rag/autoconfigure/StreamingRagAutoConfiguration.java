@@ -60,7 +60,7 @@ public class StreamingRagAutoConfiguration {
     public DefaultStreamingRag defaultStreamingRag(
             final List<DocumentRetriever> retrievers,
             final List<QueryAugmenter> augmenters,
-            final StreamingGenerator<RagResponse, Query> streamingGenerator) {
+            final StreamingGenerator<Query, RagResponse> streamingGenerator) {
         return new DefaultStreamingRag(retrievers, augmenters, streamingGenerator);
     }
 }

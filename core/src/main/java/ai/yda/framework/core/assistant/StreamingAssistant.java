@@ -35,7 +35,7 @@ import reactor.core.publisher.Flux;
  * @author Nikita Litvinov
  * @since 0.1.0
  */
-public interface StreamingAssistant<RESPONSE, QUERY> {
+public interface StreamingAssistant<QUERY, RESPONSE> {
 
     /**
      * Processes the Request and returns the corresponding Response in a streaming manner.

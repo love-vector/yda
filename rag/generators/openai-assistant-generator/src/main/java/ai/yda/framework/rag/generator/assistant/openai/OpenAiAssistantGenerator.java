@@ -41,7 +41,7 @@ import ai.yda.framework.session.core.SessionProvider;
  * @since 0.1.0
  */
 @Slf4j
-public class OpenAiAssistantGenerator implements Generator<RagResponse, Query> {
+public class OpenAiAssistantGenerator implements Generator<Query, RagResponse> {
 
     /**
      * Service used to interact with the Azure OpenAI Assistant API.

@@ -59,7 +59,7 @@ public class RagAutoConfiguration {
     public DefaultRag defaultRag(
             final List<DocumentRetriever> retrievers,
             final List<QueryAugmenter> augmenters,
-            final Generator<RagResponse, Query> generator) {
+            final Generator<Query, RagResponse> generator) {
         return new DefaultRag(retrievers, augmenters, generator);
     }
 }

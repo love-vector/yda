@@ -43,9 +43,9 @@ import ai.yda.framework.rag.core.model.RagResponse;
 @RequestMapping(
         path = "${" + RestSpringProperties.CONFIG_PREFIX + ".endpoint-relative-path:"
                 + RestSpringProperties.DEFAULT_ENDPOINT_RELATIVE_PATH + "}")
-public class RestChannel implements Channel<RagResponse, Query> {
+public class RestChannel implements Channel<Query, RagResponse> {
 
-    private final Assistant<RagResponse, Query> assistant;
+    private final Assistant<Query, RagResponse> assistant;
 
     /**
      * Constructs a new {@link RestChannel} instance with the specified {@link Assistant} instance.
@@ -53,7 +53,7 @@ public class RestChannel implements Channel<RagResponse, Query> {
      * @param assistant the {@link Assistant} instance used to process {@link Query} and generate
      *                  {@link RagResponse}.
      */
-    public RestChannel(final Assistant<RagResponse, Query> assistant) {
+    public RestChannel(final Assistant<Query, RagResponse> assistant) {
         this.assistant = assistant;
     }
 

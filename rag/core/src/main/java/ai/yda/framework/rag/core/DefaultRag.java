@@ -41,7 +41,7 @@ import ai.yda.framework.rag.core.model.RagResponse;
  * @since 0.1.0
  */
 @Getter(AccessLevel.PROTECTED)
-public class DefaultRag implements Rag<RagResponse, Query> {
+public class DefaultRag implements Rag<Query, RagResponse> {
     /**
      * The list of {@link DocumentRetriever} instances used to retrieve {@link Document}.
      */
@@ -55,7 +55,7 @@ public class DefaultRag implements Rag<RagResponse, Query> {
     /**
      * The {@link Generator} instance responsible for generating the final {@link RagResponse}.
      */
-    private final Generator<RagResponse, Query> generator;
+    private final Generator<Query, RagResponse> generator;
 
     /**
      * Constructs a new {@link DefaultRag} instance.
@@ -67,7 +67,7 @@ public class DefaultRag implements Rag<RagResponse, Query> {
     public DefaultRag(
             final List<DocumentRetriever> retrievers,
             final List<QueryAugmenter> augmenters,
-            final Generator<RagResponse, Query> generator) {
+            final Generator<Query, RagResponse> generator) {
         this.retrievers = retrievers;
         this.augmenters = augmenters;
         this.generator = generator;

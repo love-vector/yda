@@ -33,7 +33,7 @@ import ai.yda.framework.rag.core.model.RagResponse;
  * @author Nikita Litvinov
  * @since 0.1.0
  */
-public interface Rag<RESPONSE extends RagResponse, QUERY extends Query> {
+public interface Rag<QUERY extends Query, RESPONSE extends RagResponse> {
 
     /**
      * Performs a Retrieval-Augmented Generation (RAG) operation based on the provided Request.

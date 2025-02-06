@@ -36,7 +36,7 @@ import ai.yda.framework.rag.core.model.RagResponse;
  * @see StreamingGenerator
  * @since 0.1.0
  */
-public interface Generator<RESPONSE extends RagResponse, QUERY extends Query> {
+public interface Generator<QUERY extends Query, RESPONSE extends RagResponse> {
 
     /**
      * Generates Response based on the provided Request and Context.

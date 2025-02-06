@@ -35,7 +35,7 @@ import ai.yda.framework.rag.core.model.RagResponse;
  * @author Nikita Litvinov
  * @since 0.1.0
  */
-public interface StreamingRag<RESPONSE extends RagResponse, QUERY extends Query> {
+public interface StreamingRag<QUERY extends Query, RESPONSE extends RagResponse> {
 
     /**
      * Performs a Retrieval-Augmented Generation (RAG) operation in a streaming manner based on the provided Request.

@@ -42,7 +42,7 @@ import ai.yda.framework.rag.core.model.RagResponse;
  * @see OpenAiChatModel
  * @since 0.1.0
  */
-public class OpenAiChatGenerator implements Generator<RagResponse, Query> {
+public class OpenAiChatGenerator implements Generator<Query, RagResponse> {
 
     private final OpenAiChatModel chatModel;
 

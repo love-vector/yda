@@ -59,7 +59,7 @@ public class OpenAiChatGeneratorAutoConfiguration {
      * @return a {@link Generator} instance that generates Responses using the OpenAI Chat model.
      */
     @Bean
-    public Generator<RagResponse, Query> openAiGenerator(final OpenAiChatModel chatModel) {
+    public Generator<Query, RagResponse> openAiGenerator(final OpenAiChatModel chatModel) {
         return new OpenAiChatGenerator(chatModel);
     }
 }

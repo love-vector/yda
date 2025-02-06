@@ -43,7 +43,7 @@ import ai.yda.framework.rag.core.util.ContentUtil;
  * @author Nikita Litvinov
  * @since 0.1.0
  */
-public class DefaultStreamingRag implements StreamingRag<RagResponse, Query> {
+public class DefaultStreamingRag implements StreamingRag<Query, RagResponse> {
 
     /**
      * The list of {@link DocumentRetriever} instances used to retrieving {@link Document}
@@ -58,7 +58,7 @@ public class DefaultStreamingRag implements StreamingRag<RagResponse, Query> {
     /**
      * The {@link StreamingGenerator} responsible for generating the final {@link RagResponse} in a streaming manner.
      */
-    private final StreamingGenerator<RagResponse, Query> streamingGenerator;
+    private final StreamingGenerator<Query, RagResponse> streamingGenerator;
 
     /**
      * Constructs a new {@link DefaultStreamingRag} instance.
@@ -71,7 +71,7 @@ public class DefaultStreamingRag implements StreamingRag<RagResponse, Query> {
     public DefaultStreamingRag(
             final List<DocumentRetriever> retrievers,
             final List<QueryAugmenter> augmenters,
-            final StreamingGenerator<RagResponse, Query> streamingGenerator) {
+            final StreamingGenerator<Query, RagResponse> streamingGenerator) {
         this.retrievers = retrievers;
         this.augmenters = augmenters;
         this.streamingGenerator = streamingGenerator;

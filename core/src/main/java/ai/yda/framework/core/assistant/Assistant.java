@@ -32,7 +32,7 @@ package ai.yda.framework.core.assistant;
  * @author Nikita Litvinov
  * @since 0.1.0
  */
-public interface Assistant<RESPONSE, QUERY> {
+public interface Assistant<QUERY, RESPONSE> {
 
     /**
      * Processes the given Request and returns a corresponding Response.

@@ -46,11 +46,11 @@ import ai.yda.framework.rag.core.model.RagResponse;
 @RequestMapping(
         path = "${" + RestSpringStreamingProperties.CONFIG_PREFIX + ".endpoint-relative-path:"
                 + RestSpringStreamingProperties.DEFAULT_ENDPOINT_RELATIVE_PATH + "}")
-public class RestStreamingChannel implements StreamingChannel<RagResponse, Query> {
+public class RestStreamingChannel implements StreamingChannel<Query, RagResponse> {
 
-    private final StreamingAssistant<RagResponse, Query> assistant;
+    private final StreamingAssistant<Query, RagResponse> assistant;
 
-    public RestStreamingChannel(final StreamingAssistant<RagResponse, Query> assistant) {
+    public RestStreamingChannel(final StreamingAssistant<Query, RagResponse> assistant) {
         this.assistant = assistant;
     }
 

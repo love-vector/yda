@@ -28,7 +28,7 @@ package ai.yda.framework.channel.core;
  * @see StreamingChannel
  * @since 0.1.0
  */
-public interface Channel<RESPONSE, QUERY> {
+public interface Channel<QUERY, RESPONSE> {
 
     /**
      * Processes Request data involving the Assistant.

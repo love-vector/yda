@@ -45,7 +45,7 @@ import ai.yda.framework.session.core.ReactiveSessionProvider;
  * @since 0.1.0
  */
 @Slf4j
-public class OpenAiAssistantStreamingGenerator implements StreamingGenerator<RagResponse, Query> {
+public class OpenAiAssistantStreamingGenerator implements StreamingGenerator<Query, RagResponse> {
 
     /**
      * Service used to interact with the Azure OpenAI Assistant API.
