@@ -31,14 +31,14 @@ public class StreamingRagAssistant implements StreamingAssistant<RagResponse, Qu
     /**
      * The {@link StreamingRag} instance responsible for asynchronous RAG processing.
      */
-    private final StreamingRag streamingRag;
+    private final StreamingRag<RagResponse, Query> streamingRag;
 
     /**
      * Constructs a new {@link StreamingRagAssistant} instance.
      *
      * @param streamingRag the {@link StreamingRag} instance used for streaming request-response processing.
      */
-    public StreamingRagAssistant(final StreamingRag streamingRag) {
+    public StreamingRagAssistant(final StreamingRag<RagResponse, Query> streamingRag) {
         this.streamingRag = streamingRag;
     }
 
