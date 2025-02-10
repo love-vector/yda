@@ -16,15 +16,15 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.rag.generator.chat.openai;
-
-import org.springframework.ai.chat.prompt.PromptTemplate;
-import org.springframework.ai.openai.OpenAiChatModel;
-import org.springframework.ai.rag.Query;
 
 import ai.yda.framework.rag.core.generator.Generator;
 import ai.yda.framework.rag.core.model.RagResponse;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.chat.prompt.PromptTemplate;
+import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.ai.rag.Query;
 
 /**
  * Generates Responses using an OpenAI Chat Model. This class is designed to interact with a Chat Model to process User
@@ -39,6 +39,7 @@ import ai.yda.framework.rag.core.model.RagResponse;
  * @see OpenAiChatModel
  * @since 0.1.0
  */
+@Slf4j
 public class OpenAiChatGenerator implements Generator<Query, RagResponse> {
 
     private final OpenAiChatModel chatModel;
@@ -63,6 +64,11 @@ public class OpenAiChatGenerator implements Generator<Query, RagResponse> {
     @Override
     public RagResponse generate(final Query query) {
         var prompt = new PromptTemplate(query.text()).create();
+
+        if (log.isDebugEnabled()) {
+            log.debug("Chat Completion Call:\nQuery: {}", query.text());
+        }
+
         var response = chatModel.call(prompt).getResult().getOutput();
         return RagResponse.builder().result(response.getContent()).build();
     }

@@ -96,7 +96,15 @@ public class OpenAiAssistantGenerator implements Generator<Query, RagResponse> {
                     sessionProvider.put(OpenAiAssistantConstant.THREAD_ID_KEY, newThreadId);
                     return newThreadId;
                 });
-        log.debug("Thread ID: {}", threadId);
+
+        if (log.isDebugEnabled()) {
+            log.debug(
+                    "Assistant Call:\nAssistant ID: {},\nThread ID: {},\nQuery: {}",
+                    assistantId,
+                    threadId,
+                    query.text());
+        }
+
         return RagResponse.builder()
                 .result(assistantService.createRunAndWaitForResponse(threadId, assistantId, query.text()))
                 .build();

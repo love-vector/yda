@@ -22,7 +22,6 @@ package ai.yda.framework.rag.autoconfigure;
 import java.util.List;
 
 import org.springframework.ai.rag.Query;
-import org.springframework.ai.rag.generation.augmentation.ContextualQueryAugmenter;
 import org.springframework.ai.rag.generation.augmentation.QueryAugmenter;
 import org.springframework.ai.rag.retrieval.search.DocumentRetriever;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -41,12 +40,7 @@ import ai.yda.framework.rag.core.model.RagResponse;
  */
 @AutoConfiguration
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
-public class RagAutoConfiguration {
-
-    @Bean
-    public ContextualQueryAugmenter contextualQueryAugmenter() {
-        return ContextualQueryAugmenter.builder().allowEmptyContext(false).build();
-    }
+public class RagAutoConfiguration extends AbstractRagAutoConfiguration {
 
     /**
      * Default constructor for {@link RagAutoConfiguration}.
