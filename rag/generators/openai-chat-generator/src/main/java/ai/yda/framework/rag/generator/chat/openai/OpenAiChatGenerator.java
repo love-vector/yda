@@ -19,9 +19,6 @@
 */
 package ai.yda.framework.rag.generator.chat.openai;
 
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.rag.Query;
@@ -46,19 +43,6 @@ public class OpenAiChatGenerator implements Generator<Query, RagResponse> {
 
     private final OpenAiChatModel chatModel;
 
-    public static final String USER_QUERY_RESPONSE_TEMPLATE =
-            """
-                    Here is the context:
-                    {context_str}
-
-                    Here is the user's query:
-                    {user_query}
-
-                    Respond to the user's query based on the provided context.""";
-
-    private static final String CONTEXT_STR_PLACEHOLDER = "context_str";
-    private static final String USER_QUERY_PLACEHOLDER = "user_query";
-
     /**
      * Constructs a new {@link OpenAiChatGenerator} instance with the specified Chat Model.
      *
@@ -78,9 +62,7 @@ public class OpenAiChatGenerator implements Generator<Query, RagResponse> {
      */
     @Override
     public RagResponse generate(final Query query) {
-        var context = query.context().values().stream().map(Object::toString).collect(Collectors.joining(" ,"));
-        var prompt = new PromptTemplate(USER_QUERY_RESPONSE_TEMPLATE)
-                .create(Map.of(CONTEXT_STR_PLACEHOLDER, context, USER_QUERY_PLACEHOLDER, query.text()));
+        var prompt = new PromptTemplate(query.text()).create();
         var response = chatModel.call(prompt).getResult().getOutput();
         return RagResponse.builder().result(response.getContent()).build();
     }

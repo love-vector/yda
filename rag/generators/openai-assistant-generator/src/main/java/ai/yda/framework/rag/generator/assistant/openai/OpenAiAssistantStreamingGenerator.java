@@ -19,8 +19,6 @@
 */
 package ai.yda.framework.rag.generator.assistant.openai;
 
-import java.util.stream.Collectors;
-
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -92,7 +90,6 @@ public class OpenAiAssistantStreamingGenerator implements StreamingGenerator<Que
      */
     @Override
     public Flux<RagResponse> streamGeneration(final Query query) {
-        var context = query.context().values().stream().map(Object::toString).collect(Collectors.joining(" ,"));
         return reactiveSessionProvider
                 .get(OpenAiAssistantConstant.THREAD_ID_KEY)
                 .map(Object::toString)
@@ -107,7 +104,7 @@ public class OpenAiAssistantStreamingGenerator implements StreamingGenerator<Que
                                 .put(OpenAiAssistantConstant.THREAD_ID_KEY, threadId)
                                 .thenReturn(threadId))))
                 .doOnNext(threadId -> log.debug("Thread ID: {}", threadId))
-                .flatMapMany(threadId -> assistantService.createRunStream(threadId, assistantId, context))
+                .flatMapMany(threadId -> assistantService.createRunStream(threadId, assistantId, query.text()))
                 .map(deltaMessage -> RagResponse.builder().result(deltaMessage).build());
     }
 }

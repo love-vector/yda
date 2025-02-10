@@ -19,9 +19,7 @@
 */
 package ai.yda.framework.rag.core;
 
-import java.util.AbstractMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import reactor.core.publisher.Flux;
@@ -35,7 +33,6 @@ import org.springframework.ai.rag.retrieval.search.DocumentRetriever;
 
 import ai.yda.framework.rag.core.generator.StreamingGenerator;
 import ai.yda.framework.rag.core.model.RagResponse;
-import ai.yda.framework.rag.core.util.ContentUtil;
 
 /**
  * Default implementation of the Retrieval-Augmented Generation (RAG) process in a streaming manner.
@@ -63,10 +60,10 @@ public class DefaultStreamingRag implements StreamingRag<Query, RagResponse> {
     /**
      * Constructs a new {@link DefaultStreamingRag} instance.
      *
-     * @param retrievers          the list of {@link DocumentRetriever} objects used to retrieve {@link Document} data.
-     * @param augmenters          the list of {@link QueryAugmenter} objects used to augment the retrieved Contexts.
-     * @param streamingGenerator  the {@link StreamingGenerator} used to generate {@link RagResponse} objects in a
-     *                            streaming manner.
+     * @param retrievers         the list of {@link DocumentRetriever} objects used to retrieve {@link Document} data.
+     * @param augmenters         the list of {@link QueryAugmenter} objects used to augment the retrieved Contexts.
+     * @param streamingGenerator the {@link StreamingGenerator} used to generate {@link RagResponse} objects in a
+     *                           streaming manner.
      */
     public DefaultStreamingRag(
             final List<DocumentRetriever> retrievers,
@@ -95,28 +92,13 @@ public class DefaultStreamingRag implements StreamingRag<Query, RagResponse> {
                         Mono.fromCallable(() -> retriever.retrieve(query)).subscribeOn(Schedulers.boundedElastic()))
                 .collectList()
                 .map(lists -> lists.stream().flatMap(List::stream).collect(Collectors.toList()))
-                .flatMap(documents -> {
-                    augmenters.forEach(augmenter -> augmenter.augment(query, documents));
-                    return mergeDocuments(documents).map(merged -> new AbstractMap.SimpleEntry<>(documents, merged));
-                })
-                .flatMapMany(entry -> {
-                    String merged = entry.getValue();
-                    Query updatedQuery =
-                            query.mutate().context(Map.of("context", merged)).build();
-                    return streamingGenerator.streamGeneration(updatedQuery);
+                .flatMapMany(documents -> {
+                    var augmentedQuery = augmenters.stream()
+                            .reduce(
+                                    query,
+                                    (current, augmenter) -> augmenter.augment(current, documents),
+                                    (q1, q2) -> q2);
+                    return streamingGenerator.streamGeneration(augmentedQuery);
                 });
-    }
-
-    /**
-     * Merges the documents into a single string. Each piece of knowledge is separated by a point character.
-     *
-     * @param documents the list of {@link Document} objects containing knowledge data.
-     * @return a {@link Mono<String>} that emits a single string combining all pieces of knowledge from the provided
-     * contexts.
-     */
-    protected Mono<String> mergeDocuments(final List<Document> documents) {
-        return Flux.fromStream(documents.parallelStream())
-                .map(Document::getFormattedContent)
-                .collect(Collectors.joining(ContentUtil.SENTENCE_SEPARATOR));
     }
 }

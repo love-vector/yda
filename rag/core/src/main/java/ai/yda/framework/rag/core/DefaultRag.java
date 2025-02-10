@@ -20,8 +20,6 @@
 package ai.yda.framework.rag.core;
 
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -60,9 +58,9 @@ public class DefaultRag implements Rag<Query, RagResponse> {
     /**
      * Constructs a new {@link DefaultRag} instance.
      *
-     * @param retrievers          the list of {@link DocumentRetriever} objects to retrieve {@link Document} data.
-     * @param augmenters          the list of {@link QueryAugmenter} objects to augment the retrieved Contexts.
-     * @param generator           the {@link Generator} used to generate the {@link RagResponse}.
+     * @param retrievers the list of {@link DocumentRetriever} objects to retrieve {@link Document} data.
+     * @param augmenters the list of {@link QueryAugmenter} objects to augment the retrieved Contexts.
+     * @param generator  the {@link Generator} used to generate the {@link RagResponse}.
      */
     public DefaultRag(
             final List<DocumentRetriever> retrievers,
@@ -89,27 +87,11 @@ public class DefaultRag implements Rag<Query, RagResponse> {
      */
     @Override
     public RagResponse doRag(final Query query) {
-
         var documents = retrievers.parallelStream()
                 .flatMap(retriever -> retriever.retrieve(query).stream())
                 .toList();
-
-        for (var augmenter : augmenters) {
-            augmenter.augment(query, documents);
-        }
-        return generator.generate(query.mutate()
-                .context(Map.of("context", mergeDocuments(documents)))
-                .build());
-    }
-
-    /**
-     * Merges the Knowledge from the list of {@link Document} objects into a single string. Each piece of Knowledge is
-     * separated by a point character.
-     *
-     * @param documents the list of {@link Document} objects containing Knowledge data.
-     * @return a string that combines all pieces of Knowledge from the Contexts.
-     */
-    protected String mergeDocuments(final List<Document> documents) {
-        return documents.parallelStream().map(Document::getFormattedContent).collect(Collectors.joining("\n\n"));
+        var augmentedQuery = augmenters.stream()
+                .reduce(query, (current, augmenter) -> augmenter.augment(current, documents), (q1, q2) -> q2);
+        return generator.generate(augmentedQuery);
     }
 }

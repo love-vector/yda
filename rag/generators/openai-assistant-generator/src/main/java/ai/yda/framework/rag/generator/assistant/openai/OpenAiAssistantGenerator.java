@@ -19,8 +19,6 @@
 */
 package ai.yda.framework.rag.generator.assistant.openai;
 
-import java.util.stream.Collectors;
-
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.ai.rag.Query;
@@ -88,7 +86,6 @@ public class OpenAiAssistantGenerator implements Generator<Query, RagResponse> {
      */
     @Override
     public RagResponse generate(final Query query) {
-        var context = query.context().values().stream().map(Object::toString).collect(Collectors.joining(" ,"));
         var threadId = sessionProvider
                 .get(OpenAiAssistantConstant.THREAD_ID_KEY)
                 .map(Object::toString)
@@ -101,7 +98,7 @@ public class OpenAiAssistantGenerator implements Generator<Query, RagResponse> {
                 });
         log.debug("Thread ID: {}", threadId);
         return RagResponse.builder()
-                .result(assistantService.createRunAndWaitForResponse(threadId, assistantId, context))
+                .result(assistantService.createRunAndWaitForResponse(threadId, assistantId, query.text()))
                 .build();
     }
 }
