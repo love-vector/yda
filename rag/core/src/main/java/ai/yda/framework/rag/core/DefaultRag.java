@@ -90,8 +90,12 @@ public class DefaultRag implements Rag<Query, RagResponse> {
         var documents = retrievers.parallelStream()
                 .flatMap(retriever -> retriever.retrieve(query).stream())
                 .toList();
-        var augmentedQuery = augmenters.stream()
-                .reduce(query, (current, augmenter) -> augmenter.augment(current, documents), (q1, q2) -> q2);
+        var augmentedQuery = query;
+
+        for (QueryAugmenter augmenter : augmenters) {
+            augmentedQuery = augmenter.augment(augmentedQuery, documents);
+        }
+
         return generator.generate(augmentedQuery);
     }
 }

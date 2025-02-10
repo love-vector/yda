@@ -16,15 +16,17 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.rag.generator.chat.openai;
 
-import ai.yda.framework.rag.core.generator.Generator;
-import ai.yda.framework.rag.core.model.RagResponse;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.rag.Query;
+
+import ai.yda.framework.rag.core.generator.Generator;
+import ai.yda.framework.rag.core.model.RagResponse;
 
 /**
  * Generates Responses using an OpenAI Chat Model. This class is designed to interact with a Chat Model to process User

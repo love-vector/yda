@@ -93,11 +93,12 @@ public class DefaultStreamingRag implements StreamingRag<Query, RagResponse> {
                 .collectList()
                 .map(lists -> lists.stream().flatMap(List::stream).collect(Collectors.toList()))
                 .flatMapMany(documents -> {
-                    var augmentedQuery = augmenters.stream()
-                            .reduce(
-                                    query,
-                                    (current, augmenter) -> augmenter.augment(current, documents),
-                                    (q1, q2) -> q2);
+                    var augmentedQuery = query;
+
+                    for (QueryAugmenter augmenter : augmenters) {
+                        augmentedQuery = augmenter.augment(augmentedQuery, documents);
+                    }
+
                     return streamingGenerator.streamGeneration(augmentedQuery);
                 });
     }
