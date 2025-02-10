@@ -57,6 +57,9 @@ subprojects {
             removeUnusedImports()
             licenseHeaderFile(rootProject.file("copyright.txt"))
             importOrder('java', 'javax|jakarta', '', 'org.springframework', 'ai.yda', '\\#')
+
+            targetExclude(rootProject.file("/integrations/spring/rags/rag-starter/src/main/java/ai/yda/framework/rag/autoconfigure/MetadataContextualQueryAugmenter.java"))
+
         }
     }
 

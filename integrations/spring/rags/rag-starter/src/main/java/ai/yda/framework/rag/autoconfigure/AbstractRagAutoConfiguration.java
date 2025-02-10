@@ -19,13 +19,12 @@
 */
 package ai.yda.framework.rag.autoconfigure;
 
-import org.springframework.ai.rag.generation.augmentation.ContextualQueryAugmenter;
 import org.springframework.context.annotation.Bean;
 
 public abstract class AbstractRagAutoConfiguration {
 
     @Bean
-    public ContextualQueryAugmenter contextualQueryAugmenter() {
-        return ContextualQueryAugmenter.builder().build();
+    public MetadataContextualQueryAugmenter contextualQueryAugmenter() {
+        return MetadataContextualQueryAugmenter.builder().build();
     }
 }
