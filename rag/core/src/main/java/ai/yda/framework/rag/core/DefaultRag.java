@@ -20,19 +20,17 @@
 package ai.yda.framework.rag.core;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
 import lombok.Getter;
 
 import org.springframework.ai.document.Document;
+import org.springframework.ai.rag.Query;
+import org.springframework.ai.rag.generation.augmentation.QueryAugmenter;
+import org.springframework.ai.rag.retrieval.search.DocumentRetriever;
 
-import ai.yda.framework.rag.core.augmenter.Augmenter;
 import ai.yda.framework.rag.core.generator.Generator;
-import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.model.RagResponse;
-import ai.yda.framework.rag.core.retriever.Retriever;
-import ai.yda.framework.rag.core.util.RequestTransformer;
 
 /**
  * Default implementation of the Retrieval-Augmented Generation (RAG) process.
@@ -41,90 +39,63 @@ import ai.yda.framework.rag.core.util.RequestTransformer;
  * @since 0.1.0
  */
 @Getter(AccessLevel.PROTECTED)
-public class DefaultRag implements Rag<RagRequest, RagResponse> {
+public class DefaultRag implements Rag<Query, RagResponse> {
+    /**
+     * The list of {@link DocumentRetriever} instances used to retrieve {@link Document}.
+     */
+    private final List<DocumentRetriever> retrievers;
 
     /**
-     * The list of {@link Retriever} instances used to retrieve {@link Document} based on the {@link RagRequest}.
+     * The list of {@link QueryAugmenter} instances used to modify or enhance the retrieved {@link Query}.
      */
-    private final List<Retriever<RagRequest, Document>> retrievers;
-
-    /**
-     * The list of {@link Augmenter} instances used to modify or enhance the retrieved {@link Document}.
-     */
-    private final List<Augmenter<RagRequest, Document>> augmenters;
+    private final List<QueryAugmenter> augmenters;
 
     /**
      * The {@link Generator} instance responsible for generating the final {@link RagResponse}.
      */
-    private final Generator<RagRequest, RagResponse> generator;
-
-    /**
-     * The list of {@link RequestTransformer} instances used to transform the incoming {@link RagRequest}.
-     */
-    private final List<RequestTransformer<RagRequest>> requestTransformers;
+    private final Generator<Query, RagResponse> generator;
 
     /**
      * Constructs a new {@link DefaultRag} instance.
      *
-     * @param retrievers          the list of {@link Retriever} objects to retrieve {@link Document} data.
-     * @param augmenters          the list of {@link Augmenter} objects to augment the retrieved Contexts.
-     * @param generator           the {@link Generator} used to generate the {@link RagResponse}.
-     * @param requestTransformers the list of {@link RequestTransformer} objects for transforming the
-     *                            {@link RagRequest}.
+     * @param retrievers the list of {@link DocumentRetriever} objects to retrieve {@link Document} data.
+     * @param augmenters the list of {@link QueryAugmenter} objects to augment the retrieved Contexts.
+     * @param generator  the {@link Generator} used to generate the {@link RagResponse}.
      */
     public DefaultRag(
-            final List<Retriever<RagRequest, Document>> retrievers,
-            final List<Augmenter<RagRequest, Document>> augmenters,
-            final Generator<RagRequest, RagResponse> generator,
-            final List<RequestTransformer<RagRequest>> requestTransformers) {
+            final List<DocumentRetriever> retrievers,
+            final List<QueryAugmenter> augmenters,
+            final Generator<Query, RagResponse> generator) {
         this.retrievers = retrievers;
         this.augmenters = augmenters;
         this.generator = generator;
-        this.requestTransformers = requestTransformers;
     }
 
     /**
      * Executes the Retrieval-Augmented Generation (RAG) process by:
      * <ul>
-     *     <li>Transforming the initial {@link RagRequest} using the provided {@link RequestTransformer} instances.</li>
-     *     <li>Retrieving relevant {@link Document} from the {@link Retriever} instances.</li>
-     *     <li>Augmenting the retrieved Contexts using the provided {@link Augmenter} instances.</li>
+     *     <li>Transforming the initial {@link Query}
+     *     <li>Retrieving relevant {@link Document} from the {@link DocumentRetriever} instances.</li>
+     *     <li>Augmenting the retrieved Contexts using the provided {@link QueryAugmenter} instances.</li>
      *     <li>
      *         Generating the final {@link RagResponse} using the {@link Generator}, based on the augmented Contexts.
      *     </li>
      * </ul>
      *
-     * @param request the {@link RagRequest} to process.
+     * @param query the {@link Query} to process.
      * @return the generated {@link RagResponse}.
      */
     @Override
-    public RagResponse doRag(final RagRequest request) {
-        //        var transformingRequest = request;
-        //        for (RequestTransformer<RagRequest> requestTransformer : requestTransformers) {
-        //            transformingRequest = requestTransformer.transformRequest(transformingRequest);
-        //        }
-        //        var transformedRequest = transformingRequest;
+    public RagResponse doRag(final Query query) {
         var documents = retrievers.parallelStream()
-                .flatMap(retriever -> retriever.retrieve(request).stream())
+                .flatMap(retriever -> retriever.retrieve(query).stream())
                 .toList();
-        //                .map(retriever -> retriever.retrieve(transformedRequest))
+        var augmentedQuery = query;
 
-        for (var augmenter : augmenters) {
-            documents = augmenter.augment(request, documents);
-            //            documents = augmenter.augment(transformedRequest, documents);
+        for (QueryAugmenter augmenter : augmenters) {
+            augmentedQuery = augmenter.augment(augmentedQuery, documents);
         }
-        return generator.generate(request, mergeDocuments(documents));
-        //        return generator.generate(transformedRequest, mergeContexts(documents));
-    }
 
-    /**
-     * Merges the Knowledge from the list of {@link Document} objects into a single string. Each piece of Knowledge is
-     * separated by a point character.
-     *
-     * @param documents the list of {@link Document} objects containing Knowledge data.
-     * @return a string that combines all pieces of Knowledge from the Contexts.
-     */
-    protected String mergeDocuments(final List<Document> documents) {
-        return documents.parallelStream().map(Document::getFormattedContent).collect(Collectors.joining("\n\n"));
+        return generator.generate(augmentedQuery);
     }
 }

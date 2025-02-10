@@ -21,18 +21,16 @@ package ai.yda.framework.rag.autoconfigure;
 
 import java.util.List;
 
-import org.springframework.ai.document.Document;
+import org.springframework.ai.rag.Query;
+import org.springframework.ai.rag.generation.augmentation.QueryAugmenter;
+import org.springframework.ai.rag.retrieval.search.DocumentRetriever;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 
 import ai.yda.framework.rag.core.DefaultStreamingRag;
-import ai.yda.framework.rag.core.augmenter.Augmenter;
 import ai.yda.framework.rag.core.generator.StreamingGenerator;
-import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.model.RagResponse;
-import ai.yda.framework.rag.core.retriever.Retriever;
-import ai.yda.framework.rag.core.util.StreamingRequestTransformer;
 
 /**
  * Autoconfiguration class for setting up a {@link DefaultStreamingRag} bean in the RAG framework.
@@ -42,7 +40,7 @@ import ai.yda.framework.rag.core.util.StreamingRequestTransformer;
  */
 @AutoConfiguration
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.REACTIVE)
-public class StreamingRagAutoConfiguration {
+public class StreamingRagAutoConfiguration extends AbstractRagAutoConfiguration {
 
     /**
      * Default constructor for {@link StreamingRagAutoConfiguration}.
@@ -52,21 +50,17 @@ public class StreamingRagAutoConfiguration {
     /**
      * Creates and configures a {@link DefaultStreamingRag} bean.
      *
-     * @param retrievers                   the list of {@link Retriever} beans for retrieving Context based on the
-     *                                     Request.
-     * @param augmenters                   the list of {@link Augmenter} beans for enhancing the retrieved Context.
-     * @param streamingGenerator           the {@link StreamingGenerator} bean for generating Responses in a streaming
-     *                                     manner.
-     * @param streamingRequestTransformers the list of {@link StreamingRequestTransformer} beans for transforming
-     *                                     Requests before processing.
+     * @param retrievers         the list of {@link DocumentRetriever} beans for retrieving Context based on the
+     *                           Request.
+     * @param augmenters         the list of {@link QueryAugmenter} beans for enhancing the retrieved Context.
+     * @param streamingGenerator the {@link StreamingGenerator} bean for generating Responses in a streaming
      * @return a configured {@link DefaultStreamingRag} instance.
      */
     @Bean
     public DefaultStreamingRag defaultStreamingRag(
-            final List<Retriever<RagRequest, Document>> retrievers,
-            final List<Augmenter<RagRequest, Document>> augmenters,
-            final StreamingGenerator<RagRequest, RagResponse> streamingGenerator,
-            final List<StreamingRequestTransformer<RagRequest>> streamingRequestTransformers) {
-        return new DefaultStreamingRag(retrievers, augmenters, streamingGenerator, streamingRequestTransformers);
+            final List<DocumentRetriever> retrievers,
+            final List<QueryAugmenter> augmenters,
+            final StreamingGenerator<Query, RagResponse> streamingGenerator) {
+        return new DefaultStreamingRag(retrievers, augmenters, streamingGenerator);
     }
 }

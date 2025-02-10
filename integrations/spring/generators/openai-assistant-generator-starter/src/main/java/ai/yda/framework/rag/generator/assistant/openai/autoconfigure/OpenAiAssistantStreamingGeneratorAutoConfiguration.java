@@ -26,7 +26,6 @@ import org.springframework.context.annotation.Bean;
 
 import ai.yda.framework.rag.generator.assistant.openai.OpenAiAssistantStreamingGenerator;
 import ai.yda.framework.rag.generator.assistant.openai.service.AzureOpenAiAssistantService;
-import ai.yda.framework.rag.generator.assistant.openai.util.StreamingContextResolver;
 import ai.yda.framework.session.core.ReactiveSessionProvider;
 
 /**
@@ -62,24 +61,5 @@ public class OpenAiAssistantStreamingGeneratorAutoConfiguration {
             final OpenAiAssistantGeneratorProperties assistantGeneratorProperties) {
         return new OpenAiAssistantStreamingGenerator(
                 assistantService, reactiveSessionProvider, assistantGeneratorProperties.getAssistantId());
-    }
-
-    /**
-     * Creates and configures a {@link StreamingContextResolver} bean.
-     *
-     * @param assistantService             the {@link AzureOpenAiAssistantService} used for interacting with OpenAI.
-     * @param reactiveSessionProvider      the {@link ReactiveSessionProvider} responsible for managing User Sessions.
-     * @param assistantGeneratorProperties the properties for configuring the Context Resolver.
-     * @return a configured {@link StreamingContextResolver} bean.
-     */
-    @Bean
-    public StreamingContextResolver streamingContextResolver(
-            final AzureOpenAiAssistantService assistantService,
-            final ReactiveSessionProvider reactiveSessionProvider,
-            final OpenAiAssistantGeneratorProperties assistantGeneratorProperties) {
-        return new StreamingContextResolver(
-                assistantService,
-                reactiveSessionProvider,
-                assistantGeneratorProperties.getContextResolverAssistantId());
     }
 }

@@ -26,7 +26,6 @@ import org.springframework.context.annotation.Bean;
 
 import ai.yda.framework.rag.generator.assistant.openai.OpenAiAssistantGenerator;
 import ai.yda.framework.rag.generator.assistant.openai.service.AzureOpenAiAssistantService;
-import ai.yda.framework.rag.generator.assistant.openai.util.ContextResolver;
 import ai.yda.framework.session.core.SessionProvider;
 
 /**
@@ -63,22 +62,5 @@ public class OpenAiAssistantGeneratorAutoConfiguration {
             final OpenAiAssistantGeneratorProperties assistantGeneratorProperties) {
         return new OpenAiAssistantGenerator(
                 assistantService, sessionProvider, assistantGeneratorProperties.getAssistantId());
-    }
-
-    /**
-     * Creates and configures a {@link ContextResolver} bean.
-     *
-     * @param assistantService             the {@link AzureOpenAiAssistantService} used for interacting with OpenAI.
-     * @param sessionProvider              the {@link SessionProvider} responsible for managing User Sessions.
-     * @param assistantGeneratorProperties the properties for configuring the Context Resolver.
-     * @return a configured {@link ContextResolver} bean.
-     */
-    @Bean
-    public ContextResolver contextResolver(
-            final AzureOpenAiAssistantService assistantService,
-            final SessionProvider sessionProvider,
-            final OpenAiAssistantGeneratorProperties assistantGeneratorProperties) {
-        return new ContextResolver(
-                assistantService, sessionProvider, assistantGeneratorProperties.getContextResolverAssistantId());
     }
 }

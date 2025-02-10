@@ -17,24 +17,15 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.rag.core.util;
+package ai.yda.framework.rag.autoconfigure;
 
-import ai.yda.framework.rag.core.model.RagRequest;
+import org.springframework.ai.rag.generation.augmentation.ContextualQueryAugmenter;
+import org.springframework.context.annotation.Bean;
 
-/**
- * Defines a contract for transforming a {@link REQUEST}.
- *
- * @param <REQUEST> the generic type of the request that extends {@link RagRequest}.
- * @author Nikita Litvinov
- * @since 0.2.0
- */
-public interface RequestTransformer<REQUEST extends RagRequest> {
+public abstract class AbstractRagAutoConfiguration {
 
-    /**
-     * Transforms the given {@link REQUEST} and returns the transformed version.
-     *
-     * @param request the request to transform.
-     * @return the transformed request.
-     */
-    REQUEST transformRequest(REQUEST request);
+    @Bean
+    public ContextualQueryAugmenter contextualQueryAugmenter() {
+        return ContextualQueryAugmenter.builder().build();
+    }
 }

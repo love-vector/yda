@@ -19,13 +19,13 @@
 */
 package ai.yda.framework.assistant.rag.autoconfigure;
 
+import org.springframework.ai.rag.Query;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 
 import ai.yda.framework.core.assistant.StreamingRagAssistant;
 import ai.yda.framework.rag.core.StreamingRag;
-import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.model.RagResponse;
 
 /**
@@ -51,7 +51,7 @@ public class StreamingRagAssistantAutoConfiguration {
      * @return a configured {@link StreamingRagAssistant} bean.
      */
     @Bean
-    public StreamingRagAssistant streamingAssistant(final StreamingRag<RagRequest, RagResponse> streamingRag) {
+    public StreamingRagAssistant streamingAssistant(final StreamingRag<Query, RagResponse> streamingRag) {
         return new StreamingRagAssistant(streamingRag);
     }
 }

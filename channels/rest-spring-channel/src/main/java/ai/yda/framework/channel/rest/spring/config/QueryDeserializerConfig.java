@@ -22,32 +22,33 @@ package ai.yda.framework.channel.rest.spring.config;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
+import org.springframework.ai.rag.Query;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import ai.yda.framework.channel.shared.RagRequestDeserializer;
-import ai.yda.framework.rag.core.model.RagRequest;
+import ai.yda.framework.channel.shared.QueryDeserializer;
 
 /**
- * Configuration class responsible for setting up a deserialization of {@link RagRequest} objects.
+ * Custom deserializer for {@link Query} objects. It dynamically identifies all subclasses of {@link Query}
+ * based on the available fields in the JSON payload.
  *
  * @author Nikita Litvinov
  * @since 0.2.0
  */
 @Configuration
-public class RagRequestDeserializerConfig {
+public class QueryDeserializerConfig {
 
     /**
-     * Registers a custom deserializer for {@link RagRequest} using a {@link SimpleModule}.
+     * Registers a custom deserializer for {@link Query} using a {@link SimpleModule}.
      *
      * @param applicationContext the application context used to get required details.
-     * @return the {@link Module} containing the custom deserializer for {@link RagRequest}.
+     * @return the {@link Module} containing the custom deserializer for {@link Query}.
      */
     @Bean
     public Module openAiRequestModule(final ApplicationContext applicationContext) {
         var module = new SimpleModule();
-        module.addDeserializer(RagRequest.class, new RagRequestDeserializer(applicationContext));
+        module.addDeserializer(Query.class, new QueryDeserializer(applicationContext));
         return module;
     }
 }

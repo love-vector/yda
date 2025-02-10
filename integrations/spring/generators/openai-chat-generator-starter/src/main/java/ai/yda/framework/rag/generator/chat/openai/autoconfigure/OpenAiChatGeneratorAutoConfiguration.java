@@ -20,11 +20,11 @@
 package ai.yda.framework.rag.generator.chat.openai.autoconfigure;
 
 import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.ai.rag.Query;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
 
 import ai.yda.framework.rag.core.generator.Generator;
-import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.model.RagResponse;
 import ai.yda.framework.rag.generator.chat.openai.OpenAiChatGenerator;
 
@@ -59,7 +59,7 @@ public class OpenAiChatGeneratorAutoConfiguration {
      * @return a {@link Generator} instance that generates Responses using the OpenAI Chat model.
      */
     @Bean
-    public Generator<RagRequest, RagResponse> openAiGenerator(final OpenAiChatModel chatModel) {
+    public Generator<Query, RagResponse> openAiGenerator(final OpenAiChatModel chatModel) {
         return new OpenAiChatGenerator(chatModel);
     }
 }

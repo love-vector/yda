@@ -27,11 +27,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.model.function.FunctionCallback;
+import org.springframework.ai.rag.Query;
+import org.springframework.ai.rag.retrieval.search.DocumentRetriever;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.lang.NonNull;
 
-import ai.yda.framework.rag.core.model.RagRequest;
-import ai.yda.framework.rag.core.retriever.Retriever;
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentIdDTO;
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentIdsDTO;
 import ai.yda.framework.rag.retriever.google_drive.port.DocumentContentPort;
@@ -40,7 +40,7 @@ import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
 
 /**
  * The {@code GoogleDriveRetriever} class is a Retriever implementation that interacts with Google Drive
- * to retrieve contextual data for a given {@link RagRequest}. It uses the {@link GoogleDriveService}
+ * to retrieve contextual data for a given {@link Query}. It uses the {@link GoogleDriveService}
  * to perform operations on Google Drive.
  *
  * <p>This retriever is designed to process and fetch documents or data stored in Google Drive
@@ -49,7 +49,7 @@ import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
  * <p>Usage:
  * - Instantiate this class with the desired `topK` (number of results to retrieve) and a
  * configured {@link GoogleDriveService}.
- * - Use the {@link #retrieve(RagRequest)} method to perform the data retrieval operation.
+ * - Use the {@link #retrieve(Query)} method to perform the data retrieval operation.
  *
  * <p>Dependencies:
  * - Requires a properly configured {@link GoogleDriveService} instance.
@@ -58,7 +58,7 @@ import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
  * @since 0.2.0
  */
 @Slf4j
-public class GoogleDriveRetriever implements Retriever<RagRequest, Document> {
+public class GoogleDriveRetriever implements DocumentRetriever {
 
     private static final String RETRIEVAL_SYSTEM_INSTRUCTION =
             """
@@ -114,7 +114,7 @@ public class GoogleDriveRetriever implements Retriever<RagRequest, Document> {
     }
 
     @Override
-    public List<Document> retrieve(final RagRequest request) {
+    public @NonNull List<Document> retrieve(@NonNull final Query query) {
         var getAllDocumentsFunction = FunctionCallback.builder()
                 .function("getAllDocuments", documentMetadataPort::getAllFileSummaries)
                 .description("Retrieve all documents to enable filtering based on summaries")
@@ -127,7 +127,7 @@ public class GoogleDriveRetriever implements Retriever<RagRequest, Document> {
 
         var documentContentIds = chatClient
                 .prompt()
-                .user(request.getQuery())
+                .user(query.text())
                 .system(RETRIEVAL_SYSTEM_INSTRUCTION)
                 .functions(getAllDocumentsFunction, getDocumentChunksFunction)
                 .call()
