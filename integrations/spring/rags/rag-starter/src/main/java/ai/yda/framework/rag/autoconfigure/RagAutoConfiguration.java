@@ -45,7 +45,7 @@ public class RagAutoConfiguration {
 
     @Bean
     public ContextualQueryAugmenter contextualQueryAugmenter() {
-        return ContextualQueryAugmenter.builder().allowEmptyContext(true).build();
+        return ContextualQueryAugmenter.builder().allowEmptyContext(false).build();
     }
 
     /**
