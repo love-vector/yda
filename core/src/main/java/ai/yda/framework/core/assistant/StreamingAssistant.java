@@ -21,6 +21,8 @@ package ai.yda.framework.core.assistant;
 
 import reactor.core.publisher.Flux;
 
+import org.springframework.ai.rag.Query;
+
 /**
  * Represents an Assistant that helps process Requests in a streaming manner by utilizing the Retrieval-Augmented
  * Generation (RAG) system.
@@ -35,7 +37,7 @@ import reactor.core.publisher.Flux;
  * @author Nikita Litvinov
  * @since 0.1.0
  */
-public interface StreamingAssistant<QUERY, RESPONSE> {
+public interface StreamingAssistant<QUERY extends Query, RESPONSE> {
 
     /**
      * Processes the Request and returns the corresponding Response in a streaming manner.
