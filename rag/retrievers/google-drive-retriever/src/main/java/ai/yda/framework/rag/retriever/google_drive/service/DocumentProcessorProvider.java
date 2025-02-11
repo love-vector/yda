@@ -26,24 +26,27 @@ import java.util.List;
 import org.springframework.lang.NonNull;
 
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentDTO;
-import ai.yda.framework.rag.retriever.google_drive.service.processor.DocumentProcessor;
-import ai.yda.framework.rag.retriever.google_drive.service.processor.DocumentType;
-import ai.yda.framework.rag.retriever.google_drive.service.processor.ExcelDocumentProcessor;
-import ai.yda.framework.rag.retriever.google_drive.service.processor.TikaDocumentProcessor;
+import ai.yda.framework.rag.retriever.google_drive.dto.DocumentMetadataDTO;
+import ai.yda.framework.rag.retriever.google_drive.service.processor.*;
 
 public class DocumentProcessorProvider {
     private final ExcelDocumentProcessor excelProcessor;
     private final TikaDocumentProcessor tikaProcessor;
+    private final ImageDocumentProcessor imageProcessor;
 
     public DocumentProcessorProvider(
-            final @NonNull ExcelDocumentProcessor excelProcessor, final @NonNull TikaDocumentProcessor tikaProcessor) {
+            final @NonNull ExcelDocumentProcessor excelProcessor,
+            final @NonNull TikaDocumentProcessor tikaProcessor,
+            final @NonNull ImageDocumentProcessor imageProcessor) {
         this.excelProcessor = excelProcessor;
         this.tikaProcessor = tikaProcessor;
+        this.imageProcessor = imageProcessor;
     }
 
     public List<DocumentContentDTO> processDocument(
-            final String extension, final InputStream inputStream, final String documentMetadataId) throws IOException {
-        return getProcessor(extension).processDocument(inputStream, documentMetadataId);
+            final String extension, final InputStream inputStream, final DocumentMetadataDTO metadataDTO)
+            throws IOException {
+        return getProcessor(extension).processDocument(inputStream, metadataDTO);
     }
 
     private DocumentProcessor getProcessor(final String extension) {
@@ -51,6 +54,7 @@ public class DocumentProcessorProvider {
         return switch (documentType) {
             case EXCEL -> excelProcessor;
             case PDF, WORD, POWERPOINT, HTML -> tikaProcessor;
+            case PNG, JPEG -> imageProcessor;
         };
     }
 }

@@ -30,9 +30,11 @@ import ai.yda.framework.rag.retriever.google_drive.exception.UnsupportedExtensio
 public enum DocumentType {
     EXCEL("xls", "xlsx"),
     PDF("pdf"),
-    WORD("doc", "docx"),
+    WORD("doc", "docx", "odt"),
     POWERPOINT("ppt", "pptx"),
-    HTML("html");
+    HTML("html"),
+    PNG("png"),
+    JPEG("jpeg", "jpg");
 
     private final List<String> extensions;
 

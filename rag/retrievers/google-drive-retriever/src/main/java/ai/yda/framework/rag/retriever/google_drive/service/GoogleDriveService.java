@@ -119,16 +119,11 @@ public class GoogleDriveService {
 
             if (!documentMetadataDTO.isFolder()) {
                 try (var inputStream = driveService.files().get(file.getId()).executeMediaAsInputStream()) {
-
                     var contentEntities = documentProcessor.processDocument(
-                            file.getFileExtension(), inputStream, documentMetadataDTO.getDocumentId());
-
+                            file.getFileExtension(), inputStream, documentMetadataDTO);
                     documentMetadataDTO.setDocumentContents(contentEntities);
                     documentMetadataDTO.setAiDescription(
                             documentAiDescriptionService.generateAiDescription(documentMetadataDTO));
-                    documentMetadataDTO
-                            .getDocumentContents()
-                            .forEach(chunk -> chunk.setChunkName(documentMetadataDTO.getName()));
                 }
             }
             documentMetadataPort.save(documentMetadataDTO);
