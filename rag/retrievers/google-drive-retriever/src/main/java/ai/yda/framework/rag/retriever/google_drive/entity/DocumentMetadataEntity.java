@@ -54,8 +54,8 @@ public class DocumentMetadataEntity {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "summary")
-    private String summary;
+    @Column(name = "ai_description")
+    private String aiDescription;
 
     @Column(name = "webViewLink")
     private String webViewLink;

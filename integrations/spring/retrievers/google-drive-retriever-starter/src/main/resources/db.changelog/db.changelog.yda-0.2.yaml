@@ -22,7 +22,7 @@ databaseChangeLog:
                   name: description
                   type: text
               - column:
-                  name: summary
+                  name: ai_description
                   type: text
               - column:
                   name: web_view_link

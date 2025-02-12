@@ -22,8 +22,8 @@ package ai.yda.framework.rag.retriever.google_drive.port;
 import java.util.List;
 import java.util.Optional;
 
+import ai.yda.framework.rag.retriever.google_drive.dto.DocumentAiDescriptionDTO;
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentMetadataDTO;
-import ai.yda.framework.rag.retriever.google_drive.dto.DocumentSummaryDTO;
 
 public interface DocumentMetadataPort {
     Optional<DocumentMetadataDTO> findById(String documentId);
@@ -32,5 +32,5 @@ public interface DocumentMetadataPort {
 
     void deleteAll();
 
-    List<DocumentSummaryDTO> getAllFileSummaries();
+    List<DocumentAiDescriptionDTO> getAllFilesAiDescription();
 }

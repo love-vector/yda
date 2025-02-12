@@ -65,7 +65,7 @@ public class GoogleDriveService {
 
     private final DocumentMetadataMapper documentMetadataMapper;
 
-    private final DocumentSummaryService documentSummaryService;
+    private final DocumentAiDescriptionService documentAiDescriptionService;
 
     /**
      * Constructs a new instance of {@link GoogleDriveService}.
@@ -82,7 +82,7 @@ public class GoogleDriveService {
             final @NonNull DocumentContentPort documentContentPort,
             final @NonNull DocumentProcessorProvider documentProcessor,
             final @NonNull DocumentMetadataMapper documentMetadataMapper,
-            final @NonNull DocumentSummaryService documentSummaryService)
+            final @NonNull DocumentAiDescriptionService documentAiDescriptionService)
             throws IOException, GeneralSecurityException {
 
         this.documentMetadataPort = documentMetadataPort;
@@ -90,7 +90,7 @@ public class GoogleDriveService {
         this.documentProcessor = documentProcessor;
         this.documentMetadataMapper = documentMetadataMapper;
         this.driveId = driveId;
-        this.documentSummaryService = documentSummaryService;
+        this.documentAiDescriptionService = documentAiDescriptionService;
 
         var credentials =
                 GoogleCredentials.fromStream(credentialsStream).createScoped(Collections.singleton(DriveScopes.DRIVE));
@@ -124,7 +124,11 @@ public class GoogleDriveService {
                             file.getFileExtension(), inputStream, documentMetadataDTO.getDocumentId());
 
                     documentMetadataDTO.setDocumentContents(contentEntities);
-                    documentMetadataDTO.setSummary(documentSummaryService.summarizeDocument(documentMetadataDTO));
+                    documentMetadataDTO.setAiDescription(
+                            documentAiDescriptionService.generateAiDescription(documentMetadataDTO));
+                    documentMetadataDTO
+                            .getDocumentContents()
+                            .forEach(chunk -> chunk.setChunkName(documentMetadataDTO.getName()));
                 }
             }
             documentMetadataPort.save(documentMetadataDTO);

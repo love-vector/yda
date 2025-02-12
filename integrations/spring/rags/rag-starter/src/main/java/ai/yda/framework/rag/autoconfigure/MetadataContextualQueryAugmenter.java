@@ -1,23 +1,31 @@
 /*
- * Copyright 2023-2024 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * YDA - Open-Source Java AI Assistant.
+ * Copyright (C) 2024 Love Vector OÜ <https://vector-inc.dev/>
 
+ * This file is part of YDA.
+
+ * YDA is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+
+ * YDA is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
+*/
 package ai.yda.framework.rag.autoconfigure;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.rag.Query;
@@ -25,10 +33,6 @@ import org.springframework.ai.rag.generation.augmentation.QueryAugmenter;
 import org.springframework.ai.util.PromptAssert;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Augments the user query with contextual data from the content of the provided
@@ -49,7 +53,8 @@ public final class MetadataContextualQueryAugmenter implements QueryAugmenter {
 
     private static final Logger logger = LoggerFactory.getLogger(MetadataContextualQueryAugmenter.class);
 
-    private static final PromptTemplate DEFAULT_PROMPT_TEMPLATE = new PromptTemplate("""
+    private static final PromptTemplate DEFAULT_PROMPT_TEMPLATE = new PromptTemplate(
+            """
             Context information is below.
 
             ---------------------
@@ -68,7 +73,8 @@ public final class MetadataContextualQueryAugmenter implements QueryAugmenter {
             Answer:
             """);
 
-    private static final PromptTemplate DEFAULT_EMPTY_CONTEXT_PROMPT_TEMPLATE = new PromptTemplate("""
+    private static final PromptTemplate DEFAULT_EMPTY_CONTEXT_PROMPT_TEMPLATE = new PromptTemplate(
+            """
             The user query is outside your knowledge base.
             Politely inform the user that you can't answer it.
             """);
@@ -81,11 +87,13 @@ public final class MetadataContextualQueryAugmenter implements QueryAugmenter {
 
     private final boolean allowEmptyContext;
 
-    public MetadataContextualQueryAugmenter(@Nullable PromptTemplate promptTemplate,
-                                            @Nullable PromptTemplate emptyContextPromptTemplate, @Nullable Boolean allowEmptyContext) {
+    public MetadataContextualQueryAugmenter(
+            @Nullable PromptTemplate promptTemplate,
+            @Nullable PromptTemplate emptyContextPromptTemplate,
+            @Nullable Boolean allowEmptyContext) {
         this.promptTemplate = promptTemplate != null ? promptTemplate : DEFAULT_PROMPT_TEMPLATE;
-        this.emptyContextPromptTemplate = emptyContextPromptTemplate != null ? emptyContextPromptTemplate
-                : DEFAULT_EMPTY_CONTEXT_PROMPT_TEMPLATE;
+        this.emptyContextPromptTemplate =
+                emptyContextPromptTemplate != null ? emptyContextPromptTemplate : DEFAULT_EMPTY_CONTEXT_PROMPT_TEMPLATE;
         this.allowEmptyContext = allowEmptyContext != null ? allowEmptyContext : DEFAULT_ALLOW_EMPTY_CONTEXT;
         PromptAssert.templateHasRequiredPlaceholders(this.promptTemplate, "query", "context");
     }
@@ -109,9 +117,9 @@ public final class MetadataContextualQueryAugmenter implements QueryAugmenter {
                 .map(Document::getFormattedContent)
                 .collect(Collectors.joining(System.lineSeparator()));
 
-        logger.warn("This is a temporary replacement for the original class MetadataContextualQueryAugmenter," +
-                " which adds metadata to the context. It should be removed as soon as Spring AI introduces the " +
-                "necessary changes.");
+        logger.warn("This is a temporary replacement for the original class MetadataContextualQueryAugmenter,"
+                + " which adds metadata to the context. It should be removed as soon as Spring AI introduces the "
+                + "necessary changes.");
 
         // 2. Define prompt parameters.
         Map<String, Object> promptParameters = Map.of("query", query.text(), "context", documentContext);
@@ -157,10 +165,8 @@ public final class MetadataContextualQueryAugmenter implements QueryAugmenter {
         }
 
         public MetadataContextualQueryAugmenter build() {
-            return new MetadataContextualQueryAugmenter(this.promptTemplate, this.emptyContextPromptTemplate,
-                    this.allowEmptyContext);
+            return new MetadataContextualQueryAugmenter(
+                    this.promptTemplate, this.emptyContextPromptTemplate, this.allowEmptyContext);
         }
-
     }
-
 }

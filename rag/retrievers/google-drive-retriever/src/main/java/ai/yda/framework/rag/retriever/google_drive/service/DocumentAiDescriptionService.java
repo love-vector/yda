@@ -33,39 +33,33 @@ import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentDTO;
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentMetadataDTO;
 
 @Slf4j
-public class DocumentSummaryService {
+public class DocumentAiDescriptionService {
 
-    private static final String DOCUMENT_SUMMARY_INSTRUCTION =
+    private static final String DOCUMENT_AI_DESCRIPTION_INSTRUCTION =
             """
-                    Provide a summary of the attached document by highlighting its key points.
-                    Focus on the main arguments, supporting evidence, and conclusions drawn within the document.
-                    The summary should be concise yet comprehensive, capturing the essence of the document's content.
-                    For each document, ensure the following details are included at the beginning of the summary:
-                    - File Name: Include the file name or mention 'File name is missing' if unavailable.
-                    - Document Description: Include the document description or mention 'Description is missing' if unavailable.
+                    Generate a concise file description for function calling.
+                    Provide only the main topic and purpose of the file in a single sentence.
+                    excluding any file name references or additional details.
+                    The description must always follow this exact format
 
-                    Document Content:
-                    {context_str}
-
-                    Output Format:
-                    - Present the summary in paragraph form, using bullet points if necessary to delineate distinct ideas or sections.
+                    The document provides: {context_str}
                     """;
 
     private final ChatModel chatModel;
 
-    public DocumentSummaryService(final ChatModel chatModel) {
+    public DocumentAiDescriptionService(final ChatModel chatModel) {
         this.chatModel = chatModel;
     }
 
-    public String summarizeDocument(final DocumentMetadataDTO metadataDocument) {
+    public String generateAiDescription(final DocumentMetadataDTO metadataDocument) {
         var transformDocuments = transformDocument(metadataDocument);
         var documentsEnricher = new SummaryMetadataEnricher(
                 chatModel,
                 List.of(SummaryMetadataEnricher.SummaryType.CURRENT),
-                DOCUMENT_SUMMARY_INSTRUCTION,
+                DOCUMENT_AI_DESCRIPTION_INSTRUCTION,
                 MetadataMode.ALL);
-        var documentSummary = documentsEnricher.apply(List.of(transformDocuments));
-        return extractSummary(documentSummary.get(0));
+        var documentAiDescription = documentsEnricher.apply(List.of(transformDocuments));
+        return extractAiDescription(documentAiDescription.get(0));
     }
 
     private Document transformDocument(final DocumentMetadataDTO metadataDocument) {
@@ -80,7 +74,7 @@ public class DocumentSummaryService {
                 .build();
     }
 
-    private String extractSummary(final Document document) {
+    private String extractAiDescription(final Document document) {
         return document.getMetadata().getOrDefault("section_summary", "").toString();
     }
 }

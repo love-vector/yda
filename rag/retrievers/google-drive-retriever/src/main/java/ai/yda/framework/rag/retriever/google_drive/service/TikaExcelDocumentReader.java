@@ -71,7 +71,7 @@ public class TikaExcelDocumentReader extends TikaDocumentReader {
 
     private Document toDocument(String sheetName, String docText) {
         return new Document(
-                this.textFormatter.format(Objects.requireNonNullElse(docText, "")),
+                (Objects.requireNonNullElse(docText, "")),
                 Map.of(DOCUMENT_METADATA_NAME, sheetName, METADATA_SOURCE, resourceName()));
     }
 
