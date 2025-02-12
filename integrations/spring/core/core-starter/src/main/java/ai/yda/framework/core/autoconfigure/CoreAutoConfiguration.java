@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.rag.core.autoconfigure;
+package ai.yda.framework.core.autoconfigure;
 
 import java.time.Duration;
 
@@ -31,7 +31,7 @@ import org.springframework.web.client.RestClient;
 
 @AutoConfiguration
 @Slf4j
-public class OpenAiCoreAutoConfiguration {
+public class CoreAutoConfiguration {
 
     // TODO: delete this configuration as soon as Spring AI add timeout configuration
     @Bean

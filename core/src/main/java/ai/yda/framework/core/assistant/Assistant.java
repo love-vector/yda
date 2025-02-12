@@ -19,6 +19,8 @@
 */
 package ai.yda.framework.core.assistant;
 
+import org.springframework.ai.rag.Query;
+
 /**
  * Represents an Assistant that helps process Requests by utilizing the Retrieval-Augmented Generation (RAG) system.
  * <p>
@@ -32,7 +34,7 @@ package ai.yda.framework.core.assistant;
  * @author Nikita Litvinov
  * @since 0.1.0
  */
-public interface Assistant<QUERY, RESPONSE> {
+public interface Assistant<QUERY extends Query, RESPONSE> {
 
     /**
      * Processes the given Request and returns a corresponding Response.

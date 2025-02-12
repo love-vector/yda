@@ -46,12 +46,10 @@ import ai.yda.framework.rag.core.model.RagResponse;
 @RequestMapping(
         path = "${" + RestSpringStreamingProperties.CONFIG_PREFIX + ".endpoint-relative-path:"
                 + RestSpringStreamingProperties.DEFAULT_ENDPOINT_RELATIVE_PATH + "}")
-public class RestStreamingChannel implements StreamingChannel<Query, RagResponse> {
-
-    private final StreamingAssistant<Query, RagResponse> assistant;
+public class RestStreamingChannel extends StreamingChannel<Query, RagResponse> {
 
     public RestStreamingChannel(final StreamingAssistant<Query, RagResponse> assistant) {
-        this.assistant = assistant;
+        super(assistant);
     }
 
     /**
@@ -65,6 +63,6 @@ public class RestStreamingChannel implements StreamingChannel<Query, RagResponse
     @Override
     @PostMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<RagResponse> processRequest(@RequestBody @Validated final Query query) {
-        return assistant.streamAssistance(query);
+        return super.processRequest(query);
     }
 }

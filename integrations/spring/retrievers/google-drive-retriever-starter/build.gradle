@@ -1,6 +1,6 @@
 dependencies {
     api project(':google-drive-retriever')
-    implementation project(':openai-core-starter')
+    implementation project(':core-starter')
 
     implementation 'org.springframework.ai:spring-ai-openai'
     implementation 'org.springframework.ai:spring-ai-spring-boot-autoconfigure'

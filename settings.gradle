@@ -71,8 +71,8 @@ include 'rag-starter'
 project(':rag-starter').projectDir = file('integrations/spring/rags/rag-starter')
 
 //Core
-include 'openai-core-starter'
-project(':openai-core-starter').projectDir = file('integrations/spring/core/openai-core-starter')
+include 'core-starter'
+project(':core-starter').projectDir = file('integrations/spring/core/core-starter')
 
 // RAG - Retrievers
 
