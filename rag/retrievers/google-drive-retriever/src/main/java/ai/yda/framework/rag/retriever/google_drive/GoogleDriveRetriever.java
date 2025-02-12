@@ -69,7 +69,7 @@ public class GoogleDriveRetriever implements DocumentRetriever {
                     2. Operational Guidelines
                     Follow these steps sequentially and do not skip or combine steps:
                     2.1 Obtain all files along with their AI description.
-                    2.2 Select ONLY IDs of files with AI description relevant to the user's query. If no suitable files are found, return an empty list [].
+                    2.2 Select ONLY IDs of files with ai description relevant to the user's query. If no suitable files are found, return an empty list [].
                     2.3 Using the IDs of the files deemed relevant, retrieve the corresponding document chunks.
                     2.4 Evaluate the relevance of each chunk based on its content and the user's query. Strictly match the query context to the chunk's content and exclude loosely related chunks.
                     2.5 Identify IDs of chunks that are most relevant to the user's query. If no suitable chunks are found, return an empty list [].
@@ -117,7 +117,7 @@ public class GoogleDriveRetriever implements DocumentRetriever {
     public @NonNull List<Document> retrieve(@NonNull final Query query) {
         var getAllDocumentsFunction = FunctionCallback.builder()
                 .function("getAllDocuments", documentMetadataPort::getAllFilesAiDescription)
-                .description("Retrieve all documents to enable filtering based on AI description")
+                .description("Retrieves a list of all documents along with their descriptions")
                 .build();
         var getDocumentChunksFunction = FunctionCallback.builder()
                 .function("getFilesChunks", documentContentPort::getDocumentsContents)
