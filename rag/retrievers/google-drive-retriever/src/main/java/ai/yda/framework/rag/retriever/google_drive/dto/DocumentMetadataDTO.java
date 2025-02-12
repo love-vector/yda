@@ -40,7 +40,7 @@ public class DocumentMetadataDTO {
     private String documentId;
     private String name;
     private String description;
-    private String summary;
+    private String aiDescription;
     private String webViewLink;
     private OffsetDateTime createdAt;
     private OffsetDateTime modifiedAt;

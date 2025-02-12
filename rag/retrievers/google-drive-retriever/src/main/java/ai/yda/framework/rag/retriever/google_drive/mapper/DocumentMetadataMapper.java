@@ -26,8 +26,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
+import ai.yda.framework.rag.retriever.google_drive.dto.DocumentAiDescriptionDTO;
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentMetadataDTO;
-import ai.yda.framework.rag.retriever.google_drive.dto.DocumentSummaryDTO;
 import ai.yda.framework.rag.retriever.google_drive.entity.DocumentMetadataEntity;
 
 @Mapper
@@ -71,5 +71,5 @@ public interface DocumentMetadataMapper {
         return (parents != null && !parents.isEmpty()) ? parents.get(0) : null;
     }
 
-    DocumentSummaryDTO toDto(DocumentMetadataEntity documentMetadataEntity);
+    DocumentAiDescriptionDTO toDto(DocumentMetadataEntity documentMetadataEntity);
 }

@@ -16,8 +16,13 @@
 
 package ai.yda.framework.rag.autoconfigure;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.rag.Query;
@@ -25,10 +30,6 @@ import org.springframework.ai.rag.generation.augmentation.QueryAugmenter;
 import org.springframework.ai.util.PromptAssert;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Augments the user query with contextual data from the content of the provided
@@ -49,7 +50,8 @@ public final class MetadataContextualQueryAugmenter implements QueryAugmenter {
 
     private static final Logger logger = LoggerFactory.getLogger(MetadataContextualQueryAugmenter.class);
 
-    private static final PromptTemplate DEFAULT_PROMPT_TEMPLATE = new PromptTemplate("""
+    private static final PromptTemplate DEFAULT_PROMPT_TEMPLATE = new PromptTemplate(
+            """
             Context information is below.
 
             ---------------------
@@ -68,7 +70,8 @@ public final class MetadataContextualQueryAugmenter implements QueryAugmenter {
             Answer:
             """);
 
-    private static final PromptTemplate DEFAULT_EMPTY_CONTEXT_PROMPT_TEMPLATE = new PromptTemplate("""
+    private static final PromptTemplate DEFAULT_EMPTY_CONTEXT_PROMPT_TEMPLATE = new PromptTemplate(
+            """
             The user query is outside your knowledge base.
             Politely inform the user that you can't answer it.
             """);
@@ -81,11 +84,13 @@ public final class MetadataContextualQueryAugmenter implements QueryAugmenter {
 
     private final boolean allowEmptyContext;
 
-    public MetadataContextualQueryAugmenter(@Nullable PromptTemplate promptTemplate,
-                                            @Nullable PromptTemplate emptyContextPromptTemplate, @Nullable Boolean allowEmptyContext) {
+    public MetadataContextualQueryAugmenter(
+            @Nullable PromptTemplate promptTemplate,
+            @Nullable PromptTemplate emptyContextPromptTemplate,
+            @Nullable Boolean allowEmptyContext) {
         this.promptTemplate = promptTemplate != null ? promptTemplate : DEFAULT_PROMPT_TEMPLATE;
-        this.emptyContextPromptTemplate = emptyContextPromptTemplate != null ? emptyContextPromptTemplate
-                : DEFAULT_EMPTY_CONTEXT_PROMPT_TEMPLATE;
+        this.emptyContextPromptTemplate =
+                emptyContextPromptTemplate != null ? emptyContextPromptTemplate : DEFAULT_EMPTY_CONTEXT_PROMPT_TEMPLATE;
         this.allowEmptyContext = allowEmptyContext != null ? allowEmptyContext : DEFAULT_ALLOW_EMPTY_CONTEXT;
         PromptAssert.templateHasRequiredPlaceholders(this.promptTemplate, "query", "context");
     }
@@ -109,9 +114,9 @@ public final class MetadataContextualQueryAugmenter implements QueryAugmenter {
                 .map(Document::getFormattedContent)
                 .collect(Collectors.joining(System.lineSeparator()));
 
-        logger.warn("This is a temporary replacement for the original class MetadataContextualQueryAugmenter," +
-                " which adds metadata to the context. It should be removed as soon as Spring AI introduces the " +
-                "necessary changes.");
+        logger.warn("This is a temporary replacement for the original class MetadataContextualQueryAugmenter,"
+                + " which adds metadata to the context. It should be removed as soon as Spring AI introduces the "
+                + "necessary changes.");
 
         // 2. Define prompt parameters.
         Map<String, Object> promptParameters = Map.of("query", query.text(), "context", documentContext);
@@ -157,10 +162,8 @@ public final class MetadataContextualQueryAugmenter implements QueryAugmenter {
         }
 
         public MetadataContextualQueryAugmenter build() {
-            return new MetadataContextualQueryAugmenter(this.promptTemplate, this.emptyContextPromptTemplate,
-                    this.allowEmptyContext);
+            return new MetadataContextualQueryAugmenter(
+                    this.promptTemplate, this.emptyContextPromptTemplate, this.allowEmptyContext);
         }
-
     }
-
 }
