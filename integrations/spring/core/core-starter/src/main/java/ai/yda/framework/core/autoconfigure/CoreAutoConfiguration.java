@@ -23,11 +23,17 @@ import java.time.Duration;
 
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.rag.preretrieval.query.transformation.CompressionQueryTransformer;
+import org.springframework.ai.rag.preretrieval.query.transformation.RewriteQueryTransformer;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.web.client.ClientHttpRequestFactories;
 import org.springframework.boot.web.client.ClientHttpRequestFactorySettings;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.client.RestClient;
+
+import ai.yda.framework.core.rag.transformation.ReasoningCompressionQueryTransformer;
+import ai.yda.framework.core.rag.transformation.ReasoningRewriteQueryTransformer;
 
 @AutoConfiguration
 @Slf4j
@@ -42,5 +48,15 @@ public class CoreAutoConfiguration {
                 .requestFactory(ClientHttpRequestFactories.get(ClientHttpRequestFactorySettings.DEFAULTS
                         .withConnectTimeout(Duration.ofMinutes(5))
                         .withReadTimeout(Duration.ofMinutes(10))));
+    }
+
+    @Bean
+    public RewriteQueryTransformer rewriteQueryTransformer(final ChatClient.Builder chatClientBuilder) {
+        return new ReasoningRewriteQueryTransformer(chatClientBuilder, null, null);
+    }
+
+    @Bean
+    public CompressionQueryTransformer compressionQueryTransformer(final ChatClient.Builder chatClientBuilder) {
+        return new ReasoningCompressionQueryTransformer(chatClientBuilder, null);
     }
 }

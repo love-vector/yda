@@ -33,6 +33,7 @@ import org.springframework.ai.rag.retrieval.search.DocumentRetriever;
 
 import ai.yda.framework.rag.core.generator.StreamingGenerator;
 import ai.yda.framework.rag.core.model.RagResponse;
+import ai.yda.framework.rag.core.retriever.BaseRetriever;
 
 /**
  * Default implementation of the Retrieval-Augmented Generation (RAG) process in a streaming manner.
@@ -40,12 +41,12 @@ import ai.yda.framework.rag.core.model.RagResponse;
  * @author Nikita Litvinov
  * @since 0.1.0
  */
-public class DefaultStreamingRag implements StreamingRag<Query, RagResponse> {
+public class BaseStreamingRag implements StreamingRag<Query, RagResponse> {
 
     /**
      * The list of {@link DocumentRetriever} instances used to retrieving {@link Document}
      */
-    private final List<DocumentRetriever> retrievers;
+    private final List<BaseRetriever> retrievers;
 
     /**
      * The list of {@link QueryAugmenter} instances used to modify or enhance the retrieved {@link Query}.
@@ -58,15 +59,15 @@ public class DefaultStreamingRag implements StreamingRag<Query, RagResponse> {
     private final StreamingGenerator<Query, RagResponse> streamingGenerator;
 
     /**
-     * Constructs a new {@link DefaultStreamingRag} instance.
+     * Constructs a new {@link BaseStreamingRag} instance.
      *
      * @param retrievers         the list of {@link DocumentRetriever} objects used to retrieve {@link Document} data.
      * @param augmenters         the list of {@link QueryAugmenter} objects used to augment the retrieved Contexts.
      * @param streamingGenerator the {@link StreamingGenerator} used to generate {@link RagResponse} objects in a
      *                           streaming manner.
      */
-    public DefaultStreamingRag(
-            final List<DocumentRetriever> retrievers,
+    public BaseStreamingRag(
+            final List<BaseRetriever> retrievers,
             final List<QueryAugmenter> augmenters,
             final StreamingGenerator<Query, RagResponse> streamingGenerator) {
         this.retrievers = retrievers;
@@ -88,8 +89,8 @@ public class DefaultStreamingRag implements StreamingRag<Query, RagResponse> {
     @Override
     public Flux<RagResponse> streamRag(final Query query) {
         return Flux.fromIterable(retrievers)
-                .flatMap(retriever ->
-                        Mono.fromCallable(() -> retriever.retrieve(query)).subscribeOn(Schedulers.boundedElastic()))
+                .flatMap(retriever -> Mono.fromCallable(() -> retriever.transformAndRetrieve(query))
+                        .subscribeOn(Schedulers.boundedElastic()))
                 .collectList()
                 .map(lists -> lists.stream().flatMap(List::stream).collect(Collectors.toList()))
                 .flatMapMany(documents -> {

@@ -21,12 +21,15 @@ package ai.yda.framework.rag.retriever.google_drive.autoconfigure;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.List;
 
 import org.springframework.ai.autoconfigure.openai.OpenAiConnectionProperties;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.api.OpenAiApi;
+import org.springframework.ai.rag.preretrieval.query.transformation.CompressionQueryTransformer;
+import org.springframework.ai.rag.preretrieval.query.transformation.RewriteQueryTransformer;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -163,7 +166,9 @@ public class RetrieverGoogleDriveAutoConfiguration {
             final DocumentMetadataMapper documentMetadataMapper,
             final OpenAiConnectionProperties openAiConnectionProperties,
             final RestClient.Builder restClientBuilder,
-            final WebClient.Builder webClientBuilder)
+            final WebClient.Builder webClientBuilder,
+            final RewriteQueryTransformer rewriteQueryTransformer,
+            final CompressionQueryTransformer compressionQueryTransformer)
             throws IOException, GeneralSecurityException {
 
         var resource = resourceLoader.getResource(googleDriveProperties.getServiceAccountKeyFilePath());
@@ -187,7 +192,8 @@ public class RetrieverGoogleDriveAutoConfiguration {
                         documentContentPort,
                         documentProcessorProvider,
                         documentMetadataMapper,
-                        new DocumentAiDescriptionService(openAiChatModel)));
+                        new DocumentAiDescriptionService(openAiChatModel)),
+                List.of(compressionQueryTransformer, rewriteQueryTransformer));
     }
 
     private OpenAiChatModel openAiChatModel(

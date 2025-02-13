@@ -72,6 +72,6 @@ public class OpenAiChatGenerator implements Generator<Query, RagResponse> {
         }
 
         var response = chatModel.call(prompt).getResult().getOutput();
-        return RagResponse.builder().result(response.getContent()).build();
+        return RagResponse.builder().result(response.getText()).build();
     }
 }

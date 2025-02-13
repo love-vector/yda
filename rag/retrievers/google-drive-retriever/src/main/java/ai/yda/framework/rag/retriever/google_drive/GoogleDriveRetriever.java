@@ -28,10 +28,11 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.model.function.FunctionCallback;
 import org.springframework.ai.rag.Query;
-import org.springframework.ai.rag.retrieval.search.DocumentRetriever;
+import org.springframework.ai.rag.preretrieval.query.transformation.QueryTransformer;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.lang.NonNull;
 
+import ai.yda.framework.rag.core.retriever.BaseRetriever;
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentIdDTO;
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentIdsDTO;
 import ai.yda.framework.rag.retriever.google_drive.port.DocumentContentPort;
@@ -55,10 +56,13 @@ import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
  * - Requires a properly configured {@link GoogleDriveService} instance.
  *
  * @author dmmrch
+ * @author Iryna Kopchak
+ * @author Bogdan Synenko
+ *
  * @since 0.2.0
  */
 @Slf4j
-public class GoogleDriveRetriever implements DocumentRetriever {
+public class GoogleDriveRetriever extends BaseRetriever {
 
     private static final String RETRIEVAL_SYSTEM_INSTRUCTION =
             """
@@ -99,8 +103,11 @@ public class GoogleDriveRetriever implements DocumentRetriever {
             final @NonNull ChatClient chatClient,
             final @NonNull DocumentMetadataPort documentMetadataPort,
             final @NonNull DocumentContentPort documentContentPort,
-            final @NonNull GoogleDriveService googleDriveService)
+            final @NonNull GoogleDriveService googleDriveService,
+            final @NonNull List<QueryTransformer> queryTransformers)
             throws IOException {
+        super(queryTransformers);
+
         this.chatClient = chatClient;
         this.documentMetadataPort = documentMetadataPort;
         this.documentContentPort = documentContentPort;
@@ -115,6 +122,9 @@ public class GoogleDriveRetriever implements DocumentRetriever {
 
     @Override
     public @NonNull List<Document> retrieve(@NonNull final Query query) {
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving documents for Query: {}", query);
+        }
         var getAllDocumentsFunction = FunctionCallback.builder()
                 .function("getAllDocuments", documentMetadataPort::getAllFilesAiDescription)
                 .description("Retrieves a list of all documents along with their descriptions")

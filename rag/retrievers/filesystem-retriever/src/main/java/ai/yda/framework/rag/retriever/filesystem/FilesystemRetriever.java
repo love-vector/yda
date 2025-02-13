@@ -31,11 +31,11 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.ai.document.Document;
 import org.springframework.ai.rag.Query;
-import org.springframework.ai.rag.retrieval.search.DocumentRetriever;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.lang.NonNull;
 
+import ai.yda.framework.rag.core.retriever.BaseRetriever;
 import ai.yda.framework.rag.retriever.filesystem.service.FilesystemService;
 
 /**
@@ -50,7 +50,7 @@ import ai.yda.framework.rag.retriever.filesystem.service.FilesystemService;
  * @since 0.1.0
  */
 @Slf4j
-public class FilesystemRetriever implements DocumentRetriever {
+public class FilesystemRetriever extends BaseRetriever {
     /**
      * The Vector Store used to retrieve Context data for User Request through similarity search.
      */
