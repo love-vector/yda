@@ -28,6 +28,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.lang.NonNull;
 
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentDTO;
+import ai.yda.framework.rag.retriever.google_drive.dto.DocumentMetadataDTO;
 import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentContentMapper;
 import ai.yda.framework.rag.retriever.google_drive.service.SplitSheetBodyContentHandler;
 import ai.yda.framework.rag.retriever.google_drive.service.TikaExcelDocumentReader;
@@ -43,8 +44,8 @@ public class ExcelDocumentProcessor implements DocumentProcessor {
     }
 
     @Override
-    public List<DocumentContentDTO> processDocument(final InputStream inputStream, final String documentMetadataId)
-            throws IOException {
+    public List<DocumentContentDTO> processDocument(
+            final InputStream inputStream, final DocumentMetadataDTO metadataDTO) throws IOException {
         return new TikaExcelDocumentReader(
                         new ByteArrayResource(inputStream.readAllBytes()),
                         new SplitSheetBodyContentHandler(),
@@ -53,7 +54,7 @@ public class ExcelDocumentProcessor implements DocumentProcessor {
                         .map(sheet -> documentContentMapper.toDTO(
                                 sheet.getMetadata().get(DOCUMENT_METADATA_NAME).toString(),
                                 sheet.getText(),
-                                documentMetadataId))
+                                metadataDTO.getDocumentId()))
                         .toList();
     }
 }

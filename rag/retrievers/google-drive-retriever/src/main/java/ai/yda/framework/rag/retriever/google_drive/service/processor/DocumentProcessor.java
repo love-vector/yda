@@ -24,7 +24,9 @@ import java.io.InputStream;
 import java.util.List;
 
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentDTO;
+import ai.yda.framework.rag.retriever.google_drive.dto.DocumentMetadataDTO;
 
 public interface DocumentProcessor {
-    List<DocumentContentDTO> processDocument(InputStream inputStream, String documentMetadataId) throws IOException;
+    List<DocumentContentDTO> processDocument(InputStream inputStream, DocumentMetadataDTO metadataDTO)
+            throws IOException;
 }

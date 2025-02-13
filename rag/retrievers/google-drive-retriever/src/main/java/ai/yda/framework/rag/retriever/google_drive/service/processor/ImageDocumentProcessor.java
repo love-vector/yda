@@ -19,38 +19,44 @@
 */
 package ai.yda.framework.rag.retriever.google_drive.service.processor;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import org.springframework.ai.reader.tika.TikaDocumentReader;
-import org.springframework.core.io.ByteArrayResource;
+import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.model.Media;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.lang.NonNull;
+import org.springframework.util.MimeType;
 
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentDTO;
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentMetadataDTO;
 import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentContentMapper;
-import ai.yda.framework.rag.retriever.google_drive.service.DocumentTextSplitter;
 
-public class TikaDocumentProcessor implements DocumentProcessor {
+public class ImageDocumentProcessor implements DocumentProcessor {
 
+    public static final String IMAGE_DESCRIPTION_TEMPLATE =
+            """
+                    Provide the key information from the image, without fabricating data and unnecessary details.
+
+                    Description:""";
+
+    private final ChatModel chatModel;
     private final DocumentContentMapper documentContentMapper;
-    private final DocumentTextSplitter documentTextSplitter;
 
-    public TikaDocumentProcessor(
-            final @NonNull DocumentContentMapper documentContentMapper,
-            final @NonNull DocumentTextSplitter documentTextSplitter) {
+    public ImageDocumentProcessor(
+            final @NonNull ChatModel chatModel, final @NonNull DocumentContentMapper documentContentMapper) {
+        this.chatModel = chatModel;
         this.documentContentMapper = documentContentMapper;
-        this.documentTextSplitter = documentTextSplitter;
     }
 
     @Override
     public List<DocumentContentDTO> processDocument(
-            final InputStream inputStream, final DocumentMetadataDTO metadataDTO) throws IOException {
-        return new TikaDocumentReader(new ByteArrayResource(inputStream.readAllBytes()))
-                .read().stream()
-                        .flatMap(document -> documentTextSplitter.splitDocumentIntoChunks(document.getText()).stream())
-                        .map(chunk -> documentContentMapper.toDTO(chunk, metadataDTO.getDocumentId()))
-                        .toList();
+            final InputStream inputStream, final DocumentMetadataDTO metadataDTO) {
+        var imageDescriptionMsg = new UserMessage(
+                IMAGE_DESCRIPTION_TEMPLATE,
+                new Media(MimeType.valueOf(metadataDTO.getMimeType()), new InputStreamResource(inputStream)));
+        var imageContent = this.chatModel.call(imageDescriptionMsg);
+        return List.of(documentContentMapper.toDTO(imageContent, metadataDTO.getDocumentId()));
     }
 }

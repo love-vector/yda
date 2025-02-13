@@ -54,6 +54,7 @@ import ai.yda.framework.rag.retriever.google_drive.service.DocumentProcessorProv
 import ai.yda.framework.rag.retriever.google_drive.service.DocumentTextSplitter;
 import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
 import ai.yda.framework.rag.retriever.google_drive.service.processor.ExcelDocumentProcessor;
+import ai.yda.framework.rag.retriever.google_drive.service.processor.ImageDocumentProcessor;
 import ai.yda.framework.rag.retriever.google_drive.service.processor.TikaDocumentProcessor;
 
 /**
@@ -132,9 +133,24 @@ public class RetrieverGoogleDriveAutoConfiguration {
     }
 
     @Bean
+    public ImageDocumentProcessor imageDocumentProcessor(
+            final DocumentContentMapper documentContentMapper,
+            final RetrieverGoogleDriveProperties googleDriveProperties,
+            final OpenAiConnectionProperties openAiConnectionProperties,
+            final RestClient.Builder restClientBuilder,
+            final WebClient.Builder webClientBuilder) {
+
+        var openAiChatModel =
+                openAiChatModel(openAiConnectionProperties, googleDriveProperties, restClientBuilder, webClientBuilder);
+        return new ImageDocumentProcessor(openAiChatModel, documentContentMapper);
+    }
+
+    @Bean
     public DocumentProcessorProvider documentProcessorProvider(
-            final ExcelDocumentProcessor exelDocumentProcessor, final TikaDocumentProcessor tikaDocumentProcessor) {
-        return new DocumentProcessorProvider(exelDocumentProcessor, tikaDocumentProcessor);
+            final ExcelDocumentProcessor exelDocumentProcessor,
+            final TikaDocumentProcessor tikaDocumentProcessor,
+            final ImageDocumentProcessor imageDocumentProcessor) {
+        return new DocumentProcessorProvider(exelDocumentProcessor, tikaDocumentProcessor, imageDocumentProcessor);
     }
 
     @Bean
