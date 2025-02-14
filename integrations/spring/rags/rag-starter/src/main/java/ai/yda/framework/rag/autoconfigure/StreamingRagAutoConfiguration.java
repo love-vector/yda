@@ -28,12 +28,13 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 
-import ai.yda.framework.rag.core.DefaultStreamingRag;
+import ai.yda.framework.rag.core.BaseStreamingRag;
 import ai.yda.framework.rag.core.generator.StreamingGenerator;
 import ai.yda.framework.rag.core.model.RagResponse;
+import ai.yda.framework.rag.core.retriever.BaseRetriever;
 
 /**
- * Autoconfiguration class for setting up a {@link DefaultStreamingRag} bean in the RAG framework.
+ * Autoconfiguration class for setting up a {@link BaseStreamingRag} bean in the RAG framework.
  *
  * @author Nikita Litvinov
  * @since 0.1.0
@@ -48,19 +49,19 @@ public class StreamingRagAutoConfiguration extends AbstractRagAutoConfiguration 
     public StreamingRagAutoConfiguration() {}
 
     /**
-     * Creates and configures a {@link DefaultStreamingRag} bean.
+     * Creates and configures a {@link BaseStreamingRag} bean.
      *
      * @param retrievers         the list of {@link DocumentRetriever} beans for retrieving Context based on the
      *                           Request.
      * @param augmenters         the list of {@link QueryAugmenter} beans for enhancing the retrieved Context.
      * @param streamingGenerator the {@link StreamingGenerator} bean for generating Responses in a streaming
-     * @return a configured {@link DefaultStreamingRag} instance.
+     * @return a configured {@link BaseStreamingRag} instance.
      */
     @Bean
-    public DefaultStreamingRag defaultStreamingRag(
-            final List<DocumentRetriever> retrievers,
+    public BaseStreamingRag defaultStreamingRag(
+            final List<BaseRetriever> retrievers,
             final List<QueryAugmenter> augmenters,
             final StreamingGenerator<Query, RagResponse> streamingGenerator) {
-        return new DefaultStreamingRag(retrievers, augmenters, streamingGenerator);
+        return new BaseStreamingRag(retrievers, augmenters, streamingGenerator);
     }
 }

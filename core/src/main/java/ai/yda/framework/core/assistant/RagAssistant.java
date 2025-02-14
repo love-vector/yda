@@ -19,6 +19,8 @@
 */
 package ai.yda.framework.core.assistant;
 
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.ai.rag.Query;
 
 import ai.yda.framework.rag.core.Rag;
@@ -31,6 +33,7 @@ import ai.yda.framework.rag.core.model.RagResponse;
  * @author Nikita Litvinov
  * @since 0.1.0
  */
+@Slf4j
 public class RagAssistant implements Assistant<Query, RagResponse> {
 
     /**
@@ -55,6 +58,9 @@ public class RagAssistant implements Assistant<Query, RagResponse> {
      */
     @Override
     public RagResponse assist(final Query query) {
+        if (log.isDebugEnabled()) {
+            log.debug("Processing request: {}", query);
+        }
         return rag.doRag(query);
     }
 }

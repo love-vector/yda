@@ -23,6 +23,7 @@ import java.util.List;
 
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.ai.document.Document;
 import org.springframework.ai.rag.Query;
@@ -31,6 +32,7 @@ import org.springframework.ai.rag.retrieval.search.DocumentRetriever;
 
 import ai.yda.framework.rag.core.generator.Generator;
 import ai.yda.framework.rag.core.model.RagResponse;
+import ai.yda.framework.rag.core.retriever.BaseRetriever;
 
 /**
  * Default implementation of the Retrieval-Augmented Generation (RAG) process.
@@ -39,11 +41,12 @@ import ai.yda.framework.rag.core.model.RagResponse;
  * @since 0.1.0
  */
 @Getter(AccessLevel.PROTECTED)
-public class DefaultRag implements Rag<Query, RagResponse> {
+@Slf4j
+public class BaseRag implements Rag<Query, RagResponse> {
     /**
      * The list of {@link DocumentRetriever} instances used to retrieve {@link Document}.
      */
-    private final List<DocumentRetriever> retrievers;
+    private final List<BaseRetriever> retrievers;
 
     /**
      * The list of {@link QueryAugmenter} instances used to modify or enhance the retrieved {@link Query}.
@@ -56,14 +59,14 @@ public class DefaultRag implements Rag<Query, RagResponse> {
     private final Generator<Query, RagResponse> generator;
 
     /**
-     * Constructs a new {@link DefaultRag} instance.
+     * Constructs a new {@link BaseRag} instance.
      *
      * @param retrievers the list of {@link DocumentRetriever} objects to retrieve {@link Document} data.
      * @param augmenters the list of {@link QueryAugmenter} objects to augment the retrieved Contexts.
      * @param generator  the {@link Generator} used to generate the {@link RagResponse}.
      */
-    public DefaultRag(
-            final List<DocumentRetriever> retrievers,
+    public BaseRag(
+            final List<BaseRetriever> retrievers,
             final List<QueryAugmenter> augmenters,
             final Generator<Query, RagResponse> generator) {
         this.retrievers = retrievers;
@@ -88,12 +91,15 @@ public class DefaultRag implements Rag<Query, RagResponse> {
     @Override
     public RagResponse doRag(final Query query) {
         var documents = retrievers.parallelStream()
-                .flatMap(retriever -> retriever.retrieve(query).stream())
+                .flatMap(retriever -> retriever.transformAndRetrieve(query).stream())
                 .toList();
         var augmentedQuery = query;
 
-        for (QueryAugmenter augmenter : augmenters) {
+        for (var augmenter : augmenters) {
             augmentedQuery = augmenter.augment(augmentedQuery, documents);
+            if (log.isDebugEnabled()) {
+                log.debug("Augmented query: {}", query);
+            }
         }
 
         return generator.generate(augmentedQuery);
