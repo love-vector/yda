@@ -17,16 +17,24 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.rag.retriever.google_drive.service.processor;
+package ai.yda.framework.rag.retriever.google_drive.service.document.processor;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 
-import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentDTO;
-import ai.yda.framework.rag.retriever.google_drive.dto.DocumentMetadataDTO;
+import org.springframework.ai.transformer.splitter.TokenTextSplitter;
 
-public interface DocumentProcessor {
-    List<DocumentContentDTO> processDocument(InputStream inputStream, DocumentMetadataDTO metadataDTO)
-            throws IOException;
+public class DocumentTextSplitter extends TokenTextSplitter {
+
+    public DocumentTextSplitter(
+            final int chunkSize,
+            final int minChunkSizeChars,
+            final int minChunkLengthToEmbed,
+            final int maxNumChunks,
+            final boolean keepSeparator) {
+        super(chunkSize, minChunkSizeChars, minChunkLengthToEmbed, maxNumChunks, keepSeparator);
+    }
+
+    public List<String> splitDocumentIntoChunks(final String documentContent) {
+        return splitText(documentContent);
+    }
 }

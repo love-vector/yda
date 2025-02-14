@@ -96,8 +96,11 @@ public final class MetadataContextualQueryAugmenter implements QueryAugmenter {
     }
 
     /**
-     * Modified: Added metadata to the context.
+     * <p>
+     *     <strong>Note:</strong> This method has been modified from the original class to include metadata in the context.
+     * </p>
      */
+
     @Override
     public Query augment(Query query, List<Document> documents) {
         Assert.notNull(query, "query cannot be null");

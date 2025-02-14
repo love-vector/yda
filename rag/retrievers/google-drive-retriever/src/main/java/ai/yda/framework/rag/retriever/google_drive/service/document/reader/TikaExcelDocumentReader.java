@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.rag.retriever.google_drive.service;
+package ai.yda.framework.rag.retriever.google_drive.service.document.reader;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,7 +35,7 @@ import org.springframework.ai.reader.tika.TikaDocumentReader;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
 
-import static ai.yda.framework.rag.retriever.google_drive.util.Constant.DOCUMENT_METADATA_NAME;
+import static ai.yda.framework.rag.retriever.google_drive.service.document.util.Constant.DOCUMENT_METADATA_NAME;
 
 public class TikaExcelDocumentReader extends TikaDocumentReader {
 
@@ -44,17 +44,20 @@ public class TikaExcelDocumentReader extends TikaDocumentReader {
     private final SplitSheetBodyContentHandler handler;
     private final Metadata metadata;
     private final ParseContext context;
-    private final ExtractedTextFormatter textFormatter;
+    private final OptimizedExtractedTextFormatter optimizedTextFormatter;
 
     public TikaExcelDocumentReader(
-            Resource resource, SplitSheetBodyContentHandler contentHandler, ExtractedTextFormatter textFormatter) {
+            Resource resource,
+            SplitSheetBodyContentHandler contentHandler,
+            ExtractedTextFormatter textFormatter,
+            OptimizedExtractedTextFormatter optimizedTextFormatter) {
         super(resource, contentHandler, textFormatter);
         this.resource = resource;
         this.parser = new AutoDetectParser();
         this.handler = contentHandler;
         this.metadata = new Metadata();
         this.context = new ParseContext();
-        this.textFormatter = textFormatter;
+        this.optimizedTextFormatter = optimizedTextFormatter;
     }
 
     @Override
@@ -71,8 +74,8 @@ public class TikaExcelDocumentReader extends TikaDocumentReader {
 
     private Document toDocument(String sheetName, String docText) {
         return new Document(
-                (Objects.requireNonNullElse(docText, "")),
-                Map.of(DOCUMENT_METADATA_NAME, sheetName, METADATA_SOURCE, resourceName()));
+                this.optimizedTextFormatter.format(Objects.requireNonNullElse(docText, "")),
+                Map.of(METADATA_SOURCE, resourceName(), DOCUMENT_METADATA_NAME, sheetName));
     }
 
     private String resourceName() {

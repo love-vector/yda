@@ -16,7 +16,7 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.rag.retriever.google_drive.service;
 
 import java.io.IOException;
@@ -42,6 +42,7 @@ import ai.yda.framework.rag.retriever.google_drive.exception.UnsupportedExtensio
 import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentMetadataMapper;
 import ai.yda.framework.rag.retriever.google_drive.port.DocumentContentPort;
 import ai.yda.framework.rag.retriever.google_drive.port.DocumentMetadataPort;
+import ai.yda.framework.rag.retriever.google_drive.service.document.processor.DocumentProcessorProvider;
 
 /**
  * Service class for interacting with Google Drive using a Service Account.
@@ -97,9 +98,9 @@ public class GoogleDriveService {
                 GoogleCredentials.fromStream(credentialsStream).createScoped(Collections.singleton(DriveScopes.DRIVE));
 
         this.driveService = new Drive.Builder(
-                GoogleNetHttpTransport.newTrustedTransport(),
-                GsonFactory.getDefaultInstance(),
-                new HttpCredentialsAdapter(credentials))
+                        GoogleNetHttpTransport.newTrustedTransport(),
+                        GsonFactory.getDefaultInstance(),
+                        new HttpCredentialsAdapter(credentials))
                 .setApplicationName(GOOGLE_DRIVE_APP_NAME)
                 .build();
 
@@ -120,7 +121,8 @@ public class GoogleDriveService {
 
             try {
                 if (!documentMetadataDTO.isFolder()) {
-                    try (var inputStream = driveService.files().get(file.getId()).executeMediaAsInputStream()) {
+                    try (var inputStream =
+                            driveService.files().get(file.getId()).executeMediaAsInputStream()) {
                         var contentEntities = documentProcessor.processDocument(
                                 file.getFileExtension(), inputStream, documentMetadataDTO);
                         documentMetadataDTO.setDocumentContents(contentEntities);
