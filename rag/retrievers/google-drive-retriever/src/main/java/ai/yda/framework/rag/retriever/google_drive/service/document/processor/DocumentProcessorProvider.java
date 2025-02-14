@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.rag.retriever.google_drive.service;
+package ai.yda.framework.rag.retriever.google_drive.service.document.processor;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,7 +27,6 @@ import org.springframework.lang.NonNull;
 
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentDTO;
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentMetadataDTO;
-import ai.yda.framework.rag.retriever.google_drive.service.processor.*;
 
 public class DocumentProcessorProvider {
     private final ExcelDocumentProcessor excelProcessor;

@@ -53,12 +53,12 @@ import ai.yda.framework.rag.retriever.google_drive.port.DocumentMetadataPort;
 import ai.yda.framework.rag.retriever.google_drive.repository.DocumentContentRepository;
 import ai.yda.framework.rag.retriever.google_drive.repository.DocumentMetadataRepository;
 import ai.yda.framework.rag.retriever.google_drive.service.DocumentAiDescriptionService;
-import ai.yda.framework.rag.retriever.google_drive.service.DocumentProcessorProvider;
-import ai.yda.framework.rag.retriever.google_drive.service.DocumentTextSplitter;
 import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
-import ai.yda.framework.rag.retriever.google_drive.service.processor.ExcelDocumentProcessor;
-import ai.yda.framework.rag.retriever.google_drive.service.processor.ImageDocumentProcessor;
-import ai.yda.framework.rag.retriever.google_drive.service.processor.TikaDocumentProcessor;
+import ai.yda.framework.rag.retriever.google_drive.service.document.processor.DocumentProcessorProvider;
+import ai.yda.framework.rag.retriever.google_drive.service.document.processor.DocumentTextSplitter;
+import ai.yda.framework.rag.retriever.google_drive.service.document.processor.ExcelDocumentProcessor;
+import ai.yda.framework.rag.retriever.google_drive.service.document.processor.ImageDocumentProcessor;
+import ai.yda.framework.rag.retriever.google_drive.service.document.processor.TikaDocumentProcessor;
 
 /**
  * Auto-configuration class for setting up the Google Drive retriever in a Spring Boot application.

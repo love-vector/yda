@@ -42,6 +42,7 @@ import ai.yda.framework.rag.retriever.google_drive.exception.UnsupportedExtensio
 import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentMetadataMapper;
 import ai.yda.framework.rag.retriever.google_drive.port.DocumentContentPort;
 import ai.yda.framework.rag.retriever.google_drive.port.DocumentMetadataPort;
+import ai.yda.framework.rag.retriever.google_drive.service.document.processor.DocumentProcessorProvider;
 
 /**
  * Service class for interacting with Google Drive using a Service Account.

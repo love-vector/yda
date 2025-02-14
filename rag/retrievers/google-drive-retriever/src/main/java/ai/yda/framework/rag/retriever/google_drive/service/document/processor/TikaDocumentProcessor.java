@@ -17,44 +17,39 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.rag.retriever.google_drive.service.processor;
+package ai.yda.framework.rag.retriever.google_drive.service.document.processor;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import org.springframework.ai.reader.ExtractedTextFormatter;
+import org.springframework.ai.reader.tika.TikaDocumentReader;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.lang.NonNull;
 
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentContentDTO;
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentMetadataDTO;
 import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentContentMapper;
-import ai.yda.framework.rag.retriever.google_drive.service.SplitSheetBodyContentHandler;
-import ai.yda.framework.rag.retriever.google_drive.service.TikaExcelDocumentReader;
 
-import static ai.yda.framework.rag.retriever.google_drive.util.Constant.DOCUMENT_METADATA_NAME;
-
-public class ExcelDocumentProcessor implements DocumentProcessor {
+public class TikaDocumentProcessor implements DocumentProcessor {
 
     private final DocumentContentMapper documentContentMapper;
+    private final DocumentTextSplitter documentTextSplitter;
 
-    public ExcelDocumentProcessor(final @NonNull DocumentContentMapper documentContentMapper) {
+    public TikaDocumentProcessor(
+            final @NonNull DocumentContentMapper documentContentMapper,
+            final @NonNull DocumentTextSplitter documentTextSplitter) {
         this.documentContentMapper = documentContentMapper;
+        this.documentTextSplitter = documentTextSplitter;
     }
 
     @Override
     public List<DocumentContentDTO> processDocument(
             final InputStream inputStream, final DocumentMetadataDTO metadataDTO) throws IOException {
-        return new TikaExcelDocumentReader(
-                        new ByteArrayResource(inputStream.readAllBytes()),
-                        new SplitSheetBodyContentHandler(),
-                        ExtractedTextFormatter.defaults())
-                .get().stream()
-                        .map(sheet -> documentContentMapper.toDTO(
-                                sheet.getMetadata().get(DOCUMENT_METADATA_NAME).toString(),
-                                sheet.getText(),
-                                metadataDTO.getDocumentId()))
+        return new TikaDocumentReader(new ByteArrayResource(inputStream.readAllBytes()))
+                .read().stream()
+                        .flatMap(document -> documentTextSplitter.splitDocumentIntoChunks(document.getText()).stream())
+                        .map(chunk -> documentContentMapper.toDTO(chunk, metadataDTO.getDocumentId()))
                         .toList();
     }
 }
