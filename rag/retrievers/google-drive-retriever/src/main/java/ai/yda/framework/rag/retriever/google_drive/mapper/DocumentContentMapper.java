@@ -57,6 +57,11 @@ public interface DocumentContentMapper {
         if (documentContentEntity.getChunkName() != null) {
             metadata.put("chunkName", documentContentEntity.getChunkName());
         }
+        var documentMetadataEntity = documentContentEntity.getDocumentMetadata();
+        if (documentMetadataEntity != null) {
+            metadata.put("fileName", documentMetadataEntity.getName());
+            metadata.put("webViewLink", documentMetadataEntity.getWebViewLink());
+        }
         return new Document(documentContentEntity.getChunkContent(), metadata);
     }
 

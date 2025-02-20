@@ -87,12 +87,4 @@ public class DocumentMetadataEntity {
     @Singular
     @OneToMany(mappedBy = "documentMetadata", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DocumentContentEntity> documentContents;
-
-    /**
-     * Convenience method to distinguish folders from files.
-     */
-    @Transient
-    public boolean isFolder() {
-        return "application/vnd.google-apps.folder".equalsIgnoreCase(this.mimeType);
-    }
 }

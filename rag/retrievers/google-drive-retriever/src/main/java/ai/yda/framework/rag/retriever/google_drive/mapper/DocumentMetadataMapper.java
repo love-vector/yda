@@ -71,5 +71,6 @@ public interface DocumentMetadataMapper {
         return (parents != null && !parents.isEmpty()) ? parents.get(0) : null;
     }
 
+    @Mapping(target = "fileName", source = "name")
     DocumentAiDescriptionDTO toDto(DocumentMetadataEntity documentMetadataEntity);
 }

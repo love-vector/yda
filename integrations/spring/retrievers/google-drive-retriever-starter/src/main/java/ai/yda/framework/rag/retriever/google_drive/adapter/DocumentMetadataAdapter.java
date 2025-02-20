@@ -33,6 +33,8 @@ import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentMetadataMapper
 import ai.yda.framework.rag.retriever.google_drive.port.DocumentMetadataPort;
 import ai.yda.framework.rag.retriever.google_drive.repository.DocumentMetadataRepository;
 
+import static ai.yda.framework.rag.retriever.google_drive.dto.DocumentMetadataDTO.FOLDER_MIME_TYPE;
+
 @Transactional
 @Slf4j
 public class DocumentMetadataAdapter implements DocumentMetadataPort {
@@ -80,8 +82,7 @@ public class DocumentMetadataAdapter implements DocumentMetadataPort {
             log.debug("Function Calling: DocumentMetadataAdapter::getAllFilesAiDescription()");
         }
 
-        return repository.findAll().stream()
-                .filter(documentMetadataEntity -> !documentMetadataEntity.isFolder())
+        return repository.findByMimeTypeNotIgnoreCase(FOLDER_MIME_TYPE).stream()
                 .map(documentMetadataMapper::toDto)
                 .toList();
     }
