@@ -19,10 +19,14 @@
 */
 package ai.yda.framework.rag.retriever.google_drive.repository;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import ai.yda.framework.rag.retriever.google_drive.entity.DocumentMetadataEntity;
 
 @Repository
-public interface DocumentMetadataRepository extends JpaRepository<DocumentMetadataEntity, String> {}
+public interface DocumentMetadataRepository extends JpaRepository<DocumentMetadataEntity, String> {
+    List<DocumentMetadataEntity> findByMimeTypeNotIgnoreCase(String mimeType);
+}

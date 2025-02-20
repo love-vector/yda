@@ -20,15 +20,16 @@
 package ai.yda.framework.rag.retriever.google_drive;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.document.Document;
-import org.springframework.ai.model.function.FunctionCallback;
 import org.springframework.ai.rag.Query;
 import org.springframework.ai.rag.preretrieval.query.transformation.QueryTransformer;
+import org.springframework.ai.tool.function.FunctionToolCallback;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.lang.NonNull;
 
@@ -125,12 +126,12 @@ public class GoogleDriveRetriever extends BaseRetriever {
         if (log.isDebugEnabled()) {
             log.debug("Retrieving documents for Query: {}", query);
         }
-        var getAllDocumentsFunction = FunctionCallback.builder()
-                .function("getAllDocuments", documentMetadataPort::getAllFilesAiDescription)
+        var getAllDocumentsTool = FunctionToolCallback.builder(
+                        "getAllDocumentsTool", documentMetadataPort::getAllFilesAiDescription)
                 .description("Retrieves a list of all documents along with their descriptions")
                 .build();
-        var getDocumentChunksFunction = FunctionCallback.builder()
-                .function("getFilesChunks", documentContentPort::getDocumentsContents)
+        var getFilesChunksTool = FunctionToolCallback.builder(
+                        "getFilesChunksTool", documentContentPort::getDocumentsContents)
                 .description("Fetch chunks content of documents using a provided list of document IDs")
                 .inputType(DocumentIdsDTO.class)
                 .build();
@@ -139,18 +140,24 @@ public class GoogleDriveRetriever extends BaseRetriever {
                 .prompt()
                 .user(query.text())
                 .system(RETRIEVAL_SYSTEM_INSTRUCTION)
-                .functions(getAllDocumentsFunction, getDocumentChunksFunction)
+                .tools(getAllDocumentsTool, getFilesChunksTool)
                 .call()
                 .entity(new ParameterizedTypeReference<List<DocumentContentIdDTO>>() {});
 
-        if (log.isDebugEnabled() && documentContentIds != null) {
-            log.debug(
-                    "Retrieved documents with IDs: {}",
-                    documentContentIds.stream()
-                            .map(DocumentContentIdDTO::contentId)
-                            .toList());
+        if (documentContentIds != null) {
+            if (log.isDebugEnabled()) {
+                log.debug(
+                        "Retrieved documents with IDs: {}",
+                        documentContentIds.stream()
+                                .map(DocumentContentIdDTO::contentId)
+                                .toList());
+            }
+            return documentContentPort.getDocumentsByIds(documentContentIds);
         }
 
-        return documentContentPort.getDocumentsByIds(documentContentIds);
+        if (log.isDebugEnabled()) {
+            log.debug("No Documents found for Query: {}", query);
+        }
+        return Collections.emptyList();
     }
 }

@@ -37,6 +37,8 @@ import lombok.*;
 @AllArgsConstructor
 public class DocumentMetadataDTO {
 
+    public static final String FOLDER_MIME_TYPE = "application/vnd.google-apps.folder";
+
     private String documentId;
     private String name;
     private String description;
@@ -56,6 +58,6 @@ public class DocumentMetadataDTO {
      * Convenience method to distinguish folders from files.
      */
     public boolean isFolder() {
-        return "application/vnd.google-apps.folder".equalsIgnoreCase(this.mimeType);
+        return FOLDER_MIME_TYPE.equalsIgnoreCase(this.mimeType);
     }
 }
