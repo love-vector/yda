@@ -19,22 +19,44 @@
 */
 package ai.yda.framework.channel.core;
 
+import org.springframework.ai.rag.Query;
+
+import ai.yda.framework.core.assistant.Assistant;
+import ai.yda.framework.core.assistant.query.QueryProcessor;
+import ai.yda.framework.core.assistant.query.processor.SimpleQueryProcessor;
+
 /**
- * Provides a generic interface for implementing communication gateways to the Assistant.
+ * Provides an abstract class for implementing communication gateways to the Assistant.
  *
- * @param <REQUEST>  the generic type of the Request from the User.
+ * @param <QUERY>    the generic type of the query from the User.
  * @param <RESPONSE> the generic type of the Response that will be generated based on the given Request.
  * @author Nikita Litvinov
  * @see StreamingChannel
  * @since 0.1.0
  */
-public interface Channel<REQUEST, RESPONSE> {
+public abstract class Channel<QUERY, RESPONSE> {
+
+    private final QueryProcessor<QUERY> queryProcessor;
+
+    private final Assistant<Query, RESPONSE> assistant;
+
+    protected Channel(final Assistant<Query, RESPONSE> assistant) {
+        this.assistant = assistant;
+        this.queryProcessor = new SimpleQueryProcessor<>();
+    }
+
+    protected Channel(final Assistant<Query, RESPONSE> assistant, final QueryProcessor<QUERY> queryProcessor) {
+        this.assistant = assistant;
+        this.queryProcessor = queryProcessor;
+    }
 
     /**
      * Processes Request data involving the Assistant.
      *
-     * @param request the Request object to be processed.
+     * @param query the Request object to be processed.
      * @return the Response object generated after processing the Request.
      */
-    RESPONSE processRequest(REQUEST request);
+    public RESPONSE processRequest(QUERY query) {
+        return this.assistant.assist(this.queryProcessor.processQuery(query));
+    }
 }

@@ -23,7 +23,7 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Import;
 
-import ai.yda.framework.channel.rest.spring.streaming.config.RagRequestDeserializerConfig;
+import ai.yda.framework.channel.rest.spring.streaming.config.QueryDeserializerConfig;
 import ai.yda.framework.channel.rest.spring.streaming.security.SecurityConfiguration;
 import ai.yda.framework.channel.rest.spring.streaming.session.RestReactiveSessionProvider;
 import ai.yda.framework.channel.rest.spring.streaming.web.RestStreamingChannel;
@@ -40,7 +40,7 @@ import ai.yda.framework.channel.rest.spring.streaming.web.RestStreamingChannel;
  * @see RestStreamingChannel
  * @see SecurityConfiguration
  * @see RestReactiveSessionProvider
- * @see RagRequestDeserializerConfig
+ * @see QueryDeserializerConfig
  * @since 0.1.0
  */
 @AutoConfiguration
@@ -49,7 +49,7 @@ import ai.yda.framework.channel.rest.spring.streaming.web.RestStreamingChannel;
     RestStreamingChannel.class,
     SecurityConfiguration.class,
     RestReactiveSessionProvider.class,
-    RagRequestDeserializerConfig.class
+    QueryDeserializerConfig.class
 })
 public class RestSpringStreamingAutoConfiguration {
     /**

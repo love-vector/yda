@@ -1,7 +1,5 @@
 dependencies {
     api project(":rag-core")
 
-    api 'org.springframework.ai:spring-ai-core:1.0.0-M1'
-
     implementation 'org.apache.pdfbox:pdfbox:3.0.2'
 }

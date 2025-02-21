@@ -1,8 +1,6 @@
 dependencies {
     api project(":rag-core")
 
-    api 'org.springframework.ai:spring-ai-core:1.0.0-M1'
-
     api 'us.codecraft:webmagic-core:1.0.0'
     api 'us.codecraft:webmagic-selenium:1.0.0'
 

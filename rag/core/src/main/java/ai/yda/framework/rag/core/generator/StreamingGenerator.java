@@ -21,7 +21,8 @@ package ai.yda.framework.rag.core.generator;
 
 import reactor.core.publisher.Flux;
 
-import ai.yda.framework.rag.core.model.RagRequest;
+import org.springframework.ai.rag.Query;
+
 import ai.yda.framework.rag.core.model.RagResponse;
 
 /**
@@ -33,26 +34,24 @@ import ai.yda.framework.rag.core.model.RagResponse;
  * chunks.
  * </p>
  *
- * @param <REQUEST>  the generic type of the Request from the User, which must extend {@link RagRequest}.
+ * @param <QUERY>  the generic type of the query from the User, which must extend {@link Query}.
  * @param <RESPONSE> the generic type of the Response generated based on the given Request, which must extend
  *                   {@link RagResponse}.
  * @author Nikita Litvinov
- * @see RagRequest
+ * @see Query
  * @see RagResponse
  * @see Generator
  * @since 0.1.0
  */
-public interface StreamingGenerator<REQUEST extends RagRequest, RESPONSE extends RagResponse> {
+public interface StreamingGenerator<QUERY extends Query, RESPONSE extends RagResponse> {
 
     /**
      * Streams Responses based on the provided Request and Context. The method returns a Flux that emits a sequence of
      * Responses, allowing for the processing of data in a non-blocking and incremental manner.
      *
-     * @param request the Request object that contains query data from the User.
-     * @param context the Context object that helps to better understand or interpret a Request that the User
-     *                provides.
+     * @param query the Request object that contains query data from the User.
      * @return a {@link Flux stream} of Responses generated as a result of processing the Request and Context. Each
      * response in the Flux represents a part of the overall Response, allowing for the incremental delivery of results.
      */
-    Flux<RESPONSE> streamGeneration(REQUEST request, String context);
+    Flux<RESPONSE> streamGeneration(QUERY query);
 }

@@ -21,8 +21,9 @@ package ai.yda.framework.rag.generator.assistant.openai;
 
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.ai.rag.Query;
+
 import ai.yda.framework.rag.core.generator.Generator;
-import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.model.RagResponse;
 import ai.yda.framework.rag.generator.assistant.openai.service.AzureOpenAiAssistantService;
 import ai.yda.framework.rag.generator.assistant.openai.util.OpenAiAssistantConstant;
@@ -38,7 +39,7 @@ import ai.yda.framework.session.core.SessionProvider;
  * @since 0.1.0
  */
 @Slf4j
-public class OpenAiAssistantGenerator implements Generator<RagRequest, RagResponse> {
+public class OpenAiAssistantGenerator implements Generator<Query, RagResponse> {
 
     /**
      * Service used to interact with the Azure OpenAI Assistant API.
@@ -58,13 +59,13 @@ public class OpenAiAssistantGenerator implements Generator<RagRequest, RagRespon
     /**
      * Constructs a new {@link OpenAiAssistantGenerator} instance.
      *
-     * @param assistantService        the {@link AzureOpenAiAssistantService} instance used to interact with the
-     *                                Azure OpenAI Service.
-     * @param assistantId             the unique identifier for the Assistant that will be used to interact with the
-     *                                Azure OpenAI Service. This ID specifies which Assistant to use when making
-     *                                requests.
-     * @param sessionProvider         the {@link SessionProvider} instance responsible for managing sessions
-     *                                in a blocking manner, maintaining user context between interactions.
+     * @param assistantService the {@link AzureOpenAiAssistantService} instance used to interact with the
+     *                         Azure OpenAI Service.
+     * @param assistantId      the unique identifier for the Assistant that will be used to interact with the
+     *                         Azure OpenAI Service. This ID specifies which Assistant to use when making
+     *                         requests.
+     * @param sessionProvider  the {@link SessionProvider} instance responsible for managing sessions
+     *                         in a blocking manner, maintaining user context between interactions.
      */
     public OpenAiAssistantGenerator(
             final AzureOpenAiAssistantService assistantService,
@@ -80,27 +81,32 @@ public class OpenAiAssistantGenerator implements Generator<RagRequest, RagRespon
      * existing Thread ID from the Session Provider or creating a new Thread, sending the Request query to the
      * Assistant, and obtaining the Response.
      *
-     * @param request the {@link RagRequest} object containing the query from the User.
-     * @param context the Context to be included in the Request to the Assistant.
+     * @param query the {@link Query} object containing the query from the User.
      * @return a {@link RagResponse} containing the result of the Assistant's Response.
      */
     @Override
-    public RagResponse generate(final RagRequest request, final String context) {
+    public RagResponse generate(final Query query) {
         var threadId = sessionProvider
                 .get(OpenAiAssistantConstant.THREAD_ID_KEY)
                 .map(Object::toString)
-                .map(id -> assistantService
-                        .addMessageToThread(id, request.getQuery())
-                        .getThreadId())
+                .map(id -> assistantService.addMessageToThread(id, query.text()).getThreadId())
                 .orElseGet(() -> {
                     var newThreadId =
-                            assistantService.createThread(request.getQuery()).getId();
+                            assistantService.createThread(query.text()).getId();
                     sessionProvider.put(OpenAiAssistantConstant.THREAD_ID_KEY, newThreadId);
                     return newThreadId;
                 });
-        log.debug("Thread ID: {}", threadId);
+
+        if (log.isDebugEnabled()) {
+            log.debug(
+                    "Assistant Call:\nAssistant ID: {},\nThread ID: {},\nQuery: {}",
+                    assistantId,
+                    threadId,
+                    query.text());
+        }
+
         return RagResponse.builder()
-                .result(assistantService.createRunAndWaitForResponse(threadId, assistantId, context))
+                .result(assistantService.createRunAndWaitForResponse(threadId, assistantId, query.text()))
                 .build();
     }
 }

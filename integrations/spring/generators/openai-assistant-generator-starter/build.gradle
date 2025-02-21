@@ -1,7 +1,7 @@
 dependencies {
     api project(':openai-assistant-generator')
 
-    implementation 'org.springframework.ai:spring-ai-spring-boot-autoconfigure:1.0.0-M1'
+    implementation 'org.springframework.ai:spring-ai-spring-boot-autoconfigure'
 
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor:3.3.2'
 }

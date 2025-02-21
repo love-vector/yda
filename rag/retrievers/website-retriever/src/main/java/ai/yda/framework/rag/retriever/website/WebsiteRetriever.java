@@ -21,17 +21,17 @@ package ai.yda.framework.rag.retriever.website;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.ai.document.Document;
+import org.springframework.ai.rag.Query;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.lang.NonNull;
 
-import ai.yda.framework.rag.core.model.RagContext;
-import ai.yda.framework.rag.core.model.RagRequest;
-import ai.yda.framework.rag.core.retriever.Retriever;
+import ai.yda.framework.rag.core.retriever.BaseRetriever;
 import ai.yda.framework.rag.core.util.ContentUtil;
 import ai.yda.framework.rag.retriever.website.extractor.WebExtractor;
 
@@ -46,7 +46,7 @@ import ai.yda.framework.rag.retriever.website.extractor.WebExtractor;
  * @since 0.1.0
  */
 @Slf4j
-public class WebsiteRetriever implements Retriever<RagRequest, RagContext> {
+public class WebsiteRetriever extends BaseRetriever {
 
     /**
      * The maximum length of a chunk in characters.
@@ -111,23 +111,13 @@ public class WebsiteRetriever implements Retriever<RagRequest, RagContext> {
     /**
      * Retrieves Context data based on the given Request by performing a similarity search in the Vector Store.
      *
-     * @param request the Request object containing the User query for the similarity search.
-     * @return a {@link RagContext} object containing the Knowledge obtained from the similarity search.
+     * @param query the Request object containing the User query for the similarity search.
+     * @return a {@link Document} object containing the Knowledge obtained from the similarity search.
      */
     @Override
-    public RagContext retrieve(final RagRequest request) {
-        return RagContext.builder()
-                .knowledge(
-                        vectorStore
-                                .similaritySearch(
-                                        SearchRequest.query(request.getQuery()).withTopK(topK))
-                                .parallelStream()
-                                .map(document -> {
-                                    log.debug("Document metadata: {}", document.getMetadata());
-                                    return document.getContent();
-                                })
-                                .toList())
-                .build();
+    public @NonNull List<Document> retrieve(final @NonNull Query query) {
+        return Objects.requireNonNull(vectorStore.similaritySearch(
+                SearchRequest.builder().query(query.text()).topK(topK).build()));
     }
 
     /**

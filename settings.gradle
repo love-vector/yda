@@ -38,6 +38,9 @@ project(':filesystem-retriever').projectDir = file('rag/retrievers/filesystem-re
 include 'website-retriever'
 project(':website-retriever').projectDir = file('rag/retrievers/website-retriever')
 
+include 'google-drive-retriever'
+project(':google-drive-retriever').projectDir = file('rag/retrievers/google-drive-retriever')
+
 // RAG - Generators
 
 include 'openai-assistant-generator'
@@ -67,16 +70,23 @@ project(':rag-assistant-starter').projectDir = file('integrations/spring/assista
 include 'rag-starter'
 project(':rag-starter').projectDir = file('integrations/spring/rags/rag-starter')
 
+//Core
+include 'core-starter'
+project(':core-starter').projectDir = file('integrations/spring/core/core-starter')
+
 // RAG - Retrievers
 
-include 'retriever-shared-starter'
-project(':retriever-shared-starter').projectDir = file('integrations/spring/retrievers/shared')
+include 'retriever-milvus-shared-starter'
+project(':retriever-milvus-shared-starter').projectDir = file('integrations/spring/retrievers/shared')
 
 include 'filesystem-retriever-starter'
 project(':filesystem-retriever-starter').projectDir = file('integrations/spring/retrievers/filesystem-retriever-starter')
 
 include'website-retriever-starter'
 project(':website-retriever-starter').projectDir = file('integrations/spring/retrievers/website-retriever-starter')
+
+include'google-drive-retriever-starter'
+project(':google-drive-retriever-starter').projectDir = file('integrations/spring/retrievers/google-drive-retriever-starter')
 
 // RAG - Generators
 

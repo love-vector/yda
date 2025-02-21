@@ -19,12 +19,13 @@
 */
 package ai.yda.framework.rag.generator.chat.openai;
 
-import org.springframework.ai.chat.messages.UserMessage;
-import org.springframework.ai.chat.prompt.Prompt;
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.ai.rag.Query;
 
 import ai.yda.framework.rag.core.generator.Generator;
-import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.model.RagResponse;
 
 /**
@@ -40,7 +41,8 @@ import ai.yda.framework.rag.core.model.RagResponse;
  * @see OpenAiChatModel
  * @since 0.1.0
  */
-public class OpenAiChatGenerator implements Generator<RagRequest, RagResponse> {
+@Slf4j
+public class OpenAiChatGenerator implements Generator<Query, RagResponse> {
 
     private final OpenAiChatModel chatModel;
 
@@ -58,14 +60,18 @@ public class OpenAiChatGenerator implements Generator<RagRequest, RagResponse> {
     /**
      * Generates a Response for a given Request using the OpenAI Chat Model.
      *
-     * @param request the {@link RagRequest} object containing the query from the User.
-     * @param context the Context to be included in the Request to the Chat Model.
+     * @param query the {@link Query} object containing the query from the User.
      * @return a {@link RagResponse} containing the Content of the Chat Model's Response.
      */
     @Override
-    public RagResponse generate(final RagRequest request, final String context) {
-        var prompt = new Prompt(new UserMessage(request.getQuery()));
+    public RagResponse generate(final Query query) {
+        var prompt = new PromptTemplate(query.text()).create();
+
+        if (log.isDebugEnabled()) {
+            log.debug("Chat Completion Call:\nQuery: {}", query.text());
+        }
+
         var response = chatModel.call(prompt).getResult().getOutput();
-        return RagResponse.builder().result(response.getContent()).build();
+        return RagResponse.builder().result(response.getText()).build();
     }
 }

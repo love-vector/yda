@@ -21,26 +21,27 @@ package ai.yda.framework.rag.core;
 
 import reactor.core.publisher.Flux;
 
-import ai.yda.framework.rag.core.model.RagRequest;
+import org.springframework.ai.rag.Query;
+
 import ai.yda.framework.rag.core.model.RagResponse;
 
 /**
  * Provides a generic mechanism that coordinates the retrieval, augmentation, and generation processes to produce a
  * final Response based on the Request in a streaming manner.
  *
- * @param <REQUEST>  the generic type of the Request, which must extend {@link RagRequest}.
+ * @param <QUERY>  the generic type of the Request, which must extend {@link Query}.
  * @param <RESPONSE> the generic type of the Response generated based on the given Request, which must extend
  *                   {@link RagResponse}.
  * @author Nikita Litvinov
  * @since 0.1.0
  */
-public interface StreamingRag<REQUEST extends RagRequest, RESPONSE extends RagResponse> {
+public interface StreamingRag<QUERY extends Query, RESPONSE extends RagResponse> {
 
     /**
      * Performs a Retrieval-Augmented Generation (RAG) operation in a streaming manner based on the provided Request.
      *
-     * @param request the Request to process.
+     * @param query the Request to process.
      * @return a {@link Flux stream} of Response objects containing the results of the RAG operation.
      */
-    Flux<RESPONSE> streamRag(REQUEST request);
+    Flux<RESPONSE> streamRag(QUERY query);
 }

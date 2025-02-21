@@ -19,13 +19,13 @@
 */
 package ai.yda.framework.assistant.rag.autoconfigure;
 
+import org.springframework.ai.rag.Query;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 
 import ai.yda.framework.core.assistant.RagAssistant;
 import ai.yda.framework.rag.core.Rag;
-import ai.yda.framework.rag.core.model.RagRequest;
 import ai.yda.framework.rag.core.model.RagResponse;
 
 /**
@@ -50,7 +50,7 @@ public class RagAssistantAutoConfiguration {
      * @return a configured {@link RagAssistant} bean.
      */
     @Bean
-    public RagAssistant ragAssistant(final Rag<RagRequest, RagResponse> rag) {
+    public RagAssistant ragAssistant(final Rag<Query, RagResponse> rag) {
         return new RagAssistant(rag);
     }
 }
