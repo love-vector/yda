@@ -70,7 +70,7 @@ public class SecurityConfiguration {
             throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(properties.getEndpointRelativePath())
+                        .requestMatchers(properties.getEndpointRelativePath(), "/slack/events/**")
                         .authenticated()
                         .anyRequest()
                         .permitAll())

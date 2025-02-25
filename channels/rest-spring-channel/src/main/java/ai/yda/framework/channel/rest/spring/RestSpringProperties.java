@@ -56,7 +56,6 @@ public class RestSpringProperties extends RestChannelProperties {
      * This prefix is used for binding properties within the particular namespace.
      */
     public static final String CONFIG_PREFIX = "ai.yda.framework.channel.rest.spring";
-
     /**
      * Default constructor for {@link RestSpringProperties}.
      */
