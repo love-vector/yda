@@ -1,0 +1,10 @@
+dependencies {
+    api project(":channel-core")
+    api project(":channel-shared")
+    api project(":session-core")
+
+    implementation 'com.slack.api:bolt-jakarta-servlet:1.45.3'
+    api 'org.springframework.boot:spring-boot-starter-web:3.3.2'
+
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor:3.3.2'
+}

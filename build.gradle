@@ -24,7 +24,7 @@ subprojects {
     apply plugin: "io.spring.dependency-management"
 
     group = 'ai.yda-framework'
-    version = '0.2.0-YDAL-108-google-drive-retriever'
+    version = '0.2.0'
 
     java {
         withJavadocJar()

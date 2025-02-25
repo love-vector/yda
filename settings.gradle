@@ -14,6 +14,9 @@ project(':framework-core').projectDir = file('core')
 include 'channel-core'
 project(':channel-core').projectDir = file('channels/core')
 
+include('slack-channel')
+project(':slack-channel').projectDir = file('channels/slack-channel')
+
 include 'channel-shared'
 project(':channel-shared').projectDir = file('channels/shared')
 
@@ -82,10 +85,10 @@ project(':retriever-milvus-shared-starter').projectDir = file('integrations/spri
 include 'filesystem-retriever-starter'
 project(':filesystem-retriever-starter').projectDir = file('integrations/spring/retrievers/filesystem-retriever-starter')
 
-include'website-retriever-starter'
+include 'website-retriever-starter'
 project(':website-retriever-starter').projectDir = file('integrations/spring/retrievers/website-retriever-starter')
 
-include'google-drive-retriever-starter'
+include 'google-drive-retriever-starter'
 project(':google-drive-retriever-starter').projectDir = file('integrations/spring/retrievers/google-drive-retriever-starter')
 
 // RAG - Generators
