@@ -90,9 +90,10 @@ public class BaseRag implements Rag<Query, RagResponse> {
      */
     @Override
     public RagResponse doRag(final Query query) {
-        var documents = retrievers.parallelStream()
+        var documents = retrievers.stream()
                 .flatMap(retriever -> retriever.transformAndRetrieve(query).stream())
                 .toList();
+
         var augmentedQuery = query;
 
         for (var augmenter : augmenters) {
