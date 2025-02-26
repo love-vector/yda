@@ -19,36 +19,36 @@
 */
 package ai.yda.framework.channel.rest.spring;
 
+import com.slack.api.Slack;
+
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
 import ai.yda.framework.channel.rest.spring.config.QueryDeserializerConfig;
 import ai.yda.framework.channel.rest.spring.security.SecurityConfiguration;
 import ai.yda.framework.channel.rest.spring.session.RestSessionProvider;
 import ai.yda.framework.channel.rest.spring.web.RestChannel;
+import ai.yda.framework.channel.rest.spring.web.SlackEventController;
 
-/**
- * Contains an autoconfiguration for the REST Channel in the Spring application. This class is responsible for
- * automatically configuring the necessary beans and components for the REST Channel, security and session management.
- * It simplifies the setup by ensuring that all the required configurations, properties, and components are loaded and
- * initialized without needing explicit configuration by the developer. It is loaded, initialized and imported without
- * developer's interference
- *
- * @author Nikita Litvinov
- * @see RestSpringProperties
- * @see RestChannel
- * @see SecurityConfiguration
- * @see RestSessionProvider
- * @see QueryDeserializerConfig
- * @since 0.1.0
- */
 @AutoConfiguration
-@EnableConfigurationProperties({RestSpringProperties.class})
-@Import({RestChannel.class, SecurityConfiguration.class, RestSessionProvider.class, QueryDeserializerConfig.class})
-public class RestSpringAutoConfiguration {
+@EnableConfigurationProperties({RestSlackProperties.class})
+@Import({
+    RestChannel.class,
+    SlackEventController.class,
+    SecurityConfiguration.class,
+    RestSessionProvider.class,
+    QueryDeserializerConfig.class
+})
+public class RestSlackAutoConfiguration {
     /**
-     * Default constructor for {@link RestSpringAutoConfiguration}.
+     * Default constructor for {@link RestSlackAutoConfiguration}.
      */
-    public RestSpringAutoConfiguration() {}
+    @Bean
+    public Slack slack() {
+        return new Slack();
+    }
+
+    public RestSlackAutoConfiguration() {}
 }

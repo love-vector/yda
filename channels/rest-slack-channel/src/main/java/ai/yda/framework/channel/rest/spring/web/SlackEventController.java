@@ -38,7 +38,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import ai.yda.framework.channel.rest.spring.RestSpringProperties;
+import ai.yda.framework.channel.rest.spring.RestSlackProperties;
 
 @Slf4j
 @RestController
@@ -48,13 +48,13 @@ public class SlackEventController {
     private static final Set<String> processedEvents = new HashSet<>();
     private static final Set<String> processedMessages = new HashSet<>();
 
-    private final RestSpringProperties restSpringProperties;
+    private final RestSlackProperties restSlackProperties;
     private final RestChannel restChannel;
     private final Slack slack;
 
     @Autowired
-    public SlackEventController(RestSpringProperties restSpringProperties, RestChannel restChannel, Slack slack) {
-        this.restSpringProperties = restSpringProperties;
+    public SlackEventController(RestSlackProperties restSlackProperties, RestChannel restChannel, Slack slack) {
+        this.restSlackProperties = restSlackProperties;
         this.restChannel = restChannel;
         this.slack = slack;
     }
@@ -95,8 +95,7 @@ public class SlackEventController {
                     .text(message)
                     .threadTs(thread)
                     .build();
-            var response =
-                    slack.methods(restSpringProperties.getSlackBotToken()).chatPostMessage(requestBuilder);
+            var response = slack.methods(restSlackProperties.getSlackBotToken()).chatPostMessage(requestBuilder);
 
             if (!response.isOk()) {
                 log.error("Error sending a message to Slack: {}", response.getError());
