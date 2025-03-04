@@ -16,32 +16,32 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.channel.rest.spring;
 
-import ai.yda.framework.channel.rest.spring.config.QueryDeserializerConfig;
-import ai.yda.framework.channel.rest.spring.security.SecurityConfiguration;
-import ai.yda.framework.channel.rest.spring.service.SlackMessageService;
-import ai.yda.framework.channel.rest.spring.session.RestSessionProvider;
-import ai.yda.framework.channel.rest.spring.session.SessionContextHolder;
-import ai.yda.framework.channel.rest.spring.web.SlackEventController;
-import ai.yda.framework.session.core.ThreadLocalSessionProvider;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import com.slack.api.Slack;
+
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import ai.yda.framework.channel.rest.spring.config.QueryDeserializerConfig;
+import ai.yda.framework.channel.rest.spring.security.SecurityConfiguration;
+import ai.yda.framework.channel.rest.spring.service.SlackMessageService;
+import ai.yda.framework.channel.rest.spring.session.RestSessionProvider;
+import ai.yda.framework.channel.rest.spring.web.SlackEventController;
 
 @AutoConfiguration
 @EnableConfigurationProperties({RestSlackProperties.class})
 @Import({
-        SlackEventController.class,
-        SecurityConfiguration.class,
-        RestSessionProvider.class,
-        QueryDeserializerConfig.class
+    SlackEventController.class,
+    SecurityConfiguration.class,
+    RestSessionProvider.class,
+    QueryDeserializerConfig.class
 })
 public class RestSlackAutoConfiguration {
     /**
@@ -62,16 +62,5 @@ public class RestSlackAutoConfiguration {
         return Executors.newFixedThreadPool(20);
     }
 
-    @Bean
-    public SessionContextHolder sessionContextHolder() {
-        return new SessionContextHolder();
-    }
-
-    @Bean
-    public ThreadLocalSessionProvider threadLocalSessionProvider() {
-        return new ThreadLocalSessionProvider();
-    }
-
-    public RestSlackAutoConfiguration() {
-    }
+    public RestSlackAutoConfiguration() {}
 }

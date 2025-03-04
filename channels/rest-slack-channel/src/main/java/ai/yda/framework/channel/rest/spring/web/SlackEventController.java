@@ -24,9 +24,6 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import ai.yda.framework.session.core.ThreadLocalSessionProvider;
-import jakarta.servlet.http.HttpServletRequest;
-
 import com.slack.api.Slack;
 import com.slack.api.methods.SlackApiException;
 import com.slack.api.methods.request.chat.ChatPostMessageRequest;
@@ -43,7 +40,6 @@ import org.springframework.web.bind.annotation.*;
 import ai.yda.framework.channel.core.Channel;
 import ai.yda.framework.channel.rest.spring.RestSlackProperties;
 import ai.yda.framework.channel.rest.spring.session.RestSessionProvider;
-import ai.yda.framework.channel.rest.spring.session.SessionContextHolder;
 import ai.yda.framework.core.assistant.Assistant;
 import ai.yda.framework.rag.core.model.RagResponse;
 
@@ -55,30 +51,22 @@ public class SlackEventController extends Channel<Query, RagResponse> {
     private final Slack slack;
     private final RestSlackProperties restSlackProperties;
     private final RestSessionProvider sessionProvider;
-    private final SessionContextHolder sessionContextHolder;
-    private final ThreadLocalSessionProvider threadLocalSessionProvider;
 
     @Autowired
     public SlackEventController(
             final Assistant<Query, RagResponse> assistant,
             Slack slack,
             RestSlackProperties restSlackProperties,
-            RestSessionProvider sessionProvider,
-            SessionContextHolder sessionContextHolder,
-            ThreadLocalSessionProvider threadLocalSessionProvider) {
+            RestSessionProvider sessionProvider) {
         super(assistant);
         this.slack = slack;
         this.restSlackProperties = restSlackProperties;
         this.sessionProvider = sessionProvider;
-        this.sessionContextHolder = sessionContextHolder;
-        this.threadLocalSessionProvider = threadLocalSessionProvider;
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> handleSlackEvent(
-            @RequestBody Map<String, Object> payload,
-            @RequestHeader("X-Slack-Request-Timestamp") String timestamp,
-            HttpServletRequest request) {
+            @RequestBody Map<String, Object> payload, @RequestHeader("X-Slack-Request-Timestamp") String timestamp) {
 
         long requestTime = Long.parseLong(timestamp);
         long currentTime = Instant.now().getEpochSecond();
@@ -102,53 +90,39 @@ public class SlackEventController extends Channel<Query, RagResponse> {
         String channel = (String) event.get("channel");
         String threadTs = (String) event.get("thread_ts");
 
-        String sessionId = request.getSession().getId(); // Получаем sessionId перед асинхронным вызовом
-        SessionContextHolder.setSessionId(sessionId); // Сохраняем sessionId в ThreadLocal
-
         log.info("Processing event: {}", eventId);
         if (userMessage != null && !userMessage.isEmpty() && botId == null) {
-            sendMessage(channel, userMessage, threadTs);
+            sendMessage(channel, threadTs, userMessage);
         } else {
             log.warn("Ignoring event {}: userMessage is null or empty.", eventId);
         }
+
+        log.info("Response sanded: {}");
         return ResponseEntity.ok().build();
     }
+
     // threadId
     @Async
-    public CompletableFuture<Void> sendMessage(String channel, String message, String threadTs) {
-        return CompletableFuture.supplyAsync(() -> {
-                    String sessionId = SessionContextHolder.getSessionId();
-                    if (sessionId != null) {
-                        sessionProvider.put("threadId", "sessionId22");
-                    } else {
-                        log.warn("Session ID is null, unable to associate session.");
-                    }
-                    return processRequest(new Query(message));
-                })
-                .thenApply(RagResponse::getResult)
-                .thenAccept(transformMessage -> {
-                    try {
-                        var requestBuilder = ChatPostMessageRequest.builder()
-                                .channel(channel)
-                                .text(transformMessage)
-                                .threadTs(threadTs)
-                                .build();
-                        var response = slack.methods(restSlackProperties.getSlackBotToken())
-                                .chatPostMessage(requestBuilder);
+    public void sendMessage(String channel, String threadTs, String message) {
+        CompletableFuture.runAsync(() -> {
+            try {
+                var responseTest = processRequest(new Query(message)).getResult();
+                var requestBuilder = ChatPostMessageRequest.builder()
+                        .channel(channel)
+                        .text("Привет как дела ?")
+                        .threadTs(threadTs)
+                        .build();
+                var response =
+                        slack.methods(restSlackProperties.getSlackBotToken()).chatPostMessage(requestBuilder);
 
-                        if (!response.isOk()) {
-                            log.error("Error sending message to Slack: {}", response.getError());
-                        } else {
-                            log.info("Message successfully sent to channel {}: {}", channel, transformMessage);
-                        }
-                    } catch (SlackApiException | IOException e) {
-                        log.error("Error when calling Slack API", e);
-                    }
-                })
-                .exceptionally(ex -> {
-                    log.error("Error processing request asynchronously", ex);
-                    return null;
-                })
-                .thenRun(SessionContextHolder::clear);
+                if (!response.isOk()) {
+                    log.error("Error sending message to Slack: {}", response.getError());
+                } else {
+                    log.info("Message successfully sent to channel {}: {}", channel, responseTest);
+                }
+            } catch (SlackApiException | IOException e) {
+                log.error("Error when calling Slack API", e);
+            }
+        });
     }
 }
