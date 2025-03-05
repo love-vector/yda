@@ -17,16 +17,20 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.channel.rest.spring;
+package ai.yda.framework.session.core;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
+public class ThreadLocalSessionContext {
+    private final ThreadLocal<String> threadLocal = new InheritableThreadLocal<>();
 
-import ai.yda.framework.channel.shared.RestChannelProperties;
+    public void setSessionId(String sessionId) {
+        threadLocal.set(sessionId);
+    }
 
-@ConfigurationProperties(RestSlackProperties.CONFIG_PREFIX)
-public class RestSlackProperties extends RestChannelProperties {
+    public String getSessionId() {
+        return threadLocal.get();
+    }
 
-    public static final String CONFIG_PREFIX = "ai.yda.framework.channel.rest.slack.spring";
-
-    public RestSlackProperties() {}
+    public void clear() {
+        threadLocal.remove();
+    }
 }

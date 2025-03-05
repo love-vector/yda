@@ -19,9 +19,6 @@
 */
 package ai.yda.framework.channel.rest.spring;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import com.slack.api.Slack;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -30,22 +27,22 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
 import ai.yda.framework.channel.rest.spring.config.QueryDeserializerConfig;
-import ai.yda.framework.channel.rest.spring.security.SecurityConfiguration;
-import ai.yda.framework.channel.rest.spring.service.SlackMessageService;
-import ai.yda.framework.channel.rest.spring.session.RestSessionProvider;
-import ai.yda.framework.channel.rest.spring.web.SlackEventController;
+import ai.yda.framework.channel.rest.spring.web.SlackChannel;
+import ai.yda.framework.session.core.InMemorySessionStore;
+import ai.yda.framework.session.core.SessionStore;
+import ai.yda.framework.session.core.ThreadLocalSessionContext;
+import ai.yda.framework.session.core.ThreadLocalSessionProvider;
 
 @AutoConfiguration
-@EnableConfigurationProperties({RestSlackProperties.class})
+@EnableConfigurationProperties({SlackProperties.class})
 @Import({
-    SlackEventController.class,
-    SecurityConfiguration.class,
-    RestSessionProvider.class,
-    QueryDeserializerConfig.class
+    SlackChannel.class,
+    QueryDeserializerConfig.class,
+    SlackChannel.class,
 })
-public class RestSlackAutoConfiguration {
+public class SlackAutoConfiguration {
     /**
-     * Default constructor for {@link RestSlackAutoConfiguration}.
+     * Default constructor for {@link SlackAutoConfiguration}.
      */
     @Bean
     public Slack slack() {
@@ -53,14 +50,20 @@ public class RestSlackAutoConfiguration {
     }
 
     @Bean
-    public SlackMessageService slackMessageService(Slack slack, RestSlackProperties restSlackProperties) {
-        return new SlackMessageService(slack, restSlackProperties);
+    public ThreadLocalSessionContext threadLocalSessionContext() {
+        return new ThreadLocalSessionContext();
     }
 
     @Bean
-    public ExecutorService executorService() {
-        return Executors.newFixedThreadPool(20);
+    public SessionStore sessionStore() {
+        return new InMemorySessionStore();
     }
 
-    public RestSlackAutoConfiguration() {}
+    @Bean
+    public ThreadLocalSessionProvider threadContext(
+            SessionStore sessionStore, ThreadLocalSessionContext threadLocalSessionContext) {
+        return new ThreadLocalSessionProvider(sessionStore, threadLocalSessionContext);
+    }
+
+    public SlackAutoConfiguration() {}
 }

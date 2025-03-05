@@ -1,1 +1,1 @@
-ai.yda.framework.channel.rest.spring.RestSlackAutoConfiguration
+ai.yda.framework.channel.rest.spring.SlackAutoConfiguration
