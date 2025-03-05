@@ -31,13 +31,13 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
-import ai.yda.framework.channel.rest.spring.RestSlackProperties;
+import ai.yda.framework.channel.rest.spring.SlackProperties;
 
 /**
  * This is a Spring Security configuration that sets up security settings for the synchronized REST Channel.
  *
  * @author Nikita Litvinov
- * @see RestSlackProperties
+ * @see SlackProperties
  * @since 0.1.0
  */
 @Configuration
@@ -60,13 +60,13 @@ public class SecurityConfiguration {
      * </p>
      *
      * @param http       the {@link HttpSecurity} to configure.
-     * @param properties the {@link RestSlackProperties} containing configuration properties for the security setup.
+     * @param properties the {@link SlackProperties} containing configuration properties for the security setup.
      * @return a {@link SecurityFilterChain} instance configured with the specified HTTP security settings.
      * @throws Exception if an error occurs during configuration.
      */
     @Bean
-    @ConditionalOnProperty(prefix = RestSlackProperties.CONFIG_PREFIX, name = "security-token")
-    public SecurityFilterChain combinedFilterChain(final HttpSecurity http, final RestSlackProperties properties)
+    @ConditionalOnProperty(prefix = SlackProperties.CONFIG_PREFIX, name = "security-token")
+    public SecurityFilterChain combinedFilterChain(final HttpSecurity http, final SlackProperties properties)
             throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
@@ -95,7 +95,7 @@ public class SecurityConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public SecurityFilterChain defaultFilterChain(final HttpSecurity http, final RestSlackProperties properties)
+    public SecurityFilterChain defaultFilterChain(final HttpSecurity http, final SlackProperties properties)
             throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll());
@@ -111,7 +111,7 @@ public class SecurityConfiguration {
      * @param properties for configuring CORS
      * @throws Exception if an error occurs during configuration.
      */
-    private void configureCors(final HttpSecurity http, final RestSlackProperties properties) throws Exception {
+    private void configureCors(final HttpSecurity http, final SlackProperties properties) throws Exception {
         if (properties.getCorsEnabled()) {
             http.cors(cors -> {
                 var config = new CorsConfiguration();

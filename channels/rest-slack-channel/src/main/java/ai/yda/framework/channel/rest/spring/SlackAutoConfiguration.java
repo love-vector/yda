@@ -19,9 +19,6 @@
 */
 package ai.yda.framework.channel.rest.spring;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import com.slack.api.Slack;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -31,36 +28,27 @@ import org.springframework.context.annotation.Import;
 
 import ai.yda.framework.channel.rest.spring.config.QueryDeserializerConfig;
 import ai.yda.framework.channel.rest.spring.security.SecurityConfiguration;
-import ai.yda.framework.channel.rest.spring.service.SlackMessageService;
-import ai.yda.framework.channel.rest.spring.session.RestSessionProvider;
+import ai.yda.framework.channel.rest.spring.session.AsyncSessionProvider;
+import ai.yda.framework.channel.rest.spring.web.SlackChannel;
 import ai.yda.framework.channel.rest.spring.web.SlackEventController;
 
 @AutoConfiguration
-@EnableConfigurationProperties({RestSlackProperties.class})
+@EnableConfigurationProperties({SlackProperties.class})
 @Import({
     SlackEventController.class,
     SecurityConfiguration.class,
-    RestSessionProvider.class,
-    QueryDeserializerConfig.class
+    AsyncSessionProvider.class,
+    QueryDeserializerConfig.class,
+    SlackChannel.class
 })
-public class RestSlackAutoConfiguration {
+public class SlackAutoConfiguration {
     /**
-     * Default constructor for {@link RestSlackAutoConfiguration}.
+     * Default constructor for {@link SlackAutoConfiguration}.
      */
     @Bean
     public Slack slack() {
         return new Slack();
     }
 
-    @Bean
-    public SlackMessageService slackMessageService(Slack slack, RestSlackProperties restSlackProperties) {
-        return new SlackMessageService(slack, restSlackProperties);
-    }
-
-    @Bean
-    public ExecutorService executorService() {
-        return Executors.newFixedThreadPool(20);
-    }
-
-    public RestSlackAutoConfiguration() {}
+    public SlackAutoConfiguration() {}
 }

@@ -19,110 +19,37 @@
 */
 package ai.yda.framework.channel.rest.spring.web;
 
-import java.io.IOException;
-import java.time.Instant;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
-import com.slack.api.Slack;
-import com.slack.api.methods.SlackApiException;
-import com.slack.api.methods.request.chat.ChatPostMessageRequest;
-import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
 
-import org.springframework.ai.rag.Query;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import ai.yda.framework.channel.core.Channel;
-import ai.yda.framework.channel.rest.spring.RestSlackProperties;
-import ai.yda.framework.channel.rest.spring.session.RestSessionProvider;
-import ai.yda.framework.core.assistant.Assistant;
-import ai.yda.framework.rag.core.model.RagResponse;
-
-@Slf4j
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/slack/events")
-public class SlackEventController extends Channel<Query, RagResponse> {
+public class SlackEventController {
+    private static final String URL_VERIFICATION_EVENT_TYPE = "url_verification";
+    private static final String MESSAGE_EVENT_TYPE = "event_callback";
 
-    private final Slack slack;
-    private final RestSlackProperties restSlackProperties;
-    private final RestSessionProvider sessionProvider;
-
-    @Autowired
-    public SlackEventController(
-            final Assistant<Query, RagResponse> assistant,
-            Slack slack,
-            RestSlackProperties restSlackProperties,
-            RestSessionProvider sessionProvider) {
-        super(assistant);
-        this.slack = slack;
-        this.restSlackProperties = restSlackProperties;
-        this.sessionProvider = sessionProvider;
-    }
+    private final SlackChannel slackChannel;
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> handleSlackEvent(
-            @RequestBody Map<String, Object> payload, @RequestHeader("X-Slack-Request-Timestamp") String timestamp) {
-
-        long requestTime = Long.parseLong(timestamp);
-        long currentTime = Instant.now().getEpochSecond();
-
-        var payloadType = (String) payload.get("type");
-        if ("url_verification".equals(payloadType)) {
-            return ResponseEntity.ok(Map.of("challenge", payload.get("challenge")));
-        }
-
-        log.info("Processing message:");
-
-        if (Math.abs(currentTime - requestTime) > 60) {
-            log.warn("Received an outdated Slack event ({} seconds old), ignoring.", currentTime - requestTime);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Ignored outdated request");
-        }
-
-        var event = (Map<String, Object>) payload.get("event");
-        String eventId = (String) payload.get("event_id");
-        String userMessage = event != null ? (String) event.get("text") : null;
-        Object botId = event != null ? event.get("bot_id") : null;
-        String channel = (String) event.get("channel");
-        String threadTs = (String) event.get("thread_ts");
-
-        log.info("Processing event: {}", eventId);
-        if (userMessage != null && !userMessage.isEmpty() && botId == null) {
-            sendMessage(channel, threadTs, userMessage);
-        } else {
-            log.warn("Ignoring event {}: userMessage is null or empty.", eventId);
-        }
-
-        log.info("Response sanded: {}");
-        return ResponseEntity.ok().build();
-    }
-
-    // threadId
-    @Async
-    public void sendMessage(String channel, String threadTs, String message) {
-        CompletableFuture.runAsync(() -> {
-            try {
-                var responseTest = processRequest(new Query(message)).getResult();
-                var requestBuilder = ChatPostMessageRequest.builder()
-                        .channel(channel)
-                        .text("Привет как дела ?")
-                        .threadTs(threadTs)
-                        .build();
-                var response =
-                        slack.methods(restSlackProperties.getSlackBotToken()).chatPostMessage(requestBuilder);
-
-                if (!response.isOk()) {
-                    log.error("Error sending message to Slack: {}", response.getError());
-                } else {
-                    log.info("Message successfully sent to channel {}: {}", channel, responseTest);
-                }
-            } catch (SlackApiException | IOException e) {
-                log.error("Error when calling Slack API", e);
+    public ResponseEntity<?> handleSlackEvent(@RequestBody Map<String, Object> event) {
+        var eventType = (String) event.get("type");
+        if (URL_VERIFICATION_EVENT_TYPE.equals(eventType)) {
+            return ResponseEntity.ok(Map.of("challenge", event.get("challenge")));
+        } else if (MESSAGE_EVENT_TYPE.equals(eventType)) {
+            var eventData = (Map<String, String>) event.get("event");
+            if (eventData != null && eventData.get("bot_id") == null) {
+                slackChannel.sendMessage(eventData.get("channel"), eventData.get("thread_ts"), eventData.get("text"));
             }
-        });
+        }
+        return ResponseEntity.ok().build();
     }
 }

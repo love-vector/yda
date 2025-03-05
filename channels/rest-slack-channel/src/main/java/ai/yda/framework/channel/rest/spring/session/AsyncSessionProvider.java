@@ -19,38 +19,28 @@
 */
 package ai.yda.framework.channel.rest.spring.session;
 
+import java.util.Map;
 import java.util.Optional;
-
-import jakarta.servlet.http.HttpSession;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.stereotype.Component;
 
 import ai.yda.framework.session.core.SessionProvider;
 
 /**
- * Provides methods for storing and retrieving data associated with a Session using a key-value store in the REST
- * context.
+ * Provides methods for storing and retrieving data associated with a session using a key-value store.
  * <p>
- * This component interacts with the {@link HttpSession} to manage Session attributes. It provides methods to
- * add and retrieve objects from the Session based on a key.
+ * This component interacts with the thread-safe {@link java.util.concurrent.ConcurrentHashMap}
+ * to manage Session attributes. It provides methods to add and retrieve objects from the Session based on a key.
  * </p>
  *
- * @author Nikita Litvinov
- * @since 0.1.0
+ * @author Iryna Kopchak
+ * @since 0.2.0
  */
 @Component
-public class RestSessionProvider implements SessionProvider {
+public class AsyncSessionProvider implements SessionProvider {
 
-    private final HttpSession httpSession;
-
-    /**
-     * Constructs a new {@link RestSessionProvider} instance with the specified {@link HttpSession}.
-     *
-     * @param httpSession the {@link HttpSession} to be used for storing and retrieving Session attributes.
-     */
-    public RestSessionProvider(final HttpSession httpSession) {
-        this.httpSession = httpSession;
-    }
+    private final Map<String, Object> session = new ConcurrentHashMap<>();
 
     /**
      * Stores an object in the Session with the specified key.
@@ -60,7 +50,7 @@ public class RestSessionProvider implements SessionProvider {
      */
     @Override
     public void put(final String key, final Object value) {
-        httpSession.setAttribute(key, value);
+        session.put(key, value);
     }
 
     /**
@@ -72,6 +62,6 @@ public class RestSessionProvider implements SessionProvider {
      */
     @Override
     public Optional<Object> get(final String key) {
-        return Optional.ofNullable(httpSession.getAttribute(key));
+        return Optional.ofNullable(session.get(key));
     }
 }

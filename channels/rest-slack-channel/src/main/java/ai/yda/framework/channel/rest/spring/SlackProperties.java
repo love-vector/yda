@@ -23,10 +23,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import ai.yda.framework.channel.shared.RestChannelProperties;
 
-@ConfigurationProperties(RestSlackProperties.CONFIG_PREFIX)
-public class RestSlackProperties extends RestChannelProperties {
+@ConfigurationProperties(SlackProperties.CONFIG_PREFIX)
+public class SlackProperties extends RestChannelProperties {
 
     public static final String CONFIG_PREFIX = "ai.yda.framework.channel.rest.slack.spring";
 
-    public RestSlackProperties() {}
+    public SlackProperties() {}
 }
