@@ -24,7 +24,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.WebSession;
 
-import ai.yda.framework.session.core.ReactiveSessionProvider;
+import ai.yda.framework.core.session.provider.ReactiveSessionProvider;
 
 /**
  * Provides methods for storing and retrieving data associated with a Session using a key-value store  within a REST

@@ -26,11 +26,11 @@ import reactor.core.scheduler.Schedulers;
 
 import org.springframework.ai.rag.Query;
 
+import ai.yda.framework.core.session.provider.ReactiveSessionProvider;
 import ai.yda.framework.rag.core.generator.StreamingGenerator;
 import ai.yda.framework.rag.core.model.RagResponse;
 import ai.yda.framework.rag.generator.assistant.openai.service.AzureOpenAiAssistantService;
 import ai.yda.framework.rag.generator.assistant.openai.util.OpenAiAssistantConstant;
-import ai.yda.framework.session.core.ReactiveSessionProvider;
 
 /**
  * Generates responses to the Request in a streaming manner by sending queries to the Assistant Service. The class

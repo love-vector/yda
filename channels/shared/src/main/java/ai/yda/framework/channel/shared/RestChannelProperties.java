@@ -51,6 +51,7 @@ public abstract class RestChannelProperties {
      */
     private String securityToken;
 
+    private String slackBotToken;
     /**
      * Enable or disable CORS.
      */

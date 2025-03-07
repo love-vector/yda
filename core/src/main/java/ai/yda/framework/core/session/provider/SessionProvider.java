@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.session.core;
+package ai.yda.framework.core.session.provider;
 
 import java.util.Optional;
 
@@ -27,7 +27,6 @@ import java.util.Optional;
  * @author Dmitry Marchuk
  * @author Nikita Litvinov
  * @see ReactiveSessionProvider
- * @see ThreadLocalSessionProvider
  * @since 0.1.0
  */
 public interface SessionProvider {
