@@ -27,20 +27,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
 import ai.yda.framework.channel.rest.spring.config.QueryDeserializerConfig;
-import ai.yda.framework.channel.rest.spring.security.SecurityConfiguration;
-import ai.yda.framework.channel.rest.spring.session.RestReactiveSessionProvider;
 import ai.yda.framework.channel.rest.spring.web.SlackChannel;
-import ai.yda.framework.channel.rest.spring.web.SlackEventController;
 
 @AutoConfiguration
 @EnableConfigurationProperties({SlackProperties.class})
-@Import({
-    SlackEventController.class,
-    SecurityConfiguration.class,
-    RestReactiveSessionProvider.class,
-    QueryDeserializerConfig.class,
-    SlackChannel.class
-})
+@Import({SlackChannel.class, QueryDeserializerConfig.class, SlackChannel.class})
 public class SlackAutoConfiguration {
     /**
      * Default constructor for {@link SlackAutoConfiguration}.
@@ -49,34 +40,6 @@ public class SlackAutoConfiguration {
     public Slack slack() {
         return new Slack();
     }
-
-    //    @Bean
-    //    public ThreadPoolTaskExecutor taskExecutor() {
-    //        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-    //        executor.setTaskDecorator(runnable -> {
-    //            RequestAttributes context = RequestContextHolder.getRequestAttributes();
-    //            return () -> {
-    //                try {
-    //                    RequestContextHolder.setRequestAttributes(context);
-    //                    runnable.run();
-    //                } finally {
-    //                    RequestContextHolder.resetRequestAttributes();
-    //                }
-    //            };
-    //        });
-    //        executor.initialize();
-    //        return executor;
-    //    }
-    //
-    //    @Bean
-    //    TomcatConnectorCustomizer disabledFacadeDiscard() {
-    //        return (binding) -> binding.setDiscardFacades(false);
-    //    }
-
-    //    @Bean
-    //    public RequestContextListener requestContextListener() {
-    //        return new RequestContextListener();
-    //    }
 
     public SlackAutoConfiguration() {}
 }

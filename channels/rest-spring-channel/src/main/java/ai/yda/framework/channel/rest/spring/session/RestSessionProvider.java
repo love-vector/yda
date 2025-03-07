@@ -25,7 +25,7 @@ import jakarta.servlet.http.HttpSession;
 
 import org.springframework.stereotype.Component;
 
-import ai.yda.framework.core.session.SessionProvider;
+import ai.yda.framework.core.session.provider.SessionProvider;
 
 /**
  * Provides methods for storing and retrieving data associated with a Session using a key-value store in the REST

@@ -17,34 +17,34 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.core.session;
+package ai.yda.framework.core.session.provider;
 
-import reactor.core.publisher.Mono;
+import java.util.Optional;
 
 /**
- * Defines methods for storing and retrieving data associated with a reactive Session using a key-value store.
+ * Defines methods for storing and retrieving data associated with a Session using a key-value store.
  *
+ * @author Dmitry Marchuk
  * @author Nikita Litvinov
- * @see SessionProvider
+ * @see ReactiveSessionProvider
  * @since 0.1.0
  */
-public interface ReactiveSessionProvider {
+public interface SessionProvider {
 
     /**
      * Stores a value in the Session associated with the specified key.
      *
      * @param key   the key under which the value is to be stored.
      * @param value the value to be stored in the Session.
-     * @return a {@link Mono} that completes when the value is successfully stored.
      */
-    Mono<Void> put(String key, Object value);
+    void put(String key, Object value);
 
     /**
      * Retrieves the value associated with the specified key from the Session.
      *
      * @param key the key whose associated value is to be retrieved.
-     * @return a {@link Mono} that emits the value associated with the key, or completes without emitting a value
-     * if the key does not exist in the Session.
+     * @return an {@link Optional} containing the value associated with the key, or an empty {@link Optional} if the key
+     * does not exist in the Session
      */
-    Mono<Object> get(String key);
+    Optional<Object> get(String key);
 }

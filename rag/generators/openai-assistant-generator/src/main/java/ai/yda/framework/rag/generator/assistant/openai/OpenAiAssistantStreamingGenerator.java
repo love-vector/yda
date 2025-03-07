@@ -26,7 +26,7 @@ import reactor.core.scheduler.Schedulers;
 
 import org.springframework.ai.rag.Query;
 
-import ai.yda.framework.core.session.ReactiveSessionProvider;
+import ai.yda.framework.core.session.provider.ReactiveSessionProvider;
 import ai.yda.framework.rag.core.generator.StreamingGenerator;
 import ai.yda.framework.rag.core.model.RagResponse;
 import ai.yda.framework.rag.generator.assistant.openai.service.AzureOpenAiAssistantService;

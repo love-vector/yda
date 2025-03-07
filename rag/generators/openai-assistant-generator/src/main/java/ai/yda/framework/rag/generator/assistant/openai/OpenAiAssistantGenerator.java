@@ -23,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.ai.rag.Query;
 
-import ai.yda.framework.core.session.SessionProvider;
+import ai.yda.framework.core.session.provider.SessionProvider;
 import ai.yda.framework.rag.core.generator.Generator;
 import ai.yda.framework.rag.core.model.RagResponse;
 import ai.yda.framework.rag.generator.assistant.openai.service.AzureOpenAiAssistantService;
