@@ -19,17 +19,16 @@
 */
 package ai.yda.framework.core.session;
 
-import org.springframework.stereotype.Component;
-
-public class UserThreadContext {
+public class ChannelThreadContext {
 
     private final ThreadLocal<String> threadLocal = new InheritableThreadLocal<>();
 
-    public void setUserId(String userId) {
-        threadLocal.set(userId);
+    public void setChannelId(String channelId) {
+        System.out.println("SESSION CHANNEL ID: " + channelId);
+        threadLocal.set(channelId);
     }
 
-    public String getUserId() {
+    public String getChannelId() {
         return threadLocal.get();
     }
 

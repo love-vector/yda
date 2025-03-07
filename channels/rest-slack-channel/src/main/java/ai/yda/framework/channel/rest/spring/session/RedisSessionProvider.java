@@ -19,32 +19,50 @@
 */
 package ai.yda.framework.channel.rest.spring.session;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
-import ai.yda.framework.core.session.UserThreadContext;
+import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Component;
+
 import ai.yda.framework.core.session.provider.SessionProvider;
 
+@Component
+@RequiredArgsConstructor
 public class RedisSessionProvider implements SessionProvider {
 
     //    private final RedisClient redisClient;
-    private final UserThreadContext userThreadContext;
+    //    private final ChannelThreadContext channelThreadContext;
+    //    private final SessionStore sessionStore;
 
-    public RedisSessionProvider(/*RedisClient redisClient,*/ UserThreadContext userThreadContext) {
-        //        this.redisClient = redisClient;
-        this.userThreadContext = userThreadContext;
+    private final Map<String, Object> session = new ConcurrentHashMap<>();
+
+    //    public RedisSessionProvider(/*RedisClient redisClient,*/ ChannelThreadContext channelThreadContext) {
+    //        //        this.redisClient = redisClient;
+    //        this.channelThreadContext = channelThreadContext;
+    //    }
+
+    @Override
+    public void put(String key, Object value) {
+        session.put(key, value);
+        //        if (sessionStore.sessionExists(channelThreadContext.getChannelId())) {
+        //            sessionStore.getSession(channelThreadContext.getChannelId()).put(key, value);
+        //        }
     }
 
     @Override
-    public void put(String key, Object value) {}
-
-    @Override
     public Optional<Object> get(String key) {
+        return Optional.of(session.get(key));
+        //        return Optional.of(
+        //                sessionStore.getSession(channelThreadContext.getChannelId()).get(key));
 
         //        var sessionKey = userThreadContext.getSessionKey();
         //
         //        redisClient.get(String.format("{'user_id': '%s', 'thread_id': '%s'}"),
         // userThreadContext.getSessionKey());
 
-        return Optional.empty();
+        //        return Optional.empty();
     }
 }

@@ -27,11 +27,20 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
 import ai.yda.framework.channel.rest.spring.config.QueryDeserializerConfig;
+import ai.yda.framework.channel.rest.spring.session.RedisSessionProvider;
+import ai.yda.framework.channel.rest.spring.session.SessionStore;
 import ai.yda.framework.channel.rest.spring.web.SlackChannel;
 
 @AutoConfiguration
 @EnableConfigurationProperties({SlackProperties.class})
-@Import({SlackChannel.class, QueryDeserializerConfig.class, SlackChannel.class})
+@Import({
+    SlackChannel.class,
+    QueryDeserializerConfig.class,
+    SlackChannel.class,
+    RedisSessionProvider.class,
+    SessionStore.class,
+    SimpleQueryProcessorTest.class
+})
 public class SlackAutoConfiguration {
     /**
      * Default constructor for {@link SlackAutoConfiguration}.
@@ -40,6 +49,11 @@ public class SlackAutoConfiguration {
     public Slack slack() {
         return new Slack();
     }
+    //
+    //    @Bean
+    //    public ChannelThreadContext channelThreadContext() {
+    //        return new ChannelThreadContext();
+    //    }
 
     public SlackAutoConfiguration() {}
 }
