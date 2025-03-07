@@ -24,9 +24,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplicat
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
+import ai.yda.framework.core.session.ReactiveSessionProvider;
 import ai.yda.framework.rag.generator.assistant.openai.OpenAiAssistantStreamingGenerator;
 import ai.yda.framework.rag.generator.assistant.openai.service.AzureOpenAiAssistantService;
-import ai.yda.framework.session.core.ReactiveSessionProvider;
 
 /**
  * Autoconfiguration class for setting up the {@link OpenAiAssistantStreamingGenerator} bean and related components for

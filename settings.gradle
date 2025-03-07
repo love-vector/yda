@@ -54,13 +54,6 @@ project(':openai-chat-generator').projectDir = file('rag/generators/openai-chat-
 
 //______________________________________________________________________________________________________________________
 
-// Session
-
-include 'session-core'
-project(':session-core').projectDir = file('session/core')
-
-//______________________________________________________________________________________________________________________
-
 // Integrations - Spring
 
 // Assistant
