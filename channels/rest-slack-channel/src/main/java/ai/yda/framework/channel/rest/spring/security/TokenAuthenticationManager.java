@@ -19,7 +19,9 @@
 */
 package ai.yda.framework.channel.rest.spring.security;
 
-import org.springframework.security.authentication.AuthenticationManager;
+import reactor.core.publisher.Mono;
+
+import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 
@@ -27,13 +29,14 @@ import ai.yda.framework.channel.shared.TokenAuthentication;
 import ai.yda.framework.channel.shared.TokenAuthenticationException;
 
 /**
- * Provides mechanism to processes an {@link Authentication} request with {@link TokenAuthentication}.
+ * Provide mechanism to processes an {@link Authentication} request with {@link TokenAuthentication} in the reactive
+ * manner.
  *
  * @author Nikita Litvinov
  * @see TokenAuthentication
  * @since 0.1.0
  */
-public class TokenAuthenticationManager implements AuthenticationManager {
+public class TokenAuthenticationManager implements ReactiveAuthenticationManager {
 
     private final Integer tokenKeyHash;
 
@@ -51,14 +54,14 @@ public class TokenAuthenticationManager implements AuthenticationManager {
      * hash.
      *
      * @param authentication the {@link Authentication} request to be processed.
-     * @return the authenticated {@link Authentication} object if the credentials match the token key hash.
+     * @return the authenticated {@link Mono<Authentication>} object if the credentials match the token key hash.
      * @throws AuthenticationException if the credentials do not match the token key hash.
      */
     @Override
-    public Authentication authenticate(final Authentication authentication) throws AuthenticationException {
+    public Mono<Authentication> authenticate(final Authentication authentication) throws AuthenticationException {
         if (tokenKeyHash.equals(authentication.getCredentials())) {
-            return authentication;
+            return Mono.just(authentication);
         }
-        throw new TokenAuthenticationException();
+        return Mono.error(new TokenAuthenticationException());
     }
 }

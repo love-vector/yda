@@ -19,27 +19,28 @@
 */
 package ai.yda.framework.channel.rest.spring.security;
 
-import jakarta.servlet.http.HttpServletRequest;
+import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.AuthenticationConverter;
+import org.springframework.security.web.server.authentication.ServerAuthenticationConverter;
 import org.springframework.util.StringUtils;
+import org.springframework.web.server.ServerWebExchange;
 
 import ai.yda.framework.channel.shared.TokenAuthentication;
 
 /**
- * Provides strategy used for converting from a {@link HttpServletRequest} to an {@link TokenAuthentication}. Used to
- * authenticate with {@link TokenAuthenticationManager}. If the result is null, then it signals that no authentication
- * attempt should be made.
+ * Provides strategy used for converting from a {@link ServerWebExchange} to an {@link Mono<TokenAuthentication>}. Used
+ * to authenticate with {@link TokenAuthenticationManager}. If the result is null, then it signals that no
+ * authentication attempt should be made.
  *
  * @author Nikita Litvinov
  * @see TokenAuthentication
  * @since 0.1.0
  */
-public class TokenAuthenticationConverter implements AuthenticationConverter {
+public class TokenAuthenticationConverter implements ServerAuthenticationConverter {
+
     /**
      * The authentication scheme used for Bearer tokens in the authorization header. This constant is used to indicate
      * that the token should be prefixed with the word "Bearer".
@@ -58,31 +59,26 @@ public class TokenAuthenticationConverter implements AuthenticationConverter {
     public TokenAuthenticationConverter() {}
 
     /**
-     * Converts the given {@link HttpServletRequest} to an {@link TokenAuthentication}. If the result is null, then it
-     * signals that no authentication attempt should be made.
+     * Converts the given {@link ServerWebExchange} to an {@link Mono<TokenAuthentication>}. If the result is null,
+     * then it signals that no authentication attempt should be made.
      *
-     * @param request the {@link HttpServletRequest} to be converted.
-     * @return the {@link Authentication} that is a result of conversion or null if there is no authentication.
+     * @param exchange the {@link ServerWebExchange} to be converted.
+     * @return the {@link Mono<Authentication>} that is a result of conversion or null if there is no authentication.
      */
     @Override
-    public Authentication convert(final HttpServletRequest request) {
-        var authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (authHeader == null) {
-            return null;
+    public Mono<Authentication> convert(final ServerWebExchange exchange) {
+        var authHeaders = exchange.getRequest().getHeaders().get(HttpHeaders.AUTHORIZATION);
+        if (authHeaders == null) {
+            return Mono.empty();
         }
-        authHeader = authHeader.trim();
+        var authHeader = authHeaders.get(0).trim();
         if (!StringUtils.startsWithIgnoreCase(authHeader, AUTHENTICATION_SCHEME_BEARER)) {
-            return null;
+            return Mono.empty();
         }
         if (authHeader.equalsIgnoreCase(AUTHENTICATION_SCHEME_BEARER)) {
-            throw new BadCredentialsException("Empty bearer authentication token");
+            return Mono.error(new BadCredentialsException("Empty bearer authentication token"));
         }
         var token = authHeader.substring(TOKEN_START_POSITION);
-        var currentAuthentication =
-                SecurityContextHolder.getContextHolderStrategy().getContext().getAuthentication();
-        return currentAuthentication == null
-                ? new TokenAuthentication(token)
-                : new TokenAuthentication(
-                        token, currentAuthentication.getPrincipal(), currentAuthentication.getAuthorities());
+        return Mono.just(new TokenAuthentication(token));
     }
 }

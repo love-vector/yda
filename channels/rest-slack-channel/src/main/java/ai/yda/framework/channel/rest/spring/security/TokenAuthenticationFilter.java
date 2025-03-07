@@ -19,103 +19,104 @@
 */
 package ai.yda.framework.channel.rest.spring.security;
 
-import java.io.IOException;
-
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Mono;
 
 import org.springframework.lang.NonNull;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.context.SecurityContextHolderStrategy;
-import org.springframework.security.web.authentication.AuthenticationConverter;
-import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextImpl;
+import org.springframework.security.web.server.WebFilterExchange;
+import org.springframework.security.web.server.authentication.*;
+import org.springframework.security.web.server.context.ServerSecurityContextRepository;
+import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.WebFilterChain;
+
+import ai.yda.framework.channel.shared.TokenAuthenticationException;
 
 /**
- * Provides a Spring Security filter that processes authentication requests containing a Bearer token in the
+ * Provides a reactive Spring Security filter that processes authentication requests containing a Bearer token in the
  * Authorization header. The filter converts the Bearer token into an {@link Authentication} object and attempts to
  * authenticate it using the {@link TokenAuthenticationManager}. If the authentication is successful, the authenticated
- * user is stored in the {@link SecurityContextHolder}.
+ * user is stored in the {@link ServerSecurityContextRepository}.
  *
  * @author Nikita Litvinov
  * @see TokenAuthenticationConverter
  * @see TokenAuthenticationManager
  * @since 0.1.0
  */
-@RequiredArgsConstructor
-public class TokenAuthenticationFilter extends OncePerRequestFilter {
+@Slf4j
+public class TokenAuthenticationFilter implements WebFilter {
 
-    private final AuthenticationConverter authenticationConverter = new TokenAuthenticationConverter();
+    private final TokenAuthenticationConverter authenticationConverter = new TokenAuthenticationConverter();
 
     private final TokenAuthenticationManager authenticationManager;
 
-    private final SecurityContextHolderStrategy securityContextHolderStrategy =
-            SecurityContextHolder.getContextHolderStrategy();
+    private final ServerSecurityContextRepository securityContextRepository;
+
+    private final ServerAuthenticationSuccessHandler authenticationSuccessHandler =
+            new WebFilterChainServerAuthenticationSuccessHandler();
+
+    private final ServerAuthenticationFailureHandler authenticationFailureHandler =
+            new ServerAuthenticationEntryPointFailureHandler(new HttpBasicServerAuthenticationEntryPoint());
 
     /**
-     * Constructs a new {@link TokenAuthenticationFilter} instance with the provided token.
+     * Constructs a new {@link TokenAuthenticationFilter} instance with the specified token and security context
+     * repository.
      *
-     * @param token the token used to authenticate incoming requests.
+     * @param token                     the token used for authentication.
+     * @param securityContextRepository the {@link ServerSecurityContextRepository} to manage the security context.
      */
-    public TokenAuthenticationFilter(final String token) {
+    public TokenAuthenticationFilter(
+            final String token, final ServerSecurityContextRepository securityContextRepository) {
         this.authenticationManager = new TokenAuthenticationManager(token);
+        this.securityContextRepository = securityContextRepository;
     }
 
     /**
-     * Processes the authentication request by extracting the Bearer token from the Authorization header, converting it
-     * to an {@link Authentication} object, and attempting to authenticate it. The request and response is then
-     * forwarded to the next filter in the chain.
+     * Filters the request to authenticate the user based on the token.
+     * <p>
+     * This method attempts to convert the token from the request using {@link TokenAuthenticationConverter}.
+     * If successful, it proceeds with authentication using {@link TokenAuthenticationManager}. Upon successful
+     * authentication, it saves the security context and triggers the success handler. In case of authentication
+     * failure, it invokes the failure handler.
+     * </p>
      *
-     * @param request     the current {@link HttpServletRequest}.
-     * @param response    the current {@link HttpServletResponse}.
-     * @param filterChain the {@link FilterChain} to proceed with the request processing.
-     * @throws ServletException if an error occurs during the filtering process.
-     * @throws IOException      if an I/O error occurs during the filtering process.
+     * @param exchange the {@link ServerWebExchange} that contains the request and response objects.
+     * @param chain    the {@link WebFilterChain} that allows further processing of the request.
+     * @return a {@link Mono<Void>} object.
      */
+    @NonNull
     @Override
-    protected void doFilterInternal(
-            final @NonNull HttpServletRequest request,
-            final @NonNull HttpServletResponse response,
-            final @NonNull FilterChain filterChain)
-            throws ServletException, IOException {
-        try {
-            var authRequest = this.authenticationConverter.convert(request);
-            if (authRequest == null) {
-                this.logger.trace("Did not process authentication request since failed"
-                        + " to find token in Bearer Authorization header");
-                filterChain.doFilter(request, response);
-                return;
-            }
-            if (authenticationIsRequired(authRequest)) {
-                var authResult = authenticationManager.authenticate(authRequest);
-                securityContextHolderStrategy.getContext().setAuthentication(authResult);
-            }
-        } catch (final AuthenticationException ignored) {
-        }
-        filterChain.doFilter(request, response);
+    public Mono<Void> filter(@NonNull final ServerWebExchange exchange, @NonNull final WebFilterChain chain) {
+        return this.authenticationConverter
+                .convert(exchange)
+                .switchIfEmpty(chain.filter(exchange).then(Mono.empty()))
+                .flatMap(authenticationManager::authenticate)
+                .flatMap(authentication ->
+                        onAuthenticationSuccess(authentication, new WebFilterExchange(exchange, chain)))
+                .onErrorResume(
+                        TokenAuthenticationException.class,
+                        (exception) -> this.authenticationFailureHandler.onAuthenticationFailure(
+                                new WebFilterExchange(exchange, chain), exception));
     }
 
     /**
-     * Determines whether re-authentication is required based on the current authentication context.
+     * Handles the success of authentication by saving the security context and invoking the success handler.
      *
-     * @param authentication the new {@link Authentication} request to be processed.
-     * @return {@code true} if re-authentication is required and {@code false} otherwise.
+     * @param authentication    the successful {@link Authentication} result.
+     * @param webFilterExchange the {@link WebFilterExchange} containing the current request and response.
+     * @return a {@link Mono<Void>} object.
      */
-    protected boolean authenticationIsRequired(final Authentication authentication) {
-        // Only reauthenticate if token doesn't match SecurityContextHolder and user
-        // isn't authenticated (see SEC-53)
-        var currentAuthentication = securityContextHolderStrategy.getContext().getAuthentication();
-        if (currentAuthentication == null
-                || !currentAuthentication.getCredentials().equals(authentication.getCredentials())
-                || !currentAuthentication.isAuthenticated()) {
-            return true;
-        }
-        return (currentAuthentication instanceof AnonymousAuthenticationToken);
+    protected Mono<Void> onAuthenticationSuccess(
+            final Authentication authentication, final WebFilterExchange webFilterExchange) {
+        ServerWebExchange exchange = webFilterExchange.getExchange();
+        SecurityContextImpl securityContext = new SecurityContextImpl();
+        securityContext.setAuthentication(authentication);
+        return this.securityContextRepository
+                .save(exchange, securityContext)
+                .then(this.authenticationSuccessHandler.onAuthenticationSuccess(webFilterExchange, authentication))
+                .contextWrite(ReactiveSecurityContextHolder.withSecurityContext(Mono.just(securityContext)));
     }
 }

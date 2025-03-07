@@ -19,56 +19,83 @@
 */
 package ai.yda.framework.channel.rest.spring.web;
 
-import java.io.IOException;
-
 import com.slack.api.Slack;
-import com.slack.api.methods.SlackApiException;
 import com.slack.api.methods.request.chat.ChatPostMessageRequest;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import org.springframework.ai.rag.Query;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 
-import ai.yda.framework.channel.core.Channel;
+import ai.yda.framework.channel.core.StreamingChannel;
 import ai.yda.framework.channel.rest.spring.SlackProperties;
-import ai.yda.framework.core.assistant.Assistant;
+import ai.yda.framework.core.assistant.StreamingAssistant;
 import ai.yda.framework.rag.core.model.RagResponse;
 
 @Slf4j
 @Service
 @EnableAsync
-public class SlackChannel extends Channel<Query, RagResponse> {
+public class SlackChannel extends StreamingChannel<Query, RagResponse> {
 
     private final Slack slack;
     private final SlackProperties slackProperties;
 
     public SlackChannel(
-            final Assistant<Query, RagResponse> assistant, final Slack slack, final SlackProperties slackProperties) {
+            final StreamingAssistant<Query, RagResponse> assistant,
+            final Slack slack,
+            final SlackProperties slackProperties) {
         super(assistant);
         this.slack = slack;
         this.slackProperties = slackProperties;
     }
 
+    //    @Async
+    //    public void sendMessage(String channel, String threadTs, String message) {
+    //        try {
+    //            var botMessage =
+    //                    super.processRequest(new Query(message)).blockLast().getResult();
+    //            var slackResponse = slack.methods(slackProperties.getSlackBotToken())
+    //                    .chatPostMessage(ChatPostMessageRequest.builder()
+    //                            .channel(channel)
+    //                            .text(botMessage)
+    //                            .threadTs(threadTs)
+    //                            .build());
+    //
+    //            if (slackResponse.isOk()) {
+    //                log.debug("Message successfully sent to channel {}: {}", channel, botMessage);
+    //            } else {
+    //                log.error("Error sending message to Slack: {}", slackResponse.getError());
+    //            }
+    //        } catch (SlackApiException | IOException e) {
+    //            log.error("An error occurred while calling the Slack API: {}", e.getMessage());
+    //        }
+    //    }
+
     @Async
     public void sendMessage(String channel, String threadTs, String message) {
-        try {
-            var botMessage = super.processRequest(new Query(message)).getResult();
-            var slackResponse = slack.methods(slackProperties.getSlackBotToken())
-                    .chatPostMessage(ChatPostMessageRequest.builder()
-                            .channel(channel)
-                            .text(botMessage)
-                            .threadTs(threadTs)
-                            .build());
-
-            if (slackResponse.isOk()) {
-                log.debug("Message successfully sent to channel {}: {}", channel, botMessage);
-            } else {
-                log.error("Error sending message to Slack: {}", slackResponse.getError());
-            }
-        } catch (SlackApiException | IOException e) {
-            log.error("An error occurred while calling the Slack API: {}", e.getMessage());
-        }
+        super.processRequest(new Query(message))
+                .last()
+                .map(result -> result.getResult())
+                .flatMap(botMessage -> Mono.fromCallable(() -> {
+                            var slackResponse = slack.methods(slackProperties.getSlackBotToken())
+                                    .chatPostMessage(ChatPostMessageRequest.builder()
+                                            .channel(channel)
+                                            .text(botMessage)
+                                            .threadTs(threadTs)
+                                            .build());
+                            if (slackResponse.isOk()) {
+                                log.debug("Message successfully sent to channel {}: {}", channel, botMessage);
+                            } else {
+                                log.error("Error sending message to Slack: {}", slackResponse.getError());
+                            }
+                            return slackResponse;
+                        })
+                        .subscribeOn(Schedulers.boundedElastic()))
+                .subscribe(
+                        response -> {},
+                        error -> log.error("An error occurred while sending message: {}", error.getMessage()));
     }
 }

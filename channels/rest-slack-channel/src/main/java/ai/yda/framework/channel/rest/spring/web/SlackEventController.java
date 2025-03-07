@@ -22,6 +22,8 @@ package ai.yda.framework.channel.rest.spring.web;
 import java.util.Map;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Mono;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/slack/events")
@@ -39,17 +42,40 @@ public class SlackEventController {
 
     private final SlackChannel slackChannel;
 
+    //    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    //    public ResponseEntity<?> handleSlackEvent(@RequestBody Map<String, Object> event) {
+    //        var eventType = (String) event.get("type");
+    //        if (URL_VERIFICATION_EVENT_TYPE.equals(eventType)) {
+    //            return ResponseEntity.ok(Map.of("challenge", event.get("challenge")));
+    //        } else if (MESSAGE_EVENT_TYPE.equals(eventType)) {
+    //            var eventData = (Map<String, String>) event.get("event");
+    //            if (eventData != null && eventData.get("bot_id") == null) {
+    //                slackChannel.sendMessage(eventData.get("channel"), eventData.get("thread_ts"),
+    // eventData.get("text"));
+    //            }
+    //        }
+    //        return ResponseEntity.ok().build();
+    //    }
+
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> handleSlackEvent(@RequestBody Map<String, Object> event) {
+    public Mono<ResponseEntity<?>> handleSlackEvent(@RequestBody Map<String, Object> event) {
         var eventType = (String) event.get("type");
         if (URL_VERIFICATION_EVENT_TYPE.equals(eventType)) {
-            return ResponseEntity.ok(Map.of("challenge", event.get("challenge")));
+            return Mono.just(ResponseEntity.ok(Map.of("challenge", event.get("challenge"))));
         } else if (MESSAGE_EVENT_TYPE.equals(eventType)) {
             var eventData = (Map<String, String>) event.get("event");
             if (eventData != null && eventData.get("bot_id") == null) {
                 slackChannel.sendMessage(eventData.get("channel"), eventData.get("thread_ts"), eventData.get("text"));
+
+                //                Mono.fromRunnable(() -> slackChannel.sendMessage(
+                //                                eventData.get("channel"), eventData.get("thread_ts"),
+                // eventData.get("text")))
+                //                        .subscribeOn(Schedulers.boundedElastic())
+                //                        .subscribe(
+                //                                null, error -> log.error("Error sendMessage: {}",
+                // error.getMessage()));
             }
         }
-        return ResponseEntity.ok().build();
+        return Mono.just(ResponseEntity.ok().build());
     }
 }

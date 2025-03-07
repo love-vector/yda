@@ -24,24 +24,25 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
+import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
+import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
+import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.security.web.server.context.WebSessionServerSecurityContextRepository;
 import org.springframework.web.cors.CorsConfiguration;
 
 import ai.yda.framework.channel.rest.spring.SlackProperties;
+import ai.yda.framework.channel.rest.spring.session.SessionHandlerFilter;
 
 /**
- * This is a Spring Security configuration that sets up security settings for the synchronized REST Channel.
+ * This is a Web Flux Spring Security configuration that sets up security settings for the streaming REST Channel.
  *
  * @author Nikita Litvinov
  * @see SlackProperties
  * @since 0.1.0
  */
 @Configuration
-@EnableWebSecurity
+@EnableWebFluxSecurity
 public class SecurityConfiguration {
 
     /**
@@ -54,51 +55,51 @@ public class SecurityConfiguration {
      * <p>
      * Defines security filters, user authentication mechanisms, and authorization rules to control access to the
      * Channel. This configuration includes settings for {@link TokenAuthenticationFilter}, HTTP security configurations
-     * such as enabling or disabling CORS, disabling CSRF, and setting the session management creation policy to always.
-     * It also specifies authorization rules: requests to the endpoint are authorized and require authentication, while
-     * all other requests are not authorized and do not require authentication.
+     * such as enabling or disabling CORS, disabling CSRF, and adding the {@link ai.yda.framework.channel.rest.spring.session.SessionHandlerFilter} after an
+     * AnonymousAuthenticationWebFilter. It also specifies authorization rules: requests to the endpoint are authorized
+     * and require authentication, while all other requests are not authorized and do not require authentication.
      * </p>
      *
-     * @param http       the {@link HttpSecurity} to configure.
-     * @param properties the {@link SlackProperties} containing configuration properties for the security setup.
-     * @return a {@link SecurityFilterChain} instance configured with the specified HTTP security settings.
-     * @throws Exception if an error occurs during configuration.
+     * @param http       the {@link ServerHttpSecurity} to configure.
+     * @param properties the {@link SlackProperties} containing configuration properties for the security
+     *                   setup.
+     * @return a {@link SecurityWebFilterChain} instance configured with the specified HTTP security settings.
      */
     @Bean
     @ConditionalOnProperty(prefix = SlackProperties.CONFIG_PREFIX, name = "security-token")
-    public SecurityFilterChain combinedFilterChain(final HttpSecurity http, final SlackProperties properties)
-            throws Exception {
-        http.csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(properties.getEndpointRelativePath(), "/slack/events/**")
+    public SecurityWebFilterChain filterChain(final ServerHttpSecurity http, final SlackProperties properties) {
+        var securityContextRepository = new WebSessionServerSecurityContextRepository();
+        http.csrf(ServerHttpSecurity.CsrfSpec::disable)
+                .authorizeExchange(exchange -> exchange.pathMatchers(properties.getEndpointRelativePath())
                         .authenticated()
-                        .anyRequest()
+                        .anyExchange()
                         .permitAll())
+                .securityContextRepository(securityContextRepository)
                 .addFilterAfter(
-                        new TokenAuthenticationFilter(properties.getSecurityToken()),
-                        AnonymousAuthenticationFilter.class);
+                        new TokenAuthenticationFilter(properties.getSecurityToken(), securityContextRepository),
+                        SecurityWebFiltersOrder.ANONYMOUS_AUTHENTICATION);
         configureCors(http, properties);
         configureSessionManagement(http);
         return http.build();
     }
 
     /**
-     * This Channel security configuration is used when 'security-token' property is not configured.
+     * This Channel security configuration is used when the 'security-token' property is not configured.
      * <p>
      * This configuration disables CSRF protection and CORS, and sets up authorization rules such that all HTTP requests
      * are permitted without authentication.
      * </p>
      *
-     * @param http the {@link HttpSecurity} to configure.
-     * @return a {@link SecurityFilterChain} instance configured with the specified HTTP security settings.
-     * @throws Exception if an error occurs during configuration.
+     * @param http       the {@link ServerHttpSecurity} to configure.
+     * @param properties the {@link SlackProperties} containing CORS and session management configuration.
+     * @return a {@link SecurityWebFilterChain} instance configured with the specified HTTP security settings.
      */
     @Bean
     @ConditionalOnMissingBean
-    public SecurityFilterChain defaultFilterChain(final HttpSecurity http, final SlackProperties properties)
-            throws Exception {
-        http.csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll());
+    public SecurityWebFilterChain defaultFilterChain(final ServerHttpSecurity http, final SlackProperties properties) {
+        http.csrf(ServerHttpSecurity.CsrfSpec::disable)
+                .authorizeExchange(exchange -> exchange.anyExchange().permitAll())
+                .securityContextRepository(new WebSessionServerSecurityContextRepository());
         configureCors(http, properties);
         configureSessionManagement(http);
         return http.build();
@@ -109,9 +110,8 @@ public class SecurityConfiguration {
      *
      * @param http       the {@link HttpSecurity} to configure.
      * @param properties for configuring CORS
-     * @throws Exception if an error occurs during configuration.
      */
-    private void configureCors(final HttpSecurity http, final SlackProperties properties) throws Exception {
+    private void configureCors(final ServerHttpSecurity http, final SlackProperties properties) {
         if (properties.getCorsEnabled()) {
             http.cors(cors -> {
                 var config = new CorsConfiguration();
@@ -122,18 +122,16 @@ public class SecurityConfiguration {
                 cors.configurationSource(request -> config);
             });
         } else {
-            http.cors(AbstractHttpConfigurer::disable);
+            http.cors(ServerHttpSecurity.CorsSpec::disable);
         }
     }
 
     /**
-     * Configures session management to always create a session and limits the number of sessions to 1.
+     * Adds the {@link SessionHandlerFilter} after an AnonymousAuthenticationWebFilter to handle session creation.
      *
-     * @param http the {@link HttpSecurity} to configure.
-     * @throws Exception if an error occurs during configuration.
+     * @param http the {@link ServerHttpSecurity} to configure.
      */
-    private void configureSessionManagement(final HttpSecurity http) throws Exception {
-        http.sessionManagement(
-                sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.ALWAYS));
+    private void configureSessionManagement(final ServerHttpSecurity http) {
+        http.addFilterAfter(new SessionHandlerFilter(), SecurityWebFiltersOrder.ANONYMOUS_AUTHENTICATION);
     }
 }
