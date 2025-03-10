@@ -57,7 +57,7 @@ public class DocumentMetadataEntity {
     @Column(name = "ai_description")
     private String aiDescription;
 
-    @Column(name = "webViewLink")
+    @Column(name = "web_view_link")
     private String webViewLink;
 
     @Column(name = "created_at")
