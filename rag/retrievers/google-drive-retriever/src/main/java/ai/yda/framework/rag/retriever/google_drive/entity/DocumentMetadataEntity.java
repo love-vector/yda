@@ -36,7 +36,7 @@ import lombok.*;
  * @since 0.2.0
  */
 @Entity
-@Table(name = "document_metadata")
+@Table(name = "document_metadata", schema = "documents")
 @Getter
 @Setter
 @Builder(toBuilder = true)

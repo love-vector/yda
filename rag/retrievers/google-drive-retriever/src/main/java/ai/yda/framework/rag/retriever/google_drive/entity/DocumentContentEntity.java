@@ -16,7 +16,7 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.rag.retriever.google_drive.entity;
 
 import jakarta.persistence.*;
@@ -32,7 +32,7 @@ import lombok.*;
  * @since 0.2.0
  */
 @Entity
-@Table(name = "document_content")
+@Table(name = "document_content", schema = "documents")
 @Getter
 @Setter
 @Builder(toBuilder = true)
