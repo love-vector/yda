@@ -63,7 +63,7 @@ import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
  * @since 0.2.0
  */
 @Slf4j
-public class GoogleDriveRetriever extends BaseRetriever {
+public class  GoogleDriveRetriever extends BaseRetriever {
 
     private static final String RETRIEVAL_SYSTEM_INSTRUCTION =
             """
@@ -86,6 +86,10 @@ public class GoogleDriveRetriever extends BaseRetriever {
                         "contentId":"string"
                         }
                     ]
+                    
+                    - Your response MUST ALWAYS be a valid JSON array, even if it contains only one element.
+                    - Do NOT return a single object `{}`. Always wrap your response in square brackets `[]`.
+                    
                     Deduplicate chunk IDs to ensure that no chunk appears more than once in the response. If duplicates are found, keep only one instance of each unique ID.
                     Ensure the output strictly complies with the specified format.""";
 
