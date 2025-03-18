@@ -66,7 +66,7 @@ public class SlackAutoConfiguration {
     }
 
     @Bean
-    public App initSlackApp(final SlackProperties properties) {
+    public App slackApp(final SlackProperties properties) {
         var config = AppConfig.builder()
                 .signingSecret(properties.getSigningSecret())
                 .clientId(properties.getClientId())

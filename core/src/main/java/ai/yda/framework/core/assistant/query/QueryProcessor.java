@@ -21,6 +21,6 @@ package ai.yda.framework.core.assistant.query;
 
 import org.springframework.ai.rag.Query;
 
-public interface QueryProcessor<QUERY> {
-    Query processQuery(QUERY query);
+public interface QueryProcessor<QUERY, HISTORY> {
+    Query processQuery(QUERY query, HISTORY history);
 }
