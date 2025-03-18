@@ -1,0 +1,16 @@
+dependencies {
+    api project(":channel-core")
+    api project(":channel-shared")
+    api project(":session-core")
+
+    api 'org.springframework.boot:spring-boot-starter-web:3.3.2'
+    api 'org.springframework.boot:spring-boot-starter-security:3.3.2'
+    api 'com.google.apis:google-api-services-drive:v3-rev20241206-2.0.0'
+
+    implementation 'com.google.api-client:google-api-client:2.3.0'
+
+    // Google OAuth2
+    implementation 'com.google.auth:google-auth-library-oauth2-http:1.22.0'
+
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor:3.3.2'
+}
