@@ -20,11 +20,15 @@
 package ai.yda.framework.slack.channel.channel;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.ForkJoinPool;
 
 import com.slack.api.Slack;
 import com.slack.api.methods.SlackApiException;
 import com.slack.api.methods.request.chat.ChatPostMessageRequest;
+import com.slack.api.methods.request.conversations.ConversationsHistoryRequest;
+import com.slack.api.methods.request.conversations.ConversationsRepliesRequest;
+import com.slack.api.model.Message;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.ai.rag.Query;
@@ -60,6 +64,9 @@ public class SlackChannel extends Channel<Query, RagResponse> {
         concurrentExecutor.submit(() -> {
             try {
                 sessionContext.setSessionId(channel);
+
+                var slackMessageHistory = getSlackMessageHistory(channel, threadTs);
+
                 var botMessage = super.processRequest(new Query(message)).getResult();
                 var slackResponse = slack.methods(properties.getBotToken())
                         .chatPostMessage(ChatPostMessageRequest.builder()
@@ -80,5 +87,22 @@ public class SlackChannel extends Channel<Query, RagResponse> {
                 log.error("An error occurred while calling the Slack API: {}", e.getMessage());
             }
         });
+    }
+
+    private List<Message> getSlackMessageHistory(final String channel, final String threadTs)
+            throws SlackApiException, IOException {
+        if (threadTs != null) {
+            return slack.methods(properties.getBotToken())
+                    .conversationsReplies(ConversationsRepliesRequest.builder()
+                            .channel(channel)
+                            .ts(threadTs)
+                            .build())
+                    .getMessages();
+        }
+
+        return slack.methods(properties.getBotToken())
+                .conversationsHistory(
+                        ConversationsHistoryRequest.builder().channel(channel).build())
+                .getMessages();
     }
 }
