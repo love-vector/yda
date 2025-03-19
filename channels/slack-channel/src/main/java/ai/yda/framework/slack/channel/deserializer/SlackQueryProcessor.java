@@ -17,20 +17,30 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.core.assistant.query.processor;
+package ai.yda.framework.slack.channel.deserializer;
 
 import java.util.Collections;
 import java.util.List;
 
-import org.springframework.ai.chat.messages.Message;
+import com.slack.api.model.Message;
+
+import org.springframework.ai.chat.messages.AssistantMessage;
+import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.rag.Query;
+import org.springframework.stereotype.Component;
 
 import ai.yda.framework.core.assistant.query.QueryProcessor;
 
-public class SimpleQueryProcessor<QUERY, HISTORY> implements QueryProcessor<QUERY, HISTORY> {
+@Component
+public class SlackQueryProcessor implements QueryProcessor<String, List<Message>> {
 
     @Override
-    public Query processQuery(QUERY query, HISTORY history) {
-        return new Query((String) query, (List<Message>) history, Collections.emptyMap());
+    public Query processQuery(String query, List<Message> history) {
+        var messages = history.parallelStream()
+                .map(message -> message.getBotId() != null
+                        ? (org.springframework.ai.chat.messages.Message) new AssistantMessage(message.getText())
+                        : new UserMessage(message.getText()))
+                .toList();
+        return new Query(query, messages, Collections.emptyMap());
     }
 }

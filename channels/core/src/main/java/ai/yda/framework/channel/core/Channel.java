@@ -34,9 +34,9 @@ import ai.yda.framework.core.assistant.query.processor.SimpleQueryProcessor;
  * @see StreamingChannel
  * @since 0.1.0
  */
-public abstract class Channel<QUERY, RESPONSE> {
+public abstract class Channel<QUERY, HISTORY, RESPONSE> {
 
-    private final QueryProcessor<QUERY> queryProcessor;
+    private final QueryProcessor<QUERY, HISTORY> queryProcessor;
 
     private final Assistant<Query, RESPONSE> assistant;
 
@@ -45,7 +45,7 @@ public abstract class Channel<QUERY, RESPONSE> {
         this.queryProcessor = new SimpleQueryProcessor<>();
     }
 
-    protected Channel(final Assistant<Query, RESPONSE> assistant, final QueryProcessor<QUERY> queryProcessor) {
+    protected Channel(final Assistant<Query, RESPONSE> assistant, final QueryProcessor<QUERY, HISTORY> queryProcessor) {
         this.assistant = assistant;
         this.queryProcessor = queryProcessor;
     }
@@ -56,7 +56,7 @@ public abstract class Channel<QUERY, RESPONSE> {
      * @param query the Request object to be processed.
      * @return the Response object generated after processing the Request.
      */
-    public RESPONSE processRequest(QUERY query) {
-        return this.assistant.assist(this.queryProcessor.processQuery(query));
+    public RESPONSE processRequest(QUERY query, HISTORY history) {
+        return this.assistant.assist(this.queryProcessor.processQuery(query, history));
     }
 }

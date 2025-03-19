@@ -36,13 +36,14 @@ import org.springframework.stereotype.Component;
 
 import ai.yda.framework.channel.core.Channel;
 import ai.yda.framework.core.assistant.Assistant;
+import ai.yda.framework.core.assistant.query.QueryProcessor;
 import ai.yda.framework.rag.core.model.RagResponse;
 import ai.yda.framework.session.core.ThreadLocalSessionContext;
 import ai.yda.framework.slack.channel.SlackProperties;
 
 @Slf4j
 @Component
-public class SlackChannel extends Channel<Query, RagResponse> {
+public class SlackChannel extends Channel<String, List<Message>, RagResponse> {
 
     private final Slack slack;
     private final SlackProperties properties;
@@ -50,10 +51,11 @@ public class SlackChannel extends Channel<Query, RagResponse> {
 
     public SlackChannel(
             final Assistant<Query, RagResponse> assistant,
+            final QueryProcessor<String, List<Message>> queryProcessor,
             final Slack slack,
             final SlackProperties properties,
             final ThreadLocalSessionContext sessionContext) {
-        super(assistant);
+        super(assistant, queryProcessor);
         this.slack = slack;
         this.properties = properties;
         this.sessionContext = sessionContext;
@@ -66,8 +68,9 @@ public class SlackChannel extends Channel<Query, RagResponse> {
                 sessionContext.setSessionId(channel);
 
                 var slackMessageHistory = getSlackMessageHistory(channel, threadTs);
+                var botMessage =
+                        super.processRequest(message, slackMessageHistory).getResult();
 
-                var botMessage = super.processRequest(new Query(message)).getResult();
                 var slackResponse = slack.methods(properties.getBotToken())
                         .chatPostMessage(ChatPostMessageRequest.builder()
                                 .channel(channel)
