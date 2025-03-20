@@ -61,13 +61,13 @@ public class SlackChannel extends Channel<String, List<Message>, RagResponse> {
         this.sessionContext = sessionContext;
     }
 
-    public void sendMessage(final String channel, final String threadTs, final String message) {
+    public void sendMessage(final String channel, final String threadTs, final String userMessageId, final String message) {
         var concurrentExecutor = new ForkJoinPool(1);
         concurrentExecutor.submit(() -> {
             try {
                 sessionContext.setSessionId(channel);
 
-                var slackMessageHistory = getSlackMessageHistory(channel, threadTs);
+                var slackMessageHistory = getSlackMessageHistory(channel, threadTs, userMessageId);
                 var botMessage =
                         super.processRequest(message, slackMessageHistory).getResult();
 
@@ -92,20 +92,23 @@ public class SlackChannel extends Channel<String, List<Message>, RagResponse> {
         });
     }
 
-    private List<Message> getSlackMessageHistory(final String channel, final String threadTs)
+    private List<Message> getSlackMessageHistory(final String channel, final String threadTs, final String userMessageId)
             throws SlackApiException, IOException {
-        if (threadTs != null) {
-            return slack.methods(properties.getBotToken())
-                    .conversationsReplies(ConversationsRepliesRequest.builder()
-                            .channel(channel)
-                            .ts(threadTs)
-                            .build())
-                    .getMessages();
-        }
+        var messageHistory = threadTs != null
+                ? slack.methods(properties.getBotToken())
+                        .conversationsReplies(ConversationsRepliesRequest.builder()
+                                .channel(channel)
+                                .ts(threadTs)
+                                .build())
+                        .getMessages()
+                : slack.methods(properties.getBotToken())
+                        .conversationsHistory(ConversationsHistoryRequest.builder()
+                                .channel(channel)
+                                .build())
+                        .getMessages();
 
-        return slack.methods(properties.getBotToken())
-                .conversationsHistory(
-                        ConversationsHistoryRequest.builder().channel(channel).build())
-                .getMessages();
+        return messageHistory.stream()
+                .filter(message -> !message.getClientMsgId().equals(userMessageId))
+                .toList();
     }
 }

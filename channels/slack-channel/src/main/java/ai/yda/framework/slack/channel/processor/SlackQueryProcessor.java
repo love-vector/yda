@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.slack.channel.deserializer;
+package ai.yda.framework.slack.channel.processor;
 
 import java.util.Collections;
 import java.util.List;
