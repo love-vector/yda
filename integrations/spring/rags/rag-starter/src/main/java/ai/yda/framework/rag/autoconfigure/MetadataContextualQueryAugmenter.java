@@ -72,8 +72,11 @@ public final class MetadataContextualQueryAugmenter implements QueryAugmenter {
 
     private static final PromptTemplate DEFAULT_EMPTY_CONTEXT_PROMPT_TEMPLATE = new PromptTemplate(
             """
-            The user query is outside your knowledge base.
-            Politely inform the user that you can't answer it.
+            You did not receive any additional context for this query.
+            If the user's message is a simple greeting, farewell, or polite expression (e.g., "hello", "thanks", "goodbye"), respond naturally.
+            If the question requires specific knowledge beyond general common sense, politely inform the user that you cannot answer it due to lack of information.
+            
+            Query: {query}
             """);
 
     private static final boolean DEFAULT_ALLOW_EMPTY_CONTEXT = false;
@@ -133,8 +136,11 @@ public final class MetadataContextualQueryAugmenter implements QueryAugmenter {
             logger.debug("Empty context is allowed. Returning the original query.");
             return query;
         }
+
+        Map<String, Object> promptParameters = Map.of("query", query.text());
+
         logger.debug("Empty context is not allowed. Returning a specific query for empty context.");
-        return new Query(this.emptyContextPromptTemplate.render());
+        return new Query(this.emptyContextPromptTemplate.render(promptParameters));
     }
 
     public static Builder builder() {
