@@ -17,16 +17,16 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.channel.rest.spring.streaming;
+package ai.yda.framework.channel.google.drive.streaming;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Import;
 
-import ai.yda.framework.channel.rest.spring.streaming.config.QueryDeserializerConfig;
-import ai.yda.framework.channel.rest.spring.streaming.security.SecurityConfiguration;
-import ai.yda.framework.channel.rest.spring.streaming.session.RestReactiveSessionProvider;
-import ai.yda.framework.channel.rest.spring.streaming.web.RestStreamingChannel;
+import ai.yda.framework.channel.google.drive.streaming.config.QueryDeserializerConfig;
+import ai.yda.framework.channel.google.drive.streaming.security.SecurityConfiguration;
+import ai.yda.framework.channel.google.drive.streaming.session.RestReactiveSessionProvider;
+import ai.yda.framework.channel.google.drive.streaming.web.RestStreamingChannel;
 
 /**
  * Contains an autoconfiguration for the streaming REST Channel in the Spring application. This class is responsible for

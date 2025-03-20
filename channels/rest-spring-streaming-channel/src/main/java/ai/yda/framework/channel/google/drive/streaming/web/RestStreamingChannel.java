@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.channel.rest.spring.streaming.web;
+package ai.yda.framework.channel.google.drive.streaming.web;
 
 import reactor.core.publisher.Flux;
 
@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import ai.yda.framework.channel.core.StreamingChannel;
-import ai.yda.framework.channel.rest.spring.streaming.RestSpringStreamingProperties;
+import ai.yda.framework.channel.google.drive.streaming.RestSpringStreamingProperties;
 import ai.yda.framework.core.assistant.StreamingAssistant;
 import ai.yda.framework.rag.core.model.RagResponse;
 

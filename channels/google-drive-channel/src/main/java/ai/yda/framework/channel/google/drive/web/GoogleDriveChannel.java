@@ -17,40 +17,46 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.channel.rest.spring.web;
+package ai.yda.framework.channel.google.drive.web;
 
 import jakarta.servlet.http.HttpServletRequest;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import ai.yda.framework.core.assistant.Assistant;
+import ai.yda.framework.channel.google.drive.services.DriveWebhookService;
 
-/**
- * Provides REST controller logic that handles incoming requests for processing using an assistant. The path of the
- * endpoint is configurable via properties, allowing for flexibility in deployment.
- *
- * @author Nikita Litvinov
- * @see Assistant
- * @since 0.1.0
- */
-@RestController("/google-drive/webhook")
+@Slf4j
+@RestController
+@RequestMapping("/google-drive/webhook")
+@RequiredArgsConstructor
 public class GoogleDriveChannel {
 
+    private final DriveWebhookService driveWebhookService;
+
     @PostMapping
-    public ResponseEntity<Void> handleWebhook(@RequestBody final HttpServletRequest request) {
-        var channelId = request.getHeader("X-Goog-Channel-ID");
+    public ResponseEntity<Void> handleWebhook(HttpServletRequest request) {
         var resourceState = request.getHeader("X-Goog-Resource-State");
-        var resourceId = request.getHeader("X-Goog-Resource-ID");
-        var messageNumber = request.getHeader("X-Goog-Message-Number");
+        log.info("Webhook notification received. State={}", resourceState);
 
-        System.out.printf(
-                "Received Drive webhook: ChannelId=%s, State=%s, ResourceId=%s, Message=%s%n",
-                channelId, resourceState, resourceId, messageNumber);
+        if ("sync".equals(resourceState)) {
+            log.info("Sync notification received.");
+            return ResponseEntity.ok().build();
+        }
 
+        driveWebhookService.processWebhook();
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/check-changes")
+    public ResponseEntity<String> checkChanges() {
+        String result = driveWebhookService.checkChanges();
+        return ResponseEntity.ok(result);
     }
 }

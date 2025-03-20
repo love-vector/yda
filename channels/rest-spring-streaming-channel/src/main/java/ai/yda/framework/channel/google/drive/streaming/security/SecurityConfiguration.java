@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.channel.rest.spring.streaming.security;
+package ai.yda.framework.channel.google.drive.streaming.security;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -31,8 +31,8 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.context.WebSessionServerSecurityContextRepository;
 import org.springframework.web.cors.CorsConfiguration;
 
-import ai.yda.framework.channel.rest.spring.streaming.RestSpringStreamingProperties;
-import ai.yda.framework.channel.rest.spring.streaming.session.SessionHandlerFilter;
+import ai.yda.framework.channel.google.drive.streaming.RestSpringStreamingProperties;
+import ai.yda.framework.channel.google.drive.streaming.session.SessionHandlerFilter;
 
 /**
  * This is a Web Flux Spring Security configuration that sets up security settings for the streaming REST Channel.

@@ -16,15 +16,13 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
-package ai.yda.framework.channel.rest.spring;
+*/
+package ai.yda.framework.channel.google.drive;
 
-import ai.yda.framework.channel.shared.RestChannelProperties;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import java.util.List;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Getter
 @Setter
@@ -33,17 +31,9 @@ public class GoogleDriveProperties {
 
     public static final String CONFIG_PREFIX = "ai.yda.framework.channel.google.drive";
 
-    private String endpointRelativePath = RestChannelProperties.DEFAULT_ENDPOINT_RELATIVE_PATH;
-
-    private String securityToken;
-
-    private Boolean corsEnabled = Boolean.TRUE;
-
-    private List<String> allowedOrigins = List.of("*");
-
-    private List<String> allowedMethods = List.of("GET", "POST", "PUT", "DELETE");
-
-    private String serviceAccountKeyFilePath;
+    private String serviceAccountKeyFilePathOauth2;
 
     private String driveId;
+
+    private String webhookReceiverUrl;
 }

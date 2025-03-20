@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.channel.rest.spring.config;
+package ai.yda.framework.channel.google.drive.streaming.config;
 
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -30,8 +30,7 @@ import org.springframework.context.annotation.Configuration;
 import ai.yda.framework.channel.shared.QueryDeserializer;
 
 /**
- * Custom deserializer for {@link Query} objects. It dynamically identifies all subclasses of {@link Query}
- * based on the available fields in the JSON payload.
+ * Configuration class responsible for setting up a deserialization of {@link Query} objects.
  *
  * @author Nikita Litvinov
  * @since 0.2.0
