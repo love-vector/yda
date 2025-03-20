@@ -35,7 +35,7 @@ public class SlackEventController extends SlackAppServlet {
         super(app);
         app.event(MessageEvent.class, (payload, eventContext) -> {
             var event = payload.getEvent();
-            slackChannel.sendMessage(event.getChannel(), event.getThreadTs(), event.getText());
+            slackChannel.sendMessage(event.getChannel(), event.getThreadTs(), event.getClientMsgId(), event.getText());
             return eventContext.ack();
         });
     }
