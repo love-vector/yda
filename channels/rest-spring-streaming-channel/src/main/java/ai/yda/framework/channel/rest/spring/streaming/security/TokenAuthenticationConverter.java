@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.channel.google.drive.streaming.security;
+package ai.yda.framework.channel.rest.spring.streaming.security;
 
 import reactor.core.publisher.Mono;
 
