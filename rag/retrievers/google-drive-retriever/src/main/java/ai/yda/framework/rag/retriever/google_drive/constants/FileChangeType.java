@@ -17,32 +17,13 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
 */
-package ai.yda.framework.channel.google.drive.session;
+package ai.yda.framework.rag.retriever.google_drive.constants;
 
-import java.util.Optional;
-
-import jakarta.servlet.http.HttpSession;
-
-import org.springframework.stereotype.Component;
-
-import ai.yda.framework.session.core.SessionProvider;
-
-@Component
-public class RestSessionProvider implements SessionProvider {
-
-    private final HttpSession httpSession;
-
-    public RestSessionProvider(final HttpSession httpSession) {
-        this.httpSession = httpSession;
-    }
-
-    @Override
-    public void put(final String key, final Object value) {
-        httpSession.setAttribute(key, value);
-    }
-
-    @Override
-    public Optional<Object> get(final String key) {
-        return Optional.ofNullable(httpSession.getAttribute(key));
-    }
+public enum FileChangeType {
+    ADD,
+    UPDATE,
+    REMOVE,
+    TRASH,
+    UNTRASH,
+    CHANGE,
 }

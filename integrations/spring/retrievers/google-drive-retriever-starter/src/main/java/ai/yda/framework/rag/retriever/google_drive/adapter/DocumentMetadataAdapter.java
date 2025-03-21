@@ -71,6 +71,11 @@ public class DocumentMetadataAdapter implements DocumentMetadataPort {
     }
 
     @Override
+    public void deleteById(String documentId) {
+        repository.deleteById(documentId);
+    }
+
+    @Override
     public void deleteAll() {
         repository.deleteAll();
     }

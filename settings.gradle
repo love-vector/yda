@@ -17,9 +17,6 @@ project(':channel-core').projectDir = file('channels/core')
 include('slack-channel')
 project(':slack-channel').projectDir = file('channels/slack-channel')
 
-include('google-drive-channel')
-project(':google-drive-channel').projectDir = file('channels/google-drive-channel')
-
 include 'channel-shared'
 project(':channel-shared').projectDir = file('channels/shared')
 

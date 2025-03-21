@@ -43,6 +43,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import ai.yda.framework.rag.retriever.google_drive.GoogleDriveRetriever;
 import ai.yda.framework.rag.retriever.google_drive.adapter.DocumentContentAdapter;
 import ai.yda.framework.rag.retriever.google_drive.adapter.DocumentMetadataAdapter;
+import ai.yda.framework.rag.retriever.google_drive.controller.GoogleDriveChannel;
 import ai.yda.framework.rag.retriever.google_drive.exception.GoogleDriveException;
 import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentContentMapper;
 import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentContentMapperImpl;
@@ -53,12 +54,9 @@ import ai.yda.framework.rag.retriever.google_drive.port.DocumentMetadataPort;
 import ai.yda.framework.rag.retriever.google_drive.repository.DocumentContentRepository;
 import ai.yda.framework.rag.retriever.google_drive.repository.DocumentMetadataRepository;
 import ai.yda.framework.rag.retriever.google_drive.service.DocumentAiDescriptionService;
+import ai.yda.framework.rag.retriever.google_drive.service.DriveWebhookService;
 import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
-import ai.yda.framework.rag.retriever.google_drive.service.document.processor.DocumentProcessorProvider;
-import ai.yda.framework.rag.retriever.google_drive.service.document.processor.DocumentTextSplitter;
-import ai.yda.framework.rag.retriever.google_drive.service.document.processor.ExcelDocumentProcessor;
-import ai.yda.framework.rag.retriever.google_drive.service.document.processor.ImageDocumentProcessor;
-import ai.yda.framework.rag.retriever.google_drive.service.document.processor.TikaDocumentProcessor;
+import ai.yda.framework.rag.retriever.google_drive.service.document.processor.*;
 
 /**
  * Auto-configuration class for setting up the Google Drive retriever in a Spring Boot application.
@@ -154,6 +152,36 @@ public class RetrieverGoogleDriveAutoConfiguration {
             final TikaDocumentProcessor tikaDocumentProcessor,
             final ImageDocumentProcessor imageDocumentProcessor) {
         return new DocumentProcessorProvider(exelDocumentProcessor, tikaDocumentProcessor, imageDocumentProcessor);
+    }
+
+    @Bean
+    public DriveWebhookService driveWebhookService(
+            final RetrieverGoogleDriveProperties properties,
+            final DocumentMetadataPort documentMetadataPort,
+            final ResourceLoader resourceLoader,
+            final DocumentProcessorProvider documentProcessorProvider,
+            final DocumentMetadataMapper documentMetadataMapper,
+            final RestClient.Builder restClientBuilder,
+            final WebClient.Builder webClientBuilder,
+            final OpenAiConnectionProperties openAiConnectionProperties) {
+        var openAiChatModel =
+                openAiChatModel(openAiConnectionProperties, properties, restClientBuilder, webClientBuilder);
+
+        return new DriveWebhookService(
+                documentMetadataPort,
+                properties.getWebhookReceiverUrl(),
+                properties.getDriveId(),
+                documentProcessorProvider,
+                documentMetadataMapper,
+                new DocumentAiDescriptionService(openAiChatModel),
+                resourceLoader,
+                properties.getOauthClientSecretsPath(),
+                properties.getTokenPath());
+    }
+
+    @Bean
+    public GoogleDriveChannel getGoogleDriveChannel(final DriveWebhookService driveWebhookService) {
+        return new GoogleDriveChannel(driveWebhookService);
     }
 
     @Bean

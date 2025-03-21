@@ -70,6 +70,11 @@ public class RetrieverGoogleDriveProperties {
 
     private String model = OpenAiChatProperties.DEFAULT_CHAT_MODEL;
 
+    private String oauthClientSecretsPath;
+
+    private String webhookReceiverUrl;
+
+    private String tokenPath;
     /**
      * Default constructor for {@link RetrieverGoogleDriveProperties}.
      */
