@@ -41,22 +41,18 @@ public class GoogleDriveChannel {
     @PostMapping
     public ResponseEntity<Void> handleWebhook(HttpServletRequest request) {
         var resourceState = request.getHeader("X-Goog-Resource-State");
-        var channelId = request.getHeader("X-Goog-Channel-Id");
-        var resourceId = request.getHeader("X-Goog-Resource-Id");
-
-        log.info("Webhook received: state={}, channelId={}, resourceId={}", resourceState, channelId, resourceId);
-
-        if (resourceState == null || resourceState.isBlank()) {
-            log.warn("Webhook received without X-Goog-Resource-State");
-            return ResponseEntity.badRequest().build();
-        }
 
         try {
-            driveWebhookService.processWebhook();
+            driveWebhookService.processWebhook(resourceState);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             log.error("Error while processing webhook", e);
             return ResponseEntity.accepted().build();
         }
+    }
+
+    @PostMapping("/test")
+    public ResponseEntity<String> testEndpoint() {
+        return ResponseEntity.ok("Endpoint activated");
     }
 }

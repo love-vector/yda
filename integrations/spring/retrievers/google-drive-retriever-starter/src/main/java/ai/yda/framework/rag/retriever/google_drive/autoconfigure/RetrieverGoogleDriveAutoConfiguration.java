@@ -43,7 +43,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import ai.yda.framework.rag.retriever.google_drive.GoogleDriveRetriever;
 import ai.yda.framework.rag.retriever.google_drive.adapter.DocumentContentAdapter;
 import ai.yda.framework.rag.retriever.google_drive.adapter.DocumentMetadataAdapter;
-import ai.yda.framework.rag.retriever.google_drive.controller.GoogleDriveChannel;
 import ai.yda.framework.rag.retriever.google_drive.exception.GoogleDriveException;
 import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentContentMapper;
 import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentContentMapperImpl;
@@ -169,19 +168,14 @@ public class RetrieverGoogleDriveAutoConfiguration {
 
         return new DriveWebhookService(
                 documentMetadataPort,
-                properties.getWebhookReceiverUrl(),
                 properties.getDriveId(),
+                properties.getWebhookReceiverUrl(),
                 documentProcessorProvider,
                 documentMetadataMapper,
                 new DocumentAiDescriptionService(openAiChatModel),
                 resourceLoader,
                 properties.getOauthClientSecretsPath(),
                 properties.getTokenPath());
-    }
-
-    @Bean
-    public GoogleDriveChannel getGoogleDriveChannel(final DriveWebhookService driveWebhookService) {
-        return new GoogleDriveChannel(driveWebhookService);
     }
 
     @Bean

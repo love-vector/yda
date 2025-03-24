@@ -16,19 +16,14 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.rag.retriever.google_drive.service;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-
+import ai.yda.framework.rag.retriever.google_drive.constants.FileChangeType;
+import ai.yda.framework.rag.retriever.google_drive.dto.DocumentMetadataDTO;
+import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentMetadataMapper;
+import ai.yda.framework.rag.retriever.google_drive.port.DocumentMetadataPort;
+import ai.yda.framework.rag.retriever.google_drive.service.document.processor.DocumentProcessorProvider;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
@@ -39,19 +34,19 @@ import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.*;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import ai.yda.framework.rag.retriever.google_drive.constants.FileChangeType;
-import ai.yda.framework.rag.retriever.google_drive.dto.DocumentMetadataDTO;
-import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentMetadataMapper;
-import ai.yda.framework.rag.retriever.google_drive.port.DocumentMetadataPort;
-import ai.yda.framework.rag.retriever.google_drive.service.document.processor.DocumentProcessorProvider;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
-
+// TODO сделать обновления токенов по мере неообходимости
 @Slf4j
 public class DriveWebhookService {
     private final DocumentMetadataPort documentMetadataPort;
@@ -96,17 +91,17 @@ public class DriveWebhookService {
             FileDataStoreFactory dataStoreFactory = new FileDataStoreFactory(new java.io.File(tokenPath));
 
             GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
-                            GoogleNetHttpTransport.newTrustedTransport(),
-                            GsonFactory.getDefaultInstance(),
-                            clientSecrets,
-                            List.of(DriveScopes.DRIVE))
+                    GoogleNetHttpTransport.newTrustedTransport(),
+                    GsonFactory.getDefaultInstance(),
+                    clientSecrets,
+                    List.of(DriveScopes.DRIVE))
                     .setDataStoreFactory(dataStoreFactory)
                     .setAccessType("offline")
                     .build();
 
             var credential = flow.loadCredential("user");
             this.driveSync = new Drive.Builder(
-                            GoogleNetHttpTransport.newTrustedTransport(), GsonFactory.getDefaultInstance(), credential)
+                    GoogleNetHttpTransport.newTrustedTransport(), GsonFactory.getDefaultInstance(), credential)
                     .setApplicationName("YDA Google Drive Channel")
                     .build();
         } catch (Exception e) {
@@ -122,8 +117,11 @@ public class DriveWebhookService {
     }
 
     // что следует сделать с операцииям UNTRASH и TRASH
-    @Scheduled(fixedRate = 900_000)
+    // 900_000
+    @Scheduled(fixedRate = 120_000)
     private void syncChanges() {
+        log.info("Elements to update" + fileChangeMap.size());
+
         if (fileChangeMap.isEmpty()) {
             log.info("No file changes to sync.");
             return;
@@ -133,7 +131,13 @@ public class DriveWebhookService {
 
         changesToProcess.forEach((fileId, changeType) -> {
             try {
-                var file = driveSync.files().get(fileId).execute();
+                var file = driveSync
+                        .files()
+                        .get(fileId)
+                        .setSupportsAllDrives(true)
+                        .setFields(
+                                "id,name,parents,description,driveId,webViewLink,createdTime,modifiedTime,mimeType,fileExtension")
+                        .execute();
                 switch (changeType) {
                     case REMOVE -> {
                         log.info("Deleting file with ID={}", fileId);
@@ -147,6 +151,9 @@ public class DriveWebhookService {
                     case ADD -> {
                         log.info("Adding file with ID={}", fileId);
                         saveFile(file);
+                    }
+                    case TRASH, UNTRASH -> {
+                        log.info("Deleting file with ID={}", fileId);
                     }
                 }
             } catch (IOException e) {
@@ -212,36 +219,36 @@ public class DriveWebhookService {
         return null;
     }
 
-    public void processWebhook() {
+    public void processWebhook(final String resourceState) {
         try {
-            ChangeList changeList = driveSync
-                    .changes()
-                    .list(startPageToken)
-                    .setDriveId(driveId)
-                    .setSupportsAllDrives(true)
-                    .setIncludeItemsFromAllDrives(true)
-                    .execute();
+            if (!Objects.equals(resourceState, "sync")) {
+                ChangeList changeList = driveSync
+                        .changes()
+                        .list(startPageToken)
+                        .setDriveId(driveId)
+                        .setSupportsAllDrives(true)
+                        .setIncludeItemsFromAllDrives(true)
+                        .execute();
 
-            for (Change change : changeList.getChanges()) {
-                var fileId = change.getFileId();
-                var effectiveChangeType = resolveFileChangeType(change);
+                for (Change change : changeList.getChanges()) {
+                    if (change.getFileId() != null && !fileChangeMap.containsKey(change.getFileId())) {
+                        fileChangeMap.put(change.getFileId(), FileChangeType.valueOf(resourceState.toUpperCase()));
+                        log.debug("Registered change: fileId={}, type={}", change.getFileId(), resourceState);
+                    }
+                }
 
-                fileChangeMap.merge(fileId, effectiveChangeType, this::resolvePriority);
-                log.debug("Registered change: fileId={}, type={}", fileId, effectiveChangeType);
+                var newToken = changeList.getNewStartPageToken();
+                if (newToken != null) {
+                    this.startPageToken = newToken;
+                }
             }
-
-            var newToken = changeList.getNewStartPageToken();
-            if (newToken != null) {
-                this.startPageToken = newToken;
-                log.debug("Updated startPageToken to {}", newToken);
-            }
-
         } catch (Exception e) {
             log.error("Error handling webhook changes", e);
         }
     }
 
     private void setupDriveWatchChannel() {
+        log.info("current url" + webhookReceiverUrl);
         var channel = new Channel()
                 .setId(UUID.randomUUID().toString())
                 .setType("web_hook")
@@ -260,35 +267,5 @@ public class DriveWebhookService {
         } catch (Exception e) {
             log.error("Error subscribing to Google Drive webhook", e);
         }
-    }
-
-    private FileChangeType resolveFileChangeType(final Change change) {
-        if (Boolean.TRUE.equals(change.getRemoved())) {
-            return FileChangeType.REMOVE;
-        }
-
-        File file = change.getFile();
-        if (file == null) {
-            return FileChangeType.CHANGE;
-        }
-
-        var createdTime = file.getCreatedTime();
-        var modifiedTime = file.getModifiedTime();
-
-        if (createdTime != null && modifiedTime != null) {
-            if (createdTime.getValue() == modifiedTime.getValue()) {
-                return FileChangeType.ADD;
-            } else {
-                return FileChangeType.UPDATE;
-            }
-        }
-
-        return FileChangeType.CHANGE;
-    }
-
-    private FileChangeType resolvePriority(FileChangeType oldType, FileChangeType newType) {
-        return newType == FileChangeType.REMOVE
-                ? FileChangeType.REMOVE
-                : (oldType == FileChangeType.ADD && newType == FileChangeType.UPDATE ? FileChangeType.ADD : newType);
     }
 }
