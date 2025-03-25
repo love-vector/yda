@@ -91,4 +91,9 @@ public class DocumentMetadataAdapter implements DocumentMetadataPort {
                 .map(documentMetadataMapper::toDto)
                 .toList();
     }
+
+    @Override
+    public Boolean isExists(String documentId) {
+        return repository.existsById(documentId);
+    }
 }

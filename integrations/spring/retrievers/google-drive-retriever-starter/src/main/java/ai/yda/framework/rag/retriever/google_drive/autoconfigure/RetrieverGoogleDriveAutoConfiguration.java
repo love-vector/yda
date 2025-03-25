@@ -16,29 +16,8 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 package ai.yda.framework.rag.retriever.google_drive.autoconfigure;
-
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.util.List;
-
-import org.springframework.ai.autoconfigure.openai.OpenAiConnectionProperties;
-import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.openai.OpenAiChatModel;
-import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.ai.openai.api.OpenAiApi;
-import org.springframework.ai.rag.preretrieval.query.transformation.CompressionQueryTransformer;
-import org.springframework.ai.rag.preretrieval.query.transformation.RewriteQueryTransformer;
-import org.springframework.boot.autoconfigure.AutoConfiguration;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.core.io.ResourceLoader;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.web.client.RestClient;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import ai.yda.framework.rag.retriever.google_drive.GoogleDriveRetriever;
 import ai.yda.framework.rag.retriever.google_drive.adapter.DocumentContentAdapter;
@@ -56,6 +35,26 @@ import ai.yda.framework.rag.retriever.google_drive.service.DocumentAiDescription
 import ai.yda.framework.rag.retriever.google_drive.service.DriveWebhookService;
 import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
 import ai.yda.framework.rag.retriever.google_drive.service.document.processor.*;
+import org.springframework.ai.autoconfigure.openai.OpenAiConnectionProperties;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.ai.openai.OpenAiChatOptions;
+import org.springframework.ai.openai.api.OpenAiApi;
+import org.springframework.ai.rag.preretrieval.query.transformation.CompressionQueryTransformer;
+import org.springframework.ai.rag.preretrieval.query.transformation.RewriteQueryTransformer;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.reactive.function.client.WebClient;
+
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.util.List;
 
 /**
  * Auto-configuration class for setting up the Google Drive retriever in a Spring Boot application.
@@ -89,7 +88,8 @@ public class RetrieverGoogleDriveAutoConfiguration {
     /**
      * Default constructor for {@link RetrieverGoogleDriveAutoConfiguration}.
      */
-    public RetrieverGoogleDriveAutoConfiguration() {}
+    public RetrieverGoogleDriveAutoConfiguration() {
+    }
 
     @Bean
     public DocumentMetadataPort documentMetadataPort(
@@ -193,7 +193,7 @@ public class RetrieverGoogleDriveAutoConfiguration {
             final CompressionQueryTransformer compressionQueryTransformer)
             throws IOException, GeneralSecurityException {
 
-        var resource = resourceLoader.getResource(googleDriveProperties.getServiceAccountKeyFilePath());
+        var resource = resourceLoader.getResource(googleDriveProperties.getOauthClientSecretsPath());
 
         if (!resource.exists()) {
             throw new GoogleDriveException(String.format(
@@ -214,7 +214,9 @@ public class RetrieverGoogleDriveAutoConfiguration {
                         documentContentPort,
                         documentProcessorProvider,
                         documentMetadataMapper,
-                        new DocumentAiDescriptionService(openAiChatModel)),
+                        new DocumentAiDescriptionService(openAiChatModel),
+                        googleDriveProperties.getTokenPath(),
+                        googleDriveProperties.getWebhookReceiverUrl()),
                 List.of(compressionQueryTransformer, rewriteQueryTransformer));
     }
 

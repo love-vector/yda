@@ -16,14 +16,19 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.rag.retriever.google_drive.service;
 
-import ai.yda.framework.rag.retriever.google_drive.constants.FileChangeType;
-import ai.yda.framework.rag.retriever.google_drive.dto.DocumentMetadataDTO;
-import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentMetadataMapper;
-import ai.yda.framework.rag.retriever.google_drive.port.DocumentMetadataPort;
-import ai.yda.framework.rag.retriever.google_drive.service.document.processor.DocumentProcessorProvider;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
@@ -32,21 +37,22 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
-import com.google.api.services.drive.model.*;
+import com.google.api.services.drive.model.Change;
+import com.google.api.services.drive.model.Channel;
+import com.google.api.services.drive.model.File;
+import com.google.api.services.drive.model.StartPageToken;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
+import ai.yda.framework.rag.retriever.google_drive.dto.DocumentMetadataDTO;
+import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentMetadataMapper;
+import ai.yda.framework.rag.retriever.google_drive.port.DocumentMetadataPort;
+import ai.yda.framework.rag.retriever.google_drive.service.document.processor.DocumentProcessorProvider;
 
-// TODO сделать обновления токенов по мере неообходимости
 @Slf4j
 public class DriveWebhookService {
     private final DocumentMetadataPort documentMetadataPort;
@@ -61,7 +67,8 @@ public class DriveWebhookService {
     private final String tokenPath;
     private volatile String startPageToken;
 
-    private final Map<String, FileChangeType> fileChangeMap = new ConcurrentHashMap<>();
+
+    private final Map<String, File> fileChangeMap = new ConcurrentHashMap<>();
 
     public DriveWebhookService(
             final DocumentMetadataPort documentMetadataPort,
@@ -91,17 +98,17 @@ public class DriveWebhookService {
             FileDataStoreFactory dataStoreFactory = new FileDataStoreFactory(new java.io.File(tokenPath));
 
             GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
-                    GoogleNetHttpTransport.newTrustedTransport(),
-                    GsonFactory.getDefaultInstance(),
-                    clientSecrets,
-                    List.of(DriveScopes.DRIVE))
+                            GoogleNetHttpTransport.newTrustedTransport(),
+                            GsonFactory.getDefaultInstance(),
+                            clientSecrets,
+                            List.of(DriveScopes.DRIVE))
                     .setDataStoreFactory(dataStoreFactory)
                     .setAccessType("offline")
                     .build();
 
             var credential = flow.loadCredential("user");
             this.driveSync = new Drive.Builder(
-                    GoogleNetHttpTransport.newTrustedTransport(), GsonFactory.getDefaultInstance(), credential)
+                            GoogleNetHttpTransport.newTrustedTransport(), GsonFactory.getDefaultInstance(), credential)
                     .setApplicationName("YDA Google Drive Channel")
                     .build();
         } catch (Exception e) {
@@ -116,68 +123,43 @@ public class DriveWebhookService {
         setupDriveWatchChannel();
     }
 
-    // что следует сделать с операцииям UNTRASH и TRASH
     // 900_000
     @Scheduled(fixedRate = 120_000)
     private void syncChanges() {
-        log.info("Elements to update" + fileChangeMap.size());
-
         if (fileChangeMap.isEmpty()) {
             log.info("No file changes to sync.");
             return;
         }
-        Map<String, FileChangeType> changesToProcess = new HashMap<>(fileChangeMap);
+        Map<String, File> changesToProcess = new HashMap<>(fileChangeMap);
         fileChangeMap.clear();
 
-        changesToProcess.forEach((fileId, changeType) -> {
-            try {
-                var file = driveSync
-                        .files()
-                        .get(fileId)
-                        .setSupportsAllDrives(true)
-                        .setFields(
-                                "id,name,parents,description,driveId,webViewLink,createdTime,modifiedTime,mimeType,fileExtension")
-                        .execute();
-                switch (changeType) {
-                    case REMOVE -> {
-                        log.info("Deleting file with ID={}", fileId);
-                        documentMetadataPort.deleteById(fileId);
-                    }
-                    case UPDATE, CHANGE -> {
-                        log.info("Update file with ID={}", fileId);
-                        documentMetadataPort.deleteById(fileId);
-                        saveFile(file);
-                    }
-                    case ADD -> {
-                        log.info("Adding file with ID={}", fileId);
-                        saveFile(file);
-                    }
-                    case TRASH, UNTRASH -> {
-                        log.info("Deleting file with ID={}", fileId);
-                    }
-                }
-            } catch (IOException e) {
-                log.error("Failed to process file ID={}", fileId, e);
-            }
-        });
+        changesToProcess.values().forEach(file -> log.info("Processing file: {}", file.getName()));
+        changesToProcess.values().stream()
+                .filter(file -> documentMetadataPort.isExists(file.getId()))
+                .forEach(this::saveFile);
     }
 
-    private void saveFile(final File file) throws IOException {
-        var documentMetadataDTO = documentMetadataMapper.toDTO(file);
-        var parent = resolveParent(file);
-        if (parent != null) {
-            documentMetadataDTO.setParentId(parent.getDocumentId());
-        }
-        if (!documentMetadataDTO.isFolder()) {
-            try (var inputStream = driveSync.files().get(file.getId()).executeMediaAsInputStream()) {
-                var contentEntities =
-                        documentProcessor.processDocument(file.getFileExtension(), inputStream, documentMetadataDTO);
-                documentMetadataDTO.setDocumentContents(contentEntities);
-                documentMetadataDTO.setAiDescription(
-                        documentAiDescriptionService.generateAiDescription(documentMetadataDTO));
+    private void saveFile(final File file) {
+        documentMetadataPort.deleteById(file.getId());
+        try {
+            var documentMetadataDTO = documentMetadataMapper.toDTO(file);
+            var parent = resolveParent(file);
+            if (parent != null) {
+                documentMetadataDTO.setParentId(parent.getDocumentId());
             }
+            if (!documentMetadataDTO.isFolder()) {
+                try (var inputStream = driveSync.files().get(file.getId()).executeMediaAsInputStream()) {
+                    var contentEntities = documentProcessor.processDocument(
+                            file.getFileExtension(), inputStream, documentMetadataDTO);
+                    documentMetadataDTO.setDocumentContents(contentEntities);
+                    documentMetadataDTO.setAiDescription(
+                            documentAiDescriptionService.generateAiDescription(documentMetadataDTO));
+                }
+            }
+            documentMetadataPort.save(documentMetadataDTO);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        documentMetadataPort.save(documentMetadataDTO);
     }
 
     private DocumentMetadataDTO resolveParent(final File file) throws IOException {
@@ -221,34 +203,50 @@ public class DriveWebhookService {
 
     public void processWebhook(final String resourceState) {
         try {
-            if (!Objects.equals(resourceState, "sync")) {
-                ChangeList changeList = driveSync
-                        .changes()
-                        .list(startPageToken)
-                        .setDriveId(driveId)
-                        .setSupportsAllDrives(true)
-                        .setIncludeItemsFromAllDrives(true)
-                        .execute();
+            var changeList = driveSync
+                    .changes()
+                    .list(startPageToken)
+                    .setDriveId(driveId)
+                    .setSupportsAllDrives(true)
+                    .setIncludeItemsFromAllDrives(true)
+                    .execute();
 
-                for (Change change : changeList.getChanges()) {
-                    if (change.getFileId() != null && !fileChangeMap.containsKey(change.getFileId())) {
-                        fileChangeMap.put(change.getFileId(), FileChangeType.valueOf(resourceState.toUpperCase()));
-                        log.debug("Registered change: fileId={}, type={}", change.getFileId(), resourceState);
-                    }
-                }
+            changeList.getChanges().stream()
+                    .filter(Change::getRemoved)
+                    .forEach(change -> documentMetadataPort.deleteById(change.getFileId()));
 
-                var newToken = changeList.getNewStartPageToken();
-                if (newToken != null) {
-                    this.startPageToken = newToken;
-                }
+            changeList.getChanges().stream()
+                    .filter(change -> !change.getRemoved())
+                    .filter(change -> change.getFileId() != null
+                            && !change.getFileId().isEmpty()
+                            && "change".equals(resourceState))
+                    .forEach(change -> {
+                        try {
+                            var file = driveSync
+                                    .files()
+                                    .get(change.getFileId())
+                                    .setSupportsAllDrives(true)
+                                    .setFields(
+                                            "id,name,parents,description,driveId,webViewLink,createdTime,modifiedTime,mimeType,fileExtension")
+                                    .execute();
+
+                            fileChangeMap.put(file.getId(), file);
+                        } catch (Exception e) {
+                            log.error("Error processing change", e);
+                        }
+                    });
+
+            var newToken = changeList.getNewStartPageToken();
+            if (newToken != null) {
+                this.startPageToken = newToken;
             }
+
         } catch (Exception e) {
             log.error("Error handling webhook changes", e);
         }
     }
 
     private void setupDriveWatchChannel() {
-        log.info("current url" + webhookReceiverUrl);
         var channel = new Channel()
                 .setId(UUID.randomUUID().toString())
                 .setType("web_hook")
