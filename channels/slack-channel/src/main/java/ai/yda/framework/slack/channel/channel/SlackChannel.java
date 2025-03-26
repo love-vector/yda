@@ -61,7 +61,8 @@ public class SlackChannel extends Channel<String, List<Message>, RagResponse> {
         this.sessionContext = sessionContext;
     }
 
-    public void sendMessage(final String channel, final String threadTs, final String userMessageId, final String message) {
+    public void sendMessage(
+            final String channel, final String threadTs, final String userMessageId, final String message) {
         var concurrentExecutor = new ForkJoinPool(1);
         concurrentExecutor.submit(() -> {
             try {
@@ -86,13 +87,14 @@ public class SlackChannel extends Channel<String, List<Message>, RagResponse> {
                             channel,
                             slackResponse.getError());
                 }
-            } catch (SlackApiException | IOException e) {
-                log.error("An error occurred while calling the Slack API: {}", e.getMessage());
+            } catch (Exception e) {
+                log.error(e.getMessage());
             }
         });
     }
 
-    private List<Message> getSlackMessageHistory(final String channel, final String threadTs, final String userMessageId)
+    private List<Message> getSlackMessageHistory(
+            final String channel, final String threadTs, final String userMessageId)
             throws SlackApiException, IOException {
         var messageHistory = threadTs != null
                 ? slack.methods(properties.getBotToken())
@@ -108,7 +110,7 @@ public class SlackChannel extends Channel<String, List<Message>, RagResponse> {
                         .getMessages();
 
         return messageHistory.stream()
-                .filter(message -> !message.getClientMsgId().equals(userMessageId))
+                .filter(message -> !userMessageId.equals(message.getClientMsgId()))
                 .toList();
     }
 }
