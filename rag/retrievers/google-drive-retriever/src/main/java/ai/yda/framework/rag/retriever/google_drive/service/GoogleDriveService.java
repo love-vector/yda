@@ -29,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.drive.Drive;
@@ -135,7 +136,7 @@ public class GoogleDriveService {
     }
 
     // 900_000
-    @Scheduled(fixedRate = 120_000)
+    @Scheduled(fixedRate = 60_000)
     private void processPendingChanges() {
         if (pendingFileChanges.isEmpty()) {
             log.info("No file changes to sync.");
@@ -234,50 +235,62 @@ public class GoogleDriveService {
         return null;
     }
 
-    public void processWebhook(final String resourceState) {
-        try {
-            var changeList = driveService
-                    .changes()
-                    .list(startPageToken)
-                    .setDriveId(driveId)
-                    .setSupportsAllDrives(true)
-                    .setIncludeItemsFromAllDrives(true)
-                    .execute();
+    public void processWebhook(final String resourceState) throws IOException {
+        var changeList = driveService
+                .changes()
+                .list(startPageToken)
+                .setDriveId(driveId)
+                .setSupportsAllDrives(true)
+                .setIncludeItemsFromAllDrives(true)
+                .execute();
 
-            changeList.getChanges().stream()
-                    .filter(change -> change.getFileId() != null
-                            && !change.getFileId().isEmpty()
-                            && "change".equals(resourceState))
-                    .forEach(change -> {
-                        if (change.getRemoved()) {
-                            documentMetadataPort.deleteByIdCascade(change.getFileId());
-                            return;
-                        }
-
-                        try {
-                            var file = driveService
-                                    .files()
-                                    .get(change.getFileId())
-                                    .setSupportsAllDrives(true)
-                                    .setFields(
-                                            "id,name,parents,description,driveId,webViewLink,createdTime,modifiedTime,mimeType,fileExtension,trashed")
-                                    .execute();
-
-                            if (!Boolean.TRUE.equals(file.getTrashed())
-                                    && !"application/vnd.google-apps.folder".equals(file.getMimeType())) {
-                                pendingFileChanges.put(file.getId(), file);
+        changeList.getChanges().stream()
+                .filter(change ->
+                        change.getFileId() != null && !change.getFileId().isEmpty() && "change".equals(resourceState))
+                .forEach(change -> {
+                    var fileId = change.getFileId();
+                    if (change.getRemoved()) {
+                        if (documentMetadataPort.isExists(change.getFileId())) {
+                            synchronized (change.getFileId().intern()) {
+                                if (documentMetadataPort.isExists(change.getFileId())) {
+                                    documentMetadataPort.deleteByIdCascade(change.getFileId());
+                                    return;
+                                }
                             }
-                        } catch (Exception e) {
-                            log.error("Error processing change", e);
                         }
-                    });
-            var newToken = changeList.getNewStartPageToken();
-            if (newToken != null) {
-                this.startPageToken = newToken;
-            }
+                    }
 
-        } catch (Exception e) {
-            log.error("Error handling webhook changes", e);
+                    try {
+                        var file = driveService
+                                .files()
+                                .get(change.getFileId())
+                                .setSupportsAllDrives(true)
+                                .setFields(
+                                        "id,name,parents,description,driveId,webViewLink,createdTime,modifiedTime,mimeType,fileExtension,trashed")
+                                .execute();
+
+                        if (!Boolean.TRUE.equals(file.getTrashed())
+                                && !"application/vnd.google-apps.folder".equals(file.getMimeType())) {
+                            pendingFileChanges.put(file.getId(), file);
+                        }
+                    } catch (GoogleJsonResponseException ex) {
+                        if (ex.getStatusCode() == 404) {
+                            synchronized (fileId.intern()) {
+                                if (documentMetadataPort.isExists(fileId)) {
+                                    documentMetadataPort.deleteByIdCascade(fileId);
+                                    log.info("Deleted document due to 404 error: {}", fileId);
+                                }
+                            }
+                        } else {
+                            log.error("Error processing change for file {}", fileId, ex);
+                        }
+                    } catch (IOException ex) {
+                        log.error("I/O error processing change for file {}", fileId, ex);
+                    }
+                });
+        var newToken = changeList.getNewStartPageToken();
+        if (newToken != null) {
+            this.startPageToken = newToken;
         }
     }
 
