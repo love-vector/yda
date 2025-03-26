@@ -22,9 +22,12 @@ package ai.yda.framework.rag.retriever.google_drive.adapter;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.persistence.LockModeType;
 import jakarta.transaction.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.data.jpa.repository.Lock;
 
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentAiDescriptionDTO;
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentMetadataDTO;
@@ -94,6 +97,7 @@ public class DocumentMetadataAdapter implements DocumentMetadataPort {
     }
 
     @Override
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
     public void deleteByIdCascade(String documentId) {
         List<DocumentMetadataEntity> children = repository.findByParent_DocumentId(documentId);
         for (DocumentMetadataEntity child : children) {

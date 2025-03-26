@@ -36,7 +36,6 @@ import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.Channel;
 import com.google.api.services.drive.model.File;
-import com.google.api.services.drive.model.StartPageToken;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -82,6 +81,8 @@ public class GoogleDriveService {
     private volatile String startPageToken;
 
     private final Map<String, File> pendingFileChanges = new ConcurrentHashMap<>();
+
+    private Channel currentChannel;
 
     public GoogleDriveService(
             final @NonNull InputStream credentialsStream,
@@ -135,8 +136,7 @@ public class GoogleDriveService {
         subscribeToDriveChanges();
     }
 
-    // 900_000
-    @Scheduled(fixedRate = 60_000)
+    @Scheduled(fixedDelay = 2, timeUnit = TimeUnit.MINUTES)
     private void processPendingChanges() {
         if (pendingFileChanges.isEmpty()) {
             log.info("No file changes to sync.");
@@ -151,6 +151,12 @@ public class GoogleDriveService {
             documentMetadataPort.deleteByIdCascade(file.getId());
             processAndSaveFile(file);
         });
+    }
+
+    @Scheduled(fixedDelay = 24, timeUnit = TimeUnit.HOURS)
+    private void renewSubscriptionToDriveChanges() {
+        unsubscribeFromDriveChanges();
+        subscribeToDriveChanges();
     }
 
     public void syncDriveAndProcessDocuments() throws IOException {
@@ -222,7 +228,7 @@ public class GoogleDriveService {
 
     private String initializeStartPageToken() {
         try {
-            StartPageToken response = driveService
+            var response = driveService
                     .changes()
                     .getStartPageToken()
                     .setDriveId(driveId)
@@ -249,15 +255,9 @@ public class GoogleDriveService {
                         change.getFileId() != null && !change.getFileId().isEmpty() && "change".equals(resourceState))
                 .forEach(change -> {
                     var fileId = change.getFileId();
-                    if (change.getRemoved()) {
-                        if (documentMetadataPort.isExists(change.getFileId())) {
-                            synchronized (change.getFileId().intern()) {
-                                if (documentMetadataPort.isExists(change.getFileId())) {
-                                    documentMetadataPort.deleteByIdCascade(change.getFileId());
-                                    return;
-                                }
-                            }
-                        }
+                    if (documentMetadataPort.isExists(fileId) && change.getRemoved()) {
+                        documentMetadataPort.deleteByIdCascade(change.getFileId());
+                        return;
                     }
 
                     try {
@@ -269,18 +269,12 @@ public class GoogleDriveService {
                                         "id,name,parents,description,driveId,webViewLink,createdTime,modifiedTime,mimeType,fileExtension,trashed")
                                 .execute();
 
-                        if (!Boolean.TRUE.equals(file.getTrashed())
-                                && !"application/vnd.google-apps.folder".equals(file.getMimeType())) {
+                        if (!file.getTrashed() && !"application/vnd.google-apps.folder".equals(file.getMimeType())) {
                             pendingFileChanges.put(file.getId(), file);
                         }
                     } catch (GoogleJsonResponseException ex) {
                         if (ex.getStatusCode() == 404) {
-                            synchronized (fileId.intern()) {
-                                if (documentMetadataPort.isExists(fileId)) {
-                                    documentMetadataPort.deleteByIdCascade(fileId);
-                                    log.info("Deleted document due to 404 error: {}", fileId);
-                                }
-                            }
+                            log.info("Deleted document due to 404 error: {}", fileId);
                         } else {
                             log.error("Error processing change for file {}", fileId, ex);
                         }
@@ -295,6 +289,13 @@ public class GoogleDriveService {
     }
 
     private void subscribeToDriveChanges() {
+        if (startPageToken == null) {
+            log.warn("Start page token is null. Unable to subscribe to Google Drive changes.");
+            return;
+        }
+
+        unsubscribeFromDriveChanges();
+        var channelId = UUID.randomUUID().toString();
         var channel = new Channel()
                 .setId(UUID.randomUUID().toString())
                 .setType("web_hook")
@@ -302,16 +303,30 @@ public class GoogleDriveService {
                 .setExpiration(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(7));
 
         try {
-            driveService
+            currentChannel = driveService
                     .changes()
                     .watch(startPageToken, channel)
                     .setDriveId(driveId)
                     .setIncludeItemsFromAllDrives(true)
                     .setSupportsAllDrives(true)
                     .execute();
-            log.info("Subscribed successfully to Google Drive webhook (Shared Drive).");
+            log.info("Subscribed successfully to Google Drive webhook with channelId: {}", channelId);
         } catch (Exception e) {
             log.error("Error subscribing to Google Drive webhook", e);
+        }
+    }
+
+    private void unsubscribeFromDriveChanges() {
+        if (currentChannel == null) {
+            log.warn("No active subscription channel to unsubscribe.");
+            return;
+        }
+
+        try {
+            driveService.channels().stop(currentChannel).execute();
+            log.info("Unsubscribed successfully from Google Drive webhook (channelId: {}).", currentChannel.getId());
+        } catch (Exception e) {
+            log.error("Error unsubscribing from Google Drive webhook (channelId: {}).", currentChannel.getId(), e);
         }
     }
 }
