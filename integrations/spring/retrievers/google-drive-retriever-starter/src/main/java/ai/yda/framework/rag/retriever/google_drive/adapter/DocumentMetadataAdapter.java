@@ -28,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentAiDescriptionDTO;
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentMetadataDTO;
+import ai.yda.framework.rag.retriever.google_drive.entity.DocumentMetadataEntity;
 import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentContentMapper;
 import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentMetadataMapper;
 import ai.yda.framework.rag.retriever.google_drive.port.DocumentMetadataPort;
@@ -85,5 +86,19 @@ public class DocumentMetadataAdapter implements DocumentMetadataPort {
         return repository.findByMimeTypeNotIgnoreCase(FOLDER_MIME_TYPE).stream()
                 .map(documentMetadataMapper::toDto)
                 .toList();
+    }
+
+    @Override
+    public Boolean isExists(String documentId) {
+        return repository.existsById(documentId);
+    }
+
+    @Override
+    public void deleteByIdCascade(String documentId) {
+        List<DocumentMetadataEntity> children = repository.findByParent_DocumentId(documentId);
+        for (DocumentMetadataEntity child : children) {
+            deleteByIdCascade(child.getDocumentId());
+        }
+        repository.deleteById(documentId);
     }
 }
