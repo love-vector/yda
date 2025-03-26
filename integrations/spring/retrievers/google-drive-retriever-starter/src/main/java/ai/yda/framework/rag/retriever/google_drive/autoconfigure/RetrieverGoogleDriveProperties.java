@@ -62,8 +62,6 @@ public class RetrieverGoogleDriveProperties {
 
     private Boolean isProcessingEnabled = Boolean.FALSE;
 
-    private String serviceAccountKeyFilePath;
-
     private String driveId;
 
     private String defaultSchema;

@@ -16,25 +16,12 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.rag.retriever.google_drive.autoconfigure;
 
-import ai.yda.framework.rag.retriever.google_drive.GoogleDriveRetriever;
-import ai.yda.framework.rag.retriever.google_drive.adapter.DocumentContentAdapter;
-import ai.yda.framework.rag.retriever.google_drive.adapter.DocumentMetadataAdapter;
-import ai.yda.framework.rag.retriever.google_drive.exception.GoogleDriveException;
-import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentContentMapper;
-import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentContentMapperImpl;
-import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentMetadataMapper;
-import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentMetadataMapperImpl;
-import ai.yda.framework.rag.retriever.google_drive.port.DocumentContentPort;
-import ai.yda.framework.rag.retriever.google_drive.port.DocumentMetadataPort;
-import ai.yda.framework.rag.retriever.google_drive.repository.DocumentContentRepository;
-import ai.yda.framework.rag.retriever.google_drive.repository.DocumentMetadataRepository;
-import ai.yda.framework.rag.retriever.google_drive.service.DocumentAiDescriptionService;
-import ai.yda.framework.rag.retriever.google_drive.service.DriveWebhookService;
-import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
-import ai.yda.framework.rag.retriever.google_drive.service.document.processor.*;
+import java.io.IOException;
+import java.util.List;
+
 import org.springframework.ai.autoconfigure.openai.OpenAiConnectionProperties;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.openai.OpenAiChatModel;
@@ -52,9 +39,21 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.util.List;
+import ai.yda.framework.rag.retriever.google_drive.GoogleDriveRetriever;
+import ai.yda.framework.rag.retriever.google_drive.adapter.DocumentContentAdapter;
+import ai.yda.framework.rag.retriever.google_drive.adapter.DocumentMetadataAdapter;
+import ai.yda.framework.rag.retriever.google_drive.exception.GoogleDriveException;
+import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentContentMapper;
+import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentContentMapperImpl;
+import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentMetadataMapper;
+import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentMetadataMapperImpl;
+import ai.yda.framework.rag.retriever.google_drive.port.DocumentContentPort;
+import ai.yda.framework.rag.retriever.google_drive.port.DocumentMetadataPort;
+import ai.yda.framework.rag.retriever.google_drive.repository.DocumentContentRepository;
+import ai.yda.framework.rag.retriever.google_drive.repository.DocumentMetadataRepository;
+import ai.yda.framework.rag.retriever.google_drive.service.DocumentAiDescriptionService;
+import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
+import ai.yda.framework.rag.retriever.google_drive.service.document.processor.*;
 
 /**
  * Auto-configuration class for setting up the Google Drive retriever in a Spring Boot application.
@@ -88,8 +87,7 @@ public class RetrieverGoogleDriveAutoConfiguration {
     /**
      * Default constructor for {@link RetrieverGoogleDriveAutoConfiguration}.
      */
-    public RetrieverGoogleDriveAutoConfiguration() {
-    }
+    public RetrieverGoogleDriveAutoConfiguration() {}
 
     @Bean
     public DocumentMetadataPort documentMetadataPort(
@@ -154,28 +152,33 @@ public class RetrieverGoogleDriveAutoConfiguration {
     }
 
     @Bean
-    public DriveWebhookService driveWebhookService(
+    public GoogleDriveService googleDriveService(
             final RetrieverGoogleDriveProperties properties,
-            final DocumentMetadataPort documentMetadataPort,
             final ResourceLoader resourceLoader,
+            final DocumentMetadataPort documentMetadataPort,
+            final DocumentContentPort documentContentPort,
             final DocumentProcessorProvider documentProcessorProvider,
             final DocumentMetadataMapper documentMetadataMapper,
+            final OpenAiConnectionProperties openAiConnectionProperties,
             final RestClient.Builder restClientBuilder,
-            final WebClient.Builder webClientBuilder,
-            final OpenAiConnectionProperties openAiConnectionProperties) {
+            final WebClient.Builder webClientBuilder)
+            throws IOException {
+
         var openAiChatModel =
                 openAiChatModel(openAiConnectionProperties, properties, restClientBuilder, webClientBuilder);
 
-        return new DriveWebhookService(
-                documentMetadataPort,
+        var resource = resourceLoader.getResource(properties.getOauthClientSecretsPath());
+
+        return new GoogleDriveService(
+                resource.getInputStream(),
                 properties.getDriveId(),
-                properties.getWebhookReceiverUrl(),
+                documentMetadataPort,
+                documentContentPort,
                 documentProcessorProvider,
                 documentMetadataMapper,
                 new DocumentAiDescriptionService(openAiChatModel),
-                resourceLoader,
-                properties.getOauthClientSecretsPath(),
-                properties.getTokenPath());
+                properties.getTokenPath(),
+                properties.getWebhookReceiverUrl());
     }
 
     @Bean
@@ -184,20 +187,19 @@ public class RetrieverGoogleDriveAutoConfiguration {
             final ResourceLoader resourceLoader,
             final DocumentMetadataPort documentMetadataPort,
             final DocumentContentPort documentContentPort,
-            final DocumentProcessorProvider documentProcessorProvider,
-            final DocumentMetadataMapper documentMetadataMapper,
+            final GoogleDriveService googleDriveService,
             final OpenAiConnectionProperties openAiConnectionProperties,
             final RestClient.Builder restClientBuilder,
             final WebClient.Builder webClientBuilder,
             final RewriteQueryTransformer rewriteQueryTransformer,
             final CompressionQueryTransformer compressionQueryTransformer)
-            throws IOException, GeneralSecurityException {
+            throws IOException {
 
         var resource = resourceLoader.getResource(googleDriveProperties.getOauthClientSecretsPath());
 
         if (!resource.exists()) {
             throw new GoogleDriveException(String.format(
-                    "Service Account key not found at: %s", googleDriveProperties.getServiceAccountKeyFilePath()));
+                    "Service Account key not found at: %s", googleDriveProperties.getOauthClientSecretsPath()));
         }
 
         var openAiChatModel =
@@ -207,16 +209,7 @@ public class RetrieverGoogleDriveAutoConfiguration {
                 ChatClient.create(openAiChatModel),
                 documentMetadataPort,
                 documentContentPort,
-                new GoogleDriveService(
-                        resource.getInputStream(),
-                        googleDriveProperties.getDriveId(),
-                        documentMetadataPort,
-                        documentContentPort,
-                        documentProcessorProvider,
-                        documentMetadataMapper,
-                        new DocumentAiDescriptionService(openAiChatModel),
-                        googleDriveProperties.getTokenPath(),
-                        googleDriveProperties.getWebhookReceiverUrl()),
+                googleDriveService,
                 List.of(compressionQueryTransformer, rewriteQueryTransformer));
     }
 

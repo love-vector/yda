@@ -16,25 +16,26 @@
 
  * You should have received a copy of the GNU Lesser General Public License
  * along with YDA.  If not, see <https://www.gnu.org/licenses/>.
- */
+*/
 package ai.yda.framework.rag.retriever.google_drive.controller;
 
-import ai.yda.framework.rag.retriever.google_drive.service.DriveWebhookService;
-import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
 import jakarta.servlet.http.HttpServletRequest;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
 
 @Slf4j
 @RestController
 @RequestMapping("/google-drive/webhook")
 @RequiredArgsConstructor
 public class GoogleDriveChannel {
-    private final DriveWebhookService driveWebhookService;
     private final GoogleDriveService googleDriveService;
 
     @PostMapping
@@ -42,7 +43,6 @@ public class GoogleDriveChannel {
         var resourceState = request.getHeader("X-Goog-Resource-State");
 
         try {
-            driveWebhookService.processWebhook(resourceState);
             googleDriveService.processWebhook(resourceState);
             return ResponseEntity.ok().build();
         } catch (Exception e) {

@@ -34,7 +34,7 @@ public interface DocumentMetadataPort {
 
     List<DocumentAiDescriptionDTO> getAllFilesAiDescription();
 
-    void deleteById(String documentId);
-
     Boolean isExists(String documentId);
+
+    void deleteByIdCascade(String documentId);
 }
