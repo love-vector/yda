@@ -19,9 +19,7 @@
 */
 package ai.yda.framework.rag.retriever.google_drive.service;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -38,8 +36,6 @@ import com.google.api.services.drive.model.Channel;
 import com.google.api.services.drive.model.File;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.lang.NonNull;
 import org.springframework.scheduling.annotation.Scheduled;
 
@@ -103,7 +99,6 @@ public class GoogleDriveService {
         this.documentAiDescriptionService = documentAiDescriptionService;
         this.tokenPath = tokenPath;
         this.webhookReceiverUrl = webhookReceiverUrl;
-
         try {
             var jsonFactory = GsonFactory.getDefaultInstance();
             var clientSecrets = GoogleClientSecrets.load(jsonFactory, new InputStreamReader(credentialsStream));
@@ -124,19 +119,16 @@ public class GoogleDriveService {
                             GoogleNetHttpTransport.newTrustedTransport(), GsonFactory.getDefaultInstance(), credential)
                     .setApplicationName("YDA Google Drive Channel")
                     .build();
+
+            this.startPageToken = initializeStartPageToken();
+            this.subscribeToDriveChanges();
         } catch (Exception e) {
             log.info("Initializing Google Drive Webhook Service failed", e);
             throw new RuntimeException(e);
         }
     }
 
-    @EventListener(ApplicationReadyEvent.class)
-    public void onApplicationReady() {
-        this.startPageToken = initializeStartPageToken();
-        subscribeToDriveChanges();
-    }
-
-    @Scheduled(fixedDelay = 2, timeUnit = TimeUnit.MINUTES)
+    @Scheduled(fixedDelay = 1, timeUnit = TimeUnit.MINUTES)
     private void processPendingChanges() {
         if (pendingFileChanges.isEmpty()) {
             log.info("No file changes to sync.");
@@ -151,12 +143,6 @@ public class GoogleDriveService {
             documentMetadataPort.deleteByIdCascade(file.getId());
             processAndSaveFile(file);
         });
-    }
-
-    @Scheduled(fixedDelay = 24, timeUnit = TimeUnit.HOURS)
-    private void renewSubscriptionToDriveChanges() {
-        unsubscribeFromDriveChanges();
-        subscribeToDriveChanges();
     }
 
     public void syncDriveAndProcessDocuments() throws IOException {
@@ -255,29 +241,29 @@ public class GoogleDriveService {
                         change.getFileId() != null && !change.getFileId().isEmpty() && "change".equals(resourceState))
                 .forEach(change -> {
                     var fileId = change.getFileId();
-                    if (documentMetadataPort.isExists(fileId) && change.getRemoved()) {
+
+                    if (change.getRemoved()) {
                         documentMetadataPort.deleteByIdCascade(change.getFileId());
                         return;
                     }
 
                     try {
-                        var file = driveService
-                                .files()
-                                .get(change.getFileId())
-                                .setSupportsAllDrives(true)
-                                .setFields(
-                                        "id,name,parents,description,driveId,webViewLink,createdTime,modifiedTime,mimeType,fileExtension,trashed")
-                                .execute();
+                        if (!change.getFile().getMimeType().contains("google-apps")) {
+                            var file = driveService
+                                    .files()
+                                    .get(change.getFileId())
+                                    .setSupportsAllDrives(true)
+                                    .setFields(
+                                            "id,name,parents,description,driveId,webViewLink,createdTime,modifiedTime,mimeType,fileExtension,trashed")
+                                    .execute();
 
-                        if (!file.getTrashed() && !"application/vnd.google-apps.folder".equals(file.getMimeType())) {
-                            pendingFileChanges.put(file.getId(), file);
+                            if (!file.getTrashed()
+                                    && !"application/vnd.google-apps.folder".equals(file.getMimeType())) {
+                                pendingFileChanges.put(file.getId(), file);
+                            }
                         }
                     } catch (GoogleJsonResponseException ex) {
-                        if (ex.getStatusCode() == 404) {
-                            log.info("Deleted document due to 404 error: {}", fileId);
-                        } else {
-                            log.error("Error processing change for file {}", fileId, ex);
-                        }
+                        log.info("File deleted: {}", fileId);
                     } catch (IOException ex) {
                         log.error("I/O error processing change for file {}", fileId, ex);
                     }
@@ -288,6 +274,7 @@ public class GoogleDriveService {
         }
     }
 
+    @Scheduled(fixedDelay = 7, timeUnit = TimeUnit.DAYS)
     private void subscribeToDriveChanges() {
         if (startPageToken == null) {
             log.warn("Start page token is null. Unable to subscribe to Google Drive changes.");

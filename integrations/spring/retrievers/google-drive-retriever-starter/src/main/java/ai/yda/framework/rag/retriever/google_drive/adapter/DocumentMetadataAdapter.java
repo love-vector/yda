@@ -92,11 +92,6 @@ public class DocumentMetadataAdapter implements DocumentMetadataPort {
     }
 
     @Override
-    public Boolean isExists(String documentId) {
-        return repository.existsById(documentId);
-    }
-
-    @Override
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     public void deleteByIdCascade(String documentId) {
         List<DocumentMetadataEntity> children = repository.findByParent_DocumentId(documentId);
