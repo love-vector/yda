@@ -29,4 +29,6 @@ import ai.yda.framework.rag.retriever.google_drive.entity.DocumentMetadataEntity
 @Repository
 public interface DocumentMetadataRepository extends JpaRepository<DocumentMetadataEntity, String> {
     List<DocumentMetadataEntity> findByMimeTypeNotIgnoreCase(String mimeType);
+
+    List<DocumentMetadataEntity> findByParent_DocumentId(String parentId);
 }

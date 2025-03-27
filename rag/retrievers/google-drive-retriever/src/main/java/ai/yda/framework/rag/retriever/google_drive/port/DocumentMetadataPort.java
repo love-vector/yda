@@ -33,4 +33,6 @@ public interface DocumentMetadataPort {
     void deleteAll();
 
     List<DocumentAiDescriptionDTO> getAllFilesAiDescription();
+
+    void deleteByIdCascade(String documentId);
 }

@@ -156,7 +156,8 @@ public class GoogleDriveRetriever extends BaseRetriever {
                                 .map(DocumentContentIdDTO::contentId)
                                 .toList());
             }
-            var contextLimitedDocumentIds = documentContentIds.stream().limit(100).toList();
+            var contextLimitedDocumentIds =
+                    documentContentIds.stream().limit(100).toList();
             return documentContentPort.getDocumentsByIds(contextLimitedDocumentIds);
         }
 

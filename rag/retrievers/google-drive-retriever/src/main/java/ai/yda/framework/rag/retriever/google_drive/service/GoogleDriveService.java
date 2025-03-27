@@ -19,26 +19,27 @@
 */
 package ai.yda.framework.rag.retriever.google_drive.service;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.GeneralSecurityException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.io.*;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
+import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
+import com.google.api.services.drive.model.Channel;
 import com.google.api.services.drive.model.File;
-import com.google.auth.http.HttpCredentialsAdapter;
-import com.google.auth.oauth2.GoogleCredentials;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.lang.NonNull;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import ai.yda.framework.rag.retriever.google_drive.dto.DocumentMetadataDTO;
-import ai.yda.framework.rag.retriever.google_drive.exception.UnsupportedExtensionException;
 import ai.yda.framework.rag.retriever.google_drive.mapper.DocumentMetadataMapper;
 import ai.yda.framework.rag.retriever.google_drive.port.DocumentContentPort;
 import ai.yda.framework.rag.retriever.google_drive.port.DocumentMetadataPort;
@@ -69,14 +70,16 @@ public class GoogleDriveService {
 
     private final DocumentAiDescriptionService documentAiDescriptionService;
 
-    /**
-     * Constructs a new instance of {@link GoogleDriveService}.
-     * Initializes the Google Drive API client using the provided Service Account JSON InputStream.
-     *
-     * @param credentialsStream the InputStream containing the Service Account JSON key file.
-     * @throws IOException              if an I/O error occurs while reading the Service Account key file.
-     * @throws GeneralSecurityException if a security error occurs during Google API client initialization.
-     */
+    private final String tokenPath;
+
+    private final String webhookReceiverUrl;
+
+    private volatile String startPageToken;
+
+    private final Map<String, File> pendingFileChanges = new ConcurrentHashMap<>();
+
+    private Channel currentChannel;
+
     public GoogleDriveService(
             final @NonNull InputStream credentialsStream,
             final @NonNull String driveId,
@@ -84,8 +87,9 @@ public class GoogleDriveService {
             final @NonNull DocumentContentPort documentContentPort,
             final @NonNull DocumentProcessorProvider documentProcessor,
             final @NonNull DocumentMetadataMapper documentMetadataMapper,
-            final @NonNull DocumentAiDescriptionService documentAiDescriptionService)
-            throws IOException, GeneralSecurityException {
+            final @NonNull DocumentAiDescriptionService documentAiDescriptionService,
+            final @NonNull String tokenPath,
+            final @NonNull String webhookReceiverUrl) {
 
         this.documentMetadataPort = documentMetadataPort;
         this.documentContentPort = documentContentPort;
@@ -93,54 +97,59 @@ public class GoogleDriveService {
         this.documentMetadataMapper = documentMetadataMapper;
         this.driveId = driveId;
         this.documentAiDescriptionService = documentAiDescriptionService;
+        this.tokenPath = tokenPath;
+        this.webhookReceiverUrl = webhookReceiverUrl;
+        try {
+            var jsonFactory = GsonFactory.getDefaultInstance();
+            var clientSecrets = GoogleClientSecrets.load(jsonFactory, new InputStreamReader(credentialsStream));
 
-        var credentials =
-                GoogleCredentials.fromStream(credentialsStream).createScoped(Collections.singleton(DriveScopes.DRIVE));
+            var dataStoreFactory = new FileDataStoreFactory(new java.io.File(tokenPath));
 
-        this.driveService = new Drive.Builder(
-                        GoogleNetHttpTransport.newTrustedTransport(),
-                        GsonFactory.getDefaultInstance(),
-                        new HttpCredentialsAdapter(credentials))
-                .setApplicationName(GOOGLE_DRIVE_APP_NAME)
-                .build();
+            var flow = new GoogleAuthorizationCodeFlow.Builder(
+                            GoogleNetHttpTransport.newTrustedTransport(),
+                            GsonFactory.getDefaultInstance(),
+                            clientSecrets,
+                            List.of(DriveScopes.DRIVE))
+                    .setDataStoreFactory(dataStoreFactory)
+                    .setAccessType("offline")
+                    .build();
 
-        log.info("Google Drive service initialized successfully.");
-    }
+            var credential = flow.loadCredential("user");
+            this.driveService = new Drive.Builder(
+                            GoogleNetHttpTransport.newTrustedTransport(), GsonFactory.getDefaultInstance(), credential)
+                    .setApplicationName("YDA Google Drive Channel")
+                    .build();
 
-    // TODO: update document metadata and content only if modifiedAt stored in db is not the same as file modifiedTime
-    public void syncDriveAndProcessDocuments() throws IOException {
-        documentMetadataPort.deleteAll();
-
-        for (var file : listFiles()) {
-            var documentMetadataDTO = documentMetadataMapper.toDTO(file);
-
-            var parent = resolveParent(file);
-            if (parent != null) {
-                documentMetadataDTO.setParentId(parent.getDocumentId());
-            }
-
-            try {
-                if (!documentMetadataDTO.isFolder()) {
-                    try (var inputStream =
-                            driveService.files().get(file.getId()).executeMediaAsInputStream()) {
-                        var contentEntities = documentProcessor.processDocument(
-                                file.getFileExtension(), inputStream, documentMetadataDTO);
-                        documentMetadataDTO.setDocumentContents(contentEntities);
-                        documentMetadataDTO.setAiDescription(
-                                documentAiDescriptionService.generateAiDescription(documentMetadataDTO));
-                    }
-                }
-                documentMetadataPort.save(documentMetadataDTO);
-            } catch (UnsupportedExtensionException unsupportedExtensionException) {
-                log.error(unsupportedExtensionException.getMessage());
-            }
+            this.startPageToken = initializeStartPageToken();
+            this.subscribeToDriveChanges();
+        } catch (Exception e) {
+            log.info("Initializing Google Drive Webhook Service failed", e);
+            throw new RuntimeException(e);
         }
     }
 
-    /**
-     * Fetches (or creates) the parent DocumentMetadataEntity for a Google Drive file.
-     * If the file has no parents, returns null.
-     */
+    @Scheduled(fixedDelay = 1, timeUnit = TimeUnit.MINUTES)
+    private void processPendingChanges() {
+        if (pendingFileChanges.isEmpty()) {
+            log.info("No file changes to sync.");
+            return;
+        }
+
+        var changesToProcess = new HashMap<>(pendingFileChanges);
+        pendingFileChanges.clear();
+
+        changesToProcess.values().forEach(file -> log.info("Processing file: {}", file.getName()));
+        changesToProcess.values().forEach(file -> {
+            documentMetadataPort.deleteByIdCascade(file.getId());
+            processAndSaveFile(file);
+        });
+    }
+
+    public void syncDriveAndProcessDocuments() throws IOException {
+        documentMetadataPort.deleteAll();
+        listFiles().forEach(this::processAndSaveFile);
+    }
+
     private DocumentMetadataDTO resolveParent(final File file) throws IOException {
         var parents = file.getParents();
         if (parents != null && !parents.isEmpty()) {
@@ -162,7 +171,7 @@ public class GoogleDriveService {
 
             return documentMetadataPort.save(documentMetadataMapper.toDTO(parentFile));
         }
-        return null; // No parent
+        return null;
     }
 
     private List<File> listFiles() throws IOException {
@@ -179,5 +188,132 @@ public class GoogleDriveService {
                         .execute()
                         .getFiles())
                 .orElseGet(Collections::emptyList);
+    }
+
+    private void processAndSaveFile(final File file) {
+        try {
+            var documentMetadataDTO = documentMetadataMapper.toDTO(file);
+            var parent = resolveParent(file);
+            if (parent != null) {
+                documentMetadataDTO.setParentId(parent.getDocumentId());
+            }
+            if (!documentMetadataDTO.isFolder()) {
+                try (var inputStream = driveService.files().get(file.getId()).executeMediaAsInputStream()) {
+                    var contentEntities = documentProcessor.processDocument(
+                            file.getFileExtension(), inputStream, documentMetadataDTO);
+                    documentMetadataDTO.setDocumentContents(contentEntities);
+                    documentMetadataDTO.setAiDescription(
+                            documentAiDescriptionService.generateAiDescription(documentMetadataDTO));
+                }
+            }
+            documentMetadataPort.save(documentMetadataDTO);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String initializeStartPageToken() {
+        try {
+            var response = driveService
+                    .changes()
+                    .getStartPageToken()
+                    .setDriveId(driveId)
+                    .setSupportsAllDrives(true)
+                    .execute();
+            return response.getStartPageToken();
+        } catch (Exception e) {
+            log.error("Failed to get initial startPageToken", e);
+        }
+        return null;
+    }
+
+    public void processWebhook(final String resourceState) throws IOException {
+        var changeList = driveService
+                .changes()
+                .list(startPageToken)
+                .setDriveId(driveId)
+                .setSupportsAllDrives(true)
+                .setIncludeItemsFromAllDrives(true)
+                .execute();
+
+        changeList.getChanges().stream()
+                .filter(change ->
+                        change.getFileId() != null && !change.getFileId().isEmpty() && "change".equals(resourceState))
+                .forEach(change -> {
+                    var fileId = change.getFileId();
+
+                    if (change.getRemoved()) {
+                        documentMetadataPort.deleteByIdCascade(change.getFileId());
+                        return;
+                    }
+
+                    try {
+                        if (!change.getFile().getMimeType().contains("google-apps")) {
+                            var file = driveService
+                                    .files()
+                                    .get(change.getFileId())
+                                    .setSupportsAllDrives(true)
+                                    .setFields(
+                                            "id,name,parents,description,driveId,webViewLink,createdTime,modifiedTime,mimeType,fileExtension,trashed")
+                                    .execute();
+
+                            if (!file.getTrashed()
+                                    && !"application/vnd.google-apps.folder".equals(file.getMimeType())) {
+                                pendingFileChanges.put(file.getId(), file);
+                            }
+                        }
+                    } catch (GoogleJsonResponseException ex) {
+                        log.info("File deleted: {}", fileId);
+                    } catch (IOException ex) {
+                        log.error("I/O error processing change for file {}", fileId, ex);
+                    }
+                });
+        var newToken = changeList.getNewStartPageToken();
+        if (newToken != null) {
+            this.startPageToken = newToken;
+        }
+    }
+
+    @Scheduled(fixedDelay = 7, timeUnit = TimeUnit.DAYS)
+    private void subscribeToDriveChanges() {
+        if (startPageToken == null) {
+            log.warn("Start page token is null. Unable to subscribe to Google Drive changes.");
+            return;
+        }
+
+        unsubscribeFromDriveChanges();
+        var channelId = UUID.randomUUID().toString();
+        var channel = new Channel()
+                .setId(UUID.randomUUID().toString())
+                .setType("web_hook")
+                .setAddress(webhookReceiverUrl)
+                .setExpiration(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(7));
+
+        try {
+            currentChannel = driveService
+                    .changes()
+                    .watch(startPageToken, channel)
+                    .setDriveId(driveId)
+                    .setIncludeItemsFromAllDrives(true)
+                    .setSupportsAllDrives(true)
+                    .execute();
+            log.info("Subscribed successfully to Google Drive webhook with channelId: {}", channelId);
+        } catch (Exception e) {
+            log.error("Error subscribing to Google Drive webhook", e);
+        }
+    }
+
+    private void unsubscribeFromDriveChanges() {
+        if (currentChannel == null) {
+            log.warn("No active subscription channel to unsubscribe.");
+            return;
+        }
+
+        try {
+            driveService.channels().stop(currentChannel).execute();
+            log.info("Unsubscribed successfully from Google Drive webhook (channelId: {}).", currentChannel.getId());
+        } catch (Exception e) {
+            log.error("Error unsubscribing from Google Drive webhook (channelId: {}).", currentChannel.getId(), e);
+        }
     }
 }

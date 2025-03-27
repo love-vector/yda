@@ -20,7 +20,6 @@
 package ai.yda.framework.rag.retriever.google_drive.autoconfigure;
 
 import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.util.List;
 
 import org.springframework.ai.autoconfigure.openai.OpenAiConnectionProperties;
@@ -54,11 +53,7 @@ import ai.yda.framework.rag.retriever.google_drive.repository.DocumentContentRep
 import ai.yda.framework.rag.retriever.google_drive.repository.DocumentMetadataRepository;
 import ai.yda.framework.rag.retriever.google_drive.service.DocumentAiDescriptionService;
 import ai.yda.framework.rag.retriever.google_drive.service.GoogleDriveService;
-import ai.yda.framework.rag.retriever.google_drive.service.document.processor.DocumentProcessorProvider;
-import ai.yda.framework.rag.retriever.google_drive.service.document.processor.DocumentTextSplitter;
-import ai.yda.framework.rag.retriever.google_drive.service.document.processor.ExcelDocumentProcessor;
-import ai.yda.framework.rag.retriever.google_drive.service.document.processor.ImageDocumentProcessor;
-import ai.yda.framework.rag.retriever.google_drive.service.document.processor.TikaDocumentProcessor;
+import ai.yda.framework.rag.retriever.google_drive.service.document.processor.*;
 
 /**
  * Auto-configuration class for setting up the Google Drive retriever in a Spring Boot application.
@@ -157,8 +152,8 @@ public class RetrieverGoogleDriveAutoConfiguration {
     }
 
     @Bean
-    public GoogleDriveRetriever googleDriveRetriever(
-            final RetrieverGoogleDriveProperties googleDriveProperties,
+    public GoogleDriveService googleDriveService(
+            final RetrieverGoogleDriveProperties properties,
             final ResourceLoader resourceLoader,
             final DocumentMetadataPort documentMetadataPort,
             final DocumentContentPort documentContentPort,
@@ -166,16 +161,45 @@ public class RetrieverGoogleDriveAutoConfiguration {
             final DocumentMetadataMapper documentMetadataMapper,
             final OpenAiConnectionProperties openAiConnectionProperties,
             final RestClient.Builder restClientBuilder,
+            final WebClient.Builder webClientBuilder)
+            throws IOException {
+
+        var openAiChatModel =
+                openAiChatModel(openAiConnectionProperties, properties, restClientBuilder, webClientBuilder);
+
+        var resource = resourceLoader.getResource(properties.getOauthClientSecretsPath());
+
+        return new GoogleDriveService(
+                resource.getInputStream(),
+                properties.getDriveId(),
+                documentMetadataPort,
+                documentContentPort,
+                documentProcessorProvider,
+                documentMetadataMapper,
+                new DocumentAiDescriptionService(openAiChatModel),
+                properties.getTokenPath(),
+                properties.getWebhookReceiverUrl());
+    }
+
+    @Bean
+    public GoogleDriveRetriever googleDriveRetriever(
+            final RetrieverGoogleDriveProperties googleDriveProperties,
+            final ResourceLoader resourceLoader,
+            final DocumentMetadataPort documentMetadataPort,
+            final DocumentContentPort documentContentPort,
+            final GoogleDriveService googleDriveService,
+            final OpenAiConnectionProperties openAiConnectionProperties,
+            final RestClient.Builder restClientBuilder,
             final WebClient.Builder webClientBuilder,
             final RewriteQueryTransformer rewriteQueryTransformer,
             final CompressionQueryTransformer compressionQueryTransformer)
-            throws IOException, GeneralSecurityException {
+            throws IOException {
 
-        var resource = resourceLoader.getResource(googleDriveProperties.getServiceAccountKeyFilePath());
+        var resource = resourceLoader.getResource(googleDriveProperties.getOauthClientSecretsPath());
 
         if (!resource.exists()) {
             throw new GoogleDriveException(String.format(
-                    "Service Account key not found at: %s", googleDriveProperties.getServiceAccountKeyFilePath()));
+                    "Service Account key not found at: %s", googleDriveProperties.getOauthClientSecretsPath()));
         }
 
         var openAiChatModel =
@@ -185,14 +209,7 @@ public class RetrieverGoogleDriveAutoConfiguration {
                 ChatClient.create(openAiChatModel),
                 documentMetadataPort,
                 documentContentPort,
-                new GoogleDriveService(
-                        resource.getInputStream(),
-                        googleDriveProperties.getDriveId(),
-                        documentMetadataPort,
-                        documentContentPort,
-                        documentProcessorProvider,
-                        documentMetadataMapper,
-                        new DocumentAiDescriptionService(openAiChatModel)),
+                googleDriveService,
                 List.of(compressionQueryTransformer, rewriteQueryTransformer));
     }
 
